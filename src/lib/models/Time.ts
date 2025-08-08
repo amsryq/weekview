@@ -1,0 +1,37 @@
+export class Time {
+	public hour: number;
+	public minute: number;
+
+	constructor(hour: number, minute: number) {
+		this.hour = hour;
+		this.minute = minute;
+	}
+
+	/**
+	 * Parses a time string in the format "HH:mm" and returns a Time object.
+	 * @param timeStr The time string to parse.
+	 * @returns A Time object representing the parsed time.
+	 */
+	public static fromString(timeStr: string): Time {
+		const [hour, minute] = timeStr.split(":").map(Number);
+		return new Time(hour, minute);
+	}
+
+	public isAfter(other: Time): boolean {
+		if (this.hour !== other.hour) {
+			return this.hour > other.hour;
+		}
+		return this.minute > other.minute;
+	}
+
+	public isBefore(other: Time): boolean {
+		if (this.hour !== other.hour) {
+			return this.hour < other.hour;
+		}
+		return this.minute < other.minute;
+	}
+
+	public toString(): string {
+		return `${this.hour.toString().padStart(2, "0")}:${this.minute.toString().padStart(2, "0")}`;
+	}
+}
