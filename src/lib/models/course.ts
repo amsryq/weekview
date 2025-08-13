@@ -1,8 +1,21 @@
+import { immerable } from "immer";
 import { randomUUID } from "../utils";
-import type { MeetingTime } from "./MeetingTime";
-import type { Time } from "./Time";
+import type { Clock } from "./clock";
+import type { MeetingTime } from "./meeting-time";
+
+type CourseConstructorProps = {
+	code: string;
+	name: string;
+	color: string;
+	meetingTimes?: MeetingTime[];
+	notes?: string;
+	tags?: string[];
+	isSynced?: boolean;
+};
 
 export class Course {
+	[immerable] = true;
+
 	public id: string;
 	public code: string;
 	public name: string;
@@ -12,17 +25,8 @@ export class Course {
 	public tags?: string[];
 	public isSynced: boolean;
 
-	constructor(data: {
-		code: string;
-		name: string;
-		color: string;
-		meetingTimes?: MeetingTime[];
-		notes?: string;
-		tags?: string[];
-		isSynced?: boolean;
-		id?: string;
-	}) {
-		this.id = data.id || randomUUID();
+	constructor(data: CourseConstructorProps) {
+		this.id = randomUUID();
 		this.code = data.code;
 		this.name = data.name;
 		this.color = data.color;
@@ -58,7 +62,7 @@ export class Course {
 		);
 	}
 
-	public isScheduledAt(day: number, time: Time): boolean {
+	public isScheduledAt(day: number, time: Clock): boolean {
 		return this.meetingTimes.some(
 			(mt) =>
 				mt.day === day &&
@@ -67,7 +71,7 @@ export class Course {
 		);
 	}
 
-	public getMeetingTimeAt(day: number, time: Time): MeetingTime | undefined {
+	public getMeetingTimeAt(day: number, time: Clock): MeetingTime | undefined {
 		return this.meetingTimes.find(
 			(mt) =>
 				mt.day === day &&

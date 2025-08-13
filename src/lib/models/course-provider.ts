@@ -1,6 +1,6 @@
 import { randomUUID } from "../utils";
-import type { Course } from "./Course";
-import type { Time } from "./Time";
+import type { Clock } from "./clock";
+import type { Course } from "./course";
 
 export abstract class CourseProvider {
 	public id: string;
@@ -49,7 +49,7 @@ export abstract class CourseProvider {
 		});
 	}
 
-	public getCoursesAt(day: number, time: Time): Course[] {
+	public getCoursesAt(day: number, time: Clock): Course[] {
 		return this.courses.filter((course) => course.isScheduledAt(day, time));
 	}
 

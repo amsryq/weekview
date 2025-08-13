@@ -1,4 +1,4 @@
-export class Time {
+export class Clock {
 	public hour: number;
 	public minute: number;
 
@@ -12,19 +12,19 @@ export class Time {
 	 * @param timeStr The time string to parse.
 	 * @returns A Time object representing the parsed time.
 	 */
-	public static fromString(timeStr: string): Time {
+	public static fromString(timeStr: string): Clock {
 		const [hour, minute] = timeStr.split(":").map(Number);
-		return new Time(hour, minute);
+		return new Clock(hour, minute);
 	}
 
-	public isAfter(other: Time): boolean {
+	public isAfter(other: Clock): boolean {
 		if (this.hour !== other.hour) {
 			return this.hour > other.hour;
 		}
 		return this.minute > other.minute;
 	}
 
-	public isBefore(other: Time): boolean {
+	public isBefore(other: Clock): boolean {
 		if (this.hour !== other.hour) {
 			return this.hour < other.hour;
 		}

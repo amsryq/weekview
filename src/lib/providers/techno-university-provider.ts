@@ -1,8 +1,8 @@
-import { Course } from "../models/Course";
-import { CourseProvider } from "../models/CourseProvider";
-import { MeetingTime } from "../models/MeetingTime";
-import { Time } from "../models/Time";
-import { TimeRange } from "../models/TimeRange";
+import { Clock } from "../models/clock";
+import { Course } from "../models/course";
+import { CourseProvider } from "../models/course-provider";
+import { MeetingTime } from "../models/meeting-time";
+import { TimeRange } from "../models/time-range";
 
 export interface TechnoUniversityImportData {
 	courseCodes: string[];
@@ -83,13 +83,13 @@ export class TechnoUniversityProvider extends CourseProvider {
 					meetingTimes: [
 						{
 							day: 1,
-							time: new TimeRange(new Time(9, 0), new Time(10, 30)),
+							time: new TimeRange(new Clock(9, 0), new Clock(10, 30)),
 							location: "Room A101",
 							description: "Lecture",
 						},
 						{
 							day: 3,
-							time: new TimeRange(new Time(14, 0), new Time(15, 30)),
+							time: new TimeRange(new Clock(14, 0), new Clock(15, 30)),
 							location: "Lab B205",
 							description: "Lab Session",
 						},
@@ -102,12 +102,12 @@ export class TechnoUniversityProvider extends CourseProvider {
 					meetingTimes: [
 						{
 							day: 2,
-							time: new TimeRange(new Time(10, 0), new Time(11, 30)),
+							time: new TimeRange(new Clock(10, 0), new Clock(11, 30)),
 							location: "Room C301",
 						},
 						{
 							day: 4,
-							time: new TimeRange(new Time(10, 0), new Time(11, 30)),
+							time: new TimeRange(new Clock(10, 0), new Clock(11, 30)),
 							location: "Room C301",
 						},
 					],
@@ -119,12 +119,12 @@ export class TechnoUniversityProvider extends CourseProvider {
 					meetingTimes: [
 						{
 							day: 1,
-							time: new TimeRange(new Time(14, 0), new Time(15, 30)),
+							time: new TimeRange(new Clock(14, 0), new Clock(15, 30)),
 							location: "Room D102",
 						},
 						{
 							day: 5,
-							time: new TimeRange(new Time(9, 0), new Time(10, 30)),
+							time: new TimeRange(new Clock(9, 0), new Clock(10, 30)),
 							location: "Lab E201",
 						},
 					],

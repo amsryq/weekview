@@ -1,4 +1,4 @@
-import { CourseProvider } from "../models/CourseProvider";
+import { CourseProvider } from "../models/course-provider";
 
 export class ManualCourseProvider extends CourseProvider {
 	constructor() {

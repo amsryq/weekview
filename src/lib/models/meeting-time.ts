@@ -1,5 +1,6 @@
+import { immerable } from "immer";
 import { randomUUID } from "../utils";
-import type { TimeRange } from "./TimeRange";
+import type { TimeRange } from "./time-range";
 
 export interface CellStyleOverrides {
 	backgroundColor?: string;
@@ -11,6 +12,8 @@ export interface CellStyleOverrides {
 }
 
 export class MeetingTime {
+	[immerable] = true;
+
 	public id: string;
 	public day: number;
 	public time: TimeRange;
