@@ -5,9 +5,9 @@ function App() {
 	const [count, setCount] = useState(0);
 
 	return (
-		<div className="justify-center items-center">
+		<div className="flex justify-center items-center w-screen">
 			<Button onClick={() => setCount((count) => count + 1)}>
-				count is {count}
+				The count is {count}
 			</Button>
 		</div>
 	);
