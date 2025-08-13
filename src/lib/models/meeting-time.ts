@@ -27,9 +27,8 @@ export class MeetingTime {
 		location?: string;
 		description?: string;
 		styleOverrides?: CellStyleOverrides;
-		id?: string;
 	}) {
-		this.id = data.id || randomUUID();
+		this.id = randomUUID();
 		this.day = data.day;
 		this.time = data.time;
 		this.location = data.location;
