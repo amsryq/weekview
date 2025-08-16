@@ -6,61 +6,58 @@ import { MeetingTime } from "../models/meeting-time";
 import { TimeRange } from "../models/time-range";
 
 interface State {
-	courses: Set<Course>;
+	courses: Course[];
 }
 
 interface Actions {
-	createCourse: (...params: ConstructorParameters<typeof Course>) => void;
+	addCourse: (course: Course) => void;
 	removeCourse: (courseId: string) => void;
 }
 
 const CourseStore = createStore<State & Actions>()(
 	immer((set) => ({
-		courses: new Set<Course>(),
+		courses: [],
 
-		createCourse: (...params) => {
-			set((state) => state.courses.add(new Course(...params)));
+		addCourse: (course) => {
+			set((state) => {
+				state.courses.push(course);
+			});
 		},
 
 		removeCourse: (courseId) =>
 			set((state) => {
-				for (const course of state.courses) {
-					if (course.id === courseId) {
-						state.courses.delete(course);
-						break;
-					}
-				}
+				state.courses = state.courses.filter(
+					(course) => course.id !== courseId,
+				);
 			}),
 	})),
 );
 
 // TODO: Get rid of this
 if (__DEV__) {
-	CourseStore.setState((state) => {
-		state.courses = new Set<Course>([
-			new Course({
-				code: "CSC186",
-				name: "Object Oriented Programming",
-				color: "#FF5733",
-				meetingTimes: [
-					new MeetingTime({
-						day: 1,
-						time: new TimeRange(
-							Clock.fromString("09:00"),
-							Clock.fromString("11:00"),
-						),
-					}),
-					new MeetingTime({
-						day: 2,
-						time: new TimeRange(
-							Clock.fromString("10:00"),
-							Clock.fromString("12:00"),
-						),
-					}),
-				],
-			}),
-		]);
-	});
+	CourseStore.getState().addCourse(
+		new Course({
+			code: "CSC186",
+			name: "Object Oriented Programming",
+			color: "#FF5733",
+			meetingTimes: [
+				new MeetingTime({
+					day: 1,
+					time: new TimeRange(
+						Clock.fromString("09:00"),
+						Clock.fromString("11:00"),
+					),
+				}),
+				new MeetingTime({
+					day: 2,
+					time: new TimeRange(
+						Clock.fromString("10:00"),
+						Clock.fromString("12:00"),
+					),
+				}),
+			],
+		}),
+	);
 }
 
 export { CourseStore };

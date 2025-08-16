@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { type JSX } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { Course } from "~/lib/models/course";
+import { CourseStore } from "~/lib/stores/course-store";
 import { Button } from "./ui/button";
 import {
 	Dialog,
@@ -228,7 +229,8 @@ function CourseEditorForm() {
 	});
 
 	const onSubmit = (data: Course.Schema) => {
-		console.log(Course.createFromSchema(data));
+		const course = Course.createFromSchema(data);
+		CourseStore.getState().addCourse(course);
 	};
 
 	return (
