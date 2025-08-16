@@ -19,7 +19,9 @@
 		},
 		"includes": [
 			"**",
-			"!dist"
+			"!dist",
+			"!node_modules",
+			"!build"
 		]
 	},
 	"javascript": {
@@ -36,9 +38,11 @@
 				"rules": {
 					"complexity": {
 						"noAdjacentSpacesInRegex": "error",
+						"noArguments": "error",
 						"noExtraBooleanCast": "error",
 						"noUselessCatch": "error",
-						"noUselessEscapeInRegex": "error"
+						"noUselessEscapeInRegex": "error",
+						"noUselessTypeConstraint": "error"
 					},
 					"correctness": {
 						"noConstAssign": "error",
@@ -53,7 +57,6 @@
 						"noSelfAssign": "error",
 						"noSetterReturn": "error",
 						"noSwitchDeclarations": "error",
-						"noUndeclaredVariables": "error",
 						"noUnreachable": "error",
 						"noUnreachableSuper": "error",
 						"noUnsafeFinally": "error",
@@ -64,7 +67,16 @@
 						"useIsNan": "error",
 						"useValidForDirection": "error",
 						"useValidTypeof": "error",
-						"useYield": "error"
+						"useYield": "error",
+						"useExhaustiveDependencies": "warn",
+						"useHookAtTopLevel": "error"
+					},
+					"style": {
+						"noNamespace": "off",
+						"useConst": "error",
+						"noCommonJs": "error",
+						"useArrayLiterals": "error",
+						"useAsConstAssertion": "error"
 					},
 					"suspicious": {
 						"noAsyncPromiseExecutor": "error",
@@ -90,77 +102,9 @@
 						"noShadowRestrictedNames": "error",
 						"noSparseArray": "error",
 						"noUnsafeNegation": "error",
-						"noWith": "error",
-						"useGetterReturn": "error"
-					}
-				}
-			}
-		},
-		{
-			"includes": [
-				"**/*.{ts,tsx}"
-			],
-			"javascript": {
-				"globals": []
-			}
-		},
-		{
-			"includes": [
-				"**/*.{ts,tsx}"
-			],
-			"linter": {
-				"rules": {
-					"complexity": {
-						"noArguments": "error"
-					},
-					"correctness": {
-						"noConstAssign": "off",
-						"noGlobalObjectCalls": "off",
-						"noInvalidBuiltinInstantiation": "off",
-						"noInvalidConstructorSuper": "off",
-						"noSetterReturn": "off",
-						"noUndeclaredVariables": "off",
-						"noUnreachable": "off",
-						"noUnreachableSuper": "off"
-					},
-					"style": {
-						"useConst": "error"
-					},
-					"suspicious": {
-						"noClassAssign": "off",
-						"noDuplicateClassMembers": "off",
-						"noDuplicateObjectKeys": "off",
-						"noDuplicateParameters": "off",
-						"noFunctionAssign": "off",
-						"noImportAssign": "off",
-						"noRedeclare": "off",
-						"noUnsafeNegation": "off",
 						"noVar": "error",
-						"noWith": "off",
-						"useGetterReturn": "off"
-					}
-				}
-			}
-		},
-		{
-			"includes": [
-				"**/*.{ts,tsx}"
-			],
-			"linter": {
-				"rules": {
-					"complexity": {
-						"noUselessTypeConstraint": "error"
-					},
-					"correctness": {
-						"noUnusedVariables": "error"
-					},
-					"style": {
-						"noCommonJs": "error",
-						"noNamespace": "error",
-						"useArrayLiterals": "error",
-						"useAsConstAssertion": "error"
-					},
-					"suspicious": {
+						"noWith": "error",
+						"useGetterReturn": "error",
 						"noExplicitAny": "error",
 						"noExtraNonNullAssertion": "error",
 						"noMisleadingInstantiator": "error",
@@ -168,160 +112,110 @@
 						"useNamespaceKeyword": "error"
 					}
 				}
-			}
-		},
-		{
-			"includes": [
-				"**/*.{ts,tsx}"
-			],
-			"linter": {
-				"rules": {
-					"correctness": {
-						"useExhaustiveDependencies": "warn",
-						"useHookAtTopLevel": "error"
-					}
-				}
-			}
-		},
-		{
-			"includes": [
-				"**/*.{ts,tsx}"
-			],
-			"linter": {
-				"rules": {}
-			}
-		},
-		{
-			"includes": [
-				"**/*.{ts,tsx}"
-			],
+			},
 			"javascript": {
 				"globals": [
-					"onanimationend",
-					"ongamepadconnected",
-					"onlostpointercapture",
-					"onanimationiteration",
-					"onkeyup",
-					"onmousedown",
-					"onanimationstart",
-					"onslotchange",
-					"onprogress",
-					"ontransitionstart",
-					"onpause",
-					"onended",
-					"onpointerover",
-					"onscrollend",
-					"onformdata",
-					"ontransitionrun",
-					"onanimationcancel",
-					"ondrag",
-					"onchange",
-					"onbeforeinstallprompt",
-					"onbeforexrselect",
-					"onmessage",
-					"ontransitioncancel",
-					"onpointerdown",
+					"location",
 					"onabort",
-					"onpointerout",
-					"oncuechange",
-					"ongotpointercapture",
-					"onscrollsnapchanging",
-					"onsearch",
-					"onsubmit",
-					"onstalled",
-					"onsuspend",
-					"onreset",
-					"onerror",
-					"onmouseenter",
-					"ongamepaddisconnected",
-					"onresize",
-					"ondragover",
-					"onbeforetoggle",
-					"onmouseover",
-					"onpagehide",
-					"onmousemove",
-					"onratechange",
-					"oncommand",
-					"onmessageerror",
-					"onwheel",
-					"ondevicemotion",
-					"onauxclick",
-					"ontransitionend",
-					"onpaste",
-					"onpageswap",
-					"ononline",
-					"ondeviceorientationabsolute",
-					"onkeydown",
-					"onclose",
-					"onselect",
-					"onpageshow",
-					"onpointercancel",
-					"onbeforematch",
-					"onpointerrawupdate",
-					"ondragleave",
-					"onscrollsnapchange",
-					"onseeked",
-					"onwaiting",
-					"onbeforeunload",
-					"onplaying",
-					"onvolumechange",
-					"ondragend",
-					"onstorage",
-					"onloadeddata",
-					"onfocus",
-					"onoffline",
-					"onplay",
 					"onafterprint",
-					"onclick",
-					"oncut",
-					"onmouseout",
-					"ondblclick",
-					"oncanplay",
-					"onloadstart",
-					"onappinstalled",
-					"onpointermove",
-					"ontoggle",
-					"oncontextmenu",
+					"onanimationcancel",
+					"onanimationend",
+					"onanimationiteration",
+					"onanimationstart",
+					"onauxclick",
+					"onbeforeinstallprompt",
+					"onbeforematch",
+					"onbeforeprint",
+					"onbeforeunload",
 					"onblur",
 					"oncancel",
-					"onbeforeprint",
-					"oncontextrestored",
-					"onloadedmetadata",
-					"onpointerup",
-					"onlanguagechange",
-					"oncopy",
-					"onselectstart",
-					"onscroll",
-					"onload",
-					"ondragstart",
-					"onbeforeinput",
+					"oncanplay",
 					"oncanplaythrough",
+					"onchange",
+					"onclick",
+					"onclose",
+					"oncopy",
+					"oncut",
+					"ondblclick",
+					"ondurationchange",
+					"onemptied",
+					"onended",
+					"onerror",
+					"onfocus",
+					"onformdata",
+					"onhashchange",
 					"oninput",
 					"oninvalid",
-					"ontimeupdate",
-					"ondurationchange",
-					"onselectionchange",
-					"onmouseup",
-					"location",
+					"onkeydown",
 					"onkeypress",
-					"onpointerleave",
-					"oncontextlost",
-					"ondrop",
-					"onsecuritypolicyviolation",
-					"oncontentvisibilityautostatechange",
-					"ondeviceorientation",
-					"onseeking",
-					"onrejectionhandled",
-					"onunload",
+					"onkeyup",
+					"onlanguagechange",
+					"onload",
+					"onloadeddata",
+					"onloadedmetadata",
+					"onloadstart",
+					"onmessage",
+					"onmessageerror",
+					"onmousedown",
+					"onmouseenter",
 					"onmouseleave",
-					"onhashchange",
+					"onmousemove",
+					"onmouseout",
+					"onmouseover",
+					"onmouseup",
+					"onpause",
+					"onplay",
+					"onplaying",
+					"onprogress",
+					"onratechange",
+					"onreset",
+					"onresize",
+					"onscroll",
+					"onseeked",
+					"onseeking",
+					"onselect",
+					"onselectstart",
+					"onstalled",
+					"onsubmit",
+					"onsuspend",
+					"ontimeupdate",
+					"onvolumechange",
+					"onwaiting",
+					"onwheel",
+					"ongamepadconnected",
+					"ongamepaddisconnected",
+					"ondeviceorientation",
+					"ondeviceorientationabsolute",
+					"ondevicemotion",
+					"onpointerdown",
 					"onpointerenter",
-					"onmousewheel",
-					"onunhandledrejection",
-					"ondragenter",
+					"onpointerleave",
+					"onpointermove",
+					"onpointerover",
+					"onpointerrawupdate",
+					"onpointerup",
+					"onpointercancel",
+					"onpointerout",
+					"ongotpointercapture",
+					"onlostpointercapture",
+					"onbeforexrselect",
+					"onappinstalled",
+					"onpageshow",
+					"onpagehide",
+					"onpageswap",
 					"onpopstate",
-					"onpagereveal",
-					"onemptied"
+					"onrejectionhandled",
+					"onunhandledrejection",
+					"onunload",
+					"onstorage",
+					"onsearch",
+					"ontransitionrun",
+					"ontransitionstart",
+					"ontransitionend",
+					"ontransitioncancel",
+					"oncontentvisibilityautostatechange",
+					"onsecuritypolicyviolation",
+					"onbeforetoggle"
 				]
 			}
 		}
