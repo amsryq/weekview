@@ -1,7 +1,8 @@
 import { immerable } from "immer";
+import z from "zod";
 import { randomUUID } from "../utils";
 import type { Clock } from "./clock";
-import type { MeetingTime } from "./meeting-time";
+import { MeetingTime } from "./meeting-time";
 
 type CourseConstructorProps = {
 	code: string;
@@ -13,8 +14,25 @@ type CourseConstructorProps = {
 	isSynced?: boolean;
 };
 
+const courseSchema = z.object({
+	code: z.string().min(1, "Course code is required"),
+	name: z.string().min(1, "Course name is required"),
+	color: z.string().min(1, "Color is required"),
+	meetingTimes: z
+		.array(MeetingTime.schema)
+		.min(1, "At least one meeting time is required"),
+	notes: z.string().optional(),
+	tags: z.string().optional(),
+});
+
+export namespace Course {
+	export type Schema = z.infer<typeof courseSchema>;
+}
+
 export class Course {
 	[immerable] = true;
+
+	public static schema = courseSchema;
 
 	public id: string;
 	public code: string;
@@ -34,6 +52,22 @@ export class Course {
 		this.notes = data.notes;
 		this.tags = data.tags;
 		this.isSynced = data.isSynced || false;
+	}
+
+	public static createFromSchema(data: Course.Schema): Course {
+		const processedTags = data.tags
+			?.split(",")
+			.map((tag) => tag.trim())
+			.filter(Boolean);
+
+		return new Course({
+			code: data.code,
+			name: data.name,
+			color: data.color,
+			meetingTimes: data.meetingTimes.map(MeetingTime.createFromSchema),
+			notes: data.notes,
+			tags: processedTags,
+		});
 	}
 
 	public addMeetingTime(meetingTime: MeetingTime): void {

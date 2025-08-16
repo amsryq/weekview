@@ -1,6 +1,8 @@
 import { immerable } from "immer";
+import z from "zod";
 import { randomUUID } from "../utils";
-import type { TimeRange } from "./time-range";
+import { Clock } from "./clock";
+import { TimeRange } from "./time-range";
 
 export interface CellStyleOverrides {
 	backgroundColor?: string;
@@ -11,8 +13,25 @@ export interface CellStyleOverrides {
 	opacity?: number;
 }
 
+const meetingTimeSchema = z.object({
+	day: z.number().min(1).max(7),
+	location: z.string().optional(),
+	startTime: z
+		.string()
+		.regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format"),
+	endTime: z
+		.string()
+		.regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format"),
+});
+
+export namespace MeetingTime {
+	export type Schema = z.infer<typeof meetingTimeSchema>;
+}
+
 export class MeetingTime {
 	[immerable] = true;
+
+	public static schema = meetingTimeSchema;
 
 	public id: string;
 	public day: number;
@@ -34,6 +53,17 @@ export class MeetingTime {
 		this.location = data.location;
 		this.description = data.description;
 		this.styleOverrides = data.styleOverrides;
+	}
+
+	public static createFromSchema(data: MeetingTime.Schema): MeetingTime {
+		return new MeetingTime({
+			day: data.day,
+			time: new TimeRange(
+				Clock.fromString(data.startTime),
+				Clock.fromString(data.endTime),
+			),
+			location: data.location,
+		});
 	}
 
 	public overlaps(other: MeetingTime): boolean {

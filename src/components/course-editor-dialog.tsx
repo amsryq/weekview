@@ -1,15 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type JSX } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
-import z from "zod";
+import { Course } from "~/lib/models/course";
 import { Button } from "./ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "./ui/card";
 import {
 	Dialog,
 	DialogClose,
@@ -39,26 +32,6 @@ import {
 } from "./ui/select";
 import { Textarea } from "./ui/textarea";
 
-const meetingTimeSchema = z.object({
-	day: z.number().min(1).max(7),
-	location: z.string().optional(),
-	startTime: z
-		.string()
-		.regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format"),
-	endTime: z
-		.string()
-		.regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format"),
-});
-
-const courseSchema = z.object({
-	code: z.string().min(1, "Course code is required"),
-	name: z.string().min(1, "Course name is required"),
-	color: z.string().min(1, "Color is required"),
-	meetingTimes: z.array(meetingTimeSchema).optional(),
-	notes: z.string().optional(),
-	tags: z.string().optional(),
-});
-
 const DAYS_OF_WEEK = [
 	{ value: 1, label: "Monday" },
 	{ value: 2, label: "Tuesday" },
@@ -72,7 +45,7 @@ const DAYS_OF_WEEK = [
 function MeetingTimesSection({
 	form,
 }: {
-	form: ReturnType<typeof useForm<z.infer<typeof courseSchema>>>;
+	form: ReturnType<typeof useForm<Course.Schema>>;
 }) {
 	const { fields, append, remove } = useFieldArray({
 		control: form.control,
@@ -236,8 +209,8 @@ function MeetingTimesSection({
 }
 
 function CourseEditorForm() {
-	const form = useForm<z.infer<typeof courseSchema>>({
-		resolver: zodResolver(courseSchema),
+	const form = useForm<Course.Schema>({
+		resolver: zodResolver(Course.schema),
 		defaultValues: {
 			code: "",
 			name: "",
@@ -254,18 +227,8 @@ function CourseEditorForm() {
 		},
 	});
 
-	const onSubmit = (data: z.infer<typeof courseSchema>) => {
-		// Convert tags string to array
-		const processedData = {
-			...data,
-			tags: data.tags
-				? data.tags
-						.split(",")
-						.map((tag) => tag.trim())
-						.filter(Boolean)
-				: [],
-		};
-		console.log(processedData);
+	const onSubmit = (data: Course.Schema) => {
+		console.log(Course.createFromSchema(data));
 	};
 
 	return (
@@ -399,7 +362,7 @@ function CourseEditorForm() {
 						</DialogClose>
 					</div>
 					<Button type="submit" className="flex-1 sm:flex-none">
-						Save Course
+						Save
 					</Button>
 				</div>
 			</form>
@@ -417,7 +380,7 @@ export default function CourseEditorDialog({
 			<DialogTrigger asChild>{children}</DialogTrigger>
 			<DialogContent className="w-full max-w-full sm:max-w-4xl max-h-[90vh] overflow-y-auto">
 				<DialogHeader>
-					<DialogTitle>Edit Course</DialogTitle>
+					<DialogTitle>Add Course</DialogTitle>
 					<DialogDescription>
 						Fill in the course details and add meeting times for your course.
 					</DialogDescription>

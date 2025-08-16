@@ -26,11 +26,11 @@ function CourseCard({ course }: { course: Course }) {
 				<h3>{course.name}</h3>
 				<p>{course.notes}</p>
 
-				<CourseEditorDialog>
+				{/* <CourseEditorDialog>
 					<Button variant="outline" className="mt-2">
 						Edit Course
 					</Button>
-				</CourseEditorDialog>
+				</CourseEditorDialog> */}
 
 				<ul>
 					{course.meetingTimes.map((time) => (
@@ -48,10 +48,14 @@ function Body() {
 	const courses = useStore(CourseStore, (s) => s.courses);
 
 	return (
-		<div className="p-4">
+		<div className="space-y-4 p-4">
 			{Array.from(courses).map((course) => (
 				<CourseCard key={course.id} course={course} />
 			))}
+
+			<CourseEditorDialog>
+				<Button className="w-full">Add Course</Button>
+			</CourseEditorDialog>
 		</div>
 	);
 }
