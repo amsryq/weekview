@@ -35,6 +35,18 @@ export class Clock {
 		return this.minute < other.minute;
 	}
 
+	public isSame(other: Clock): boolean {
+		return this.hour === other.hour && this.minute === other.minute;
+	}
+
+	public isSameOrBefore(other: Clock): boolean {
+		return this.isBefore(other) || this.isSame(other);
+	}
+
+	public isSameOrAfter(other: Clock): boolean {
+		return this.isAfter(other) || this.isSame(other);
+	}
+
 	public toString(): string {
 		return `${this.hour.toString().padStart(2, "0")}:${this.minute.toString().padStart(2, "0")}`;
 	}

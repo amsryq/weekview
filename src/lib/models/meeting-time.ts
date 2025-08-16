@@ -70,12 +70,8 @@ export class MeetingTime {
 		if (this.day !== other.day) return false;
 
 		return (
-			(this.time.start.isAfter(other.time.start) &&
-				this.time.start.isBefore(other.time.end)) ||
-			(this.time.end.isAfter(other.time.start) &&
-				this.time.end.isBefore(other.time.end)) ||
-			(this.time.start.isBefore(other.time.start) &&
-				this.time.end.isAfter(other.time.end))
+			this.time.start.isSameOrBefore(other.time.end) &&
+			this.time.end.isSameOrAfter(other.time.start)
 		);
 	}
 

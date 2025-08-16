@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type JSX } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { type UseFormReturn, useFieldArray, useForm } from "react-hook-form";
 import { Course } from "~/lib/models/course";
 import { CourseStore } from "~/lib/stores/course-store";
 import { Button } from "./ui/button";
@@ -43,11 +43,7 @@ const DAYS_OF_WEEK = [
 	{ value: 7, label: "Sunday" },
 ];
 
-function MeetingTimesSection({
-	form,
-}: {
-	form: ReturnType<typeof useForm<Course.Schema>>;
-}) {
+function MeetingTimesSection({ form }: { form: UseFormReturn<Course.Schema> }) {
 	const { fields, append, remove } = useFieldArray({
 		control: form.control,
 		name: "meetingTimes",
@@ -73,7 +69,7 @@ function MeetingTimesSection({
 				</div>
 			</div>
 
-			<div>
+			<div className="space-y-4">
 				<ScrollArea className="sm:h-96">
 					{fields.length === 0 && (
 						<div className="text-center py-8 text-muted-foreground">
@@ -100,98 +96,108 @@ function MeetingTimesSection({
 								</Button>
 							</div>
 
-							<div className="grid gap-4">
-								<div className="grid grid-cols-2 gap-3">
-									<FormField
-										control={form.control}
-										name={`meetingTimes.${index}.day`}
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel className="text-xs font-medium">
-													Day
-												</FormLabel>
-												<Select
-													onValueChange={(value) =>
-														field.onChange(Number(value))
-													}
-													defaultValue={field.value?.toString()}
-												>
-													<FormControl>
-														<SelectTrigger className="h-9">
-															<SelectValue placeholder="Select day" />
-														</SelectTrigger>
-													</FormControl>
-													<SelectContent>
-														{DAYS_OF_WEEK.map((day) => (
-															<SelectItem
-																key={day.value}
-																value={day.value.toString()}
-															>
-																{day.label}
-															</SelectItem>
-														))}
-													</SelectContent>
-												</Select>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
+							<FormField
+								control={form.control}
+								name={`meetingTimes.${index}`}
+								render={() => (
+									<div className="grid gap-4">
+										<div className="grid grid-cols-2 gap-3">
+											<FormField
+												control={form.control}
+												name={`meetingTimes.${index}.day`}
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel className="text-xs font-medium">
+															Day
+														</FormLabel>
+														<Select
+															onValueChange={(value) =>
+																field.onChange(Number(value))
+															}
+															defaultValue={field.value?.toString()}
+														>
+															<FormControl>
+																<SelectTrigger className="h-9">
+																	<SelectValue placeholder="Select day" />
+																</SelectTrigger>
+															</FormControl>
+															<SelectContent>
+																{DAYS_OF_WEEK.map((day) => (
+																	<SelectItem
+																		key={day.value}
+																		value={day.value.toString()}
+																	>
+																		{day.label}
+																	</SelectItem>
+																))}
+															</SelectContent>
+														</Select>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
 
-									<FormField
-										control={form.control}
-										name={`meetingTimes.${index}.location`}
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel className="text-xs font-medium">
-													Location
-												</FormLabel>
-												<FormControl>
-													<Input
-														placeholder="Room 101"
-														className="h-9"
-														{...field}
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-								</div>
+											<FormField
+												control={form.control}
+												name={`meetingTimes.${index}.location`}
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel className="text-xs font-medium">
+															Location
+														</FormLabel>
+														<FormControl>
+															<Input
+																placeholder="Room 101"
+																className="h-9"
+																{...field}
+															/>
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+										</div>
 
-								<div className="grid grid-cols-2 gap-3">
-									<FormField
-										control={form.control}
-										name={`meetingTimes.${index}.startTime`}
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel className="text-xs font-medium">
-													Start Time
-												</FormLabel>
-												<FormControl>
-													<Input type="time" className="h-9" {...field} />
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
+										<div className="grid grid-cols-2 gap-3">
+											<FormField
+												control={form.control}
+												name={`meetingTimes.${index}.startTime`}
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel className="text-xs font-medium">
+															Start Time
+														</FormLabel>
+														<FormControl>
+															<Input type="time" className="h-9" {...field} />
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
 
-									<FormField
-										control={form.control}
-										name={`meetingTimes.${index}.endTime`}
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel className="text-xs font-medium">
-													End Time
-												</FormLabel>
-												<FormControl>
-													<Input type="time" className="h-9" {...field} />
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-								</div>
-							</div>
+											<FormField
+												control={form.control}
+												name={`meetingTimes.${index}.endTime`}
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel className="text-xs font-medium">
+															End Time
+														</FormLabel>
+														<FormControl>
+															<Input type="time" className="h-9" {...field} />
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+										</div>
+
+										<div className="grid gap-3">
+											<FormMessage />
+										</div>
+									</div>
+								)}
+							/>
 						</div>
 					))}
 
@@ -204,6 +210,7 @@ function MeetingTimesSection({
 						<span className="text-sm">+ Add Meeting Time</span>
 					</Button>
 				</ScrollArea>
+				<FormMessage />
 			</div>
 		</div>
 	);
@@ -230,6 +237,29 @@ function CourseEditorForm() {
 
 	const onSubmit = (data: Course.Schema) => {
 		const course = Course.createFromSchema(data);
+
+		// Check clashes between its own meetings
+		for (const [i, mt] of course.meetingTimes.entries()) {
+			for (const [j, other] of course.meetingTimes.entries()) {
+				if (i >= j) continue; // avoid self and duplicates
+
+				if (mt.overlaps(other)) {
+					form.setError(`meetingTimes.${i}`, {
+						message: `This meeting time conflicts with meeting #${j + 1}.`,
+					});
+
+					return;
+				}
+			}
+		}
+
+		if (CourseStore.getState().hasTimeConflicts(course)) {
+			form.setError("meetingTimes", {
+				message: "There are time conflicts with existing courses.",
+			});
+			return;
+		}
+
 		CourseStore.getState().addCourse(course);
 	};
 
@@ -339,7 +369,11 @@ function CourseEditorForm() {
 
 					{/* Meeting Times */}
 					<div className="flex-1 w-full max-sm:border-t max-sm:pt-4 sm:border-l sm:pl-6">
-						<MeetingTimesSection form={form} />
+						<FormField
+							control={form.control}
+							name="meetingTimes"
+							render={() => <MeetingTimesSection form={form} />}
+						/>
 					</div>
 				</div>
 				{/* Form Buttons */}

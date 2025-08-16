@@ -12,10 +12,11 @@ interface State {
 interface Actions {
 	addCourse: (course: Course) => void;
 	removeCourse: (courseId: string) => void;
+	hasTimeConflicts: (course: Course) => boolean;
 }
 
 const CourseStore = createStore<State & Actions>()(
-	immer((set) => ({
+	immer((set, get) => ({
 		courses: [],
 
 		addCourse: (course) => {
@@ -30,6 +31,12 @@ const CourseStore = createStore<State & Actions>()(
 					(course) => course.id !== courseId,
 				);
 			}),
+
+		hasTimeConflicts: (course: Course) => {
+			return get().courses.some((existingCourse) => {
+				return existingCourse.hasTimeConflictWith(course);
+			});
+		},
 	})),
 );
 
