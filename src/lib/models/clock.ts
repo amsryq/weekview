@@ -1,4 +1,8 @@
+import { immerable } from "immer";
+
 export class Clock {
+	[immerable] = true;
+
 	public hour: number;
 	public minute: number;
 

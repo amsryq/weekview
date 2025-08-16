@@ -63,6 +63,14 @@
 	}
 }
 
+* {
+  scrollbar-width: thin;
+  scrollbar-color: currentColor transparent;
+}
+*::-webkit-scrollbar { width: 8px; }
+*::-webkit-scrollbar-thumb { border-radius: 8px; background: currentColor; opacity: .4; }
+*::-webkit-scrollbar-track { background: transparent; }
+
 @theme inline {
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);
