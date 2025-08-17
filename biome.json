@@ -73,6 +73,7 @@
 					},
 					"style": {
 						"noNamespace": "off",
+						"noEnum": "error",
 						"useConst": "error",
 						"noCommonJs": "error",
 						"useArrayLiterals": "error",

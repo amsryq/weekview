@@ -1,7 +1,9 @@
 import { immerable } from "immer";
 import z from "zod";
+import { ManualCourseProvider } from "../providers/manual-course-provider";
 import { randomUUID } from "../utils";
 import type { Clock } from "./clock";
+import type { CourseProvider } from "./course-provider";
 import { MeetingTime } from "./meeting-time";
 
 type CourseConstructorProps = {
@@ -11,7 +13,7 @@ type CourseConstructorProps = {
 	meetingTimes?: MeetingTime[];
 	notes?: string;
 	tags?: string[];
-	isSynced?: boolean;
+	provider?: CourseProvider;
 };
 
 const courseSchema = z.object({
@@ -27,6 +29,7 @@ const courseSchema = z.object({
 
 export namespace Course {
 	export type Schema = z.infer<typeof courseSchema>;
+	export type SyncStatus = "pending" | "synced" | "error";
 }
 
 export class Course {
@@ -41,7 +44,9 @@ export class Course {
 	public meetingTimes: MeetingTime[];
 	public notes?: string;
 	public tags?: string[];
-	public isSynced: boolean;
+
+	public provider: CourseProvider;
+	public syncStatus: Course.SyncStatus = "synced";
 
 	constructor(data: CourseConstructorProps) {
 		this.id = randomUUID();
@@ -51,7 +56,7 @@ export class Course {
 		this.meetingTimes = data.meetingTimes || [];
 		this.notes = data.notes;
 		this.tags = data.tags;
-		this.isSynced = data.isSynced || false;
+		this.provider = data.provider ?? ManualCourseProvider.instance;
 	}
 
 	public static createFromSchema(data: Course.Schema): Course {

@@ -49,14 +49,13 @@ function MeetingTimesSection({ form }: { form: UseFormReturn<Course.Schema> }) {
 		name: "meetingTimes",
 	});
 
-	const addMeetingTime = () => {
+	const addMeetingTime = () =>
 		append({
 			day: 1,
 			location: "",
 			startTime: "09:00",
 			endTime: "10:30",
 		});
-	};
 
 	return (
 		<div className="h-full w-full overflow-hidden min-h-0">
@@ -226,6 +225,7 @@ function CourseEditorForm() {
 			meetingTimes: [
 				{
 					day: 1,
+					location: "",
 					startTime: "10:00",
 					endTime: "12:00",
 				},

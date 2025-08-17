@@ -1,16 +1,16 @@
 import type { JSX } from "react";
 import { useStore } from "zustand";
 import type { Course } from "~/lib/models/course";
-import { CourseStore } from "~/lib/stores/course-store";
+import type { CourseProvider } from "~/lib/models/course-provider";
+import { ProviderStore } from "~/lib/stores/provider-store";
 import CourseEditorDialog from "./course-editor-dialog";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
+import { ScrollArea } from "./ui/scroll-area";
 import {
 	Sheet,
-	SheetClose,
 	SheetContent,
 	SheetDescription,
-	SheetFooter,
 	SheetHeader,
 	SheetTitle,
 	SheetTrigger,
@@ -44,19 +44,36 @@ function CourseCard({ course }: { course: Course }) {
 	);
 }
 
-function Body() {
-	const courses = useStore(CourseStore, (s) => s.courses);
+function ProviderSection({ provider }: { provider: CourseProvider }) {
+	const courses = provider.useCourses();
 
 	return (
-		<div className="space-y-4 p-4">
-			{Array.from(courses).map((course) => (
-				<CourseCard key={course.id} course={course} />
-			))}
-
-			<CourseEditorDialog>
-				<Button className="w-full">Add Course</Button>
-			</CourseEditorDialog>
+		<div className="space-y-2">
+			<h2 className="text-lg font-semibold">{provider.name}</h2>
+			<div className="space-y-4">
+				{courses.map((course) => (
+					<CourseCard key={course.id} course={course} />
+				))}
+			</div>
 		</div>
+	);
+}
+
+function CourseList() {
+	const providers = useStore(ProviderStore, (s) => s.providers);
+
+	return (
+		<ScrollArea className="overflow-auto h-auto">
+			<div className="space-y-4 px-4 pb-4">
+				{providers.map((provider) => (
+					<ProviderSection key={provider.id} provider={provider} />
+				))}
+
+				<CourseEditorDialog>
+					<Button className="w-full">Add Course</Button>
+				</CourseEditorDialog>
+			</div>
+		</ScrollArea>
 	);
 }
 
@@ -75,12 +92,7 @@ export default function CourseManagementSheet({
 						Manage your selected courses here.
 					</SheetDescription>
 				</SheetHeader>
-				<Body />
-				<SheetFooter>
-					<SheetClose asChild>
-						<Button variant="outline">Close</Button>
-					</SheetClose>
-				</SheetFooter>
+				<CourseList />
 			</SheetContent>
 		</Sheet>
 	);

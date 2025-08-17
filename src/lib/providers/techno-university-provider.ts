@@ -28,9 +28,7 @@ export class TechnoUniversityProvider extends CourseProvider {
 		isActive?: boolean;
 	}) {
 		super({
-			name: `techno-university`,
-			displayName: "Techno University",
-			isActive: data.isActive,
+			name: `Techno University`,
 		});
 
 		this.lastSyncAt = data.lastSyncAt;
@@ -59,7 +57,6 @@ export class TechnoUniversityProvider extends CourseProvider {
 				code: courseData.code,
 				color: this.generateCourseColor(),
 				meetingTimes,
-				isSynced: true,
 			});
 		});
 
@@ -150,7 +147,7 @@ export class TechnoUniversityProvider extends CourseProvider {
 	}
 
 	public async sync(): Promise<void> {
-		console.log(`Syncing courses from ${this.displayName}...`);
+		console.log(`Syncing courses from ${this.name}...`);
 		// In a real implementation, this would re-fetch all synced courses
 		this.lastSyncAt = new Date();
 	}

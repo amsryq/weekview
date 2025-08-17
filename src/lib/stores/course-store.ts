@@ -42,29 +42,32 @@ const CourseStore = createStore<State & Actions>()(
 
 // TODO: Get rid of this
 if (__DEV__) {
-	CourseStore.getState().addCourse(
-		new Course({
-			code: "CSC186",
-			name: "Object Oriented Programming",
-			color: "#FF5733",
-			meetingTimes: [
-				new MeetingTime({
-					day: 1,
-					time: new TimeRange(
-						Clock.fromString("09:00"),
-						Clock.fromString("11:00"),
-					),
-				}),
-				new MeetingTime({
-					day: 2,
-					time: new TimeRange(
-						Clock.fromString("10:00"),
-						Clock.fromString("12:00"),
-					),
-				}),
-			],
-		}),
-	);
+	// setTimeout needed due to circular dependency
+	setTimeout(() => {
+		CourseStore.getState().addCourse(
+			new Course({
+				code: "CSC186",
+				name: "Object Oriented Programming",
+				color: "#FF5733",
+				meetingTimes: [
+					new MeetingTime({
+						day: 1,
+						time: new TimeRange(
+							Clock.fromString("09:00"),
+							Clock.fromString("11:00"),
+						),
+					}),
+					new MeetingTime({
+						day: 2,
+						time: new TimeRange(
+							Clock.fromString("10:00"),
+							Clock.fromString("12:00"),
+						),
+					}),
+				],
+			}),
+		);
+	}, 0);
 }
 
 export { CourseStore };
