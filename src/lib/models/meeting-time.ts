@@ -66,6 +66,15 @@ export class MeetingTime {
 		});
 	}
 
+	public toSchema(): MeetingTime.Schema {
+		return {
+			day: this.day,
+			startTime: this.time.start.toString(),
+			endTime: this.time.end.toString(),
+			location: this.location,
+		};
+	}
+
 	public overlaps(other: MeetingTime): boolean {
 		if (this.day !== other.day) return false;
 

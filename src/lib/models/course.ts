@@ -75,24 +75,27 @@ export class Course {
 		});
 	}
 
-	public addMeetingTime(meetingTime: MeetingTime): void {
-		this.meetingTimes.push(meetingTime);
+	public toSchema() {
+		return {
+			code: this.code,
+			name: this.name,
+			color: this.color,
+			meetingTimes: this.meetingTimes.map((mt) => mt.toSchema()),
+			notes: this.notes,
+			tags: this.tags?.join(", "),
+		};
 	}
 
-	public removeMeetingTime(meetingTimeId: string): void {
-		this.meetingTimes = this.meetingTimes.filter(
-			(mt) => mt.id !== meetingTimeId,
-		);
-	}
-
-	public updateMeetingTime(
-		meetingTimeId: string,
-		updates: Partial<MeetingTime>,
-	): void {
-		const index = this.meetingTimes.findIndex((mt) => mt.id === meetingTimeId);
-		if (index !== -1) {
-			Object.assign(this.meetingTimes[index], updates);
-		}
+	public static applyUpdates(target: Course, data: Course.Schema): void {
+		target.code = data.code;
+		target.name = data.name;
+		target.color = data.color;
+		target.meetingTimes = data.meetingTimes.map(MeetingTime.createFromSchema);
+		target.notes = data.notes;
+		target.tags = data.tags
+			?.split(",")
+			.map((tag) => tag.trim())
+			.filter(Boolean);
 	}
 
 	public hasTimeConflictWith(other: Course): boolean {

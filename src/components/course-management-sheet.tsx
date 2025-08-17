@@ -1,3 +1,4 @@
+import { invariant } from "es-toolkit";
 import type { JSX } from "react";
 import { useStore } from "zustand";
 import { Course } from "~/lib/models/course";
@@ -27,11 +28,25 @@ function CourseCard({ course }: { course: Course }) {
 				<h3>{course.name}</h3>
 				<p>{course.notes}</p>
 
-				{/* <CourseEditorDialog>
+				<CourseEditorDialog
+					defaultValues={course.toSchema()}
+					onSubmit={(data) => {
+						// TODO: Check conflict against other courses
+
+						CourseStore.setState((state) => {
+							const courseToUpdate = state.courses.find(
+								(c) => c.id === course.id,
+							);
+
+							invariant(courseToUpdate, "Course not found");
+							Course.applyUpdates(courseToUpdate, data);
+						});
+					}}
+				>
 					<Button variant="outline" className="mt-2">
 						Edit Course
 					</Button>
-				</CourseEditorDialog> */}
+				</CourseEditorDialog>
 
 				<ul>
 					{course.meetingTimes.map((time) => (

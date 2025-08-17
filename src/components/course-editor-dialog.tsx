@@ -1,6 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toMerged } from "es-toolkit";
 import { type JSX } from "react";
 import { type UseFormReturn, useFieldArray, useForm } from "react-hook-form";
+import type { PartialDeep } from "type-fest";
 import { Course } from "~/lib/models/course";
 import { MeetingTime } from "~/lib/models/meeting-time";
 import { Button } from "./ui/button";
@@ -217,24 +219,28 @@ function MeetingTimesSection({ form }: { form: UseFormReturn<Course.Schema> }) {
 
 function CourseEditorForm(props: {
 	onSubmit: (data: Course.Schema, form: UseFormReturn<Course.Schema>) => void;
+	defaultValues?: PartialDeep<Course.Schema>;
 }) {
 	const form = useForm<Course.Schema>({
 		resolver: zodResolver(Course.schema),
-		defaultValues: {
-			code: "",
-			name: "",
-			color: "#3b82f6",
-			meetingTimes: [
-				{
-					day: 1,
-					location: "",
-					startTime: "10:00",
-					endTime: "12:00",
-				},
-			],
-			notes: "",
-			tags: "",
-		},
+		defaultValues: toMerged(
+			{
+				code: "",
+				name: "",
+				color: "#3b82f6",
+				meetingTimes: [
+					{
+						day: 1,
+						location: "",
+						startTime: "10:00",
+						endTime: "12:00",
+					},
+				],
+				notes: "",
+				tags: "",
+			},
+			props.defaultValues ?? {},
+		),
 	});
 
 	const onSubmit = (data: Course.Schema) => {
@@ -403,10 +409,12 @@ function CourseEditorForm(props: {
 export default function CourseEditorDialog({
 	children,
 	title = "Edit Course",
+	defaultValues = undefined,
 	onSubmit,
 }: {
 	children: JSX.Element;
-	title: string;
+	title?: string;
+	defaultValues?: PartialDeep<Course.Schema>;
 	onSubmit: (data: Course.Schema, form: UseFormReturn<Course.Schema>) => void;
 }) {
 	return (
@@ -420,7 +428,7 @@ export default function CourseEditorDialog({
 					</DialogDescription>
 				</DialogHeader>
 
-				<CourseEditorForm onSubmit={onSubmit} />
+				<CourseEditorForm onSubmit={onSubmit} defaultValues={defaultValues} />
 			</DialogContent>
 		</Dialog>
 	);
