@@ -1,7 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toMerged } from "es-toolkit";
 import { type JSX, useState } from "react";
-import { type UseFormReturn, useFieldArray, useForm } from "react-hook-form";
+import {
+	type UseFormReturn,
+	useFieldArray,
+	useForm,
+	useFormContext,
+} from "react-hook-form";
 import type { PartialDeep } from "type-fest";
 import { Course } from "~/lib/models/course";
 import { MeetingTime } from "~/lib/models/meeting-time";
@@ -45,7 +50,8 @@ const DAYS_OF_WEEK = [
 	{ value: 7, label: "Sunday" },
 ];
 
-function MeetingTimesSection({ form }: { form: UseFormReturn<Course.Schema> }) {
+function MeetingTimesSection() {
+	const form = useFormContext<Course.Schema>();
 	const { fields, append, remove } = useFieldArray({
 		control: form.control,
 		name: "meetingTimes",
@@ -218,7 +224,6 @@ function MeetingTimesSection({ form }: { form: UseFormReturn<Course.Schema> }) {
 }
 
 function CourseEditorForm(props: {
-	setOpen: (open: boolean) => void;
 	onSubmit: (data: Course.Schema, form: UseFormReturn<Course.Schema>) => void;
 	defaultValues?: PartialDeep<Course.Schema>;
 }) {
@@ -262,10 +267,6 @@ function CourseEditorForm(props: {
 		}
 
 		props.onSubmit(data, form);
-
-		if (Object.keys(form.formState.errors).length === 0) {
-			props.setOpen(false);
-		}
 	};
 
 	return (
@@ -377,7 +378,7 @@ function CourseEditorForm(props: {
 						<FormField
 							control={form.control}
 							name="meetingTimes"
-							render={() => <MeetingTimesSection form={form} />}
+							render={() => <MeetingTimesSection />}
 						/>
 					</div>
 				</div>
@@ -436,8 +437,14 @@ export default function CourseEditorDialog({
 				</DialogHeader>
 
 				<CourseEditorForm
-					setOpen={setOpen}
-					onSubmit={onSubmit}
+					onSubmit={(data, form) => {
+						onSubmit(data, form);
+
+						// Close the dialog if there's no error
+						if (Object.keys(form.formState.errors).length === 0) {
+							setOpen(false);
+						}
+					}}
 					defaultValues={defaultValues}
 				/>
 			</DialogContent>
