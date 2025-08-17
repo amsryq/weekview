@@ -440,10 +440,13 @@ export default function CourseEditorDialog({
 					onSubmit={(data, form) => {
 						onSubmit(data, form);
 
-						// Close the dialog if there's no error
-						if (Object.keys(form.formState.errors).length === 0) {
-							setOpen(false);
-						}
+						// This is used instead of form.formState.errors because form.formState.errors could be outdated
+						const fields = form.getValues();
+						const hasError = Object.keys(fields).some(
+							(key) => form.getFieldState(key as keyof typeof fields).error,
+						);
+
+						if (!hasError) setOpen(false);
 					}}
 					defaultValues={defaultValues}
 				/>

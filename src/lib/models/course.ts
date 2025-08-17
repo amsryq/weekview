@@ -86,7 +86,7 @@ export class Course {
 		};
 	}
 
-	public static applyUpdates(target: Course, data: Course.Schema): void {
+	public static assignFromSchema(target: Course, data: Course.Schema): void {
 		target.code = data.code;
 		target.name = data.name;
 		target.color = data.color;

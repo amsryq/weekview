@@ -12,7 +12,7 @@ interface State {
 interface Actions {
 	addCourse: (course: Course) => void;
 	removeCourse: (courseId: string) => void;
-	hasTimeConflicts: (course: Course) => boolean;
+	hasTimeConflicts: (course: Course, exempt?: Course) => boolean;
 }
 
 const CourseStore = createStore<State & Actions>()(
@@ -32,9 +32,12 @@ const CourseStore = createStore<State & Actions>()(
 				);
 			}),
 
-		hasTimeConflicts: (course: Course) => {
+		hasTimeConflicts: (course, exempt) => {
 			return get().courses.some((existingCourse) => {
-				return existingCourse.hasTimeConflictWith(course);
+				return (
+					existingCourse.id !== exempt?.id &&
+					existingCourse.hasTimeConflictWith(course)
+				);
 			});
 		},
 	})),

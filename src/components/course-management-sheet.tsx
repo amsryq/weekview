@@ -30,19 +30,27 @@ function CourseCard({ course }: { course: Course }) {
 
 				<CourseEditorDialog
 					defaultValues={course.toSchema()}
-					onSubmit={(data) => {
-						// TODO: Check conflict against other courses
+					onSubmit={(data, form) => {
+						if (
+							CourseStore.getState().hasTimeConflicts(
+								Course.createFromSchema(data),
+								course,
+							)
+						) {
+							form.setError("meetingTimes", {
+								message: "There are time conflicts with other courses.",
+							});
+
+							return;
+						}
 
 						CourseStore.setState((state) => {
+							// Writable version of this
 							const courseToUpdate = state.courses.find(
 								(c) => c.id === course.id,
-							);
+							)!;
 
-							invariant(
-								courseToUpdate,
-								"Attempted to edit a non-existent course",
-							);
-							Course.applyUpdates(courseToUpdate, data);
+							Course.assignFromSchema(courseToUpdate, data);
 						});
 					}}
 				>
