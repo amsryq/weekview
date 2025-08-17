@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { type JSX } from "react";
 import { type UseFormReturn, useFieldArray, useForm } from "react-hook-form";
 import { Course } from "~/lib/models/course";
-import { CourseStore } from "~/lib/stores/course-store";
+import { MeetingTime } from "~/lib/models/meeting-time";
 import { Button } from "./ui/button";
 import {
 	Dialog,
@@ -69,7 +69,7 @@ function MeetingTimesSection({ form }: { form: UseFormReturn<Course.Schema> }) {
 			</div>
 
 			<div className="space-y-4">
-				<ScrollArea className="sm:h-96">
+				<ScrollArea className="md:h-96">
 					{fields.length === 0 && (
 						<div className="text-center py-8 text-muted-foreground">
 							<p className="text-sm">No meeting times added yet</p>
@@ -215,7 +215,9 @@ function MeetingTimesSection({ form }: { form: UseFormReturn<Course.Schema> }) {
 	);
 }
 
-function CourseEditorForm() {
+function CourseEditorForm(props: {
+	onSubmit: (data: Course.Schema, form: UseFormReturn<Course.Schema>) => void;
+}) {
 	const form = useForm<Course.Schema>({
 		resolver: zodResolver(Course.schema),
 		defaultValues: {
@@ -236,40 +238,32 @@ function CourseEditorForm() {
 	});
 
 	const onSubmit = (data: Course.Schema) => {
-		const course = Course.createFromSchema(data);
+		const meetingObjs = data.meetingTimes.map((mt) =>
+			MeetingTime.createFromSchema(mt),
+		);
 
 		// Check clashes between its own meetings
-		for (const [i, mt] of course.meetingTimes.entries()) {
-			for (const [j, other] of course.meetingTimes.entries()) {
-				if (i >= j) continue; // avoid self and duplicates
-
-				if (mt.overlaps(other)) {
+		for (let i = 0; i < meetingObjs.length; i++) {
+			for (let j = i + 1; j < meetingObjs.length; j++) {
+				if (meetingObjs[i].overlaps(meetingObjs[j])) {
 					form.setError(`meetingTimes.${i}`, {
 						message: `This meeting time conflicts with meeting #${j + 1}.`,
 					});
-
 					return;
 				}
 			}
 		}
 
-		if (CourseStore.getState().hasTimeConflicts(course)) {
-			form.setError("meetingTimes", {
-				message: "There are time conflicts with existing courses.",
-			});
-			return;
-		}
-
-		CourseStore.getState().addCourse(course);
+		props.onSubmit(data, form);
 	};
 
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-0">
-				<div className="flex flex-col sm:flex-row gap-4">
+				<div className="flex flex-col md:flex-row gap-4">
 					{/* Course Form */}
 					<div className="flex-[1] space-y-6">
-						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							<FormField
 								control={form.control}
 								name="code"
@@ -368,7 +362,7 @@ function CourseEditorForm() {
 					</div>
 
 					{/* Meeting Times */}
-					<div className="flex-1 w-full max-sm:border-t max-sm:pt-4 sm:border-l sm:pl-6">
+					<div className="flex-1 w-full max-md:border-t max-md:pt-4 md:border-l md:pl-6">
 						<FormField
 							control={form.control}
 							name="meetingTimes"
@@ -377,13 +371,13 @@ function CourseEditorForm() {
 					</div>
 				</div>
 				{/* Form Buttons */}
-				<div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-6 border-t sm:border-t-0">
+				<div className="flex flex-col-reverse md:flex-row justify-end gap-3 pt-6 border-t md:border-t-0">
 					<div className="flex gap-3">
 						<Button
 							type="button"
 							variant="ghost"
 							onClick={() => form.reset()}
-							className="flex-1 sm:flex-none"
+							className="flex-1 md:flex-none"
 						>
 							Reset
 						</Button>
@@ -391,13 +385,13 @@ function CourseEditorForm() {
 							<Button
 								type="button"
 								variant="outline"
-								className="flex-1 sm:flex-none"
+								className="flex-1 md:flex-none"
 							>
 								Cancel
 							</Button>
 						</DialogClose>
 					</div>
-					<Button type="submit" className="flex-1 sm:flex-none">
+					<Button type="submit" className="flex-1 md:flex-none">
 						Save
 					</Button>
 				</div>
@@ -408,21 +402,25 @@ function CourseEditorForm() {
 
 export default function CourseEditorDialog({
 	children,
+	title = "Edit Course",
+	onSubmit,
 }: {
 	children: JSX.Element;
+	title: string;
+	onSubmit: (data: Course.Schema, form: UseFormReturn<Course.Schema>) => void;
 }) {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>{children}</DialogTrigger>
-			<DialogContent className="w-full max-w-full sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+			<DialogContent className="w-full max-w-full md:max-w-4xl max-h-[90vh] overflow-y-auto">
 				<DialogHeader>
-					<DialogTitle>Add Course</DialogTitle>
+					<DialogTitle>{title}</DialogTitle>
 					<DialogDescription>
 						Fill in the course details and add meeting times for your course.
 					</DialogDescription>
 				</DialogHeader>
 
-				<CourseEditorForm />
+				<CourseEditorForm onSubmit={onSubmit} />
 			</DialogContent>
 		</Dialog>
 	);

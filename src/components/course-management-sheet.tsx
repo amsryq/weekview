@@ -1,7 +1,8 @@
 import type { JSX } from "react";
 import { useStore } from "zustand";
-import type { Course } from "~/lib/models/course";
+import { Course } from "~/lib/models/course";
 import type { CourseProvider } from "~/lib/models/course-provider";
+import { CourseStore } from "~/lib/stores/course-store";
 import { ProviderStore } from "~/lib/stores/provider-store";
 import CourseEditorDialog from "./course-editor-dialog";
 import { Button } from "./ui/button";
@@ -69,7 +70,21 @@ function CourseList() {
 					<ProviderSection key={provider.id} provider={provider} />
 				))}
 
-				<CourseEditorDialog>
+				<CourseEditorDialog
+					title="Add Course"
+					onSubmit={(data, form) => {
+						const course = Course.createFromSchema(data);
+
+						if (CourseStore.getState().hasTimeConflicts(course)) {
+							form.setError("meetingTimes", {
+								message: "There are time conflicts with existing courses.",
+							});
+							return;
+						}
+
+						CourseStore.getState().addCourse(course);
+					}}
+				>
 					<Button className="w-full">Add Course</Button>
 				</CourseEditorDialog>
 			</div>
