@@ -38,7 +38,10 @@ function CourseCard({ course }: { course: Course }) {
 								(c) => c.id === course.id,
 							);
 
-							invariant(courseToUpdate, "Course not found");
+							invariant(
+								courseToUpdate,
+								"Attempted to edit a non-existent course",
+							);
 							Course.applyUpdates(courseToUpdate, data);
 						});
 					}}

@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toMerged } from "es-toolkit";
-import { type JSX } from "react";
+import { type JSX, useState } from "react";
 import { type UseFormReturn, useFieldArray, useForm } from "react-hook-form";
 import type { PartialDeep } from "type-fest";
 import { Course } from "~/lib/models/course";
@@ -218,6 +218,7 @@ function MeetingTimesSection({ form }: { form: UseFormReturn<Course.Schema> }) {
 }
 
 function CourseEditorForm(props: {
+	setOpen: (open: boolean) => void;
 	onSubmit: (data: Course.Schema, form: UseFormReturn<Course.Schema>) => void;
 	defaultValues?: PartialDeep<Course.Schema>;
 }) {
@@ -261,6 +262,10 @@ function CourseEditorForm(props: {
 		}
 
 		props.onSubmit(data, form);
+
+		if (Object.keys(form.formState.errors).length === 0) {
+			props.setOpen(false);
+		}
 	};
 
 	return (
@@ -417,8 +422,10 @@ export default function CourseEditorDialog({
 	defaultValues?: PartialDeep<Course.Schema>;
 	onSubmit: (data: Course.Schema, form: UseFormReturn<Course.Schema>) => void;
 }) {
+	const [open, setOpen] = useState(false);
+
 	return (
-		<Dialog>
+		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>{children}</DialogTrigger>
 			<DialogContent className="w-full max-w-full md:max-w-4xl max-h-[90vh] overflow-y-auto">
 				<DialogHeader>
@@ -428,7 +435,11 @@ export default function CourseEditorDialog({
 					</DialogDescription>
 				</DialogHeader>
 
-				<CourseEditorForm onSubmit={onSubmit} defaultValues={defaultValues} />
+				<CourseEditorForm
+					setOpen={setOpen}
+					onSubmit={onSubmit}
+					defaultValues={defaultValues}
+				/>
 			</DialogContent>
 		</Dialog>
 	);
