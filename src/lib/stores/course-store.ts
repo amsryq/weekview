@@ -47,7 +47,7 @@ const CourseStore = createStore<State & Actions>()(
 if (__DEV__) {
 	// setTimeout needed due to circular dependency
 	setTimeout(() => {
-		CourseStore.getState().addCourse(
+		[
 			new Course({
 				code: "CSC186",
 				name: "Object Oriented Programming",
@@ -69,7 +69,233 @@ if (__DEV__) {
 					}),
 				],
 			}),
-		);
+
+			new Course({
+				code: "CSC159",
+				name: "Operating Systems",
+				color: "#33B5FF",
+				meetingTimes: [
+					new MeetingTime({
+						day: 3,
+						time: new TimeRange(
+							Clock.fromString("13:00"),
+							Clock.fromString("15:00"),
+						),
+					}),
+					new MeetingTime({
+						day: 5,
+						time: new TimeRange(
+							Clock.fromString("11:00"),
+							Clock.fromString("13:00"),
+						),
+					}),
+				],
+			}),
+
+			new Course({
+				code: "CSC210",
+				name: "Data Structures and Algorithms",
+				color: "#C0392B",
+				meetingTimes: [
+					new MeetingTime({
+						day: 1,
+						time: new TimeRange(
+							Clock.fromString("11:00"),
+							Clock.fromString("13:00"),
+						),
+					}),
+					new MeetingTime({
+						day: 4,
+						time: new TimeRange(
+							Clock.fromString("15:00"),
+							Clock.fromString("17:00"),
+						),
+					}),
+				],
+				notes: "Core CS course",
+				tags: ["core", "exam-heavy"],
+			}),
+
+			new Course({
+				code: "CSC240",
+				name: "Computer Networks",
+				color: "#2980B9",
+				meetingTimes: [
+					new MeetingTime({
+						day: 2,
+						time: new TimeRange(
+							Clock.fromString("14:00"),
+							Clock.fromString("16:00"),
+						),
+					}),
+					new MeetingTime({
+						day: 5,
+						time: new TimeRange(
+							Clock.fromString("16:00"),
+							Clock.fromString("18:00"),
+						),
+					}),
+				],
+			}),
+
+			new Course({
+				code: "CSC250",
+				name: "Software Engineering",
+				color: "#16A085",
+				meetingTimes: [
+					new MeetingTime({
+						day: 1,
+						time: new TimeRange(
+							Clock.fromString("18:00"),
+							Clock.fromString("20:00"),
+						),
+					}),
+					new MeetingTime({
+						day: 3,
+						time: new TimeRange(
+							Clock.fromString("20:00"),
+							Clock.fromString("22:00"),
+						),
+					}),
+				],
+				notes: "Night class",
+				tags: ["group project"],
+			}),
+
+			new Course({
+				code: "MAT215",
+				name: "Discrete Mathematics",
+				color: "#8E44AD",
+				meetingTimes: [
+					new MeetingTime({
+						day: 1,
+						time: new TimeRange(
+							Clock.fromString("14:00"),
+							Clock.fromString("16:00"),
+						),
+					}),
+					new MeetingTime({
+						day: 4,
+						time: new TimeRange(
+							Clock.fromString("10:00"),
+							Clock.fromString("12:00"),
+						),
+					}),
+				],
+			}),
+
+			new Course({
+				code: "ENG102",
+				name: "Academic Writing",
+				color: "#27AE60",
+				meetingTimes: [
+					new MeetingTime({
+						day: 2,
+						time: new TimeRange(
+							Clock.fromString("08:00"),
+							Clock.fromString("10:00"),
+						),
+					}),
+				],
+			}),
+
+			new Course({
+				code: "PHY111",
+				name: "Physics I",
+				color: "#E67E22",
+				meetingTimes: [
+					new MeetingTime({
+						day: 3,
+						time: new TimeRange(
+							Clock.fromString("10:00"),
+							Clock.fromString("11:00"),
+						),
+					}),
+					new MeetingTime({
+						day: 5,
+						time: new TimeRange(
+							Clock.fromString("14:00"),
+							Clock.fromString("16:00"),
+						),
+					}),
+				],
+			}),
+
+			new Course({
+				code: "PHY111-LAB",
+				name: "Physics I Lab",
+				color: "#D35400",
+				meetingTimes: [
+					new MeetingTime({
+						day: 4,
+						time: new TimeRange(
+							Clock.fromString("18:00"),
+							Clock.fromString("21:00"),
+						),
+					}),
+				],
+				notes: "Lab reports due weekly",
+				tags: ["lab", "night"],
+			}),
+
+			new Course({
+				code: "CSC310",
+				name: "Artificial Intelligence",
+				color: "#9B59B6",
+				meetingTimes: [
+					new MeetingTime({
+						day: 6,
+						time: new TimeRange(
+							Clock.fromString("10:00"),
+							Clock.fromString("13:00"),
+						),
+					}),
+				],
+				notes: "Saturday elective",
+				tags: ["elective", "AI"],
+			}),
+
+			new Course({
+				code: "CSC330",
+				name: "Parallel Computing",
+				color: "#34495E",
+				meetingTimes: [
+					new MeetingTime({
+						day: 2,
+						time: new TimeRange(
+							Clock.fromString("19:00"),
+							Clock.fromString("21:00"),
+						),
+					}),
+					new MeetingTime({
+						day: 5,
+						time: new TimeRange(
+							Clock.fromString("20:00"),
+							Clock.fromString("22:00"),
+						),
+					}),
+				],
+				notes: "Late evening course, heavy workload",
+				tags: ["advanced"],
+			}),
+
+			new Course({
+				code: "HIS201",
+				name: "World History",
+				color: "#BDC3C7",
+				meetingTimes: [
+					new MeetingTime({
+						day: 3,
+						time: new TimeRange(
+							Clock.fromString("08:00"),
+							Clock.fromString("10:00"),
+						),
+					}),
+				],
+			}),
+		].forEach((c) => {
+			CourseStore.getState().addCourse(c);
+		});
 	}, 0);
 }
 

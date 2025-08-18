@@ -1,0 +1,312 @@
+import { Clock, MapPin, Settings } from "lucide-react";
+import { createContext, useContext, useMemo } from "react";
+import { useStore } from "zustand";
+import type { Course } from "~/lib/models/course";
+import type { MeetingTime } from "~/lib/models/meeting-time";
+import { CourseStore } from "~/lib/stores/course-store";
+import CourseManagementSheet from "./course-management-sheet";
+import { Button } from "./ui/button";
+import {
+	Card,
+	CardAction,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "./ui/card";
+
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const ROW_BLOCK_WIDTH_REM = 6;
+const COLUMN_BLOCK_HEIGHT_REM = 4;
+
+interface TimetableContextProps {
+	courses: Course[];
+	timeSlots: string[];
+	rowWidth: number;
+	columnHeight: number;
+	layout: "rows" | "columns";
+}
+const TimetableContext = createContext<TimetableContextProps | null>(null);
+
+function useTimetable() {
+	const ctx = useContext(TimetableContext);
+	if (!ctx)
+		throw new Error("useTimetable must be used within TimetableProvider");
+	return ctx;
+}
+
+function CourseBlock({
+	course,
+	meetingTime,
+}: {
+	course: Course;
+	meetingTime: MeetingTime;
+}) {
+	const { timeSlots, layout } = useTimetable();
+
+	const {
+		start: { hour: startHour, minute: startMinute },
+		end: { hour: endHour, minute: endMinute },
+	} = meetingTime.time;
+
+	const startOffsetHours = startHour + startMinute / 60;
+	const endOffsetHours = endHour + endMinute / 60;
+	const durationHours = endOffsetHours - startOffsetHours;
+	const earliestHour = Number.parseInt(timeSlots[0].split(":")[0]);
+
+	let style: React.CSSProperties;
+	if (layout === "rows") {
+		const leftOffset = (startOffsetHours - earliestHour) * ROW_BLOCK_WIDTH_REM;
+		const width = durationHours * ROW_BLOCK_WIDTH_REM;
+		style = {
+			left: `${leftOffset}rem`,
+			width: `${width}rem`,
+			top: "0.1rem",
+			bottom: "0rem",
+			backgroundColor: course.color,
+			borderColor: course.color,
+		};
+	} else {
+		const topOffset =
+			(startOffsetHours - earliestHour) * COLUMN_BLOCK_HEIGHT_REM;
+		const height = durationHours * COLUMN_BLOCK_HEIGHT_REM;
+		style = {
+			top: `${topOffset}rem`,
+			height: `${height}rem`,
+			left: "0rem",
+			right: "0rem",
+			backgroundColor: course.color,
+			borderColor: course.color,
+		};
+	}
+
+	return (
+		<div className="absolute rounded-lg border overflow-hidden" style={style}>
+			<div className="p-2 h-full flex flex-col justify-between text-white text-xs relative">
+				<div className="space-y-0.5">
+					<div className="font-bold truncate">{course.code}</div>
+					<div className="text-xs opacity-90 truncate">{course.name}</div>
+				</div>
+
+				<div>
+					<div className="flex items-center gap-1 text-xs opacity-90">
+						<Clock className="w-3 h-3" />
+						<span>
+							{meetingTime.time.start.toString()}-
+							{meetingTime.time.end.toString()}
+						</span>
+					</div>
+
+					{meetingTime.location && (
+						<div className="flex items-center gap-1 text-xs opacity-90">
+							<MapPin className="w-3 h-3" />
+							<span className="truncate">{meetingTime.location}</span>
+						</div>
+					)}
+				</div>
+			</div>
+		</div>
+	);
+}
+
+function DayColumn({ day, dayIndex }: { day: string; dayIndex: number }) {
+	const { courses, timeSlots, columnHeight, rowWidth, layout } = useTimetable();
+	const meetingDay = dayIndex + 1;
+
+	const dayMeetings = courses.flatMap((course) =>
+		course.meetingTimes
+			.filter((mt) => mt.day === meetingDay)
+			.map((mt) => ({ course, meetingTime: mt })),
+	);
+
+	const containerStyle =
+		layout === "rows"
+			? { width: `${rowWidth}rem`, height: "6rem" }
+			: { height: `${columnHeight}rem` };
+
+	const lineClass =
+		layout === "rows"
+			? "absolute top-0 bottom-0 border-l border-border/50"
+			: "absolute left-0 right-0 border-t border-border/50";
+
+	const lineStyle = (index: number) =>
+		layout === "rows"
+			? { left: `${index * ROW_BLOCK_WIDTH_REM}rem` }
+			: { top: `${index * COLUMN_BLOCK_HEIGHT_REM}rem` };
+
+	return (
+		<div className={layout === "rows" ? "flex" : ""}>
+			<div
+				className={
+					layout === "rows"
+						? "w-16 flex-shrink-0 flex items-center justify-end pr-6"
+						: "h-8 flex items-center justify-center"
+				}
+			>
+				<div className="text-secondary-foreground text-sm font-medium">
+					{day}
+				</div>
+			</div>
+
+			<div className="relative overflow-hidden" style={containerStyle}>
+				{timeSlots.map((_, index) => (
+					<div key={index} className={lineClass} style={lineStyle(index)} />
+				))}
+
+				{dayMeetings.map(({ course, meetingTime }) => (
+					<CourseBlock
+						key={`${course.id}-${meetingTime.id}`}
+						course={course}
+						meetingTime={meetingTime}
+					/>
+				))}
+			</div>
+		</div>
+	);
+}
+
+function RowLayout({ visibleDays }: { visibleDays: string[] }) {
+	const { timeSlots } = useTimetable();
+	return (
+		<div className="overflow-x-auto">
+			<div className="min-w-fit">
+				<div className="flex pb-2">
+					<div className="w-16 flex-shrink-0" />
+					<div className="flex">
+						{timeSlots.map((time: string) => (
+							<div
+								key={time}
+								className="text-sm text-muted-foreground text-center -translate-x-4 flex flex-shrink-0"
+								style={{ width: `${ROW_BLOCK_WIDTH_REM}rem` }}
+							>
+								{time}
+							</div>
+						))}
+					</div>
+				</div>
+
+				{visibleDays.map((day: string) => (
+					<DayColumn key={day} day={day} dayIndex={DAYS.indexOf(day)} />
+				))}
+			</div>
+		</div>
+	);
+}
+
+function ColumnLayout({ visibleDays }: { visibleDays: string[] }) {
+	const { timeSlots } = useTimetable();
+	return (
+		<div
+			className="grid"
+			style={{ gridTemplateColumns: `auto repeat(${visibleDays.length}, 1fr)` }}
+		>
+			<div className="space-y-0">
+				<div className="h-8" />
+				{timeSlots.map((time: string) => (
+					<div
+						key={time}
+						className="text-sm text-muted-foreground text-right pr-2 flex -translate-y-2 justify-end"
+						style={{ height: `${COLUMN_BLOCK_HEIGHT_REM}rem` }}
+					>
+						{time}
+					</div>
+				))}
+			</div>
+
+			{visibleDays.map((day: string) => (
+				<DayColumn key={day} day={day} dayIndex={DAYS.indexOf(day)} />
+			))}
+		</div>
+	);
+}
+
+interface WeeklyTimetableProps {
+	layout?: "rows" | "columns";
+}
+
+export default function WeeklyTimetable({
+	layout = "rows",
+}: WeeklyTimetableProps) {
+	const courses = useStore(CourseStore, (state) => state.courses);
+
+	const visibleDays = useMemo(() => {
+		const maxDay = Math.max(
+			5,
+			...courses.flatMap((c) => c.meetingTimes.map((mt) => mt.day)),
+		);
+		return DAYS.slice(0, maxDay);
+	}, [courses]);
+
+	const { timeSlots, columnHeight, rowWidth } = useMemo(() => {
+		if (courses.length === 0) {
+			const slots: string[] = [];
+			for (let hour = 8; hour <= 18; hour++) {
+				slots.push(`${hour.toString().padStart(2, "0")}:00`);
+			}
+			return {
+				timeSlots: slots,
+				columnHeight: slots.length * COLUMN_BLOCK_HEIGHT_REM,
+				rowWidth: slots.length * ROW_BLOCK_WIDTH_REM,
+			};
+		}
+
+		let earliestHour = 24;
+		let latestHour = 0;
+
+		courses.forEach((course) => {
+			course.meetingTimes.forEach((mt) => {
+				earliestHour = Math.min(earliestHour, mt.time.start.hour);
+				latestHour = Math.max(latestHour, mt.time.end.hour);
+			});
+		});
+
+		earliestHour = Math.max(6, earliestHour);
+		latestHour = Math.max(Math.min(23, latestHour - 1), 18);
+
+		const slots: string[] = [];
+		for (let hour = earliestHour; hour <= latestHour; hour++) {
+			slots.push(`${hour.toString().padStart(2, "0")}:00`);
+		}
+
+		return {
+			timeSlots: slots,
+			columnHeight: slots.length * COLUMN_BLOCK_HEIGHT_REM,
+			rowWidth: slots.length * ROW_BLOCK_WIDTH_REM,
+		};
+	}, [courses]);
+
+	return (
+		<Card>
+			<CardHeader>
+				<CardAction>
+					<CourseManagementSheet>
+						<Button variant="outline" size="sm">
+							<Settings className="w-4 h-4" />
+							Manage Courses
+						</Button>
+					</CourseManagementSheet>
+				</CardAction>
+			</CardHeader>
+
+			<CardContent>
+				<TimetableContext.Provider
+					value={{ courses, timeSlots, columnHeight, rowWidth, layout }}
+				>
+					{courses.length === 0 ? (
+						<div className="text-center py-12 space-y-2">
+							<p className="text-lg text-muted-foreground">
+								No courses added yet.
+							</p>
+							<p className="text-sm text-muted-foreground">
+								Click "Manage Courses" to get started!
+							</p>
+						</div>
+					) : layout === "rows" ? (
+						<RowLayout visibleDays={visibleDays} />
+					) : (
+						<ColumnLayout visibleDays={visibleDays} />
+					)}
+				</TimetableContext.Provider>
+			</CardContent>
+		</Card>
+	);
+}

@@ -1,12 +1,9 @@
-import CourseManagementSheet from "./components/course-management-sheet";
-import { Button } from "./components/ui/button";
+import WeeklyTimetable from "./components/weekly-timetable";
 
 function App() {
 	return (
-		<div className="flex justify-center items-center w-screen h-screen">
-			<CourseManagementSheet>
-				<Button>Manage Courses</Button>
-			</CourseManagementSheet>
+		<div className="container h-screen mx-auto p-4 w-full">
+			<WeeklyTimetable />
 		</div>
 	);
 }
