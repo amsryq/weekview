@@ -1,4 +1,3 @@
-import { invariant } from "es-toolkit";
 import type { JSX } from "react";
 import { useStore } from "zustand";
 import { Course } from "~/lib/models/course";
