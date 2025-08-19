@@ -6,13 +6,7 @@ import type { MeetingTime } from "~/lib/models/meeting-time";
 import { CourseStore } from "~/lib/stores/course-store";
 import CourseManagementSheet from "./course-management-sheet";
 import { Button } from "./ui/button";
-import {
-	Card,
-	CardAction,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "./ui/card";
+import { Card, CardAction, CardContent, CardHeader } from "./ui/card";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const ROW_BLOCK_WIDTH_REM = 6;

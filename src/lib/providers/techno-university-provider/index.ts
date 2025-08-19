@@ -1,8 +1,8 @@
-import { Clock } from "../models/clock";
-import { Course } from "../models/course";
-import { CourseProvider } from "../models/course-provider";
-import { MeetingTime } from "../models/meeting-time";
-import { TimeRange } from "../models/time-range";
+import { Clock } from "~/lib/models/clock";
+import { Course } from "~/lib/models/course";
+import { CourseProvider } from "~/lib/models/course-provider";
+import { MeetingTime } from "~/lib/models/meeting-time";
+import { TimeRange } from "~/lib/models/time-range";
 
 export interface TechnoUniversityImportData {
 	courseCodes: string[];
