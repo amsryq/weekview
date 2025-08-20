@@ -253,7 +253,7 @@ export default function WeeklyTimetable({
 			});
 		});
 
-		earliestHour = Math.max(6, earliestHour);
+		earliestHour = Math.min(8, Math.max(6, earliestHour));
 		latestHour = Math.max(Math.min(23, latestHour - 1), 18);
 
 		const slots: string[] = [];
