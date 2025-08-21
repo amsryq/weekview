@@ -1,0 +1,1 @@
+- Do not suggest running the build command after completing tasks. Simply state that the task is finished and proceed, as the developer likely already has the development server running.
