@@ -25,7 +25,6 @@ function CourseCard({ course }: { course: Course }) {
 					{course.code}
 				</h1>
 				<h3>{course.name}</h3>
-				<p>{course.notes}</p>
 
 				<CourseEditorDialog
 					defaultValues={course.toSchema()}

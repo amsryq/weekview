@@ -23,8 +23,6 @@ const courseSchema = z.object({
 	meetingTimes: z
 		.array(MeetingTime.schema)
 		.min(1, "At least one meeting time is required"),
-	notes: z.string().optional(),
-	tags: z.string().optional(),
 });
 
 export namespace Course {
@@ -42,8 +40,6 @@ export class Course {
 	public name: string;
 	public color: string;
 	public meetingTimes: MeetingTime[];
-	public notes?: string;
-	public tags?: string[];
 
 	public provider: CourseProvider;
 	public syncStatus: Course.SyncStatus = "synced";
@@ -54,24 +50,15 @@ export class Course {
 		this.name = data.name;
 		this.color = data.color;
 		this.meetingTimes = data.meetingTimes || [];
-		this.notes = data.notes;
-		this.tags = data.tags;
 		this.provider = data.provider ?? ManualCourseProvider.instance;
 	}
 
 	public static createFromSchema(data: Course.Schema): Course {
-		const processedTags = data.tags
-			?.split(",")
-			.map((tag) => tag.trim())
-			.filter(Boolean);
-
 		return new Course({
 			code: data.code,
 			name: data.name,
 			color: data.color,
 			meetingTimes: data.meetingTimes.map(MeetingTime.createFromSchema),
-			notes: data.notes,
-			tags: processedTags,
 		});
 	}
 
@@ -81,8 +68,6 @@ export class Course {
 			name: this.name,
 			color: this.color,
 			meetingTimes: this.meetingTimes.map((mt) => mt.toSchema()),
-			notes: this.notes,
-			tags: this.tags?.join(", "),
 		};
 	}
 
@@ -91,11 +76,6 @@ export class Course {
 		target.name = data.name;
 		target.color = data.color;
 		target.meetingTimes = data.meetingTimes.map(MeetingTime.createFromSchema);
-		target.notes = data.notes;
-		target.tags = data.tags
-			?.split(",")
-			.map((tag) => tag.trim())
-			.filter(Boolean);
 	}
 
 	public hasTimeConflictWith(other: Course): boolean {

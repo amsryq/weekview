@@ -275,7 +275,7 @@ function CourseEditorForm(props: {
 				<div className="flex flex-col md:flex-row gap-4">
 					{/* Course Form */}
 					<div className="flex-[1] space-y-6">
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div className="grid grid-cols-1 gap-4">
 							<FormField
 								control={form.control}
 								name="code"
@@ -331,42 +331,6 @@ function CourseEditorForm(props: {
 									<FormDescription>
 										Choose a color for your course
 									</FormDescription>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-
-						<FormField
-							control={form.control}
-							name="notes"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Notes</FormLabel>
-									<FormControl>
-										<Textarea
-											placeholder="Additional notes about the course..."
-											className="resize-none min-h-[80px]"
-											{...field}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-
-						<FormField
-							control={form.control}
-							name="tags"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Tags</FormLabel>
-									<FormControl>
-										<Input
-											placeholder="programming, mathematics, required"
-											{...field}
-										/>
-									</FormControl>
-									<FormDescription>Separate tags with commas</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
