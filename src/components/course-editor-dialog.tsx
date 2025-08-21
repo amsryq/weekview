@@ -38,7 +38,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "./ui/select";
-import { Textarea } from "./ui/textarea";
 
 const DAYS_OF_WEEK = [
 	{ value: 1, label: "Monday" },

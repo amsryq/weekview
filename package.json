@@ -28,6 +28,7 @@
     "es-toolkit": "^1.39.10",
     "immer": "^10.1.1",
     "lucide-react": "^0.540.0",
+    "modern-screenshot": "^4.6.6",
     "radix-ui": "^1.4.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
