@@ -44,7 +44,7 @@ const CourseStore = createStore<State & Actions>()(
 );
 
 // TODO: Get rid of this
-if (__DEV__) {
+if (process.env.NODE_ENV !== "production") {
 	// setTimeout needed due to circular dependency
 	setTimeout(() => {
 		[
@@ -112,8 +112,6 @@ if (__DEV__) {
 						),
 					}),
 				],
-				notes: "Core CS course",
-				tags: ["core", "exam-heavy"],
 			}),
 
 			new Course({
@@ -158,8 +156,6 @@ if (__DEV__) {
 						),
 					}),
 				],
-				notes: "Night class",
-				tags: ["group project"],
 			}),
 
 			new Course({
@@ -234,8 +230,6 @@ if (__DEV__) {
 						),
 					}),
 				],
-				notes: "Lab reports due weekly",
-				tags: ["lab", "night"],
 			}),
 
 			new Course({
@@ -251,8 +245,6 @@ if (__DEV__) {
 						),
 					}),
 				],
-				notes: "Saturday elective",
-				tags: ["elective", "AI"],
 			}),
 
 			new Course({
@@ -275,8 +267,6 @@ if (__DEV__) {
 						),
 					}),
 				],
-				notes: "Late evening course, heavy workload",
-				tags: ["advanced"],
 			}),
 
 			new Course({

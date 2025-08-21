@@ -1,12 +1,10 @@
-import { Clock, MapPin, Settings } from "lucide-react";
+import { Clock, MapPin } from "lucide-react";
 import { createContext, useContext, useMemo } from "react";
 import { useStore } from "zustand";
 import type { Course } from "~/lib/models/course";
 import type { MeetingTime } from "~/lib/models/meeting-time";
 import { CourseStore } from "~/lib/stores/course-store";
-import CourseManagementSheet from "./course-management-sheet";
-import { Button } from "./ui/button";
-import { Card, CardAction, CardContent, CardHeader } from "./ui/card";
+import { Card, CardContent } from "./ui/card";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const ROW_BLOCK_WIDTH_REM = 6;
@@ -146,9 +144,9 @@ function DayColumn({ day, dayIndex }: { day: string; dayIndex: number }) {
 					<div key={index} className={lineClass} style={lineStyle(index)} />
 				))}
 
-				{dayMeetings.map(({ course, meetingTime }) => (
+				{dayMeetings.map(({ course, meetingTime }, idx) => (
 					<CourseBlock
-						key={`${course.id}-${meetingTime.id}`}
+						key={`${course.code}-${meetingTime.day}-${idx}`}
 						course={course}
 						meetingTime={meetingTime}
 					/>
@@ -272,7 +270,7 @@ export default function WeeklyTimetable({
 
 	return (
 		<Card>
-			<CardContent>
+			<CardContent className="max-w-[95vw]">
 				<TimetableContext.Provider
 					value={{ courses, timeSlots, columnHeight, rowWidth, layout }}
 				>

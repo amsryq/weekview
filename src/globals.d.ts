@@ -1,5 +1,3 @@
-declare global {
-	var __DEV__: boolean;
-}
+declare global {}
 
 export {};

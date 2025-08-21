@@ -58,8 +58,8 @@ function CourseCard({ course }: { course: Course }) {
 				</CourseEditorDialog>
 
 				<ul>
-					{course.meetingTimes.map((time) => (
-						<li key={time.id}>
+					{course.meetingTimes.map((time, idx) => (
+						<li key={idx}>
 							{time.day}: {time.time.toString()}
 						</li>
 					))}
@@ -90,8 +90,8 @@ function CourseList() {
 	return (
 		<ScrollArea className="overflow-auto h-auto">
 			<div className="space-y-4 px-4 pb-4">
-				{providers.map((provider) => (
-					<ProviderSection key={provider.id} provider={provider} />
+				{providers.map((provider, idx) => (
+					<ProviderSection key={idx} provider={provider} />
 				))}
 
 				<CourseEditorDialog

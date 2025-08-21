@@ -4,10 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.7",
@@ -20,6 +19,7 @@
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-use-controllable-state": "^1.2.2",
+    "@tailwindcss/postcss": "^4.1.12",
     "@tailwindcss/vite": "^4.1.11",
     "@tanstack/react-query": "^5.85.5",
     "class-variance-authority": "^0.7.1",
@@ -29,12 +29,14 @@
     "immer": "^10.1.1",
     "lucide-react": "^0.540.0",
     "modern-screenshot": "^4.6.6",
+    "next": "^15.5.0",
+    "postcss": "^8.5.6",
     "radix-ui": "^1.4.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.62.0",
     "tailwind-merge": "^3.3.1",
-    "tailwindcss": "^4.1.11",
+    "tailwindcss": "^4.1.12",
     "zod": "^4.0.17",
     "zustand": "^5.0.7"
   },
