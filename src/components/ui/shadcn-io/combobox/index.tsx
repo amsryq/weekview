@@ -1,7 +1,7 @@
 "use client";
 
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
-import { ChevronsUpDownIcon, PlusIcon } from "lucide-react";
+import { ChevronsUpDownIcon, Loader2Icon, PlusIcon } from "lucide-react";
 import {
 	type ComponentProps,
 	createContext,
@@ -44,6 +44,8 @@ type ComboboxContextType = {
 	setWidth: (width: number) => void;
 	inputValue: string;
 	setInputValue: (value: string) => void;
+	loading: boolean;
+	loadingText?: string;
 };
 
 const ComboboxContext = createContext<ComboboxContextType>({
@@ -57,6 +59,8 @@ const ComboboxContext = createContext<ComboboxContextType>({
 	setWidth: () => undefined,
 	inputValue: "",
 	setInputValue: () => undefined,
+	loading: false,
+	loadingText: "Loading...",
 });
 
 export type ComboboxProps = ComponentProps<typeof Popover> & {
@@ -67,6 +71,8 @@ export type ComboboxProps = ComponentProps<typeof Popover> & {
 	onValueChange?: (value: string) => void;
 	open?: boolean;
 	onOpenChange?: (open: boolean) => void;
+	loading?: boolean;
+	loadingText?: string;
 };
 
 export const Combobox = ({
@@ -78,6 +84,8 @@ export const Combobox = ({
 	defaultOpen = false,
 	open: controlledOpen,
 	onOpenChange: controlledOnOpenChange,
+	loading = false,
+	loadingText = "Loading...",
 	...props
 }: ComboboxProps) => {
 	const [value, onValueChange] = useControllableState({
@@ -106,6 +114,8 @@ export const Combobox = ({
 				setWidth,
 				inputValue,
 				setInputValue,
+				loading,
+				loadingText,
 			}}
 		>
 			<Popover {...props} onOpenChange={onOpenChange} open={open} />
@@ -119,7 +129,8 @@ export const ComboboxTrigger = ({
 	children,
 	...props
 }: ComboboxTriggerProps) => {
-	const { value, data, type, setWidth } = useContext(ComboboxContext);
+	const { value, data, type, setWidth, loading, loadingText } =
+		useContext(ComboboxContext);
 	const ref = useRef<HTMLButtonElement>(null);
 
 	useEffect(() => {
@@ -148,12 +159,21 @@ export const ComboboxTrigger = ({
 			<Button variant="outline" {...props} ref={ref}>
 				{children ?? (
 					<span className="flex w-full items-center justify-between gap-2">
-						{(value && data.find((item) => item.value === value)?.label) ||
-							`Select ${type}...`}
-						<ChevronsUpDownIcon
-							className="shrink-0 text-muted-foreground"
-							size={16}
-						/>
+						{loading
+							? loadingText
+							: (value && data.find((item) => item.value === value)?.label) ||
+								`Select ${type}...`}
+						{loading ? (
+							<Loader2Icon
+								className="shrink-0 animate-spin text-muted-foreground"
+								size={16}
+							/>
+						) : (
+							<ChevronsUpDownIcon
+								className="shrink-0 text-muted-foreground"
+								size={16}
+							/>
+						)}
 					</span>
 				)}
 			</Button>
@@ -221,16 +241,25 @@ export const ComboboxInput = ({
 export type ComboboxListProps = ComponentProps<typeof CommandList>;
 
 export const ComboboxList = (props: ComboboxListProps) => (
-	<CommandList {...props} />
+	<CommandList aria-busy={useContext(ComboboxContext).loading} {...props} />
 );
 
 export type ComboboxEmptyProps = ComponentProps<typeof CommandEmpty>;
 
 export const ComboboxEmpty = ({ children, ...props }: ComboboxEmptyProps) => {
-	const { type } = useContext(ComboboxContext);
+	const { type, loading, loadingText } = useContext(ComboboxContext);
 
 	return (
-		<CommandEmpty {...props}>{children ?? `No ${type} found.`}</CommandEmpty>
+		<CommandEmpty {...props}>
+			{loading ? (
+				<span className="flex items-center gap-2 text-muted-foreground">
+					<Loader2Icon className="h-4 w-4 animate-spin" />
+					{loadingText}
+				</span>
+			) : (
+				(children ?? `No ${type} found.`)
+			)}
+		</CommandEmpty>
 	);
 };
 
@@ -273,10 +302,10 @@ export const ComboboxCreateNew = ({
 	children,
 	className,
 }: ComboboxCreateNewProps) => {
-	const { inputValue, type, onValueChange, onOpenChange } =
+	const { inputValue, type, onValueChange, onOpenChange, loading } =
 		useContext(ComboboxContext);
 
-	if (!inputValue.trim()) {
+	if (loading || !inputValue.trim()) {
 		return null;
 	}
 

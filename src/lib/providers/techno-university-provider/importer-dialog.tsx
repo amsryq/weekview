@@ -120,6 +120,8 @@ function CourseAndFacultySelectorDialog() {
 			<div className="flex flex-col gap-2 py-4">
 				<Combobox
 					type="campus"
+					loading={campusesLoading}
+					loadingText="Loading campuses..."
 					data={
 						campuses?.map(({ code, name }) => ({ value: code, label: name })) ||
 						[]
@@ -149,59 +151,55 @@ function CourseAndFacultySelectorDialog() {
 				</Combobox>
 
 				{campusesError && (
-					<div className="text-sm text-red-500">
-						{(campusesError as Error).message}
-					</div>
+					<div className="text-sm text-red-500">{campusesError.message}</div>
 				)}
 
-				{selectedCampus?.requiresFaculty && (
-					<>
-						<Combobox
-							type="faculty"
-							data={
-								faculties?.map(({ code: id, name }) => ({
-									value: id,
-									label: name,
-								})) || []
-							}
-							value={selectedFaculty?.code || ""}
-							onValueChange={handleFacultyChange}
-						>
-							<ComboboxTrigger
-								className={`w-full ${
-									facultiesLoading
-										? "cursor-wait"
-										: !faculties
-											? "cursor-not-allowed opacity-50"
-											: ""
-								}`}
-								disabled={facultiesLoading || !faculties}
-							/>
-							<ComboboxContent>
-								<ComboboxInput />
-								<ComboboxEmpty>
-									{facultiesLoading
-										? "Loading faculties..."
-										: "No faculties found"}
-								</ComboboxEmpty>
-								<ComboboxList>
-									<ComboboxGroup>
-										{faculties?.map(({ code: id, name }) => (
-											<ComboboxItem key={id} value={id}>
-												{name}
-											</ComboboxItem>
-										))}
-									</ComboboxGroup>
-								</ComboboxList>
-							</ComboboxContent>
-						</Combobox>
+				<Combobox
+					type="faculty"
+					loading={facultiesLoading}
+					loadingText="Loading faculties..."
+					data={
+						faculties?.map(({ code: id, name }) => ({
+							value: id,
+							label: name,
+						})) || []
+					}
+					value={selectedFaculty?.code || ""}
+					onValueChange={handleFacultyChange}
+				>
+					<ComboboxTrigger
+						className={`w-full ${
+							facultiesLoading
+								? "cursor-wait"
+								: !faculties
+									? "cursor-not-allowed opacity-50"
+									: ""
+						}`}
+						disabled={
+							!selectedCampus?.requiresFaculty || facultiesLoading || !faculties
+						}
+					/>
+					<ComboboxContent>
+						<ComboboxInput />
+						<ComboboxEmpty>
+							{facultiesLoading ? "Loading faculties..." : "No faculties found"}
+						</ComboboxEmpty>
+						<ComboboxList>
+							<ComboboxGroup>
+								{faculties?.map(({ code: id, name }) => (
+									<ComboboxItem key={id} value={id}>
+										{name}
+									</ComboboxItem>
+								))}
+							</ComboboxGroup>
+						</ComboboxList>
+					</ComboboxContent>
+				</Combobox>
 
-						{facultiesError && (
-							<div className="text-sm text-red-500">
-								{(facultiesError as Error).message}
-							</div>
-						)}
-					</>
+				{facultiesError && (
+					<div className="text-sm text-red-500">
+						{(facultiesError as Error).message}
+					</div>
 				)}
 			</div>
 
