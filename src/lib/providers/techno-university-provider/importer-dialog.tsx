@@ -270,8 +270,12 @@ function GroupSelectorDialog() {
 				sg.internal.code === technoCourse.internal.code &&
 				sg.internal.group === technoCourse.internal.group,
 		);
+
 		if (!exists) {
-			CourseStore.getState().addCourse(technoCourse);
+			const state = CourseStore.getState();
+			if (!state.hasTimeConflicts(technoCourse)) {
+				state.addCourse(technoCourse);
+			}
 		}
 	};
 
@@ -338,23 +342,41 @@ function GroupSelectorDialog() {
 								<div className="text-sm text-red-500 p-2">
 									{(groupsError as Error).message}
 								</div>
-							) : selectedCourse &&
-								availableGroups &&
-								availableGroups.length > 0 ? (
-								availableGroups.map((technoCourse) => (
-									<button
-										key={technoCourse.internal.group}
-										onClick={() => handleGroupSelect(technoCourse)}
-										className="block w-full text-left p-2 rounded hover:bg-muted transition-colors"
-										disabled={selectedGroups.some(
-											(sg) =>
-												sg.internal.code === technoCourse.internal.code &&
-												sg.internal.group === technoCourse.internal.group,
-										)}
-									>
-										<div className="text-sm">{technoCourse.internal.group}</div>
-									</button>
-								))
+							) : selectedCourse && availableGroups?.length ? (
+								availableGroups.map((technoCourse) => {
+									const alreadyExists = selectedGroups.includes(technoCourse);
+									const conflicts =
+										CourseStore.getState().hasTimeConflicts(technoCourse);
+
+									const reason = alreadyExists
+										? "Already added"
+										: conflicts
+											? "Time conflict"
+											: undefined;
+
+									return (
+										<button
+											key={technoCourse.internal.group}
+											onClick={() => handleGroupSelect(technoCourse)}
+											className={`block w-full text-left p-2 rounded transition-colors ${
+												reason
+													? "opacity-60 cursor-not-allowed"
+													: "hover:bg-muted"
+											}`}
+											disabled={Boolean(reason)}
+											title={reason}
+										>
+											<div className="text-sm">
+												{technoCourse.internal.group}
+											</div>
+											{reason && (
+												<div className="text-xs text-muted-foreground mt-1">
+													{reason}
+												</div>
+											)}
+										</button>
+									);
+								})
 							) : (
 								<div className="text-sm text-muted-foreground italic p-2">
 									{selectedCourse
