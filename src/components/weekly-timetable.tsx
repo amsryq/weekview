@@ -272,17 +272,6 @@ export default function WeeklyTimetable({
 
 	return (
 		<Card>
-			<CardHeader>
-				<CardAction>
-					<CourseManagementSheet>
-						<Button variant="outline" size="sm">
-							<Settings className="w-4 h-4" />
-							Manage Courses
-						</Button>
-					</CourseManagementSheet>
-				</CardAction>
-			</CardHeader>
-
 			<CardContent>
 				<TimetableContext.Provider
 					value={{ courses, timeSlots, columnHeight, rowWidth, layout }}

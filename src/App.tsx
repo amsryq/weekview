@@ -1,4 +1,6 @@
+import { DownloadIcon, ImportIcon, Settings } from "lucide-react";
 import { domToPng } from "modern-screenshot";
+import CourseManagementSheet from "./components/course-management-sheet";
 import { Button } from "./components/ui/button";
 import WeeklyTimetable from "./components/weekly-timetable";
 import TechnoUniversityImporterDialog from "./lib/providers/techno-university-provider/importer-dialog";
@@ -37,18 +39,26 @@ function App() {
 	};
 
 	return (
-		<div className="container h-screen mx-auto p-4 w-full">
-			<WeeklyTimetable />
-			<div className="m-4 flex flex-wrap gap-2">
-				<Button onClick={handleDownloadPng} size="lg" variant="default">
-					Download PNG
-				</Button>
+		<div className="flex flex-col items-center justify-center container h-screen mx-auto p-4 w-full">
+			<div className="m-4 flex flex-wrap justify-center gap-2">
+				<CourseManagementSheet>
+					<Button variant="outline">
+						<Settings className="w-4 h-4" />
+						Manage Courses
+					</Button>
+				</CourseManagementSheet>
 				<TechnoUniversityImporterDialog>
-					<Button size="lg" variant="outline">
+					<Button variant="outline">
+						<ImportIcon className="w-4 h-4" />
 						Import from Techno University
 					</Button>
 				</TechnoUniversityImporterDialog>
+				<Button onClick={handleDownloadPng}>
+					<DownloadIcon className="w-4 h-4" />
+					Download as PNG
+				</Button>
 			</div>
+			<WeeklyTimetable />
 		</div>
 	);
 }
