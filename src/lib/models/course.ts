@@ -8,9 +8,9 @@ import { MeetingTime } from "./meeting-time";
 
 type CourseConstructorProps = {
 	code: string;
-	name: string;
 	color: string;
-	meetingTimes?: MeetingTime[];
+	meetingTimes: MeetingTime[];
+	name?: string;
 	notes?: string;
 	tags?: string[];
 	provider?: CourseProvider;
@@ -18,11 +18,11 @@ type CourseConstructorProps = {
 
 const courseSchema = z.object({
 	code: z.string().min(1, "Course code is required"),
-	name: z.string().min(1, "Course name is required"),
 	color: z.string().min(1, "Color is required"),
 	meetingTimes: z
 		.array(MeetingTime.schema)
 		.min(1, "At least one meeting time is required"),
+	name: z.string().optional(),
 });
 
 export namespace Course {
@@ -37,8 +37,8 @@ export class Course {
 
 	public id: string;
 	public code: string;
-	public name: string;
 	public color: string;
+	public name?: string;
 	public meetingTimes: MeetingTime[];
 
 	public provider: CourseProvider;
