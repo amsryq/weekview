@@ -19,7 +19,7 @@ function AuthComponent() {
 	}
 
 	return (
-		<div className="flex flex-col justify-center gap-4">
+		<div className="flex flex-col justify-center gap-4 py-4">
 			<p className="text-lg font-semibold">
 				Welcome {session.data?.user.name}!
 			</p>
@@ -87,7 +87,7 @@ function App() {
 					Download as PNG
 				</Button>
 			</div>
-			{/* <WeeklyTimetable /> */}
+			<WeeklyTimetable />
 			<AuthComponent />
 		</div>
 	);

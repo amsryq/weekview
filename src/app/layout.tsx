@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-	title: "Taiki",
-	description: "A weekly timetable generator",
+	title: "Weekview",
+	description:
+		"Generate stunning weekly schedules effortlessly for your classes.",
 };
 
 export default function RootLayout({
