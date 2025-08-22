@@ -1,9 +1,38 @@
 import { DownloadIcon, ImportIcon, Settings } from "lucide-react";
 import { domToPng } from "modern-screenshot";
 import CourseManagementSheet from "./components/course-management-sheet";
+import SignIn from "./components/sign-in";
 import { Button } from "./components/ui/button";
 import WeeklyTimetable from "./components/weekly-timetable";
+import { signOut, useSession } from "./lib/auth/auth-client";
 import TechnoUniversityImporterDialog from "./lib/providers/techno-university-provider/importer-dialog";
+
+function AuthComponent() {
+	const session = useSession();
+
+	if (session.data == null) {
+		return (
+			<SignIn>
+				<Button>Sign In</Button>
+			</SignIn>
+		);
+	}
+
+	return (
+		<div className="flex flex-col justify-center gap-4">
+			<p className="text-lg font-semibold">
+				Welcome {session.data?.user.name}!
+			</p>
+			<Button
+				onClick={() => {
+					signOut();
+				}}
+			>
+				Sign out
+			</Button>
+		</div>
+	);
+}
 
 function App() {
 	// TODO: Export button instead or both and show save file picker?
@@ -58,7 +87,8 @@ function App() {
 					Download as PNG
 				</Button>
 			</div>
-			<WeeklyTimetable />
+			{/* <WeeklyTimetable /> */}
+			<AuthComponent />
 		</div>
 	);
 }
