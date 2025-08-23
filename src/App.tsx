@@ -6,7 +6,7 @@ import SignIn from "./components/sign-in";
 import { Button } from "./components/ui/button";
 import WeeklyTimetable from "./components/weekly-timetable";
 import { authClient, signOut, useSession } from "./lib/auth/auth-client";
-import { getUserSubscriptionInfo } from "./lib/auth/util";
+import { getUserSubscriptionInfo } from "./lib/auth/helpers";
 import TechnoUniversityImporterDialog from "./lib/providers/techno-university-provider/importer-dialog";
 
 function AccountPanel() {
