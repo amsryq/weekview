@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ThemeProvider } from "../lib/hooks/use-theme";
 
 export const metadata: Metadata = {
 	title: "Weekview",
@@ -14,7 +15,12 @@ export default function RootLayout({
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<body>
-				<div className="root">{children}</div>
+				<ThemeProvider
+					defaultTheme="system"
+					storageKey="weekview-ui-theme"
+				>
+					<div className="root">{children}</div>
+				</ThemeProvider>
 			</body>
 		</html>
 	);

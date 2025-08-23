@@ -3,6 +3,7 @@ import { DownloadIcon, ImportIcon, Settings } from "lucide-react";
 import { domToPng } from "modern-screenshot";
 import CourseManagementSheet from "./components/course-management-sheet";
 import SignIn from "./components/sign-in";
+import { ThemeToggle } from "./components/theme-toggle";
 import { Button } from "./components/ui/button";
 import WeeklyTimetable from "./components/weekly-timetable";
 import { authClient, signOut, useSession } from "./lib/auth/auth-client";
@@ -144,7 +145,6 @@ function App() {
 			width: node.scrollWidth + padding * 2,
 			height: node.scrollHeight + padding * 2,
 			style: {
-				backgroundColor: "white",
 				padding: `${padding}px`,
 				borderRadius: `${borderRadius}px`,
 			},
@@ -158,6 +158,10 @@ function App() {
 
 	return (
 		<div className="flex flex-col items-center justify-center container h-screen mx-auto p-4 w-full">
+			<div className="absolute top-4 right-4">
+				<ThemeToggle />
+			</div>
+
 			<AccountPanel />
 
 			<div className="m-4 flex flex-wrap justify-center gap-2">

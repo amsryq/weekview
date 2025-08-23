@@ -160,7 +160,7 @@ function RowLayout({ visibleDays }: { visibleDays: string[] }) {
 	const { timeSlots } = useTimetable();
 	return (
 		<div className="overflow-x-auto">
-			<div id="weekly-timetable" className="min-w-fit">
+			<div id="weekly-timetable" className="bg-card min-w-fit">
 				<div className="flex pb-2">
 					<div className="w-16 flex-shrink-0" />
 					<div className="flex">
@@ -190,7 +190,7 @@ function ColumnLayout({ visibleDays }: { visibleDays: string[] }) {
 	return (
 		<div
 			id="weekly-timetable"
-			className="grid"
+			className="grid bg-card"
 			style={{ gridTemplateColumns: `auto repeat(${visibleDays.length}, 1fr)` }}
 		>
 			<div className="space-y-0">
