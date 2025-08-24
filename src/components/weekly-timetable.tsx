@@ -6,6 +6,7 @@ import type { MeetingTime } from "~/lib/models/meeting-time";
 import { CourseStore } from "~/lib/stores/course-store";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { Card, CardContent } from "./ui/card";
+import { FitText } from "./ui/fit-text";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const ROW_BLOCK_WIDTH_REM = 6;
@@ -121,12 +122,12 @@ function CourseBlock({
 				{/* Code + Course Name */}
 				<div>
 					{prefs.isVisible("code") && (
-						<div
-							className={`font-${prefs.weight.code} truncate`}
-							style={{ fontSize: prefs.fontSize.code }}
+						<FitText
+							fontSize={prefs.fontSize.code}
+							className={`font-${prefs.weight.code}`}
 						>
 							{course.code}
-						</div>
+						</FitText>
 					)}
 					{prefs.isVisible("courseName") && course.name && (
 						<div

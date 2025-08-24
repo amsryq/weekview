@@ -86,7 +86,7 @@ function ElementRow({
 							prefs.setPreference(
 								"fontSize",
 								elementKey,
-								Math.min(24, prefs.fontSize[elementKey] + 1),
+								Math.min(32, prefs.fontSize[elementKey] + 1),
 							)
 						}
 					>
