@@ -4,6 +4,7 @@ import { useStore } from "zustand";
 import type { Course } from "~/lib/models/course";
 import type { MeetingTime } from "~/lib/models/meeting-time";
 import { CourseStore } from "~/lib/stores/course-store";
+import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { Card, CardContent } from "./ui/card";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -17,6 +18,7 @@ interface TimetableContextProps {
 	columnHeight: number;
 	layout: "rows" | "columns";
 }
+
 const TimetableContext = createContext<TimetableContextProps | null>(null);
 
 function useTimetable() {
@@ -34,6 +36,7 @@ function CourseBlock({
 	meetingTime: MeetingTime;
 }) {
 	const { timeSlots, layout } = useTimetable();
+	const prefs = useStore(TimetablePreferencesStore);
 
 	const {
 		start: { hour: startHour, minute: startMinute },
@@ -45,56 +48,109 @@ function CourseBlock({
 	const durationHours = endOffsetHours - startOffsetHours;
 	const earliestHour = Number.parseInt(timeSlots[0].split(":")[0]);
 
-	let style: React.CSSProperties;
-	if (layout === "rows") {
-		const leftOffset = (startOffsetHours - earliestHour) * ROW_BLOCK_WIDTH_REM;
-		const width = durationHours * ROW_BLOCK_WIDTH_REM;
-		style = {
-			left: `${leftOffset}rem`,
-			width: `${width}rem`,
-			top: "0.1rem",
-			bottom: "0rem",
-			backgroundColor: course.color,
-			borderColor: course.color,
-		};
-	} else {
-		const topOffset =
-			(startOffsetHours - earliestHour) * COLUMN_BLOCK_HEIGHT_REM;
-		const height = durationHours * COLUMN_BLOCK_HEIGHT_REM;
-		style = {
-			top: `${topOffset}rem`,
-			height: `${height}rem`,
-			left: "0rem",
-			right: "0rem",
-			backgroundColor: course.color,
-			borderColor: course.color,
-		};
-	}
+	// Layout styles
+	const style: React.CSSProperties =
+		layout === "rows"
+			? {
+					left: `${(startOffsetHours - earliestHour) * ROW_BLOCK_WIDTH_REM}rem`,
+					width: `${durationHours * ROW_BLOCK_WIDTH_REM}rem`,
+					top: "0.1rem",
+					bottom: "0rem",
+					backgroundColor: course.color,
+					borderColor: course.color,
+				}
+			: {
+					top: `${(startOffsetHours - earliestHour) * COLUMN_BLOCK_HEIGHT_REM}rem`,
+					height: `${durationHours * COLUMN_BLOCK_HEIGHT_REM}rem`,
+					left: "0rem",
+					right: "0rem",
+					backgroundColor: course.color,
+					borderColor: course.color,
+				};
+
+	const justifyClass =
+		prefs.textAlign === "center"
+			? "center"
+			: prefs.textAlign === "right"
+				? "end"
+				: "start";
+
+	const InfoRow = ({
+		icon,
+		text,
+		fontKey,
+		fontSize,
+		visible,
+	}: {
+		icon?: React.ReactNode;
+		text: React.ReactNode;
+		fontKey: keyof typeof prefs.weight;
+		fontSize: number;
+		visible: boolean;
+	}) => (
+		<div>
+			{visible && text && (
+				<div
+					className={`flex items-center justify-${justifyClass} gap-1 opacity-90 font-${prefs.weight[fontKey]} truncate`}
+					style={{ fontSize, textAlign: prefs.textAlign }}
+				>
+					{icon}
+					<span className="truncate">{text}</span>
+				</div>
+			)}
+		</div>
+	);
 
 	return (
 		<div className="absolute rounded-lg border overflow-hidden" style={style}>
-			<div className="p-2 h-full flex flex-col justify-between text-white text-xs relative">
-				<div className="space-y-0.5">
-					<div className="font-bold truncate">{course.code}</div>
-					<div className="text-xs opacity-90 truncate">{course.name}</div>
-				</div>
+			<div
+				className="p-2 h-full flex flex-col justify-between text-white text-xs relative"
+				style={{ textAlign: prefs.textAlign }}
+			>
+				{/* Time */}
+				<InfoRow
+					icon={
+						<Clock width={prefs.fontSize.time} height={prefs.fontSize.time} />
+					}
+					visible={prefs.isVisible("time")}
+					text={`${meetingTime.time.start.toString()}-${meetingTime.time.end.toString()}`}
+					fontKey="time"
+					fontSize={prefs.fontSize.time}
+				/>
 
+				{/* Code + Course Name */}
 				<div>
-					<div className="flex items-center gap-1 text-xs opacity-90">
-						<Clock className="w-3 h-3" />
-						<span>
-							{meetingTime.time.start.toString()}-
-							{meetingTime.time.end.toString()}
-						</span>
-					</div>
-
-					{meetingTime.location && (
-						<div className="flex items-center gap-1 text-xs opacity-90">
-							<MapPin className="w-3 h-3" />
-							<span className="truncate">{meetingTime.location}</span>
+					{prefs.isVisible("code") && (
+						<div
+							className={`font-${prefs.weight.code} truncate`}
+							style={{ fontSize: prefs.fontSize.code }}
+						>
+							{course.code}
+						</div>
+					)}
+					{prefs.isVisible("courseName") && course.name && (
+						<div
+							className={`opacity-90 truncate font-${prefs.weight.courseName}`}
+							style={{ fontSize: prefs.fontSize.courseName }}
+						>
+							{course.name}
 						</div>
 					)}
 				</div>
+
+				{/* Location */}
+				<InfoRow
+					icon={
+						<MapPin
+							width={prefs.fontSize.location}
+							height={prefs.fontSize.location}
+						/>
+					}
+					visible={prefs.isVisible("location")}
+					text={meetingTime.location}
+					fontKey="location"
+					fontSize={prefs.fontSize.location}
+				/>
 			</div>
 		</div>
 	);
@@ -156,11 +212,18 @@ function DayColumn({ day, dayIndex }: { day: string; dayIndex: number }) {
 	);
 }
 
-function RowLayout({ visibleDays }: { visibleDays: string[] }) {
+function RowLayout({
+	visibleDays,
+	containerId,
+}: {
+	visibleDays: string[];
+	containerId: string;
+}) {
 	const { timeSlots } = useTimetable();
+
 	return (
 		<div className="overflow-x-auto">
-			<div id="weekly-timetable" className="bg-card min-w-fit">
+			<div id={containerId} className="bg-card min-w-fit">
 				<div className="flex pb-2">
 					<div className="w-16 flex-shrink-0" />
 					<div className="flex">
@@ -170,7 +233,7 @@ function RowLayout({ visibleDays }: { visibleDays: string[] }) {
 								className="text-sm text-muted-foreground text-center -translate-x-4 flex flex-shrink-0"
 								style={{ width: `${ROW_BLOCK_WIDTH_REM}rem` }}
 							>
-								{time}
+								<span className="font-semibold">{time}</span>
 							</div>
 						))}
 					</div>
@@ -185,11 +248,22 @@ function RowLayout({ visibleDays }: { visibleDays: string[] }) {
 }
 
 // TODO: This is currently unfinished
-function ColumnLayout({ visibleDays }: { visibleDays: string[] }) {
+function ColumnLayout({
+	visibleDays,
+	containerId,
+}: {
+	visibleDays: string[];
+	containerId: string;
+}) {
 	const { timeSlots } = useTimetable();
+	const timeFontSize = useStore(
+		TimetablePreferencesStore,
+		(s) => s.fontSize.time,
+	);
+	const timeWeight = useStore(TimetablePreferencesStore, (s) => s.weight.time);
 	return (
 		<div
-			id="weekly-timetable"
+			id={containerId}
 			className="grid bg-card"
 			style={{ gridTemplateColumns: `auto repeat(${visibleDays.length}, 1fr)` }}
 		>
@@ -201,7 +275,12 @@ function ColumnLayout({ visibleDays }: { visibleDays: string[] }) {
 						className="text-sm text-muted-foreground text-right pr-2 flex -translate-y-2 justify-end"
 						style={{ height: `${COLUMN_BLOCK_HEIGHT_REM}rem` }}
 					>
-						{time}
+						<span
+							style={{ fontSize: `${timeFontSize}px` }}
+							className={`font-${timeWeight}`}
+						>
+							{time}
+						</span>
 					</div>
 				))}
 			</div>
@@ -215,12 +294,22 @@ function ColumnLayout({ visibleDays }: { visibleDays: string[] }) {
 
 interface WeeklyTimetableProps {
 	layout?: "rows" | "columns";
+	/**
+	 * This will be pulled from CourseStore if not provided
+	 */
+	courses?: Course[];
+	containerId?: string;
 }
 
 export default function WeeklyTimetable({
-	layout = "rows",
+	layout,
+	courses: _courses,
+	containerId = "weekly-timetable",
 }: WeeklyTimetableProps) {
-	const courses = useStore(CourseStore, (state) => state.courses);
+	const courses = useStore(CourseStore, (state) => _courses || state.courses);
+	const prefsLayout = useStore(TimetablePreferencesStore, (s) => s.layout);
+	// Allow prop override; default to preferences
+	const effectiveLayout = layout ?? prefsLayout;
 
 	const visibleDays = useMemo(() => {
 		const maxDay = Math.max(
@@ -272,7 +361,13 @@ export default function WeeklyTimetable({
 		<Card>
 			<CardContent className="max-w-[95vw]">
 				<TimetableContext.Provider
-					value={{ courses, timeSlots, columnHeight, rowWidth, layout }}
+					value={{
+						courses,
+						timeSlots,
+						columnHeight,
+						rowWidth,
+						layout: effectiveLayout,
+					}}
 				>
 					{courses.length === 0 ? (
 						<div className="text-center py-12 space-y-2">
@@ -283,10 +378,10 @@ export default function WeeklyTimetable({
 								Click "Manage Courses" to get started!
 							</p>
 						</div>
-					) : layout === "rows" ? (
-						<RowLayout visibleDays={visibleDays} />
+					) : effectiveLayout === "rows" ? (
+						<RowLayout visibleDays={visibleDays} containerId={containerId} />
 					) : (
-						<ColumnLayout visibleDays={visibleDays} />
+						<ColumnLayout visibleDays={visibleDays} containerId={containerId} />
 					)}
 				</TimetableContext.Provider>
 			</CardContent>

@@ -55,6 +55,7 @@ if (process.env.NODE_ENV !== "production") {
 				meetingTimes: [
 					new MeetingTime({
 						day: 1,
+						location: "Lecture Room 1",
 						time: new TimeRange(
 							Clock.fromString("09:00"),
 							Clock.fromString("11:00"),

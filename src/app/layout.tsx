@@ -15,10 +15,7 @@ export default function RootLayout({
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<body>
-				<ThemeProvider
-					defaultTheme="system"
-					storageKey="weekview-ui-theme"
-				>
+				<ThemeProvider defaultTheme="system" storageKey="weekview-ui-theme">
 					<div className="root">{children}</div>
 				</ThemeProvider>
 			</body>

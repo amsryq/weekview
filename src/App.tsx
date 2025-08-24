@@ -1,9 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { DownloadIcon, ImportIcon, Settings } from "lucide-react";
+import {
+	DownloadIcon,
+	ImportIcon,
+	Settings,
+	SlidersHorizontal,
+} from "lucide-react";
 import { domToPng } from "modern-screenshot";
 import CourseManagementSheet from "./components/course-management-sheet";
 import SignIn from "./components/sign-in";
 import { ThemeToggle } from "./components/theme-toggle";
+import TimetableCustomizer from "./components/timetable-customizer";
 import { Button } from "./components/ui/button";
 import WeeklyTimetable from "./components/weekly-timetable";
 import { authClient, signOut, useSession } from "./lib/auth/auth-client";
@@ -83,7 +89,7 @@ function AccountPanel() {
 						});
 					}}
 				>
-					{isSupporter ? "Already a Supporter" : "Become a Supporter"}
+					Become a Supporter
 				</Button>
 				<Button
 					disabled={!isSupporter}
@@ -177,12 +183,18 @@ function App() {
 						Import from Techno University
 					</Button>
 				</TechnoUniversityImporterDialog>
+				<TimetableCustomizer>
+					<Button variant="outline">
+						<SlidersHorizontal className="w-4 h-4" />
+						Customize
+					</Button>
+				</TimetableCustomizer>
 				<Button onClick={handleDownloadPng}>
 					<DownloadIcon className="w-4 h-4" />
 					Download as PNG
 				</Button>
 			</div>
-			<WeeklyTimetable />
+			<WeeklyTimetable containerId="weekly-timetable" />
 		</div>
 	);
 }
