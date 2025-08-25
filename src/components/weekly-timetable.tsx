@@ -385,16 +385,7 @@ export default function WeeklyTimetable({
 						layout: effectiveLayout,
 					}}
 				>
-					{courses.length === 0 ? (
-						<div className="text-center py-12 space-y-2">
-							<p className="text-lg text-muted-foreground">
-								No courses added yet.
-							</p>
-							<p className="text-sm text-muted-foreground">
-								Click "Manage Courses" to get started!
-							</p>
-						</div>
-					) : effectiveLayout === "rows" ? (
+					{effectiveLayout === "rows" ? (
 						<RowLayout visibleDays={visibleDays} containerId={containerId} />
 					) : (
 						<ColumnLayout visibleDays={visibleDays} containerId={containerId} />

@@ -220,7 +220,10 @@ export function timetableDataToTechnoCourses(
 			const course = new TechnoCourse({
 				code: timetableData.course,
 				name: timetableData.course,
-				color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+				cellAppearance: {
+					bgColor: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+					fgColor: "#fff",
+				},
 				campus: timetableData.campus,
 				group: row.group,
 				meetingTimes: [

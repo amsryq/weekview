@@ -40,5 +40,3 @@ export const auth = betterAuth({
 		}),
 	],
 });
-
-export * from "./helpers";

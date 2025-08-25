@@ -1,7 +1,10 @@
+"use client";
+
 import { useQuery } from "@tanstack/react-query";
 import { ReactNode } from "react";
 import { authClient, signOut, useSession } from "~/lib/auth/auth-client";
-import { getUserSubscriptionInfo } from "~/lib/auth/helpers";
+import { fetchUserSubscriptions } from "~/lib/auth/helpers";
+import { getActiveSubscription } from "~/lib/auth/helpers-client";
 import SignIn from "./sign-in";
 import { Button } from "./ui/button";
 import {
@@ -17,7 +20,7 @@ export function AccountManagerDialog({ children }: { children: ReactNode }) {
 	const session = useSession();
 
 	const {
-		data: userSubscriptionInfo,
+		data: userSubscriptions,
 		isLoading,
 		error,
 	} = useQuery({
@@ -25,7 +28,7 @@ export function AccountManagerDialog({ children }: { children: ReactNode }) {
 		enabled: !!session.data,
 		queryFn: async () => {
 			if (session.data) {
-				const subInfo = await getUserSubscriptionInfo(session.data.user.id);
+				const subInfo = await fetchUserSubscriptions(session.data.user.id);
 				if (subInfo) return subInfo;
 			}
 
@@ -57,9 +60,9 @@ export function AccountManagerDialog({ children }: { children: ReactNode }) {
 		);
 	}
 
-	const isSupporter =
-		userSubscriptionInfo?.status === "active" ||
-		userSubscriptionInfo?.status === "trialing";
+	const userSubscriptionInfo =
+		userSubscriptions && getActiveSubscription(userSubscriptions);
+	const isSupporter = !!userSubscriptionInfo;
 
 	return (
 		<Dialog>
