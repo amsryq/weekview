@@ -27,3 +27,4 @@ next-env.d.ts
 
 # TODO: Uncomment this
 README.md
+.env
