@@ -2,27 +2,26 @@ import { immerable } from "immer";
 import z from "zod";
 import { ManualCourseProvider } from "../providers/manual-course-provider";
 import { randomUUID } from "../utils";
+import { type CellAppearance, CellAppearanceSchema } from "./cell-appearance";
 import type { Clock } from "./clock";
 import type { CourseProvider } from "./course-provider";
 import { MeetingTime } from "./meeting-time";
 
 type CourseConstructorProps = {
 	code: string;
-	color: string;
 	meetingTimes: MeetingTime[];
 	name?: string;
-	notes?: string;
-	tags?: string[];
 	provider?: CourseProvider;
+	cellAppearance?: Partial<CellAppearance>;
 };
 
 const courseSchema = z.object({
 	code: z.string().min(1, "Course code is required"),
-	color: z.string().min(1, "Color is required"),
 	meetingTimes: z
 		.array(MeetingTime.schema)
 		.min(1, "At least one meeting time is required"),
 	name: z.string().optional(),
+	cellAppearance: CellAppearanceSchema.optional(),
 });
 
 export namespace Course {
@@ -37,9 +36,9 @@ export class Course {
 
 	public id: string;
 	public code: string;
-	public color: string;
 	public name?: string;
 	public meetingTimes: MeetingTime[];
+	public cellAppearance?: Partial<CellAppearance>;
 
 	public provider: CourseProvider;
 	public syncStatus: Course.SyncStatus = "synced";
@@ -48,8 +47,8 @@ export class Course {
 		this.id = randomUUID();
 		this.code = data.code;
 		this.name = data.name;
-		this.color = data.color;
 		this.meetingTimes = data.meetingTimes || [];
+		this.cellAppearance = data.cellAppearance;
 		this.provider = data.provider ?? ManualCourseProvider.instance;
 	}
 
@@ -57,25 +56,27 @@ export class Course {
 		return new Course({
 			code: data.code,
 			name: data.name,
-			color: data.color,
 			meetingTimes: data.meetingTimes.map(MeetingTime.createFromSchema),
+			cellAppearance: data.cellAppearance,
 		});
 	}
 
-	public toSchema() {
+	public toSchema(): Course.Schema {
 		return {
 			code: this.code,
 			name: this.name,
-			color: this.color,
 			meetingTimes: this.meetingTimes.map((mt) => mt.toSchema()),
+			cellAppearance: this.cellAppearance,
 		};
 	}
 
 	public static assignFromSchema(target: Course, data: Course.Schema): void {
 		target.code = data.code;
 		target.name = data.name;
-		target.color = data.color;
 		target.meetingTimes = data.meetingTimes.map(MeetingTime.createFromSchema);
+		target.cellAppearance = data.cellAppearance as
+			| Partial<CellAppearance>
+			| undefined;
 	}
 
 	public hasTimeConflictWith(other: Course): boolean {

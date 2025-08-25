@@ -39,6 +39,8 @@ function CourseBlock({
 	const { timeSlots, layout } = useTimetable();
 	const prefs = useStore(TimetablePreferencesStore);
 
+	const appearance = prefs.getCellAppearance(course, meetingTime);
+
 	const {
 		start: { hour: startHour, minute: startMinute },
 		end: { hour: endHour, minute: endMinute },
@@ -57,22 +59,22 @@ function CourseBlock({
 					width: `${durationHours * ROW_BLOCK_WIDTH_REM}rem`,
 					top: "0.1rem",
 					bottom: "0rem",
-					backgroundColor: course.color,
-					borderColor: course.color,
+					backgroundColor: appearance.bgColor,
+					borderColor: appearance.bgColor,
 				}
 			: {
 					top: `${(startOffsetHours - earliestHour) * COLUMN_BLOCK_HEIGHT_REM}rem`,
 					height: `${durationHours * COLUMN_BLOCK_HEIGHT_REM}rem`,
 					left: "0rem",
 					right: "0rem",
-					backgroundColor: course.color,
-					borderColor: course.color,
+					backgroundColor: appearance.bgColor,
+					borderColor: appearance.bgColor,
 				};
 
 	const justifyClass =
-		prefs.textAlign === "center"
+		appearance.textAlign === "center"
 			? "center"
-			: prefs.textAlign === "right"
+			: appearance.textAlign === "right"
 				? "end"
 				: "start";
 
@@ -85,15 +87,19 @@ function CourseBlock({
 	}: {
 		icon?: React.ReactNode;
 		text: React.ReactNode;
-		fontKey: keyof typeof prefs.weight;
+		fontKey: keyof typeof appearance.weight;
 		fontSize: number;
 		visible: boolean;
 	}) => (
 		<div>
 			{visible && text && (
 				<div
-					className={`flex items-center justify-${justifyClass} gap-1 opacity-90 font-${prefs.weight[fontKey]} truncate`}
-					style={{ fontSize, textAlign: prefs.textAlign }}
+					className={`flex items-center justify-${justifyClass} gap-1 opacity-90 font-${appearance.weight[fontKey]} truncate`}
+					style={{
+						fontSize,
+						textAlign: appearance.textAlign,
+						color: appearance.fgColor,
+					}}
 				>
 					{icon}
 					<span className="truncate">{text}</span>
@@ -105,34 +111,40 @@ function CourseBlock({
 	return (
 		<div className="absolute rounded-lg border overflow-hidden" style={style}>
 			<div
-				className="p-2 h-full flex flex-col justify-between text-white text-xs relative"
-				style={{ textAlign: prefs.textAlign }}
+				className="p-2 h-full flex flex-col justify-between text-xs relative"
+				style={{
+					textAlign: appearance.textAlign,
+					color: appearance.fgColor ?? "#fff",
+				}}
 			>
 				{/* Time */}
 				<InfoRow
 					icon={
-						<Clock width={prefs.fontSize.time} height={prefs.fontSize.time} />
+						<Clock
+							width={appearance.fontSize.time}
+							height={appearance.fontSize.time}
+						/>
 					}
-					visible={prefs.isVisible("time")}
+					visible={appearance.visibility.time}
 					text={`${meetingTime.time.start.toString()}-${meetingTime.time.end.toString()}`}
 					fontKey="time"
-					fontSize={prefs.fontSize.time}
+					fontSize={appearance.fontSize.time}
 				/>
 
 				{/* Code + Course Name */}
 				<div>
-					{prefs.isVisible("code") && (
+					{appearance.visibility.code && (
 						<FitText
-							fontSize={prefs.fontSize.code}
-							className={`font-${prefs.weight.code}`}
+							fontSize={appearance.fontSize.code}
+							className={`font-${appearance.weight.code}`}
 						>
 							{course.code}
 						</FitText>
 					)}
-					{prefs.isVisible("courseName") && course.name && (
+					{appearance.visibility.name && course.name && (
 						<div
-							className={`opacity-90 truncate font-${prefs.weight.courseName}`}
-							style={{ fontSize: prefs.fontSize.courseName }}
+							className={`opacity-90 truncate font-${appearance.weight.name}`}
+							style={{ fontSize: appearance.fontSize.name }}
 						>
 							{course.name}
 						</div>
@@ -143,14 +155,14 @@ function CourseBlock({
 				<InfoRow
 					icon={
 						<MapPin
-							width={prefs.fontSize.location}
-							height={prefs.fontSize.location}
+							width={appearance.fontSize.location}
+							height={appearance.fontSize.location}
 						/>
 					}
-					visible={prefs.isVisible("location")}
+					visible={appearance.visibility.location}
 					text={meetingTime.location}
 					fontKey="location"
-					fontSize={prefs.fontSize.location}
+					fontSize={appearance.fontSize.location}
 				/>
 			</div>
 		</div>
@@ -259,9 +271,12 @@ function ColumnLayout({
 	const { timeSlots } = useTimetable();
 	const timeFontSize = useStore(
 		TimetablePreferencesStore,
-		(s) => s.fontSize.time,
+		(s) => s.cellAppearance.fontSize.time,
 	);
-	const timeWeight = useStore(TimetablePreferencesStore, (s) => s.weight.time);
+	const timeWeight = useStore(
+		TimetablePreferencesStore,
+		(s) => s.cellAppearance.weight.time,
+	);
 	return (
 		<div
 			id={containerId}

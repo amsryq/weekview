@@ -1,14 +1,9 @@
 import { useMemo } from "react";
 import { useStore } from "zustand";
+import type { CellElements, FontWeight } from "~/lib/models/cell-appearance";
 import { Course } from "~/lib/models/course";
-import type {
-	CustomizableElements,
-	FontWeight,
-	TextAlign,
-} from "~/lib/stores/timetable-preferences";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { Button } from "./ui/button";
-import { Card, CardContent } from "./ui/card";
 import {
 	Dialog,
 	DialogClose,
@@ -17,7 +12,6 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "./ui/dialog";
-import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { ScrollArea } from "./ui/scroll-area";
 import {
@@ -35,7 +29,7 @@ function ElementRow({
 	elementKey,
 }: {
 	name: string;
-	elementKey: CustomizableElements;
+	elementKey: CellElements;
 }) {
 	const prefs = useStore(TimetablePreferencesStore, (s) => s);
 
@@ -47,9 +41,9 @@ function ElementRow({
 
 			<div className="flex items-center gap-3">
 				<Select
-					value={prefs.weight[elementKey]}
+					value={prefs.cellAppearance.weight[elementKey]}
 					onValueChange={(v: FontWeight) =>
-						prefs.setPreference("weight", elementKey, v)
+						prefs.setCellElementAppearanceValue("weight", elementKey, v)
 					}
 				>
 					<SelectTrigger className="w-24">
@@ -67,26 +61,26 @@ function ElementRow({
 						variant="outline"
 						size="sm"
 						onClick={() =>
-							prefs.setPreference(
+							prefs.setCellElementAppearanceValue(
 								"fontSize",
 								elementKey,
-								Math.max(8, prefs.fontSize[elementKey] - 1),
+								Math.max(8, prefs.cellAppearance.fontSize[elementKey] - 1),
 							)
 						}
 					>
 						-
 					</Button>
 					<span className="w-8 text-center text-sm tabular-nums">
-						{prefs.fontSize[elementKey]}
+						{prefs.cellAppearance.fontSize[elementKey]}
 					</span>
 					<Button
 						variant="outline"
 						size="sm"
 						onClick={() =>
-							prefs.setPreference(
+							prefs.setCellElementAppearanceValue(
 								"fontSize",
 								elementKey,
-								Math.min(32, prefs.fontSize[elementKey] + 1),
+								Math.min(32, prefs.cellAppearance.fontSize[elementKey] + 1),
 							)
 						}
 					>
@@ -96,9 +90,13 @@ function ElementRow({
 
 				<Label className="flex items-center gap-2 cursor-pointer">
 					<Switch
-						checked={prefs.visibility[elementKey]}
+						checked={prefs.cellAppearance.visibility[elementKey]}
 						onCheckedChange={(checked) =>
-							prefs.setPreference("visibility", elementKey, checked)
+							prefs.setCellElementAppearanceValue(
+								"visibility",
+								elementKey,
+								checked,
+							)
 						}
 					/>
 				</Label>
@@ -125,8 +123,8 @@ export default function TimetableCustomizer({
 				courses={[
 					Course.createFromSchema({
 						code: "CS101",
-						color: "#4F46E5",
 						name: "Intro to Computer Science",
+						cellAppearance: { bgColor: "#4F46E5", fgColor: "#ffffff" },
 						meetingTimes: [
 							{
 								day: 1,
@@ -144,7 +142,6 @@ export default function TimetableCustomizer({
 					}),
 					Course.createFromSchema({
 						code: "MA201",
-						color: "#059669",
 						meetingTimes: [
 							{
 								day: 3,
@@ -153,10 +150,17 @@ export default function TimetableCustomizer({
 								location: "Room C",
 							},
 						],
+						cellAppearance: {
+							bgColor: "#059669",
+							fgColor: "#ffffff",
+						},
 					}),
 					Course.createFromSchema({
 						code: "PH102",
-						color: "#F59E42",
+						cellAppearance: {
+							bgColor: "#F59E42",
+							fgColor: "#ffffff",
+						},
 						name: "Physics",
 						meetingTimes: [
 							{
@@ -210,25 +214,37 @@ export default function TimetableCustomizer({
 									<div className="flex gap-2">
 										<Button
 											variant={
-												prefs.textAlign === "left" ? "default" : "outline"
+												prefs.cellAppearance.textAlign === "left"
+													? "default"
+													: "outline"
 											}
-											onClick={() => prefs.setValue("textAlign", "left")}
+											onClick={() =>
+												prefs.setCellAppearanceValue("textAlign", "left")
+											}
 										>
 											Left
 										</Button>
 										<Button
 											variant={
-												prefs.textAlign === "center" ? "default" : "outline"
+												prefs.cellAppearance.textAlign === "center"
+													? "default"
+													: "outline"
 											}
-											onClick={() => prefs.setValue("textAlign", "center")}
+											onClick={() =>
+												prefs.setCellAppearanceValue("textAlign", "center")
+											}
 										>
 											Center
 										</Button>
 										<Button
 											variant={
-												prefs.textAlign === "right" ? "default" : "outline"
+												prefs.cellAppearance.textAlign === "right"
+													? "default"
+													: "outline"
 											}
-											onClick={() => prefs.setValue("textAlign", "right")}
+											onClick={() =>
+												prefs.setCellAppearanceValue("textAlign", "right")
+											}
 										>
 											Right
 										</Button>
@@ -238,7 +254,7 @@ export default function TimetableCustomizer({
 
 							<div className="space-y-3">
 								<ElementRow name="Code" elementKey="code" />
-								<ElementRow name="Course Name" elementKey="courseName" />
+								<ElementRow name="Course Name" elementKey="name" />
 								<ElementRow name="Time" elementKey="time" />
 								<ElementRow name="Location" elementKey="location" />
 							</div>

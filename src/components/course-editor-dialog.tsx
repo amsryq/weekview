@@ -309,7 +309,7 @@ function CourseEditorForm(props: {
 
 						<FormField
 							control={form.control}
-							name="color"
+							name="cellAppearance.bgColor"
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel>Color</FormLabel>
@@ -329,6 +329,34 @@ function CourseEditorForm(props: {
 									</FormControl>
 									<FormDescription>
 										Choose a color for your course
+									</FormDescription>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+
+						<FormField
+							control={form.control}
+							name="cellAppearance.fgColor"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Text Color</FormLabel>
+									<FormControl>
+										<div className="flex items-center gap-3">
+											<Input
+												type="color"
+												className="w-20 h-10 p-1"
+												{...field}
+											/>
+											<Input
+												placeholder="#3b82f6"
+												className="flex-1"
+												{...field}
+											/>
+										</div>
+									</FormControl>
+									<FormDescription>
+										Choose a text color for your course
 									</FormDescription>
 									<FormMessage />
 								</FormItem>

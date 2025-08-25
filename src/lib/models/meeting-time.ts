@@ -1,17 +1,9 @@
 import { immerable } from "immer";
 import z from "zod";
 import { randomUUID } from "../utils";
+import { type CellAppearance, CellAppearanceSchema } from "./cell-appearance";
 import { Clock } from "./clock";
 import { TimeRange } from "./time-range";
-
-export interface CellStyleOverrides {
-	backgroundColor?: string;
-	borderColor?: string;
-	textColor?: string;
-	borderStyle?: "solid" | "dashed" | "dotted";
-	borderWidth?: number;
-	opacity?: number;
-}
 
 const meetingTimeSchema = z.object({
 	day: z.number().min(1).max(7),
@@ -22,6 +14,7 @@ const meetingTimeSchema = z.object({
 	endTime: z
 		.string()
 		.regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format"),
+	cellAppearance: CellAppearanceSchema.optional(),
 });
 
 export namespace MeetingTime {
@@ -38,21 +31,21 @@ export class MeetingTime {
 	public time: TimeRange;
 	public location?: string;
 	public description?: string;
-	public styleOverrides?: CellStyleOverrides;
+	public cellAppearance?: Partial<CellAppearance>;
 
 	constructor(data: {
 		day: number;
 		time: TimeRange;
 		location?: string;
 		description?: string;
-		styleOverrides?: CellStyleOverrides;
+		cellAppearance?: Partial<CellAppearance>;
 	}) {
 		this.id = randomUUID();
 		this.day = data.day;
 		this.time = data.time;
 		this.location = data.location;
 		this.description = data.description;
-		this.styleOverrides = data.styleOverrides;
+		this.cellAppearance = data.cellAppearance;
 	}
 
 	public static createFromSchema(data: MeetingTime.Schema): MeetingTime {
@@ -72,6 +65,7 @@ export class MeetingTime {
 			startTime: this.time.start.toString(),
 			endTime: this.time.end.toString(),
 			location: this.location,
+			cellAppearance: this.cellAppearance,
 		};
 	}
 

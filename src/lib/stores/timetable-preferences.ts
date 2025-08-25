@@ -1,58 +1,75 @@
-import { UnknownRecord } from "type-fest";
+import { toMerged } from "es-toolkit";
+import { RequiredDeep, UnknownRecord } from "type-fest";
 import { createStore } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
+import {
+	type CellAppearance,
+	type CellElements,
+	type FontWeight,
+} from "../models/cell-appearance";
+import { Course } from "../models/course";
+import { MeetingTime } from "../models/meeting-time";
 
 export type TimetableLayout = "rows" | "columns";
-export type TextAlign = "left" | "center" | "right";
-export type FontWeight = "light" | "normal" | "bold";
-export type CustomizableElements =
-	| "time"
-	| "location"
-	| "code"
-	| "courseName"
-	| "lecturer";
 
 const defaultState = {
 	layout: "rows" as TimetableLayout,
 
-	visibility: {
-		time: true,
-		location: true,
-		code: true,
-		courseName: true,
-		lecturer: true,
-	} as Record<CustomizableElements, boolean>,
+	cellAppearance: {
+		// Defining these colors in this level doesn't really make sense, so these only serve as fallback
+		bgColor: process.env.NODE_ENV !== "production" ? "#FF0000" : "#22223b",
+		fgColor: process.env.NODE_ENV !== "production" ? "#00FF00" : "#f5f7fa",
 
-	fontSize: {
-		code: 18,
-		courseName: 12,
-		time: 11,
-		location: 11,
-		lecturer: 11,
-	} as Record<CustomizableElements, number>,
+		textAlign: "left",
 
-	weight: {
-		code: "bold" as FontWeight,
-		courseName: "normal" as FontWeight,
-		time: "normal" as FontWeight,
-		location: "normal" as FontWeight,
-		lecturer: "normal" as FontWeight,
-	} as Record<CustomizableElements, FontWeight>,
+		visibility: {
+			time: true,
+			location: true,
+			code: true,
+			name: true,
+			lecturer: true,
+		},
 
-	textAlign: "left" as TextAlign,
+		fontSize: {
+			code: 22,
+			name: 12,
+			time: 11,
+			location: 11,
+			lecturer: 11,
+		},
+
+		weight: {
+			code: "bold",
+			name: "normal",
+			time: "normal",
+			location: "normal",
+			lecturer: "normal",
+		},
+	} satisfies RequiredDeep<CellAppearance> as RequiredDeep<CellAppearance>,
 };
 
 export type State = typeof defaultState;
 
 interface Actions {
-	isVisible: (key: CustomizableElements) => boolean;
-	setPreference: <K1 extends keyof State, K2 extends keyof State[K1]>(
-		key: K1,
-		subKey: K2,
-		value: State[K1][K2],
-	) => void;
+	getCellAppearance: (
+		course: Course,
+		meetingTime: MeetingTime,
+	) => RequiredDeep<CellAppearance>;
+
 	setValue: <K extends keyof State>(key: K, value: State[K]) => void;
+
+	setCellAppearanceValue: <K extends keyof CellAppearance>(
+		key: K,
+		value: CellAppearance[K],
+	) => void;
+
+	setCellElementAppearanceValue: (
+		key: "visibility" | "fontSize" | "weight",
+		subKey: CellElements,
+		value: boolean | number | FontWeight,
+	) => void;
+
 	reset: () => void;
 }
 
@@ -61,18 +78,34 @@ export const TimetablePreferencesStore = createStore<State & Actions>()(
 		immer((set, get) => ({
 			...defaultState,
 
-			isVisible: (key) => {
-				return get().visibility[key];
-			},
+			getCellAppearance(course: Course, meetingTime: MeetingTime) {
+				let appearance: RequiredDeep<CellAppearance> = get().cellAppearance;
+				if (course.cellAppearance) {
+					appearance = toMerged(appearance, course.cellAppearance);
+				}
+				if (meetingTime.cellAppearance) {
+					appearance = toMerged(appearance, meetingTime.cellAppearance);
+				}
 
-			setPreference: (key, subKey, value) =>
-				set((s) => {
-					(s[key] as UnknownRecord)[subKey] = value;
-				}),
+				return appearance;
+			},
 
 			setValue: (key, value) =>
 				set((s) => {
 					(s[key] as unknown) = value;
+				}),
+
+			setCellElementAppearanceValue: (key, subKey, value) =>
+				set((s) => {
+					const target = (s.cellAppearance as UnknownRecord)[
+						key
+					] as UnknownRecord;
+					target[subKey] = value as unknown;
+				}),
+
+			setCellAppearanceValue: (key, value) =>
+				set((s) => {
+					(s.cellAppearance as UnknownRecord)[key] = value as unknown;
 				}),
 
 			reset: () => set(() => defaultState),
