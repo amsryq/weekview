@@ -155,7 +155,7 @@ function CourseBlock({
 						/>
 					}
 					visible={appearance.visibility.time}
-					text={`${meetingTime.time.start.toString()}-${meetingTime.time.end.toString()}`}
+					text={`${meetingTime.time.toString()}`}
 					fontKey="time"
 					fontSize={appearance.fontSize.time}
 				/>

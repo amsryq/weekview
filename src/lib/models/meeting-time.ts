@@ -77,16 +77,4 @@ export class MeetingTime {
 			this.time.end.isAfter(other.time.start)
 		);
 	}
-
-	public getDurationInSlots(): number {
-		const startHour = this.time.start.hour;
-		const startMin = this.time.start.minute;
-		const endHour = this.time.end.hour;
-		const endMin = this.time.end.minute;
-
-		const startTotalMin = startHour * 60 + startMin;
-		const endTotalMin = endHour * 60 + endMin;
-
-		return Math.ceil((endTotalMin - startTotalMin) / 30); // 30-minute slots
-	}
 }

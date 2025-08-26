@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Providers from "./providers";
 
 export const metadata: Metadata = {
 	title: "Weekview",
@@ -14,7 +15,9 @@ export default function RootLayout({
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<body>
-				<div className="root">{children}</div>
+				<Providers>
+					<div className="root">{children}</div>
+				</Providers>
 			</body>
 		</html>
 	);

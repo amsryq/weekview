@@ -13,6 +13,6 @@ export class TimeRange {
 	}
 
 	public toString(): string {
-		return `${this.start.toString()} - ${this.end.toString()}`;
+		return `${this.start.toString()}-${this.end.toString()}`;
 	}
 }

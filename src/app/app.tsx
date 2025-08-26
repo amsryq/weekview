@@ -1,3 +1,5 @@
+"use client";
+
 import {
 	DownloadIcon,
 	ImportIcon,
@@ -6,7 +8,10 @@ import {
 	UserIcon,
 } from "lucide-react";
 import { domToPng } from "modern-screenshot";
-import { AccountManagerDialog } from "../components/account-manager-dialog";
+import {
+	AccountManagerDialog,
+	AccountManagerPanel,
+} from "../components/account-manager-dialog";
 import CourseManagementSheet from "../components/course-management-sheet";
 import { ThemeToggle } from "../components/theme-toggle";
 import TimetableCustomizer from "../components/timetable-customizer";
@@ -48,12 +53,6 @@ const handleDownloadPng = async () => {
 function App() {
 	return (
 		<div className="flex flex-col flex-1 items-center justify-center">
-			<AccountManagerDialog>
-				<Button variant="outline">
-					<UserIcon className="w-4 h-4" />
-					Manage Account
-				</Button>
-			</AccountManagerDialog>
 			<div className="m-4 flex flex-wrap justify-center gap-2">
 				<ThemeToggle />
 

@@ -17,6 +17,23 @@ import {
 } from "./ui/dialog";
 
 export function AccountManagerDialog({ children }: { children: ReactNode }) {
+	return (
+		<Dialog>
+			<DialogTrigger asChild>{children}</DialogTrigger>
+			<DialogContent className="sm:max-w-[95vh]">
+				<DialogHeader>
+					<DialogTitle>Manage Account</DialogTitle>
+					<DialogDescription>
+						Manage your subscription and account settings here.
+					</DialogDescription>
+				</DialogHeader>
+				<AccountManagerPanel />
+			</DialogContent>
+		</Dialog>
+	);
+}
+
+export function AccountManagerPanel() {
 	const session = useSession();
 
 	const {
@@ -65,78 +82,67 @@ export function AccountManagerDialog({ children }: { children: ReactNode }) {
 	const isSupporter = !!userSubscriptionInfo;
 
 	return (
-		<Dialog>
-			<DialogTrigger asChild>{children}</DialogTrigger>
-			<DialogContent className="sm:max-w-[95vh]">
-				<DialogHeader>
-					<DialogTitle>Manage Account</DialogTitle>
-					<DialogDescription>
-						Manage your subscription and account settings here.
-					</DialogDescription>
-				</DialogHeader>
-				<div className="flex flex-col justify-center items-center text-center gap-4 py-4">
-					<span className="text-lg font-semibold text-center">
-						Welcome {session.data?.user.name}! You are currently{" "}
-						{isSupporter ? "a supporter!" : "not a supporter."}
-						<br />
-						{userSubscriptionInfo?.cancelAtPeriodEnd === true && (
-							<span className="text-sm font-normal">
-								Your subscription will cancel at{" "}
-								{userSubscriptionInfo?.periodEnd?.toDateString()}.
-							</span>
-						)}
+		<div className="flex flex-col justify-center items-center text-center gap-4 py-4">
+			<span className="text-lg font-semibold text-center">
+				Welcome {session.data?.user.name}! You are currently{" "}
+				{isSupporter ? "a supporter!" : "not a supporter."}
+				<br />
+				{userSubscriptionInfo?.cancelAtPeriodEnd === true && (
+					<span className="text-sm font-normal">
+						Your subscription will cancel at{" "}
+						{userSubscriptionInfo?.periodEnd?.toDateString()}.
 					</span>
-					<div className="flex gap-2 justify-center">
-						<Button
-							disabled={isSupporter}
-							onClick={async () => {
-								await authClient.subscription.upgrade({
-									plan: "supporter",
-									// TODO: Proper URLs for these
-									successUrl: "/",
-									cancelUrl: "/",
-								});
-							}}
-						>
-							Become a Supporter
-						</Button>
-						<Button
-							disabled={!isSupporter}
-							onClick={async () => {
-								await authClient.subscription.cancel({
-									returnUrl: "/",
-									subscriptionId: userSubscriptionInfo!.id,
-								});
-							}}
-						>
-							Unsubscribe
-						</Button>
-						<Button
-							disabled={
-								userSubscriptionInfo?.status !== "canceled" &&
-								!userSubscriptionInfo?.cancelAtPeriodEnd
-							}
-							onClick={async () => {
-								await authClient.subscription.restore({
-									subscriptionId: userSubscriptionInfo!.id,
-								});
-							}}
-						>
-							Restore
-						</Button>
-						<Button
-							onClick={async () => {
-								await authClient.subscription.billingPortal({
-									returnUrl: "/",
-								});
-							}}
-						>
-							Manage Subscription
-						</Button>
-						<Button onClick={() => void signOut()}>Sign out</Button>
-					</div>
-				</div>
-			</DialogContent>
-		</Dialog>
+				)}
+			</span>
+			<div className="flex gap-2 justify-center">
+				<Button
+					disabled={isSupporter}
+					onClick={async () => {
+						await authClient.subscription.upgrade({
+							plan: "supporter",
+							// TODO: Proper URLs for these
+							successUrl: "/",
+							cancelUrl: "/",
+						});
+					}}
+				>
+					Become a Supporter
+				</Button>
+				<Button
+					disabled={!isSupporter}
+					onClick={async () => {
+						await authClient.subscription.cancel({
+							returnUrl: "/",
+							subscriptionId: userSubscriptionInfo!.id,
+						});
+					}}
+				>
+					Unsubscribe
+				</Button>
+				<Button
+					disabled={
+						userSubscriptionInfo?.status !== "canceled" &&
+						!userSubscriptionInfo?.cancelAtPeriodEnd
+					}
+					onClick={async () => {
+						await authClient.subscription.restore({
+							subscriptionId: userSubscriptionInfo!.id,
+						});
+					}}
+				>
+					Restore
+				</Button>
+				<Button
+					onClick={async () => {
+						await authClient.subscription.billingPortal({
+							returnUrl: "/",
+						});
+					}}
+				>
+					Manage Subscription
+				</Button>
+				<Button onClick={() => void signOut()}>Sign out</Button>
+			</div>
+		</div>
 	);
 }
