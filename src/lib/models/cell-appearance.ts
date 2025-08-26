@@ -31,16 +31,49 @@ export const IconAppearanceSchema = z.object({
 
 export type IconAppearance = z.infer<typeof IconAppearanceSchema>;
 
-export const CellAppearanceSchema = z
-	.object({
-		bgColor: z.string(),
-		fgColor: z.string(),
-		visibility: z.partialRecord(CellElementsSchema, z.boolean().optional()),
-		fontSize: z.partialRecord(CellElementsSchema, z.number().optional()),
-		weight: z.partialRecord(CellElementsSchema, FontWeightSchema.optional()),
-		textAlign: TextAlignSchema,
-		icon: IconAppearanceSchema.optional(),
-	})
-	.partial();
+export const BackgroundTypeSchema = z.enum(["solid", "gradient"]);
+export type BackgroundType = z.infer<typeof BackgroundTypeSchema>;
+
+export const GradientDirectionSchema = z.enum([
+	"to-r", // right
+	"to-l", // left
+	"to-t", // top
+	"to-b", // bottom
+	"to-tr", // top-right
+	"to-tl", // top-left
+	"to-br", // bottom-right
+	"to-bl", // bottom-left
+]);
+export type GradientDirection = z.infer<typeof GradientDirectionSchema>;
+
+export const BackgroundAppearanceSchema = z.discriminatedUnion("type", [
+	z.object({
+		type: z.literal("solid"),
+		color: z.string(),
+	}),
+	z.object({
+		type: z.literal("gradient"),
+		gradientColors: z.array(z.string()),
+		gradientDirection: GradientDirectionSchema,
+	}),
+]);
+
+export type BackgroundAppearance = z.infer<typeof BackgroundAppearanceSchema>;
+
+export const CellAppearanceSchema = z.object({
+	background: BackgroundAppearanceSchema,
+	fgColor: z.string(),
+	visibility: z
+		.partialRecord(CellElementsSchema, z.boolean().optional())
+		.optional(),
+	fontSize: z
+		.partialRecord(CellElementsSchema, z.number().optional())
+		.optional(),
+	weight: z
+		.partialRecord(CellElementsSchema, FontWeightSchema.optional())
+		.optional(),
+	textAlign: TextAlignSchema.optional(),
+	icon: IconAppearanceSchema.optional(),
+});
 
 export type CellAppearance = z.infer<typeof CellAppearanceSchema>;

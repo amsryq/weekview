@@ -69,7 +69,11 @@ if (process.env.NODE_ENV !== "production") {
 					}),
 				],
 				cellAppearance: {
-					bgColor: "#FF5733",
+					background: {
+						type: "gradient",
+						gradientColors: ["#FF5733", "#C0392B"],
+						gradientDirection: "to-br",
+					},
 					fgColor: "#ffffff",
 				},
 			}),
@@ -77,7 +81,13 @@ if (process.env.NODE_ENV !== "production") {
 			new Course({
 				code: "CSC159",
 				name: "Operating Systems",
-				cellAppearance: { bgColor: "#33B5FF", fgColor: "#ffffff" },
+				cellAppearance: {
+					background: {
+						type: "solid",
+						color: "#33B5FF",
+					},
+					fgColor: "#ffffff",
+				},
 				meetingTimes: [
 					new MeetingTime({
 						day: 3,
@@ -99,7 +109,13 @@ if (process.env.NODE_ENV !== "production") {
 			new Course({
 				code: "CSC210",
 				name: "Data Structures and Algorithms",
-				cellAppearance: { bgColor: "#C0392B", fgColor: "#ffffff" },
+				cellAppearance: {
+					background: {
+						type: "solid",
+						color: "#C0392B",
+					},
+					fgColor: "#ffffff",
+				},
 				meetingTimes: [
 					new MeetingTime({
 						day: 1,
@@ -121,7 +137,14 @@ if (process.env.NODE_ENV !== "production") {
 			new Course({
 				code: "CSC240",
 				name: "Computer Networks",
-				cellAppearance: { bgColor: "#2980B9", fgColor: "#ffffff" },
+				cellAppearance: {
+					background: {
+						type: "gradient",
+						gradientColors: ["#2980B9", "#3498DB", "#5DADE2"],
+						gradientDirection: "to-r",
+					},
+					fgColor: "#ffffff",
+				},
 				meetingTimes: [
 					new MeetingTime({
 						day: 2,
@@ -143,7 +166,13 @@ if (process.env.NODE_ENV !== "production") {
 			new Course({
 				code: "CSC250",
 				name: "Software Engineering",
-				cellAppearance: { bgColor: "#16A085", fgColor: "#ffffff" },
+				cellAppearance: {
+					background: {
+						type: "solid",
+						color: "#16A085",
+					},
+					fgColor: "#ffffff",
+				},
 				meetingTimes: [
 					new MeetingTime({
 						day: 1,
@@ -165,7 +194,14 @@ if (process.env.NODE_ENV !== "production") {
 			new Course({
 				code: "MAT215",
 				name: "Discrete Mathematics",
-				cellAppearance: { bgColor: "#8E44AD", fgColor: "#ffffff" },
+				cellAppearance: {
+					background: {
+						type: "gradient",
+						gradientColors: ["#8E44AD", "#9B59B6"],
+						gradientDirection: "to-tl",
+					},
+					fgColor: "#ffffff",
+				},
 				meetingTimes: [
 					new MeetingTime({
 						day: 1,
@@ -187,7 +223,13 @@ if (process.env.NODE_ENV !== "production") {
 			new Course({
 				code: "ENG102",
 				name: "Academic Writing",
-				cellAppearance: { bgColor: "#27AE60", fgColor: "#ffffff" },
+				cellAppearance: {
+					background: {
+						type: "solid",
+						color: "#27AE60",
+					},
+					fgColor: "#ffffff",
+				},
 				meetingTimes: [
 					new MeetingTime({
 						day: 2,
@@ -202,7 +244,13 @@ if (process.env.NODE_ENV !== "production") {
 			new Course({
 				code: "PHY111",
 				name: "Physics I",
-				cellAppearance: { bgColor: "#E67E22", fgColor: "#ffffff" },
+				cellAppearance: {
+					background: {
+						type: "solid",
+						color: "#E67E22",
+					},
+					fgColor: "#ffffff",
+				},
 				meetingTimes: [
 					new MeetingTime({
 						day: 3,
@@ -227,7 +275,13 @@ if (process.env.NODE_ENV !== "production") {
 			new Course({
 				code: "PHY111-LAB",
 				name: "Physics I Lab",
-				cellAppearance: { bgColor: "#D35400", fgColor: "#ffffff" },
+				cellAppearance: {
+					background: {
+						type: "solid",
+						color: "#E67E22",
+					},
+					fgColor: "#ffffff",
+				},
 				meetingTimes: [
 					new MeetingTime({
 						day: 4,
@@ -242,7 +296,13 @@ if (process.env.NODE_ENV !== "production") {
 			new Course({
 				code: "CSC330",
 				name: "Parallel Computing",
-				cellAppearance: { bgColor: "#34495E", fgColor: "#ffffff" },
+				cellAppearance: {
+					background: {
+						type: "solid",
+						color: "#34495E",
+					},
+					fgColor: "#ffffff",
+				},
 				meetingTimes: [
 					new MeetingTime({
 						day: 2,
@@ -264,7 +324,13 @@ if (process.env.NODE_ENV !== "production") {
 			new Course({
 				code: "HIS201",
 				name: "World History",
-				cellAppearance: { bgColor: "#BDC3C7", fgColor: "#ffffff" },
+				cellAppearance: {
+					background: {
+						type: "solid",
+						color: "#BDC3C7",
+					},
+					fgColor: "#ffffff",
+				},
 				meetingTimes: [
 					new MeetingTime({
 						day: 3,

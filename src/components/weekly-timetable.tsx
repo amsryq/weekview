@@ -5,6 +5,7 @@ import type { Course } from "~/lib/models/course";
 import type { MeetingTime } from "~/lib/models/meeting-time";
 import { CourseStore } from "~/lib/stores/course-store";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
+import { getBackgroundStyle } from "~/lib/utils";
 import { Card, CardContent } from "./ui/card";
 import { CustomIcon } from "./ui/custom-icon";
 import { FitText } from "./ui/fit-text";
@@ -53,6 +54,8 @@ function CourseBlock({
 	const earliestHour = Number.parseInt(timeSlots[0].split(":")[0]);
 
 	// Layout styles
+	const backgroundStyle = getBackgroundStyle(appearance.background);
+
 	const style: React.CSSProperties =
 		layout === "rows"
 			? {
@@ -60,16 +63,14 @@ function CourseBlock({
 					width: `${durationHours * ROW_BLOCK_WIDTH_REM}rem`,
 					top: "0.1rem",
 					bottom: "0rem",
-					backgroundColor: appearance.bgColor,
-					borderColor: appearance.bgColor,
+					...backgroundStyle,
 				}
 			: {
 					top: `${(startOffsetHours - earliestHour) * COLUMN_BLOCK_HEIGHT_REM}rem`,
 					height: `${durationHours * COLUMN_BLOCK_HEIGHT_REM}rem`,
 					left: "0rem",
 					right: "0rem",
-					backgroundColor: appearance.bgColor,
-					borderColor: appearance.bgColor,
+					...backgroundStyle,
 				};
 
 	const justifyClass =
@@ -133,7 +134,7 @@ function CourseBlock({
 	);
 
 	return (
-		<div className="absolute rounded-lg border overflow-hidden" style={style}>
+		<div className="absolute rounded-lg overflow-hidden" style={style}>
 			<div
 				className="p-2 h-full flex flex-col justify-between text-xs relative"
 				style={{

@@ -4,6 +4,7 @@ import { createStore } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import {
+	type BackgroundAppearance,
 	type CellAppearance,
 	type CellElements,
 	type FontWeight,
@@ -17,8 +18,11 @@ const defaultState = {
 	layout: "rows" as TimetableLayout,
 
 	cellAppearance: {
-		// Defining these colors in this level doesn't really make sense, so these only serve as fallback
-		bgColor: process.env.NODE_ENV !== "production" ? "#FF0000" : "#22223b",
+		background: {
+			type: "solid",
+			color: process.env.NODE_ENV !== "production" ? "#FF0000" : "#22223b",
+		} satisfies BackgroundAppearance,
+
 		fgColor: process.env.NODE_ENV !== "production" ? "#00FF00" : "#f5f7fa",
 
 		textAlign: "left",
@@ -81,6 +85,8 @@ interface Actions {
 		value: boolean | number | FontWeight,
 	) => void;
 
+	setBackgroundAppearance: (background: BackgroundAppearance) => void;
+
 	reset: () => void;
 }
 
@@ -119,9 +125,27 @@ export const TimetablePreferencesStore = createStore<State & Actions>()(
 					(s.cellAppearance as UnknownRecord)[key] = value as unknown;
 				}),
 
+			setBackgroundAppearance: (background) =>
+				set((s) => {
+					if (background.type === "solid") {
+						s.cellAppearance.background = {
+							type: background.type,
+							color: background.color,
+						};
+					} else {
+						s.cellAppearance.background = {
+							type: background.type,
+							gradientColors: background.gradientColors,
+							gradientDirection: background.gradientDirection,
+						};
+					}
+				}),
+
 			reset: () => set(() => defaultState),
 		})),
-		{ name: "taiki-timetable-preferences" },
+		{
+			name: "taiki-timetable-preferences",
+		},
 	),
 );
 

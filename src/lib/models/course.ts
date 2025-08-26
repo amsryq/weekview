@@ -12,7 +12,7 @@ type CourseConstructorProps = {
 	meetingTimes: MeetingTime[];
 	name?: string;
 	provider?: CourseProvider;
-	cellAppearance?: Partial<CellAppearance>;
+	cellAppearance: CellAppearance;
 };
 
 const courseSchema = z.object({
@@ -21,7 +21,7 @@ const courseSchema = z.object({
 		.array(MeetingTime.schema)
 		.min(1, "At least one meeting time is required"),
 	name: z.string().optional(),
-	cellAppearance: CellAppearanceSchema.optional(),
+	cellAppearance: CellAppearanceSchema,
 });
 
 export namespace Course {
@@ -38,7 +38,7 @@ export class Course {
 	public code: string;
 	public name?: string;
 	public meetingTimes: MeetingTime[];
-	public cellAppearance?: Partial<CellAppearance>;
+	public cellAppearance: CellAppearance;
 
 	public provider: CourseProvider;
 	public syncStatus: Course.SyncStatus = "synced";
@@ -74,9 +74,7 @@ export class Course {
 		target.code = data.code;
 		target.name = data.name;
 		target.meetingTimes = data.meetingTimes.map(MeetingTime.createFromSchema);
-		target.cellAppearance = data.cellAppearance as
-			| Partial<CellAppearance>
-			| undefined;
+		target.cellAppearance = data.cellAppearance;
 	}
 
 	public hasTimeConflictWith(other: Course): boolean {

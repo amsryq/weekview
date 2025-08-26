@@ -8,8 +8,10 @@ import {
 	useFormContext,
 } from "react-hook-form";
 import type { PartialDeep } from "type-fest";
+import type { BackgroundAppearance } from "~/lib/models/cell-appearance";
 import { Course } from "~/lib/models/course";
 import { MeetingTime } from "~/lib/models/meeting-time";
+import { GradientPicker } from "./gradient-picker";
 import { Button } from "./ui/button";
 import {
 	Dialog,
@@ -244,7 +246,10 @@ function CourseEditorForm(props: {
 					},
 				],
 				cellAppearance: {
-					bgColor: "#3b82f6",
+					background: {
+						type: "solid",
+						color: "#3b82f6",
+					},
 					fgColor: "#ffffff",
 					icon: {
 						type: "emoji",
@@ -323,26 +328,18 @@ function CourseEditorForm(props: {
 
 						<FormField
 							control={form.control}
-							name="cellAppearance.bgColor"
+							name="cellAppearance.background"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Color</FormLabel>
+									<FormLabel>Background</FormLabel>
 									<FormControl>
-										<div className="flex items-center gap-3">
-											<Input
-												type="color"
-												className="w-20 h-10 p-1"
-												{...field}
-											/>
-											<Input
-												placeholder="#3b82f6"
-												className="flex-1"
-												{...field}
-											/>
-										</div>
+										<GradientPicker
+											value={field.value}
+											onChange={field.onChange}
+										/>
 									</FormControl>
 									<FormDescription>
-										Choose a color for your course
+										Choose a background for your course
 									</FormDescription>
 									<FormMessage />
 								</FormItem>

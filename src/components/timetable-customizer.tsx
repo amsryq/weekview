@@ -3,6 +3,7 @@ import { useStore } from "zustand";
 import type { CellElements, FontWeight } from "~/lib/models/cell-appearance";
 import { Course } from "~/lib/models/course";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
+import { GradientPicker } from "./gradient-picker";
 import { Button } from "./ui/button";
 import {
 	Dialog,
@@ -110,7 +111,7 @@ export default function TimetableCustomizer({
 }: {
 	children: React.ReactNode;
 }) {
-	const prefs = useStore(TimetablePreferencesStore, (s) => s);
+	const prefs = useStore(TimetablePreferencesStore);
 
 	// Simple subset preview: reuse actual component with preferences applied
 	const previewLayout = prefs.layout;
@@ -124,7 +125,13 @@ export default function TimetableCustomizer({
 					Course.createFromSchema({
 						code: "CS101",
 						name: "Intro to Computer Science",
-						cellAppearance: { bgColor: "#4F46E5", fgColor: "#ffffff" },
+						cellAppearance: {
+							background: {
+								type: "solid",
+								color: "#4F46E5",
+							},
+							fgColor: "#ffffff",
+						},
 						meetingTimes: [
 							{
 								day: 1,
@@ -151,14 +158,22 @@ export default function TimetableCustomizer({
 							},
 						],
 						cellAppearance: {
-							bgColor: "#059669",
+							background: {
+								type: "gradient",
+								gradientColors: ["#059669", "#34D399"],
+								gradientDirection: "to-br",
+							},
 							fgColor: "#ffffff",
 						},
 					}),
 					Course.createFromSchema({
 						code: "PH102",
 						cellAppearance: {
-							bgColor: "#F59E42",
+							background: {
+								type: "gradient",
+								gradientColors: ["#F59E42", "#F97316", "#EF4444"],
+								gradientDirection: "to-t",
+							},
 							fgColor: "#ffffff",
 						},
 						name: "Physics",
