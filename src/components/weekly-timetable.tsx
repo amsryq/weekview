@@ -6,6 +6,7 @@ import type { MeetingTime } from "~/lib/models/meeting-time";
 import { CourseStore } from "~/lib/stores/course-store";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { Card, CardContent } from "./ui/card";
+import { CustomIcon } from "./ui/custom-icon";
 import { FitText } from "./ui/fit-text";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -78,6 +79,29 @@ function CourseBlock({
 				? "end"
 				: "start";
 
+	// Icon positioning logic
+	const iconPosition = appearance.icon
+		? (() => {
+				const isRightAlign = appearance.textAlign === "right";
+
+				// If text is right-aligned, place icon on top-left
+				// If text is center or left-aligned, place icon on top-right
+				const side = isRightAlign ? "left" : "right";
+
+				return {
+					position: "absolute",
+					top: `${appearance.icon.offsetY}px`,
+					[side]: `${appearance.icon.offsetX}px`,
+					fontSize: `${appearance.icon.size * 10}px`,
+					opacity: appearance.icon.opacity,
+					transform: `rotate(${appearance.icon.rotation}deg)`,
+					pointerEvents: "none",
+					userSelect: "none",
+					zIndex: 0,
+				} as const;
+			})()
+		: null;
+
 	const InfoRow = ({
 		icon,
 		text,
@@ -117,6 +141,11 @@ function CourseBlock({
 					color: appearance.fgColor ?? "#fff",
 				}}
 			>
+				{/* Icon */}
+				{appearance.icon && iconPosition && (
+					<CustomIcon icon={appearance.icon} style={iconPosition} />
+				)}
+
 				{/* Time */}
 				<InfoRow
 					icon={
@@ -132,11 +161,11 @@ function CourseBlock({
 				/>
 
 				{/* Code + Course Name */}
-				<div>
+				<div className="flex flex-col">
 					{appearance.visibility.code && (
 						<FitText
 							fontSize={appearance.fontSize.code}
-							className={`font-${appearance.weight.code}`}
+							className={`font-${appearance.weight.code} leading-none`}
 						>
 							{course.code}
 						</FitText>

@@ -46,6 +46,17 @@ const defaultState = {
 			location: "normal",
 			lecturer: "normal",
 		},
+
+		icon: {
+			type: "emoji",
+			svg: "",
+			emoji: "",
+			opacity: 0.7,
+			rotation: 15,
+			offsetX: 4,
+			offsetY: 10,
+			size: 3,
+		},
 	} satisfies RequiredDeep<CellAppearance> as RequiredDeep<CellAppearance>,
 };
 

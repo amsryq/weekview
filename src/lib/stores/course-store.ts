@@ -240,21 +240,6 @@ if (process.env.NODE_ENV !== "production") {
 			}),
 
 			new Course({
-				code: "CSC310",
-				name: "Artificial Intelligence",
-				cellAppearance: { bgColor: "#9B59B6", fgColor: "#ffffff" },
-				meetingTimes: [
-					new MeetingTime({
-						day: 6,
-						time: new TimeRange(
-							Clock.fromString("10:00"),
-							Clock.fromString("13:00"),
-						),
-					}),
-				],
-			}),
-
-			new Course({
 				code: "CSC330",
 				name: "Parallel Computing",
 				cellAppearance: { bgColor: "#34495E", fgColor: "#ffffff" },

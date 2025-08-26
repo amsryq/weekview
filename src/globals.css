@@ -222,6 +222,27 @@
   }
 }
 
+/* Twemoji styling */
+img.twemoji {
+  width: 1em !important;
+  height: 1em !important;
+  display: inline-block !important;
+  vertical-align: text-top !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Custom SVG icon styling */
+.custom-icon svg {
+  width: 1em !important;
+  height: 1em !important;
+  display: inline-block !important;
+  vertical-align: text-top !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  fill: currentColor;
+}
+
 * {
   scrollbar-width: thin;
   scrollbar-color: currentColor transparent;
