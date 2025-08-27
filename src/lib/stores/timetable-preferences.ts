@@ -18,13 +18,6 @@ const defaultState = {
 	layout: "rows" as TimetableLayout,
 
 	cellAppearance: {
-		background: {
-			type: "solid",
-			color: process.env.NODE_ENV !== "production" ? "#FF0000" : "#22223b",
-		} satisfies BackgroundAppearance,
-
-		fgColor: process.env.NODE_ENV !== "production" ? "#00FF00" : "#f5f7fa",
-
 		textAlign: "left",
 
 		visibility: {
@@ -51,6 +44,8 @@ const defaultState = {
 			lecturer: "normal",
 		},
 
+		// Below this line should always be defined by the course/meeting. These only serves as fallback
+
 		icon: {
 			type: "emoji",
 			svg: "",
@@ -61,6 +56,13 @@ const defaultState = {
 			offsetY: 10,
 			size: 3,
 		},
+
+		background: {
+			type: "solid",
+			color: "#22223b",
+		} satisfies BackgroundAppearance,
+
+		fgColor: "#00FF00",
 	} satisfies RequiredDeep<CellAppearance> as RequiredDeep<CellAppearance>,
 };
 
