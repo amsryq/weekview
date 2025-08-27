@@ -199,7 +199,15 @@ export default function TimetableCustomizer({
 				</DialogHeader>
 				<ScrollArea className="flex-1 overflow-y-auto h-auto">
 					<div className="grid md:grid-cols-2 gap-6 p-1">
-						<div className="flex justify-center no-scroll">{preview}</div>
+						<div className="flex justify-center items-center no-scroll">
+							{prefs.layout === "rows" ? (
+								preview
+							) : (
+								<div className="text-muted-foreground italic">
+									Preview currently unavailable for horizontal layout.
+								</div>
+							)}
+						</div>
 						<div className="space-y-6">
 							<div className="space-y-4">
 								<div className="space-y-2">

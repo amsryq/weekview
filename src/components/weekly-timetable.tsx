@@ -11,8 +11,8 @@ import { CustomIcon } from "./ui/custom-icon";
 import { FitText } from "./ui/fit-text";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const ROW_BLOCK_WIDTH_REM = 6;
-const COLUMN_BLOCK_HEIGHT_REM = 4;
+const ROW_BLOCK_WIDTH_PX = 84;
+const COLUMN_BLOCK_HEIGHT_PX = 84;
 
 interface TimetableContextProps {
 	courses: Course[];
@@ -59,16 +59,16 @@ function CourseBlock({
 	const style: React.CSSProperties =
 		layout === "rows"
 			? {
-					left: `${(startOffsetHours - earliestHour) * ROW_BLOCK_WIDTH_REM}rem`,
-					width: `${durationHours * ROW_BLOCK_WIDTH_REM}rem`,
+					left: `${(startOffsetHours - earliestHour) * ROW_BLOCK_WIDTH_PX}px`,
+					width: `${durationHours * ROW_BLOCK_WIDTH_PX}px`,
 					top: "2px",
 					bottom: "0px",
 					borderRadius: 8,
 					...backgroundStyle,
 				}
 			: {
-					top: `${(startOffsetHours - earliestHour) * COLUMN_BLOCK_HEIGHT_REM}rem`,
-					height: `${durationHours * COLUMN_BLOCK_HEIGHT_REM}rem`,
+					top: `${(startOffsetHours - earliestHour) * COLUMN_BLOCK_HEIGHT_PX}px`,
+					height: `${durationHours * COLUMN_BLOCK_HEIGHT_PX}px`,
 					left: "2px",
 					right: "0px",
 					borderRadius: 8,
@@ -175,7 +175,7 @@ function CourseBlock({
 					)}
 					{appearance.visibility.name && course.name && (
 						<div
-							className={`opacity-90 truncate font-${appearance.weight.name}`}
+							className={`opacity-90 font-${appearance.weight.name} ${layout === "rows" ? "truncate" : ""}`}
 							style={{ fontSize: appearance.fontSize.name }}
 						>
 							{course.name}
@@ -213,8 +213,8 @@ function DayColumn({ day, dayIndex }: { day: string; dayIndex: number }) {
 
 	const containerStyle =
 		layout === "rows"
-			? { width: `${rowWidth}rem`, height: "6rem" }
-			: { height: `${columnHeight}rem` };
+			? { width: `${rowWidth}px`, height: "96px" }
+			: { height: `${columnHeight}px`, width: "120px" };
 
 	const lineClass =
 		layout === "rows"
@@ -223,8 +223,8 @@ function DayColumn({ day, dayIndex }: { day: string; dayIndex: number }) {
 
 	const lineStyle = (index: number) =>
 		layout === "rows"
-			? { left: `${index * ROW_BLOCK_WIDTH_REM}rem` }
-			: { top: `${index * COLUMN_BLOCK_HEIGHT_REM}rem` };
+			? { left: `${index * ROW_BLOCK_WIDTH_PX}px` }
+			: { top: `${index * COLUMN_BLOCK_HEIGHT_PX}px` };
 
 	return (
 		<div className={layout === "rows" ? "flex" : ""}>
@@ -276,7 +276,7 @@ function RowLayout({
 							<div
 								key={time}
 								className="text-sm text-muted-foreground text-center -translate-x-4 flex flex-shrink-0"
-								style={{ width: `${ROW_BLOCK_WIDTH_REM}rem` }}
+								style={{ width: `${ROW_BLOCK_WIDTH_PX}px` }}
 							>
 								<span className="font-semibold">{time}</span>
 							</div>
@@ -292,7 +292,6 @@ function RowLayout({
 	);
 }
 
-// TODO: This is currently unfinished
 function ColumnLayout({
 	visibleDays,
 	containerId,
@@ -310,32 +309,36 @@ function ColumnLayout({
 		(s) => s.cellAppearance.weight.time,
 	);
 	return (
-		<div
-			id={containerId}
-			className="grid bg-card"
-			style={{ gridTemplateColumns: `auto repeat(${visibleDays.length}, 1fr)` }}
-		>
-			<div className="space-y-0">
-				<div className="h-8" />
-				{timeSlots.map((time: string) => (
-					<div
-						key={time}
-						className="text-sm text-muted-foreground text-right pr-2 flex -translate-y-2 justify-end"
-						style={{ height: `${COLUMN_BLOCK_HEIGHT_REM}rem` }}
-					>
-						<span
-							style={{ fontSize: `${timeFontSize}px` }}
-							className={`font-${timeWeight}`}
+		<div className="overflow-y-auto">
+			<div
+				id={containerId}
+				className="grid bg-card"
+				style={{
+					gridTemplateColumns: `auto repeat(${visibleDays.length}, 1fr)`,
+				}}
+			>
+				<div className="space-y-0">
+					<div className="h-8" />
+					{timeSlots.map((time: string) => (
+						<div
+							key={time}
+							className="text-sm text-muted-foreground text-right pr-2 flex -translate-y-2 justify-end"
+							style={{ height: `${COLUMN_BLOCK_HEIGHT_PX}px` }}
 						>
-							{time}
-						</span>
-					</div>
+							<span
+								style={{ fontSize: `${timeFontSize}px` }}
+								className={`font-${timeWeight}`}
+							>
+								{time}
+							</span>
+						</div>
+					))}
+				</div>
+
+				{visibleDays.map((day: string) => (
+					<DayColumn key={day} day={day} dayIndex={DAYS.indexOf(day)} />
 				))}
 			</div>
-
-			{visibleDays.map((day: string) => (
-				<DayColumn key={day} day={day} dayIndex={DAYS.indexOf(day)} />
-			))}
 		</div>
 	);
 }
@@ -375,8 +378,8 @@ export default function WeeklyTimetable({
 			}
 			return {
 				timeSlots: slots,
-				columnHeight: slots.length * COLUMN_BLOCK_HEIGHT_REM,
-				rowWidth: slots.length * ROW_BLOCK_WIDTH_REM,
+				columnHeight: slots.length * COLUMN_BLOCK_HEIGHT_PX,
+				rowWidth: slots.length * ROW_BLOCK_WIDTH_PX,
 			};
 		}
 
@@ -400,8 +403,8 @@ export default function WeeklyTimetable({
 
 		return {
 			timeSlots: slots,
-			columnHeight: slots.length * COLUMN_BLOCK_HEIGHT_REM,
-			rowWidth: slots.length * ROW_BLOCK_WIDTH_REM,
+			columnHeight: slots.length * COLUMN_BLOCK_HEIGHT_PX,
+			rowWidth: slots.length * ROW_BLOCK_WIDTH_PX,
 		};
 	}, [courses]);
 
