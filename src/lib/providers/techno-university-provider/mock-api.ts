@@ -221,7 +221,10 @@ export function timetableDataToTechnoCourses(
 				code: timetableData.course,
 				name: timetableData.course,
 				cellAppearance: {
-					bgColor: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+					background: {
+						type: "solid",
+						color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+					},
 					fgColor: "#fff",
 				},
 				campus: timetableData.campus,

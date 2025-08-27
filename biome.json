@@ -6,7 +6,8 @@
 		"useIgnoreFile": false
 	},
 	"files": {
-		"ignoreUnknown": false
+		"ignoreUnknown": false,
+		"includes": ["**", "!**/dist", "!node_modules", "!build"]
 	},
 	"formatter": {
 		"enabled": true,
@@ -16,13 +17,7 @@
 		"enabled": true,
 		"rules": {
 			"recommended": false
-		},
-		"includes": [
-			"**",
-			"!dist",
-			"!node_modules",
-			"!build"
-		]
+		}
 	},
 	"javascript": {
 		"formatter": {
@@ -31,9 +26,7 @@
 	},
 	"overrides": [
 		{
-			"includes": [
-				"**/*.{ts,tsx}"
-			],
+			"includes": ["**/*.{ts,tsx}"],
 			"linter": {
 				"rules": {
 					"complexity": {

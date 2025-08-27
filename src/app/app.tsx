@@ -8,10 +8,6 @@ import {
 	UserIcon,
 } from "lucide-react";
 import { domToPng } from "modern-screenshot";
-import {
-	AccountManagerDialog,
-	AccountManagerPanel,
-} from "../components/account-manager-dialog";
 import CourseManagementSheet from "../components/course-management-sheet";
 import { ThemeToggle } from "../components/theme-toggle";
 import TimetableCustomizer from "../components/timetable-customizer";
@@ -62,12 +58,6 @@ function App() {
 						Manage Courses
 					</Button>
 				</CourseManagementSheet>
-				<TechnoUniversityImporterDialog>
-					<Button variant="outline">
-						<ImportIcon className="w-4 h-4" />
-						Import from Techno University
-					</Button>
-				</TechnoUniversityImporterDialog>
 				<TimetableCustomizer>
 					<Button variant="outline">
 						<SlidersHorizontal className="w-4 h-4" />

@@ -20,7 +20,7 @@ import {
 	SelectValue,
 } from "./ui/select";
 
-interface GradientPickerProps {
+interface CellBackgroundConfigurerProps {
 	value: BackgroundAppearance;
 	onChange: (value: BackgroundAppearance) => void;
 }
@@ -80,7 +80,10 @@ function toBackgroundAppearance(f: FormValues): BackgroundAppearance {
 	};
 }
 
-export function GradientPicker({ value, onChange }: GradientPickerProps) {
+export function CellBackgroundConfigurer({
+	value,
+	onChange,
+}: CellBackgroundConfigurerProps) {
 	const { control, watch, setValue, getValues } = useForm<FormValues>({
 		defaultValues: toFormValues(value),
 	});

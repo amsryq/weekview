@@ -61,15 +61,17 @@ function CourseBlock({
 			? {
 					left: `${(startOffsetHours - earliestHour) * ROW_BLOCK_WIDTH_REM}rem`,
 					width: `${durationHours * ROW_BLOCK_WIDTH_REM}rem`,
-					top: "0.1rem",
-					bottom: "0rem",
+					top: "2px",
+					bottom: "0px",
+					borderRadius: 8,
 					...backgroundStyle,
 				}
 			: {
 					top: `${(startOffsetHours - earliestHour) * COLUMN_BLOCK_HEIGHT_REM}rem`,
 					height: `${durationHours * COLUMN_BLOCK_HEIGHT_REM}rem`,
-					left: "0rem",
-					right: "0rem",
+					left: "2px",
+					right: "0px",
+					borderRadius: 8,
 					...backgroundStyle,
 				};
 
@@ -134,7 +136,7 @@ function CourseBlock({
 	);
 
 	return (
-		<div className="absolute rounded-lg overflow-hidden" style={style}>
+		<div className="absolute overflow-hidden" style={style}>
 			<div
 				className="p-2 h-full flex flex-col justify-between text-xs relative"
 				style={{

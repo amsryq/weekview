@@ -3,7 +3,6 @@ import { useStore } from "zustand";
 import type { CellElements, FontWeight } from "~/lib/models/cell-appearance";
 import { Course } from "~/lib/models/course";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
-import { GradientPicker } from "./gradient-picker";
 import { Button } from "./ui/button";
 import {
 	Dialog,
@@ -32,7 +31,7 @@ function ElementRow({
 	name: string;
 	elementKey: CellElements;
 }) {
-	const prefs = useStore(TimetablePreferencesStore, (s) => s);
+	const prefs = useStore(TimetablePreferencesStore);
 
 	return (
 		<div className="flex items-center justify-between p-3 border rounded-lg">
@@ -113,7 +112,6 @@ export default function TimetableCustomizer({
 }) {
 	const prefs = useStore(TimetablePreferencesStore);
 
-	// Simple subset preview: reuse actual component with preferences applied
 	const previewLayout = prefs.layout;
 
 	const preview = useMemo(

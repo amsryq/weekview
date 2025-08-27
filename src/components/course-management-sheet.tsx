@@ -1,7 +1,9 @@
+import { ImportIcon, PlusIcon } from "lucide-react";
 import type { JSX } from "react";
 import { useStore } from "zustand";
 import { Course } from "~/lib/models/course";
 import type { CourseProvider } from "~/lib/models/course-provider";
+import TechnoUniversityImporterDialog from "~/lib/providers/techno-university-provider/importer-dialog";
 import { CourseStore } from "~/lib/stores/course-store";
 import { ProviderStore } from "~/lib/stores/provider-store";
 import CourseEditorDialog from "./course-editor-dialog";
@@ -93,24 +95,6 @@ function CourseList() {
 				{providers.map((provider, idx) => (
 					<ProviderSection key={idx} provider={provider} />
 				))}
-
-				<CourseEditorDialog
-					title="Add Course"
-					onSubmit={(data, form) => {
-						const course = Course.createFromSchema(data);
-
-						if (CourseStore.getState().hasTimeConflicts(course)) {
-							form.setError("meetingTimes", {
-								message: "There are time conflicts with existing courses.",
-							});
-							return;
-						}
-
-						CourseStore.getState().addCourse(course);
-					}}
-				>
-					<Button className="w-full">Add Course</Button>
-				</CourseEditorDialog>
 			</div>
 		</ScrollArea>
 	);
@@ -130,6 +114,34 @@ export default function CourseManagementSheet({
 					<SheetDescription>
 						Manage your selected courses here.
 					</SheetDescription>
+					<div className="flex flex-col gap-2 py-2">
+						<TechnoUniversityImporterDialog>
+							<Button variant="outline" className="w-full">
+								<ImportIcon className="w-4 h-4" />
+								Import from Techno University
+							</Button>
+						</TechnoUniversityImporterDialog>
+						<CourseEditorDialog
+							title="Add Course"
+							onSubmit={(data, form) => {
+								const course = Course.createFromSchema(data);
+
+								if (CourseStore.getState().hasTimeConflicts(course)) {
+									form.setError("meetingTimes", {
+										message: "There are time conflicts with existing courses.",
+									});
+									return;
+								}
+
+								CourseStore.getState().addCourse(course);
+							}}
+						>
+							<Button>
+								<PlusIcon className="w-4 h-4" />
+								Add Course
+							</Button>
+						</CourseEditorDialog>
+					</div>
 				</SheetHeader>
 				<CourseList />
 			</SheetContent>

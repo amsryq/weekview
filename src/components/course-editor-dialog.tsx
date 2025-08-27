@@ -8,10 +8,9 @@ import {
 	useFormContext,
 } from "react-hook-form";
 import type { PartialDeep } from "type-fest";
-import type { BackgroundAppearance } from "~/lib/models/cell-appearance";
 import { Course } from "~/lib/models/course";
 import { MeetingTime } from "~/lib/models/meeting-time";
-import { GradientPicker } from "./gradient-picker";
+import { CellBackgroundConfigurer } from "./cell-background-configurer";
 import { Button } from "./ui/button";
 import {
 	Dialog,
@@ -333,7 +332,7 @@ function CourseEditorForm(props: {
 								<FormItem>
 									<FormLabel>Background</FormLabel>
 									<FormControl>
-										<GradientPicker
+										<CellBackgroundConfigurer
 											value={field.value}
 											onChange={field.onChange}
 										/>
