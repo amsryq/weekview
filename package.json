@@ -5,7 +5,8 @@
 	"scripts": {
 		"dev": "next dev --turbopack",
 		"build": "next build",
-		"start": "next start",
+		"start": "HOSTNAME=0.0.0.0 PORT=3000 node ./.next/standalone/server.js",
+		"postbuild": "cp -r .next/static .next/standalone/.next/ && [ -d public ] && cp -r public .next/standalone/public || true",
 		"biome:fixAll": "biome check --write"
 	},
 	"dependencies": {

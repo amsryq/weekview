@@ -1,19 +1,12 @@
 "use client";
 
-import {
-	DownloadIcon,
-	ImportIcon,
-	Settings,
-	SlidersHorizontal,
-	UserIcon,
-} from "lucide-react";
+import { DownloadIcon, Settings, SlidersHorizontal } from "lucide-react";
 import { domToPng } from "modern-screenshot";
-import CourseManagementSheet from "../components/course-management-sheet";
-import { ThemeToggle } from "../components/theme-toggle";
-import TimetableCustomizer from "../components/timetable-customizer";
-import { Button } from "../components/ui/button";
-import WeeklyTimetable from "../components/weekly-timetable";
-import TechnoUniversityImporterDialog from "../lib/providers/techno-university-provider/importer-dialog";
+import CourseManagementSheet from "~/components/course-management-sheet";
+import { ThemeToggle } from "~/components/theme-toggle";
+import TimetableCustomizer from "~/components/timetable-customizer";
+import { Button } from "~/components/ui/button";
+import WeeklyTimetable from "~/components/weekly-timetable";
 
 // TODO: Export button instead or both and show save file picker?
 const handleDownloadPng = async () => {
