@@ -1,13 +1,13 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 type Theme = "dark" | "light" | "system";
 
 type ThemeProviderProps = {
 	children: React.ReactNode;
+	storageKey: string;
 	defaultTheme?: Theme;
-	storageKey?: string;
 };
 
 type ThemeProviderState = {
@@ -22,10 +22,27 @@ const initialState: ThemeProviderState = {
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
+function setThemeAttr(theme: Theme) {
+	const root = window.document.documentElement;
+
+	root.classList.remove("light", "dark");
+	if (theme === "system") {
+		const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+			.matches
+			? "dark"
+			: "light";
+
+		root.classList.add(systemTheme);
+		return;
+	}
+
+	root.classList.add(theme);
+}
+
 export function ThemeProvider({
 	children,
 	defaultTheme = "system",
-	storageKey = "ui-theme",
+	storageKey,
 	...props
 }: ThemeProviderProps) {
 	const [theme, setTheme] = useState<Theme>(defaultTheme);
@@ -41,33 +58,33 @@ export function ThemeProvider({
 	}, [storageKey]);
 
 	useEffect(() => {
-		const root = window.document.documentElement;
-
-		root.classList.remove("light", "dark");
-
+		setThemeAttr(theme);
 		if (theme === "system") {
-			const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-				.matches
-				? "dark"
-				: "light";
-
-			root.classList.add(systemTheme);
-
 			// Listen for system theme changes
 			const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 			const handleChange = (e: MediaQueryListEvent) => {
-				if (theme === "system") {
-					root.classList.remove("light", "dark");
-					root.classList.add(e.matches ? "dark" : "light");
-				}
+				setThemeAttr(e.matches ? "dark" : "light");
 			};
-
 			mediaQuery.addEventListener("change", handleChange);
 			return () => mediaQuery.removeEventListener("change", handleChange);
 		}
-
-		root.classList.add(theme);
 	}, [theme]);
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Does not matter, this only run once
+	const script = useMemo(
+		() => (
+			<script
+				suppressHydrationWarning
+				dangerouslySetInnerHTML={{
+					__html: `
+						var storedTheme = localStorage.getItem(${JSON.stringify(storageKey)});
+						if (storedTheme) (${setThemeAttr.toString()})(storedTheme);
+					`,
+				}}
+			/>
+		),
+		[],
+	);
 
 	const value = {
 		theme,
@@ -80,9 +97,12 @@ export function ThemeProvider({
 	};
 
 	return (
-		<ThemeProviderContext.Provider {...props} value={value}>
-			{children}
-		</ThemeProviderContext.Provider>
+		<>
+			<ThemeProviderContext.Provider {...props} value={value}>
+				{children}
+			</ThemeProviderContext.Provider>
+			{script}
+		</>
 	);
 }
 

@@ -1,11 +1,11 @@
 import { stripe } from "@better-auth/stripe";
 import { betterAuth } from "better-auth";
-import { mongodbAdapter } from "better-auth/adapters/mongodb";
-import { MongoClient } from "mongodb";
+import { Pool } from "pg";
 import { Stripe } from "stripe";
 
-const client = new MongoClient(process.env.MONGODB_URL!);
-const db = client.db();
+const pg = new Pool({
+	connectionString: process.env.POSTGRES_URL!,
+});
 
 const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 	apiVersion: "2025-07-30.basil",
@@ -22,7 +22,7 @@ export const auth = betterAuth({
 			clientSecret: process.env.GITHUB_CLIENT_SECRET!,
 		},
 	},
-	database: mongodbAdapter(db),
+	database: pg,
 	plugins: [
 		stripe({
 			stripeClient,
