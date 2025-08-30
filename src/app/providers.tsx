@@ -5,7 +5,7 @@ import {
 	QueryClient,
 	QueryClientProvider,
 } from "@tanstack/react-query";
-import { ThemeProvider } from "~/lib/hooks/use-theme";
+import { ThemeProvider } from "~/lib/hooks/themes";
 
 function makeQueryClient() {
 	return new QueryClient({
