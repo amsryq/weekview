@@ -1,8 +1,14 @@
+import { merge, toMerged } from "es-toolkit";
 import { useMemo } from "react";
+import { PartialDeep } from "type-fest";
 import { useStore } from "zustand";
-import type { CellElements, FontWeight } from "~/lib/models/cell-appearance";
+import type {
+	CellAppearance,
+	CellElements,
+} from "~/lib/models/cell-appearance";
 import { Course } from "~/lib/models/course";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
+import { CellAppearanceLayoutSettings } from "./cell-appearance-layout-settings";
 import { Button } from "./ui/button";
 import {
 	Dialog,
@@ -14,96 +20,8 @@ import {
 } from "./ui/dialog";
 import { Label } from "./ui/label";
 import { ScrollArea } from "./ui/scroll-area";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "./ui/select";
-import { Switch } from "./ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import WeeklyTimetable from "./weekly-timetable";
-
-function ElementRow({
-	name,
-	elementKey,
-}: {
-	name: string;
-	elementKey: CellElements;
-}) {
-	const prefs = useStore(TimetablePreferencesStore);
-
-	return (
-		<div className="flex items-center justify-between p-3 border rounded-lg">
-			<div>
-				<div className="w-24 text-sm font-medium">{name}</div>
-			</div>
-
-			<div className="flex items-center gap-3">
-				<Select
-					value={prefs.cellAppearance.weight[elementKey]}
-					onValueChange={(v: FontWeight) =>
-						prefs.setCellElementAppearanceValue("weight", elementKey, v)
-					}
-				>
-					<SelectTrigger className="w-24">
-						<SelectValue />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="light">Light</SelectItem>
-						<SelectItem value="normal">Normal</SelectItem>
-						<SelectItem value="bold">Bold</SelectItem>
-					</SelectContent>
-				</Select>
-
-				<div className="flex items-center gap-2 flex-1">
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() =>
-							prefs.setCellElementAppearanceValue(
-								"fontSize",
-								elementKey,
-								Math.max(8, prefs.cellAppearance.fontSize[elementKey] - 1),
-							)
-						}
-					>
-						-
-					</Button>
-					<span className="w-8 text-center text-sm tabular-nums">
-						{prefs.cellAppearance.fontSize[elementKey]}
-					</span>
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() =>
-							prefs.setCellElementAppearanceValue(
-								"fontSize",
-								elementKey,
-								Math.min(32, prefs.cellAppearance.fontSize[elementKey] + 1),
-							)
-						}
-					>
-						+
-					</Button>
-				</div>
-
-				<Label className="flex items-center gap-2 cursor-pointer">
-					<Switch
-						checked={prefs.cellAppearance.visibility[elementKey]}
-						onCheckedChange={(checked) =>
-							prefs.setCellElementAppearanceValue(
-								"visibility",
-								elementKey,
-								checked,
-							)
-						}
-					/>
-				</Label>
-			</div>
-		</div>
-	);
-}
 
 export default function TimetableCustomizer({
 	children,
@@ -113,6 +31,12 @@ export default function TimetableCustomizer({
 	const prefs = useStore(TimetablePreferencesStore);
 
 	const previewLayout = prefs.layout;
+
+	const handleCellAppearanceChange = (changes: PartialDeep<CellAppearance>) => {
+		TimetablePreferencesStore.setState((writable) => {
+			merge(writable.cellAppearance, changes);
+		});
+	};
 
 	const preview = useMemo(
 		() => (
@@ -209,91 +133,57 @@ export default function TimetableCustomizer({
 							)}
 						</div>
 						<div className="space-y-6">
-							<div className="space-y-4">
-								<div className="space-y-2">
-									<Label>Table Layout</Label>
-									<div className="flex gap-2">
-										<Button
-											variant={prefs.layout === "rows" ? "default" : "outline"}
-											onClick={() => prefs.setValue("layout", "rows")}
-										>
-											Horizontal rows
-										</Button>
-										<Button
-											variant={
-												prefs.layout === "columns" ? "default" : "outline"
-											}
-											onClick={() => prefs.setValue("layout", "columns")}
-										>
-											Vertical columns
-										</Button>
+							<Tabs defaultValue="timetable" className="w-full">
+								<TabsList className="grid w-full grid-cols-2">
+									<TabsTrigger value="timetable">Timetable Layout</TabsTrigger>
+									<TabsTrigger value="cells">Cell Layout</TabsTrigger>
+								</TabsList>
+
+								<TabsContent value="timetable" className="space-y-4 mt-6">
+									<div className="space-y-2">
+										<Label>Table Layout</Label>
+										<div className="flex gap-2">
+											<Button
+												variant={prefs.layout === "rows" ? "default" : "outline"}
+												onClick={() => prefs.setValue("layout", "rows")}
+											>
+												Horizontal rows
+											</Button>
+											<Button
+												variant={
+													prefs.layout === "columns" ? "default" : "outline"
+												}
+												onClick={() => prefs.setValue("layout", "columns")}
+											>
+												Vertical columns
+											</Button>
+										</div>
 									</div>
-								</div>
+								</TabsContent>
 
-								<div className="space-y-2">
-									<Label>Text alignment</Label>
-									<div className="flex gap-2">
-										<Button
-											variant={
-												prefs.cellAppearance.textAlign === "left"
-													? "default"
-													: "outline"
-											}
-											onClick={() =>
-												prefs.setCellAppearanceValue("textAlign", "left")
-											}
-										>
-											Left
-										</Button>
-										<Button
-											variant={
-												prefs.cellAppearance.textAlign === "center"
-													? "default"
-													: "outline"
-											}
-											onClick={() =>
-												prefs.setCellAppearanceValue("textAlign", "center")
-											}
-										>
-											Center
-										</Button>
-										<Button
-											variant={
-												prefs.cellAppearance.textAlign === "right"
-													? "default"
-													: "outline"
-											}
-											onClick={() =>
-												prefs.setCellAppearanceValue("textAlign", "right")
-											}
-										>
-											Right
-										</Button>
-									</div>
-								</div>
-							</div>
-
-							<div className="space-y-3">
-								<ElementRow name="Code" elementKey="code" />
-								<ElementRow name="Course Name" elementKey="name" />
-								<ElementRow name="Time" elementKey="time" />
-								<ElementRow name="Location" elementKey="location" />
-							</div>
-
-							<div className="pt-2 flex gap-2">
-								<DialogClose asChild>
-									<Button>Close</Button>
-								</DialogClose>
-								<Button
-									variant="outline"
-									onClick={() => TimetablePreferencesStore.getState().reset()}
-								>
-									Reset
-								</Button>
-							</div>
+								<TabsContent value="cells" className="space-y-3 mt-6">
+									<CellAppearanceLayoutSettings
+										value={prefs.cellAppearance}
+										onChange={handleCellAppearanceChange}
+									/>
+								</TabsContent>
+							</Tabs>
 						</div>
 					</div>
 				</ScrollArea>
+				
+				{/* Sticky footer with buttons */}
+				<div className="flex justify-end gap-2 pt-4 border-t bg-background">
+					<Button
+						variant="outline"
+						onClick={() => TimetablePreferencesStore.getState().reset()}
+					>
+						Reset
+					</Button>
+					<DialogClose asChild>
+						<Button>Close</Button>
+					</DialogClose>
+				</div>
 			</DialogContent>
 		</Dialog>
 	);

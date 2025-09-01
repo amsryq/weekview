@@ -25,7 +25,6 @@ const defaultState = {
 			location: true,
 			code: true,
 			name: true,
-			lecturer: true,
 		},
 
 		fontSize: {
@@ -33,7 +32,6 @@ const defaultState = {
 			name: 12,
 			time: 11,
 			location: 11,
-			lecturer: 11,
 		},
 
 		weight: {
@@ -41,7 +39,6 @@ const defaultState = {
 			name: "normal",
 			time: "normal",
 			location: "normal",
-			lecturer: "normal",
 		},
 
 		// Below this line should always be defined by the course/meeting. These only serves as fallback

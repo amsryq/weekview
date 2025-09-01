@@ -1,12 +1,6 @@
 import { z } from "zod";
 
-export const CellElementsSchema = z.enum([
-	"time",
-	"location",
-	"code",
-	"name",
-	"lecturer",
-]);
+export const CellElementsSchema = z.enum(["time", "location", "code", "name"]);
 export type CellElements = z.infer<typeof CellElementsSchema>;
 
 export const TextAlignSchema = z.enum(["left", "center", "right"]);
