@@ -144,7 +144,9 @@ export default function TimetableCustomizer({
 										<Label>Table Layout</Label>
 										<div className="flex gap-2">
 											<Button
-												variant={prefs.layout === "rows" ? "default" : "outline"}
+												variant={
+													prefs.layout === "rows" ? "default" : "outline"
+												}
 												onClick={() => prefs.setValue("layout", "rows")}
 											>
 												Horizontal rows
@@ -171,7 +173,7 @@ export default function TimetableCustomizer({
 						</div>
 					</div>
 				</ScrollArea>
-				
+
 				{/* Sticky footer with buttons */}
 				<div className="flex justify-end gap-2 pt-4 border-t bg-background">
 					<Button

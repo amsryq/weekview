@@ -1,6 +1,7 @@
 import { useFormContext } from "react-hook-form";
 import type { Course } from "~/lib/models/course";
 import { CellBackgroundConfigurer } from "../cell-background-configurer";
+import { Card } from "../ui/card";
 import {
 	FormControl,
 	FormDescription,
@@ -10,7 +11,6 @@ import {
 	FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 
 export function AppearanceTab() {
 	const form = useFormContext<Course.Schema>();
@@ -24,58 +24,27 @@ export function AppearanceTab() {
 				</p>
 			</div>
 
-			<Tabs defaultValue="solid-background" className="w-full">
-				<TabsList className="grid w-full grid-cols-2">
-					<TabsTrigger value="solid-background">Solid Background</TabsTrigger>
-					<TabsTrigger value="gradient-background">
-						Gradient Background
-					</TabsTrigger>
-				</TabsList>
-
-				<TabsContent value="solid-background" className="space-y-6">
-					<FormField
-						control={form.control}
-						name="cellAppearance.background"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Background</FormLabel>
-								<FormControl>
-									<CellBackgroundConfigurer
-										value={field.value}
-										onChange={field.onChange}
-									/>
-								</FormControl>
-								<FormDescription>
-									Choose a solid color background for your course
-								</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-				</TabsContent>
-
-				<TabsContent value="gradient-background" className="space-y-6">
-					<FormField
-						control={form.control}
-						name="cellAppearance.background"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Gradient Background</FormLabel>
-								<FormControl>
-									<CellBackgroundConfigurer
-										value={field.value}
-										onChange={field.onChange}
-									/>
-								</FormControl>
-								<FormDescription>
-									Choose a gradient background for your course
-								</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-				</TabsContent>
-			</Tabs>
+			<FormField
+				control={form.control}
+				name="cellAppearance.background"
+				render={({ field }) => (
+					<FormItem>
+						<FormLabel>Background</FormLabel>
+						<FormControl>
+							<Card className="px-4">
+								<CellBackgroundConfigurer
+									value={field.value}
+									onChange={field.onChange}
+								/>
+							</Card>
+						</FormControl>
+						<FormDescription>
+							Choose a background for your course (solid color or gradient)
+						</FormDescription>
+						<FormMessage />
+					</FormItem>
+				)}
+			/>
 
 			<FormField
 				control={form.control}

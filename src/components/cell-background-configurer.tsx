@@ -19,6 +19,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "./ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 interface CellBackgroundConfigurerProps {
 	value: BackgroundAppearance;
@@ -121,45 +122,6 @@ export function CellBackgroundConfigurer({
 
 	return (
 		<div className="space-y-4">
-			{/* Type Switch */}
-			<div className="space-y-2">
-				<Label>Background Type</Label>
-				<div className="flex gap-2">
-					<Button
-						type="button"
-						size="sm"
-						variant={watched.type === "solid" ? "default" : "outline"}
-						onClick={() => setValue("type", "solid")}
-					>
-						Solid
-					</Button>
-					<Button
-						type="button"
-						size="sm"
-						variant={watched.type === "gradient" ? "default" : "outline"}
-						onClick={() => {
-							setValue("type", "gradient");
-							const current = getValues();
-							if (
-								!current.gradientColors ||
-								current.gradientColors.length === 0
-							) {
-								// Prefer current.color if available, otherwise fallback.
-								setValue("gradientColors", [
-									current.color ?? "#000000",
-									"#ffffff",
-								]);
-							}
-							if (!current.gradientDirection) {
-								setValue("gradientDirection", "to-r");
-							}
-						}}
-					>
-						Gradient
-					</Button>
-				</div>
-			</div>
-
 			{/* Preview */}
 			<div className="space-y-2">
 				<Label>Preview</Label>
@@ -169,33 +131,62 @@ export function CellBackgroundConfigurer({
 				/>
 			</div>
 
-			{watched.type === "solid" ? (
-				<div className="space-y-2">
-					<Label>Color</Label>
-					<Controller
-						control={control}
-						name="color"
-						render={({ field }) => (
-							<div className="flex items-center gap-3">
-								<Input
-									type="color"
-									value={field.value}
-									onChange={(e) => field.onChange(e.target.value)}
-									className="w-20 h-10 p-1"
-								/>
-								<Input
-									type="text"
-									value={field.value}
-									onChange={(e) => field.onChange(e.target.value)}
-									placeholder="#000000"
-									className="flex-1"
-								/>
-							</div>
-						)}
-					/>
-				</div>
-			) : (
-				<div className="space-y-4">
+			<Tabs
+				value={watched.type}
+				onValueChange={(value) => {
+					if (value === "solid") {
+						setValue("type", "solid");
+					} else if (value === "gradient") {
+						setValue("type", "gradient");
+						const current = getValues();
+						if (
+							!current.gradientColors ||
+							current.gradientColors.length === 0
+						) {
+							setValue("gradientColors", [
+								current.color ?? "#000000",
+								"#ffffff",
+							]);
+						}
+						if (!current.gradientDirection) {
+							setValue("gradientDirection", "to-r");
+						}
+					}
+				}}
+			>
+				<TabsList className="grid w-full grid-cols-2">
+					<TabsTrigger value="solid">Solid</TabsTrigger>
+					<TabsTrigger value="gradient">Gradient</TabsTrigger>
+				</TabsList>
+
+				<TabsContent value="solid" className="space-y-4">
+					<div className="space-y-2">
+						<Label>Color</Label>
+						<Controller
+							control={control}
+							name="color"
+							render={({ field }) => (
+								<div className="flex items-center gap-3">
+									<Input
+										type="color"
+										value={field.value}
+										onChange={(e) => field.onChange(e.target.value)}
+										className="w-20 h-10 p-1"
+									/>
+									<Input
+										type="text"
+										value={field.value}
+										onChange={(e) => field.onChange(e.target.value)}
+										placeholder="#000000"
+										className="flex-1"
+									/>
+								</div>
+							)}
+						/>
+					</div>
+				</TabsContent>
+
+				<TabsContent value="gradient" className="space-y-4">
 					{/* Direction */}
 					<div className="space-y-2">
 						<Label>Gradient Direction</Label>
@@ -271,8 +262,8 @@ export function CellBackgroundConfigurer({
 							</Button>
 						</div>
 					</div>
-				</div>
-			)}
+				</TabsContent>
+			</Tabs>
 		</div>
 	);
 }
