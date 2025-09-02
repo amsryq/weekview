@@ -1,3 +1,4 @@
+import React, { JSX } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { CourseStore } from "../stores/course-store";
@@ -29,4 +30,6 @@ export abstract class CourseProvider {
 	}
 
 	public abstract sync(): Promise<void>;
+
+	public abstract renderAddCourseButton(): JSX.Element;
 }
