@@ -118,10 +118,18 @@ export function ColorSelector({ value, onChange }: ColorPickerProps) {
 								type="button"
 								size="icon"
 								variant="destructive"
-								className="absolute -top-1 -right-1 w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity"
+								className="absolute -top-2 -right-2 w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity"
 								onClick={(e) => {
 									e.stopPropagation();
 									removeColor(color.id);
+
+									// Resort to the first color of the same type
+									const firstColor = colors.find(
+										(c) => c.background.type === color.background.type,
+									);
+									if (firstColor) {
+										handleColorSelect(firstColor.background);
+									}
 								}}
 							>
 								<Trash2 className="w-2 h-2" />
