@@ -1,6 +1,6 @@
 import { useFormContext } from "react-hook-form";
 import type { Course } from "~/lib/models/course";
-import { CellBackgroundConfigurer } from "../cell-background-configurer";
+import { ColorSelector } from "../color-selector";
 import { Card } from "../ui/card";
 import {
 	FormControl,
@@ -29,14 +29,9 @@ export function AppearanceTab() {
 				name="cellAppearance.background"
 				render={({ field }) => (
 					<FormItem>
-						<FormLabel>Background</FormLabel>
+						<FormLabel>Background Color</FormLabel>
 						<FormControl>
-							<Card className="px-4">
-								<CellBackgroundConfigurer
-									value={field.value}
-									onChange={field.onChange}
-								/>
-							</Card>
+							<ColorSelector value={field.value} onChange={field.onChange} />
 						</FormControl>
 						<FormDescription>
 							Choose a background for your course (solid color or gradient)

@@ -2,13 +2,15 @@
 
 import { isEqual } from "es-toolkit";
 import { Plus, X } from "lucide-react";
-import React, { useEffect } from "react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import React, { useEffect, useRef } from "react";
+import { Control, Controller, useFieldArray, useForm } from "react-hook-form";
+
 import type {
 	BackgroundAppearance,
 	GradientDirection,
 } from "~/lib/models/cell-appearance";
 import { getBackgroundStyle } from "~/lib/utils";
+
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -24,6 +26,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 interface CellBackgroundConfigurerProps {
 	value: BackgroundAppearance;
 	onChange: (value: BackgroundAppearance) => void;
+	showTabs?: boolean;
 }
 
 type FormValues = {
@@ -33,7 +36,7 @@ type FormValues = {
 	gradientDirection: GradientDirection;
 };
 
-const gradientDirections: { value: GradientDirection; label: string }[] = [
+const GRADIENT_DIRECTIONS: { value: GradientDirection; label: string }[] = [
 	{ value: "to-r", label: "→ Right" },
 	{ value: "to-l", label: "← Left" },
 	{ value: "to-t", label: "↑ Top" },
@@ -44,46 +47,127 @@ const gradientDirections: { value: GradientDirection; label: string }[] = [
 	{ value: "to-bl", label: "↙ Bottom Left" },
 ];
 
-function toFormValues(v: BackgroundAppearance): FormValues {
-	if (v.type === "solid") {
+function toFormValues(value: BackgroundAppearance): FormValues {
+	if (value.type === "solid") {
 		return {
 			type: "solid",
-			color: v.color,
+			color: value.color,
 			gradientColors: [],
 			gradientDirection: "to-r",
 		};
 	}
 	return {
 		type: "gradient",
-		color: v.gradientColors[0] || "#000000",
-		gradientColors: Array.isArray(v.gradientColors)
-			? [...v.gradientColors]
-			: [],
-		gradientDirection: v.gradientDirection,
+		color: value.gradientColors[0] || "#000000",
+		gradientColors: [...value.gradientColors],
+		gradientDirection: value.gradientDirection,
 	};
 }
 
-function toBackgroundAppearance(f: FormValues): BackgroundAppearance {
-	if (f.type === "solid") {
-		return { type: "solid", color: f.color ?? "#000000" };
+function toBackgroundAppearance(form: FormValues): BackgroundAppearance {
+	if (form.type === "solid") {
+		return { type: "solid", color: form.color || "#000000" };
 	}
-
-	// Ensure the gradient branch always satisfies the schema shape.
-	const colors =
-		f.gradientColors && f.gradientColors.length > 0
-			? f.gradientColors
-			: [f.color ?? "#000000", "#ffffff"];
-
+	const colors = form.gradientColors?.length
+		? form.gradientColors
+		: [form.color || "#000000", "#ffffff"];
 	return {
 		type: "gradient",
 		gradientColors: colors,
-		gradientDirection: f.gradientDirection ?? "to-r",
+		gradientDirection: form.gradientDirection || "to-r",
 	};
 }
+
+const ColorInputRow = ({
+	value,
+	onChange,
+	onRemove,
+	showRemove,
+}: {
+	value: string;
+	onChange: (value: string) => void;
+	onRemove?: () => void;
+	showRemove?: boolean;
+}) => (
+	<div className="flex items-center gap-2">
+		<Input
+			type="color"
+			value={value}
+			onChange={(e) => onChange(e.target.value)}
+			className="w-12 h-8 p-1 flex-shrink-0"
+		/>
+		<Input
+			type="text"
+			value={value}
+			onChange={(e) => onChange(e.target.value)}
+			className="flex-1"
+		/>
+		{showRemove && onRemove && (
+			<Button
+				type="button"
+				size="icon"
+				variant="outline"
+				onClick={onRemove}
+				className="w-8 h-8"
+			>
+				<X className="w-4 h-4" />
+			</Button>
+		)}
+	</div>
+);
+
+const GradientDirectionSelect = ({
+	control,
+}: {
+	control: Control<FormValues>;
+}) => (
+	<Controller
+		control={control}
+		name="gradientDirection"
+		render={({ field }) => (
+			<Select value={field.value} onValueChange={field.onChange}>
+				<SelectTrigger>
+					<SelectValue placeholder="Direction" />
+				</SelectTrigger>
+				<SelectContent>
+					{GRADIENT_DIRECTIONS.map(({ value, label }) => (
+						<SelectItem key={value} value={value}>
+							{label}
+						</SelectItem>
+					))}
+				</SelectContent>
+			</Select>
+		)}
+	/>
+);
+
+const ColorPicker = ({ control }: { control: Control<FormValues> }) => (
+	<Controller
+		control={control}
+		name="color"
+		render={({ field }) => (
+			<div className="flex items-center gap-3">
+				<Input
+					type="color"
+					value={field.value}
+					onChange={(e) => field.onChange(e.target.value)}
+					className="w-20 h-10 p-1"
+				/>
+				<Input
+					type="text"
+					value={field.value}
+					onChange={(e) => field.onChange(e.target.value)}
+					className="flex-1"
+				/>
+			</div>
+		)}
+	/>
+);
 
 export function CellBackgroundConfigurer({
 	value,
 	onChange,
+	showTabs,
 }: CellBackgroundConfigurerProps) {
 	const { control, watch, setValue, getValues } = useForm<FormValues>({
 		defaultValues: toFormValues(value),
@@ -91,14 +175,13 @@ export function CellBackgroundConfigurer({
 
 	const { fields, append, remove } = useFieldArray({
 		control,
-		// bug: TypeScript being sane challenge
-		name: "gradientColors" as unknown as never,
+		name: "gradientColors" as never,
 	});
 
 	const watched = watch();
-	const previousValueRef = React.useRef<BackgroundAppearance>(value);
+	const previousValueRef = useRef<BackgroundAppearance>(value);
 
-	// Update form when external value changes
+	// Sync form when external value changes
 	useEffect(() => {
 		if (!isEqual(value, previousValueRef.current)) {
 			const formValues = toFormValues(value);
@@ -110,6 +193,7 @@ export function CellBackgroundConfigurer({
 		}
 	}, [value, setValue]);
 
+	// Emit changes to parent
 	useEffect(() => {
 		const newValue = toBackgroundAppearance(watched);
 		if (!isEqual(newValue, previousValueRef.current)) {
@@ -122,29 +206,18 @@ export function CellBackgroundConfigurer({
 
 	return (
 		<div className="space-y-4">
-			{/* Preview */}
-			<div className="space-y-2">
-				<Label>Preview</Label>
-				<div
-					className="h-12 rounded border border-border"
-					style={previewStyle}
-				/>
-			</div>
-
+			{/* Tabs */}
 			<Tabs
 				value={watched.type}
-				onValueChange={(value) => {
-					if (value === "solid") {
+				onValueChange={(val) => {
+					if (val === "solid") {
 						setValue("type", "solid");
-					} else if (value === "gradient") {
+					} else {
 						setValue("type", "gradient");
 						const current = getValues();
-						if (
-							!current.gradientColors ||
-							current.gradientColors.length === 0
-						) {
+						if (!current.gradientColors?.length) {
 							setValue("gradientColors", [
-								current.color ?? "#000000",
+								current.color || "#000000",
 								"#ffffff",
 							]);
 						}
@@ -154,103 +227,57 @@ export function CellBackgroundConfigurer({
 					}
 				}}
 			>
-				<TabsList className="grid w-full grid-cols-2">
-					<TabsTrigger value="solid">Solid</TabsTrigger>
-					<TabsTrigger value="gradient">Gradient</TabsTrigger>
-				</TabsList>
+				{showTabs && (
+					<TabsList className="w-full">
+						<TabsTrigger value="solid">Solid</TabsTrigger>
+						<TabsTrigger value="gradient">Gradient</TabsTrigger>
+					</TabsList>
+				)}
 
+				{/* Preview */}
+				<div className="space-y-2">
+					<Label>Preview</Label>
+					<div
+						className="h-12 rounded border border-border"
+						style={previewStyle}
+					/>
+				</div>
+
+				{/* Solid Tab */}
 				<TabsContent value="solid" className="space-y-4">
 					<div className="space-y-2">
 						<Label>Color</Label>
-						<Controller
-							control={control}
-							name="color"
-							render={({ field }) => (
-								<div className="flex items-center gap-3">
-									<Input
-										type="color"
-										value={field.value}
-										onChange={(e) => field.onChange(e.target.value)}
-										className="w-20 h-10 p-1"
-									/>
-									<Input
-										type="text"
-										value={field.value}
-										onChange={(e) => field.onChange(e.target.value)}
-										placeholder="#000000"
-										className="flex-1"
-									/>
-								</div>
-							)}
-						/>
+						<ColorPicker control={control} />
 					</div>
 				</TabsContent>
 
+				{/* Gradient Tab */}
 				<TabsContent value="gradient" className="space-y-4">
 					{/* Direction */}
 					<div className="space-y-2">
 						<Label>Gradient Direction</Label>
-						<Controller
-							control={control}
-							name="gradientDirection"
-							render={({ field }) => (
-								<Select value={field.value} onValueChange={field.onChange}>
-									<SelectTrigger>
-										<SelectValue placeholder="Direction" />
-									</SelectTrigger>
-									<SelectContent>
-										{gradientDirections.map((dir) => (
-											<SelectItem key={dir.value} value={dir.value}>
-												{dir.label}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							)}
-						/>
+						<GradientDirectionSelect control={control} />
 					</div>
 
-					{/* Gradient Colors */}
+					{/* Colors */}
 					<div className="space-y-2">
 						<Label>Gradient Colors</Label>
 						<div className="space-y-2">
 							{fields.map((fieldItem, index) => (
-								<div key={fieldItem.id} className="flex items-center gap-2">
-									<Controller
-										control={control}
-										name={`gradientColors.${index}` as const}
-										render={({ field }) => (
-											<>
-												<Input
-													type="color"
-													value={field.value}
-													onChange={(e) => field.onChange(e.target.value)}
-													className="w-12 h-8 p-1 flex-shrink-0"
-												/>
-												<Input
-													type="text"
-													value={field.value}
-													onChange={(e) => field.onChange(e.target.value)}
-													className="flex-1"
-												/>
-											</>
-										)}
-									/>
-									{fields.length > 2 && (
-										<Button
-											type="button"
-											size="icon"
-											variant="outline"
-											onClick={() => remove(index)}
-											className="w-8 h-8 flex-shrink-0"
-										>
-											<X className="w-4 h-4" />
-										</Button>
+								<Controller
+									key={fieldItem.id}
+									control={control}
+									name={`gradientColors.${index}` as const}
+									render={({ field }) => (
+										<ColorInputRow
+											value={field.value}
+											onChange={field.onChange}
+											onRemove={() => remove(index)}
+											showRemove={fields.length > 2}
+										/>
 									)}
-								</div>
+								/>
 							))}
-
-							{/* Add new */}
 							<Button
 								type="button"
 								variant="outline"
