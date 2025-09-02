@@ -3,21 +3,18 @@ import { useFormContext } from "react-hook-form";
 import { PartialDeep } from "type-fest";
 import type { CellAppearance } from "~/lib/models/cell-appearance";
 import type { Course } from "~/lib/models/course";
+import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { CellAppearanceLayoutSettings } from "../cell-appearance-layout-settings";
 
 export function LayoutTab() {
 	const form = useFormContext<Course.Schema>();
 
 	const currentCellAppearance = form.watch("cellAppearance");
-	const handleCellAppearanceChange = (changes: PartialDeep<CellAppearance>) => {
-		form.setValue(
-			"cellAppearance",
-			toMerged(form.getValues("cellAppearance"), changes),
-			{
-				shouldDirty: true,
-				shouldValidate: true,
-			},
-		);
+	const handleCellAppearanceChange = (values: PartialDeep<CellAppearance>) => {
+		form.setValue("cellAppearance", values as CellAppearance, {
+			shouldDirty: true,
+			shouldValidate: true,
+		});
 	};
 
 	return (
@@ -31,6 +28,7 @@ export function LayoutTab() {
 
 			<CellAppearanceLayoutSettings
 				value={currentCellAppearance}
+				baseValues={TimetablePreferencesStore.getState().cellAppearance}
 				onChange={handleCellAppearanceChange}
 			/>
 		</div>
