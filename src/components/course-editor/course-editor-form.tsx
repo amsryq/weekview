@@ -14,7 +14,6 @@ import { CourseDetailsTab } from "./course-details-tab";
 import { CoursePreview } from "./course-preview";
 import { IconsTab } from "./icons-tab";
 import { LayoutTab } from "./layout-tab";
-import { MeetingTimesTab } from "./meeting-times-tab";
 
 interface CourseEditorFormProps {
 	onSubmit: (data: Course.Schema, form: UseFormReturn<Course.Schema>) => void;
@@ -88,9 +87,8 @@ export function CourseEditorForm({
 					{/* Main Content with Tabs */}
 					<div className="flex-1 min-w-0">
 						<Tabs defaultValue="details" className="w-full">
-							<TabsList className="grid w-full grid-cols-5">
+							<TabsList className="grid w-full grid-cols-4">
 								<TabsTrigger value="details">Details</TabsTrigger>
-								<TabsTrigger value="meeting-times">Meetings</TabsTrigger>
 								<TabsTrigger value="appearance">Appearance</TabsTrigger>
 								<TabsTrigger value="layout">Layout</TabsTrigger>
 								<TabsTrigger value="icons">Icons</TabsTrigger>
@@ -100,10 +98,6 @@ export function CourseEditorForm({
 								<ScrollArea className="h-[60vh] pr-4">
 									<TabsContent value="details" className="m-0">
 										<CourseDetailsTab />
-									</TabsContent>
-
-									<TabsContent value="meeting-times" className="m-0">
-										<MeetingTimesTab />
 									</TabsContent>
 
 									<TabsContent value="appearance" className="m-0">

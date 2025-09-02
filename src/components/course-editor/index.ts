@@ -4,4 +4,3 @@ export { CourseEditorForm } from "./course-editor-form";
 export { CoursePreview } from "./course-preview";
 export { IconsTab } from "./icons-tab";
 export { LayoutTab } from "./layout-tab";
-export { MeetingTimesTab } from "./meeting-times-tab";
