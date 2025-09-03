@@ -6,7 +6,7 @@ import {
 	PlusIcon,
 	Trash2Icon,
 } from "lucide-react";
-import type { JSX } from "react";
+import { type JSX, useMemo } from "react";
 import { useStore } from "zustand";
 import { Course } from "~/lib/models/course";
 import type { CourseProvider } from "~/lib/models/course-provider";
@@ -182,7 +182,7 @@ function ProviderSection({ provider }: { provider: CourseProvider }) {
 
 	return (
 		<div className="space-y-2">
-			<h2 className="text-lg font-semibold flex items-center gap-2">
+			<h2 className="text-lg font-semibold flex items-center gap-1">
 				{provider.name}
 				<span className="text-xs text-muted-foreground">
 					({courses.length})
@@ -201,7 +201,6 @@ function ProviderSection({ provider }: { provider: CourseProvider }) {
 								/>
 							))}
 						</div>
-						<provider.renderAddCourseButton />
 					</>
 				) : (
 					<Card>
@@ -209,10 +208,10 @@ function ProviderSection({ provider }: { provider: CourseProvider }) {
 							<span className="text-center text-sm text-muted-foreground">
 								No courses added from this provider.
 							</span>
-							<provider.renderAddCourseButton />
 						</CardContent>
 					</Card>
 				)}
+				<provider.renderAddCourseButton />
 			</div>
 		</div>
 	);

@@ -1,8 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
-import { createContext, type JSX, useContext, useState } from "react";
-import { useStore } from "zustand";
+import { pick } from "es-toolkit";
+import { JSX, memo, useState } from "react";
+import { create, useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "~/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "~/components/ui/dialog";
 import {
 	Combobox,
 	ComboboxContent,
@@ -13,20 +23,8 @@ import {
 	ComboboxList,
 	ComboboxTrigger,
 } from "~/components/ui/shadcn-io/combobox";
-import {
-	DialogStack,
-	DialogStackBody,
-	DialogStackContent,
-	DialogStackDescription,
-	DialogStackFooter,
-	DialogStackHeader,
-	DialogStackNext,
-	DialogStackOverlay,
-	DialogStackPrevious,
-	DialogStackTitle,
-	DialogStackTrigger,
-} from "~/components/ui/shadcn-io/dialog-stack";
 import { CourseStore } from "~/lib/stores/course-store";
+import { TechnoUniversityProvider } from ".";
 import {
 	fetchCampuses,
 	fetchCourses,
@@ -37,35 +35,48 @@ import {
 import { TechnoCourse } from "./techno-course";
 import type { ServerCampus, ServerCourse, ServerFaculty } from "./types";
 
-interface ImporterSelectionContextValue {
+const useImporterSelectionStore = create<{
+	open: boolean;
+	currentStep: number;
 	selectedCampus?: ServerCampus;
-	setSelectedCampus: (c?: ServerCampus) => void;
 	selectedFaculty?: ServerFaculty;
-	setSelectedFaculty: (f?: ServerFaculty) => void;
 	selectedCourse?: ServerCourse;
+	setOpen: (open: boolean) => void;
+	setCurrentStep: (step: number) => void;
+	setSelectedCampus: (c?: ServerCampus) => void;
+	setSelectedFaculty: (f?: ServerFaculty) => void;
 	setSelectedCourse: (c?: ServerCourse) => void;
-}
+}>((set) => ({
+	open: false,
+	currentStep: 0,
+	selectedCampus: undefined,
+	selectedFaculty: undefined,
+	selectedCourse: undefined,
+	setOpen: (open) => set({ open }),
+	setCurrentStep: (step) => set({ currentStep: step }),
+	setSelectedCampus: (c) =>
+		set({
+			selectedCampus: c,
+			selectedFaculty: undefined,
+			selectedCourse: undefined,
+		}),
+	setSelectedFaculty: (f) =>
+		set({
+			selectedFaculty: f,
+			selectedCourse: undefined,
+		}),
+	setSelectedCourse: (c) => set({ selectedCourse: c }),
+}));
 
-const ImporterSelectionContext = createContext<
-	ImporterSelectionContextValue | undefined
->(undefined);
-
-function useImporterSelection() {
-	const ctx = useContext(ImporterSelectionContext);
-	if (!ctx)
-		throw new Error(
-			"useImporterSelection must be used within TechnoUniversityImporterDialog",
-		);
-	return ctx;
-}
-
-function CourseAndFacultySelectorDialog() {
+function CourseAndFacultySelectorStep() {
 	const {
 		selectedCampus,
 		setSelectedCampus,
 		selectedFaculty,
 		setSelectedFaculty,
-	} = useImporterSelection();
+		setCurrentStep,
+	} = useImporterSelectionStore();
+
 	// Campuses
 	const {
 		data: campuses,
@@ -110,12 +121,12 @@ function CourseAndFacultySelectorDialog() {
 
 	return (
 		<>
-			<DialogStackHeader>
-				<DialogStackTitle>Choose your campus & faculty</DialogStackTitle>
-				<DialogStackDescription>
+			<DialogHeader>
+				<DialogTitle>Choose your campus & faculty</DialogTitle>
+				<DialogDescription>
 					Please select your campus and faculty from the dropdown menus.
-				</DialogStackDescription>
-			</DialogStackHeader>
+				</DialogDescription>
+			</DialogHeader>
 
 			<div className="flex flex-col gap-2 py-4">
 				<Combobox
@@ -203,20 +214,27 @@ function CourseAndFacultySelectorDialog() {
 				)}
 			</div>
 
-			<DialogStackFooter className="justify-end">
-				<DialogStackNext asChild>
-					<Button variant="outline" disabled={!canProceed}>
-						Next
-					</Button>
-				</DialogStackNext>
-			</DialogStackFooter>
+			<DialogFooter className="justify-end">
+				<Button
+					variant="outline"
+					disabled={!canProceed}
+					onClick={() => setCurrentStep(1)}
+				>
+					Next
+				</Button>
+			</DialogFooter>
 		</>
 	);
 }
 
-function GroupSelectorDialog() {
-	const { selectedCampus, selectedFaculty, selectedCourse, setSelectedCourse } =
-		useImporterSelection();
+const GroupSelectorStep = memo(function GroupSelectorStep() {
+	const {
+		selectedCampus,
+		selectedFaculty,
+		selectedCourse,
+		setSelectedCourse,
+		setCurrentStep,
+	} = useImporterSelectionStore();
 
 	const selectedGroups = useStore(
 		CourseStore,
@@ -224,7 +242,6 @@ function GroupSelectorDialog() {
 			state.courses.filter((a): a is TechnoCourse => a instanceof TechnoCourse),
 		),
 	);
-
 	// Courses list for selected campus/faculty
 	const {
 		data: courses,
@@ -288,12 +305,12 @@ function GroupSelectorDialog() {
 
 	return (
 		<>
-			<DialogStackHeader>
-				<DialogStackTitle>Groups</DialogStackTitle>
-				<DialogStackDescription>
+			<DialogHeader>
+				<DialogTitle>Groups</DialogTitle>
+				<DialogDescription>
 					Select and manage your selected groups.
-				</DialogStackDescription>
-			</DialogStackHeader>
+				</DialogDescription>
+			</DialogHeader>
 
 			<div className="flex gap-4 py-4 h-[400px]">
 				{/* Left side - Courses and Groups */}
@@ -437,62 +454,41 @@ function GroupSelectorDialog() {
 				</div>
 			</div>
 
-			<DialogStackFooter className="justify-start">
-				<DialogStackPrevious asChild>
-					<Button variant="outline">Previous</Button>
-				</DialogStackPrevious>
-			</DialogStackFooter>
+			<DialogFooter className="justify-start">
+				<Button variant="outline" onClick={() => setCurrentStep(0)}>
+					Previous
+				</Button>
+			</DialogFooter>
 		</>
 	);
-}
+});
 
 export default function TechnoUniversityImporterDialog({
 	children,
 }: {
 	children: JSX.Element;
 }) {
-	const [selectedCampus, setSelectedCampus] = useState<
-		ServerCampus | undefined
-	>();
-	const [selectedFaculty, setSelectedFaculty] = useState<
-		ServerFaculty | undefined
-	>();
-	const [selectedCourse, setSelectedCourse] = useState<
-		ServerCourse | undefined
-	>();
+	const { open, setOpen, currentStep } = useImporterSelectionStore(
+		useShallow((s) => pick(s, ["open", "setOpen", "currentStep"])),
+	);
+
+	const handleOpenChange = (open: boolean) => {
+		setOpen(open);
+	};
 
 	return (
-		<DialogStack>
-			<DialogStackTrigger asChild>{children}</DialogStackTrigger>
-			<DialogStackOverlay />
-			<ImporterSelectionContext.Provider
-				value={{
-					selectedCampus,
-					setSelectedCampus: (c?: ServerCampus) => {
-						setSelectedCampus(c);
-						// Reset dependent selections when campus changes
-						setSelectedFaculty(undefined);
-						setSelectedCourse(undefined);
-					},
-					selectedFaculty,
-					setSelectedFaculty: (f?: ServerFaculty) => {
-						setSelectedFaculty(f);
-						// Reset course selection when faculty changes
-						setSelectedCourse(undefined);
-					},
-					selectedCourse,
-					setSelectedCourse,
-				}}
-			>
-				<DialogStackBody className="max-w-5xl">
-					<DialogStackContent>
-						<CourseAndFacultySelectorDialog />
-					</DialogStackContent>
-					<DialogStackContent>
-						<GroupSelectorDialog />
-					</DialogStackContent>
-				</DialogStackBody>
-			</ImporterSelectionContext.Provider>
-		</DialogStack>
+		<>
+			<Dialog open={open && currentStep === 0} onOpenChange={handleOpenChange}>
+				<DialogTrigger asChild>{children}</DialogTrigger>
+				<DialogContent className={`sm:max-w-5xl w-auto`}>
+					<CourseAndFacultySelectorStep />
+				</DialogContent>
+			</Dialog>
+			<Dialog open={open && currentStep === 1} onOpenChange={handleOpenChange}>
+				<DialogContent className="sm:max-w-5xl w-full">
+					<GroupSelectorStep />
+				</DialogContent>
+			</Dialog>
+		</>
 	);
 }

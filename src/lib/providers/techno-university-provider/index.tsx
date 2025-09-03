@@ -4,6 +4,7 @@ import { Button } from "~/components/ui/button";
 import { CourseProvider } from "~/lib/models/course-provider";
 import { TimeRange } from "~/lib/models/time-range";
 import TechnoUniversityImporterDialog from "./importer-dialog";
+import { TechnoCourse } from "./techno-course";
 
 export interface TechnoUniversityImportData {
 	courseCodes: string[];
@@ -32,6 +33,10 @@ export class TechnoUniversityProvider extends CourseProvider {
 
 	public static get instance(): TechnoUniversityProvider {
 		return (singletonCache ??= new TechnoUniversityProvider());
+	}
+
+	public useCourses(): TechnoCourse[] {
+		return super.useCourses() as TechnoCourse[];
 	}
 
 	public sync(): Promise<void> {
