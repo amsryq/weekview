@@ -86,19 +86,17 @@ function initializePredefinedColors(state: State) {
 		state.colors.filter((c) => c.isPredefined).map((c) => c.name),
 	);
 
-	ColorStore.setState((state) => {
-		for (const predefined of PREDEFINED_COLORS) {
-			if (!existingPredefinedIds.has(predefined.name)) {
-				const colorEntry = new ColorEntry({
-					id: randomUUID(),
-					name: predefined.name,
-					background: predefined.background,
-					isPredefined: true,
-				});
-				state.colors.push(colorEntry);
-			}
+	for (const predefined of PREDEFINED_COLORS) {
+		if (!existingPredefinedIds.has(predefined.name)) {
+			const colorEntry = new ColorEntry({
+				id: randomUUID(),
+				name: predefined.name,
+				background: predefined.background,
+				isPredefined: true,
+			});
+			state.colors.push(colorEntry);
 		}
-	});
+	}
 }
 
 const ColorStore = createStore<State & Actions>()(
