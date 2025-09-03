@@ -1,4 +1,4 @@
-import { ImportIcon } from "lucide-react";
+import { SettingsIcon } from "lucide-react";
 import { JSX } from "react";
 import { Button } from "~/components/ui/button";
 import { CourseProvider } from "~/lib/models/course-provider";
@@ -47,8 +47,8 @@ export class TechnoUniversityProvider extends CourseProvider {
 		return (
 			<TechnoUniversityImporterDialog>
 				<Button className="w-full">
-					<ImportIcon className="w-4 h-4" />
-					Import from Techno University
+					<SettingsIcon className="w-4 h-4" />
+					Manage
 				</Button>
 			</TechnoUniversityImporterDialog>
 		);

@@ -1,6 +1,6 @@
 "use client";
 
-import { DownloadIcon, Settings, SlidersHorizontal } from "lucide-react";
+import { DownloadIcon, Settings, Settings2Icon } from "lucide-react";
 import { domToPng } from "modern-screenshot";
 import CourseManagementSheet from "~/components/course-management-sheet";
 import { ThemeToggle } from "~/components/theme-toggle";
@@ -53,7 +53,7 @@ function App() {
 				</CourseManagementSheet>
 				<TimetableCustomizer>
 					<Button variant="outline">
-						<SlidersHorizontal className="w-4 h-4" />
+						<Settings2Icon className="w-4 h-4" />
 						Customize
 					</Button>
 				</TimetableCustomizer>
