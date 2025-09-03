@@ -2,7 +2,7 @@
 
 import { isEqual } from "es-toolkit";
 import { Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { BackgroundAppearance } from "~/lib/models/cell-appearance";
 import { useColorStore } from "~/lib/stores/color-store";
 import { getBackgroundStyle } from "~/lib/utils";
@@ -25,18 +25,21 @@ interface ColorPickerProps {
 /**
  * Allow managing (adding/removing) colors from ColorStore
  */
-export function ColorSelector({ value, onChange }: ColorPickerProps) {
+export function ColorSelectorGrid({ value, onChange }: ColorPickerProps) {
 	const [backgroundType, setBackgroundType] = useState<"solid" | "gradient">(
 		value?.type || "solid",
 	);
+
 	const [showCustomDialog, setShowCustomDialog] = useState(false);
-	const [customColor, setCustomColor] = useState<BackgroundAppearance>(
-		value || { type: "solid", color: "#000000" },
-	);
+	const [customColor, setCustomColor] = useState<BackgroundAppearance>({
+		type: "solid",
+		color: "#000000",
+	});
 
 	const colors = useColorStore((state) => state.colors);
 	const addColor = useColorStore((state) => state.addColor);
 	const removeColor = useColorStore((state) => state.removeColor);
+	const lastSelected = useRef<BackgroundAppearance | null>(null);
 
 	// Filter colors by current background type
 	const filteredColors = colors.filter(
@@ -46,25 +49,17 @@ export function ColorSelector({ value, onChange }: ColorPickerProps) {
 	// Check if a color is currently selected
 	const isColorSelected = (background: BackgroundAppearance) => {
 		if (!value || value.type !== background.type) return false;
-
-		if (background.type === "solid") {
-			return value.type === "solid" && value.color === background.color;
-		} else {
-			return (
-				value.type === "gradient" &&
-				isEqual(value.gradientColors, background.gradientColors) &&
-				value.gradientDirection === background.gradientDirection
-			);
-		}
+		return isEqual(value, background);
 	};
 
 	const handleColorSelect = (background: BackgroundAppearance) => {
+		lastSelected.current = value || null;
 		onChange(background);
 	};
 
 	const handleAddCustomColor = () => {
 		addColor(customColor);
-		onChange(customColor);
+		handleColorSelect(customColor);
 		setShowCustomDialog(false);
 	};
 
@@ -123,12 +118,14 @@ export function ColorSelector({ value, onChange }: ColorPickerProps) {
 									e.stopPropagation();
 									removeColor(color.id);
 
-									// Resort to the first color of the same type
-									const firstColor = colors.find(
-										(c) => c.background.type === color.background.type,
-									);
-									if (firstColor) {
-										handleColorSelect(firstColor.background);
+									const resortColor =
+										lastSelected.current ||
+										colors.find(
+											(c) => c.background.type === color.background.type,
+										)?.background;
+
+									if (resortColor) {
+										handleColorSelect(resortColor);
 									}
 								}}
 							>

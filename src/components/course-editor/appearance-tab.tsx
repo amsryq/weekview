@@ -1,6 +1,6 @@
 import { useFormContext } from "react-hook-form";
 import type { Course } from "~/lib/models/course";
-import { ColorSelector } from "../color-selector";
+import { ColorSelectorGrid } from "../color-selector-grid";
 import {
 	FormControl,
 	FormDescription,
@@ -30,7 +30,10 @@ export function AppearanceTab() {
 					<FormItem>
 						<FormLabel>Background Color</FormLabel>
 						<FormControl>
-							<ColorSelector value={field.value} onChange={field.onChange} />
+							<ColorSelectorGrid
+								value={field.value}
+								onChange={field.onChange}
+							/>
 						</FormControl>
 						<FormDescription>
 							Choose a background for your course (solid color or gradient)
