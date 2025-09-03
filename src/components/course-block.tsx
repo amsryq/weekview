@@ -26,6 +26,14 @@ interface CourseBlockProps {
 	layoutType?: "rows" | "columns";
 }
 
+const FontWeightMap = {
+	light: "font-light",
+	normal: "font-normal",
+	medium: "font-medium",
+	bold: "font-bold",
+	semibold: "font-semibold",
+} as const;
+
 function FieldInfoRow({
 	appearance,
 	icon,
@@ -39,15 +47,15 @@ function FieldInfoRow({
 }) {
 	const justifyClass =
 		appearance.textAlign === "center"
-			? "center"
+			? "justify-center"
 			: appearance.textAlign === "right"
-				? "end"
-				: "start";
+				? "justify-end"
+				: "justify-start";
 	return (
 		<div>
 			{appearance.visibility[fieldKey] && text && (
 				<div
-					className={`flex items-center justify-${justifyClass} gap-1 opacity-90 font-${appearance.weight![fieldKey]} truncate`}
+					className={`truncate flex items-center gap-1 opacity-90 ${justifyClass} ${FontWeightMap[appearance.weight[fieldKey]]}`}
 					style={{
 						fontSize: appearance.fontSize[fieldKey],
 						textAlign: appearance.textAlign,
@@ -134,14 +142,14 @@ export function CourseBlock({
 					{appearance.visibility.code && (
 						<FitText
 							fontSize={appearance.fontSize.code}
-							className={`font-${appearance.weight.code} leading-none`}
+							className={`${FontWeightMap[appearance.weight.code]} leading-none`}
 						>
 							{course.code}
 						</FitText>
 					)}
 					{appearance.visibility.name && course.name && (
 						<div
-							className={`opacity-90 font-${appearance.weight.name} ${
+							className={`opacity-90 ${FontWeightMap[appearance.weight.name]} ${
 								layoutType === "rows" ? "truncate" : ""
 							}`}
 							style={{ fontSize: appearance.fontSize.name }}

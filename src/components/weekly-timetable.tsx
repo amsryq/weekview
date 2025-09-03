@@ -190,14 +190,6 @@ function ColumnLayout({
 	containerId: string;
 }) {
 	const { timeSlots } = useTimetable();
-	const timeFontSize = useStore(
-		TimetablePreferencesStore,
-		(s) => s.cellAppearance.fontSize.time,
-	);
-	const timeWeight = useStore(
-		TimetablePreferencesStore,
-		(s) => s.cellAppearance.weight.time,
-	);
 	return (
 		<div className="overflow-y-auto">
 			<div
@@ -210,18 +202,13 @@ function ColumnLayout({
 				<div className="space-y-0">
 					<div className="h-8" />
 					{timeSlots.map((time: string) => (
-						<div
+						<span
 							key={time}
-							className="text-sm text-muted-foreground text-right pr-2 flex -translate-y-2 justify-end"
 							style={{ height: `${COLUMN_BLOCK_HEIGHT_PX}px` }}
+							className="flex text-[12px] text-muted-foreground font-semibold pr-2 -translate-y-2 justify-end"
 						>
-							<span
-								style={{ fontSize: `${timeFontSize}px` }}
-								className={`font-${timeWeight}`}
-							>
-								{time}
-							</span>
-						</div>
+							{time}
+						</span>
 					))}
 				</div>
 
