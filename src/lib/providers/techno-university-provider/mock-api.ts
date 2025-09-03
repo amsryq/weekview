@@ -44,7 +44,6 @@ const MOCK_COURSE_DATA: Record<
 			code: string;
 			group: string;
 			color: string;
-			name: string;
 			meetingTimes: { day: number; startTime: string; endTime: string }[];
 		}
 	>
@@ -55,7 +54,6 @@ const MOCK_COURSE_DATA: Record<
 			code: "CSC110",
 			group: "M3CS1102A",
 			color: "#3b82f6",
-			name: "CSC110",
 			meetingTimes: [
 				{ day: 1, startTime: "10:00", endTime: "12:00" },
 				{ day: 1, startTime: "14:00", endTime: "16:00" },
@@ -66,7 +64,6 @@ const MOCK_COURSE_DATA: Record<
 			code: "CSC110",
 			group: "M3CS1102B",
 			color: "#3b82f6",
-			name: "CSC110",
 			meetingTimes: [
 				{ day: 2, startTime: "08:00", endTime: "10:00" },
 				{ day: 4, startTime: "10:00", endTime: "12:00" },
@@ -77,7 +74,6 @@ const MOCK_COURSE_DATA: Record<
 			code: "CSC110",
 			group: "M3CS1102C",
 			color: "#3b82f6",
-			name: "CSC110",
 			meetingTimes: [{ day: 3, startTime: "14:00", endTime: "16:00" }],
 		},
 	},
@@ -87,7 +83,6 @@ const MOCK_COURSE_DATA: Record<
 			code: "MAT183",
 			group: "M3CS1102A",
 			color: "#f59e42",
-			name: "MAT183",
 			meetingTimes: [{ day: 2, startTime: "10:00", endTime: "12:00" }],
 		},
 		M3CS1102B: {
@@ -95,7 +90,6 @@ const MOCK_COURSE_DATA: Record<
 			code: "MAT183",
 			group: "M3CS1102B",
 			color: "#f59e42",
-			name: "MAT183",
 			meetingTimes: [{ day: 3, startTime: "08:00", endTime: "10:00" }],
 		},
 	},
@@ -105,7 +99,6 @@ const MOCK_COURSE_DATA: Record<
 			code: "ELC543",
 			group: "M3EL1301A",
 			color: "#10b981",
-			name: "ELC543",
 			meetingTimes: [{ day: 4, startTime: "08:00", endTime: "10:00" }],
 		},
 		M3EL1301B: {
@@ -113,7 +106,6 @@ const MOCK_COURSE_DATA: Record<
 			code: "ELC543",
 			group: "M3EL1301B",
 			color: "#10b981",
-			name: "ELC543",
 			meetingTimes: [{ day: 5, startTime: "10:00", endTime: "12:00" }],
 		},
 		M3EL1301C: {
@@ -121,7 +113,6 @@ const MOCK_COURSE_DATA: Record<
 			code: "ELC543",
 			group: "M3EL1301C",
 			color: "#10b981",
-			name: "ELC543",
 			meetingTimes: [{ day: 1, startTime: "08:00", endTime: "10:00" }],
 		},
 	},
@@ -131,7 +122,6 @@ const MOCK_COURSE_DATA: Record<
 			code: "PHY201",
 			group: "M3PH2101A",
 			color: "#f43f5e",
-			name: "PHY201",
 			meetingTimes: [{ day: 2, startTime: "14:00", endTime: "16:00" }],
 		},
 		M3PH2101B: {
@@ -139,7 +129,6 @@ const MOCK_COURSE_DATA: Record<
 			code: "PHY201",
 			group: "M3PH2101B",
 			color: "#f43f5e",
-			name: "PHY201",
 			meetingTimes: [{ day: 5, startTime: "08:00", endTime: "10:00" }],
 		},
 	},
@@ -149,7 +138,6 @@ const MOCK_COURSE_DATA: Record<
 			code: "CSC210",
 			group: "M3CS2103A",
 			color: "#6366f1",
-			name: "CSC210",
 			meetingTimes: [{ day: 3, startTime: "10:00", endTime: "12:00" }],
 		},
 		M3CS2103B: {
@@ -157,7 +145,6 @@ const MOCK_COURSE_DATA: Record<
 			code: "CSC210",
 			group: "M3CS2103B",
 			color: "#6366f1",
-			name: "CSC210",
 			meetingTimes: [{ day: 4, startTime: "14:00", endTime: "16:00" }],
 		},
 	},
@@ -219,7 +206,6 @@ export function timetableDataToTechnoCourses(
 		if (!courses.has(row.group)) {
 			const course = new TechnoCourse({
 				code: timetableData.course,
-				name: timetableData.course,
 				cellAppearance: {
 					background: {
 						type: "solid",
