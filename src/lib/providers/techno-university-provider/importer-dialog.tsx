@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { pick } from "es-toolkit";
-import { JSX, memo, useState } from "react";
+import { JSX, memo } from "react";
 import { create, useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "~/components/ui/button";
@@ -24,7 +24,6 @@ import {
 	ComboboxTrigger,
 } from "~/components/ui/shadcn-io/combobox";
 import { CourseStore } from "~/lib/stores/course-store";
-import { TechnoUniversityProvider } from ".";
 import {
 	fetchCampuses,
 	fetchCourses,

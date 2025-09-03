@@ -1,5 +1,4 @@
 import { FieldValues } from "react-hook-form";
-import { PartialDeep } from "type-fest";
 import { PartialObjectDeep } from "type-fest/source/partial-deep";
 
 export type DirtyFieldsType =

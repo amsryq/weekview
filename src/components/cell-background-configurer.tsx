@@ -2,7 +2,7 @@
 
 import { isEqual } from "es-toolkit";
 import { Plus, X } from "lucide-react";
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Control, Controller, useFieldArray, useForm } from "react-hook-form";
 
 import type {

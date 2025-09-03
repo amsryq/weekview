@@ -1,11 +1,8 @@
-import { merge, toMerged } from "es-toolkit";
+import { merge } from "es-toolkit";
 import { useMemo } from "react";
 import { PartialDeep } from "type-fest";
 import { useStore } from "zustand";
-import type {
-	CellAppearance,
-	CellElements,
-} from "~/lib/models/cell-appearance";
+import type { CellAppearance } from "~/lib/models/cell-appearance";
 import { Course } from "~/lib/models/course";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { CellAppearanceLayoutSettings } from "./cell-appearance-layout-settings";

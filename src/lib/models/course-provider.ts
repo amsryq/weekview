@@ -1,4 +1,4 @@
-import React, { JSX } from "react";
+import { JSX } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { CourseStore } from "../stores/course-store";

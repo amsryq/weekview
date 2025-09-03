@@ -1,16 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "~/components/ui/card";
 import { cn } from "~/lib/utils";
 import { signIn } from "../lib/auth/auth-client";
 import {

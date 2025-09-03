@@ -1,16 +1,8 @@
-import {
-	ClockIcon,
-	ImportIcon,
-	MapPinIcon,
-	PencilIcon,
-	PlusIcon,
-	Trash2Icon,
-} from "lucide-react";
-import { type JSX, useMemo } from "react";
+import { ClockIcon, MapPinIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import { type JSX } from "react";
 import { useStore } from "zustand";
 import { Course } from "~/lib/models/course";
 import type { CourseProvider } from "~/lib/models/course-provider";
-import TechnoUniversityImporterDialog from "~/lib/providers/techno-university-provider/importer-dialog";
 import { CourseStore } from "~/lib/stores/course-store";
 import { ProviderStore } from "~/lib/stores/provider-store";
 import { getBackgroundStyle } from "~/lib/utils";

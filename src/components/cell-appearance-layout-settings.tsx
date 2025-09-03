@@ -1,12 +1,10 @@
-import { isEqual } from "es-toolkit";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { PartialDeep, UnknownRecord } from "type-fest";
 import type {
 	CellAppearance,
 	CellElements,
 	TextAlign,
 } from "~/lib/models/cell-appearance";
-import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import {

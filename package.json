@@ -7,7 +7,7 @@
 		"build": "next build",
 		"start": "HOSTNAME=0.0.0.0 PORT=3000 node ./.next/standalone/server.js",
 		"postbuild": "cp -r .next/static .next/standalone/.next/ && [ -d public ] && cp -r public .next/standalone/public || true",
-		"biome:fixAll": "biome check --write",
+		"biome:check": "biome check --write",
 		"db:up": "docker compose up -d postgres",
 		"db:down": "docker compose down",
 		"db:psql": "docker exec -it taiki-postgres psql -U taiki -d taiki",
