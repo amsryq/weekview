@@ -1,14 +1,13 @@
-import { Clock, MapPin } from "lucide-react";
 import { createContext, useContext, useMemo } from "react";
+import { RequiredDeep } from "type-fest";
 import { useStore } from "zustand";
+import type { CellAppearance } from "~/lib/models/cell-appearance";
 import type { Course } from "~/lib/models/course";
 import type { MeetingTime } from "~/lib/models/meeting-time";
 import { CourseStore } from "~/lib/stores/course-store";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
-import { getBackgroundStyle } from "~/lib/utils";
+import { CourseBlock } from "./course-block";
 import { Card, CardContent } from "./ui/card";
-import { CustomIcon } from "./ui/custom-icon";
-import { FitText } from "./ui/fit-text";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const ROW_BLOCK_WIDTH_PX = 84;
@@ -31,18 +30,21 @@ function useTimetable() {
 	return ctx;
 }
 
-function CourseBlock({
-	course,
-	meetingTime,
-}: {
+interface PositionedCourseBlockProps {
 	course: Course;
 	meetingTime: MeetingTime;
-}) {
-	const { timeSlots, layout } = useTimetable();
-	const prefs = useStore(TimetablePreferencesStore);
+	appearance: RequiredDeep<CellAppearance>;
+	layout: "rows" | "columns";
+	timeSlots: string[];
+}
 
-	const appearance = prefs.getCellAppearance(course, meetingTime);
-
+function PositionedCourseBlock({
+	course,
+	meetingTime,
+	appearance,
+	layout,
+	timeSlots,
+}: PositionedCourseBlockProps) {
 	const {
 		start: { hour: startHour, minute: startMinute },
 		end: { hour: endHour, minute: endMinute },
@@ -53,156 +55,41 @@ function CourseBlock({
 	const durationHours = endOffsetHours - startOffsetHours;
 	const earliestHour = Number.parseInt(timeSlots[0].split(":")[0]);
 
-	// Layout styles
-	const backgroundStyle = getBackgroundStyle(appearance.background);
-
-	const style: React.CSSProperties =
-		layout === "rows"
-			? {
-					left: `${(startOffsetHours - earliestHour) * ROW_BLOCK_WIDTH_PX}px`,
-					width: `${durationHours * ROW_BLOCK_WIDTH_PX}px`,
-					top: "2px",
-					bottom: "0px",
-					borderRadius: 8,
-					...backgroundStyle,
-				}
-			: {
-					top: `${(startOffsetHours - earliestHour) * COLUMN_BLOCK_HEIGHT_PX}px`,
-					height: `${durationHours * COLUMN_BLOCK_HEIGHT_PX}px`,
-					left: "2px",
-					right: "0px",
-					borderRadius: 8,
-					...backgroundStyle,
-				};
-
-	const justifyClass =
-		appearance.textAlign === "center"
-			? "center"
-			: appearance.textAlign === "right"
-				? "end"
-				: "start";
-
-	// Icon positioning logic
-	const iconPosition = appearance.icon
-		? (() => {
-				const isRightAlign = appearance.textAlign === "right";
-
-				// If text is right-aligned, place icon on top-left
-				// If text is center or left-aligned, place icon on top-right
-				const side = isRightAlign ? "left" : "right";
-
-				return {
-					position: "absolute",
-					top: `${appearance.icon.offsetY}px`,
-					[side]: `${appearance.icon.offsetX}px`,
-					fontSize: `${appearance.icon.size * 10}px`,
-					opacity: appearance.icon.opacity,
-					transform: `rotate(${appearance.icon.rotation}deg)`,
-					pointerEvents: "none",
-					userSelect: "none",
-					zIndex: 0,
-				} as const;
-			})()
-		: null;
-
-	const InfoRow = ({
-		icon,
-		text,
-		fontKey,
-		fontSize,
-		visible,
-	}: {
-		icon?: React.ReactNode;
-		text: React.ReactNode;
-		fontKey: keyof typeof appearance.weight;
-		fontSize: number;
-		visible: boolean;
-	}) => (
-		<div>
-			{visible && text && (
-				<div
-					className={`flex items-center justify-${justifyClass} gap-1 opacity-90 font-${appearance.weight[fontKey]} truncate`}
-					style={{
-						fontSize,
-						textAlign: appearance.textAlign,
-						color: appearance.fgColor,
-					}}
-				>
-					{icon}
-					<span className="truncate">{text}</span>
-				</div>
-			)}
-		</div>
-	);
+	const positionStyle: React.CSSProperties = (() => {
+		if (layout === "rows") {
+			return {
+				position: "absolute",
+				left: `${(startOffsetHours - earliestHour) * ROW_BLOCK_WIDTH_PX}px`,
+				width: `${durationHours * ROW_BLOCK_WIDTH_PX}px`,
+				top: "2px",
+				bottom: "0px",
+			};
+		} else {
+			return {
+				position: "absolute",
+				top: `${(startOffsetHours - earliestHour) * COLUMN_BLOCK_HEIGHT_PX}px`,
+				height: `${durationHours * COLUMN_BLOCK_HEIGHT_PX}px`,
+				left: "2px",
+				right: "0px",
+			};
+		}
+	})();
 
 	return (
-		<div className="absolute overflow-hidden" style={style}>
-			<div
-				className="p-2 h-full flex flex-col justify-between text-xs relative"
-				style={{
-					textAlign: appearance.textAlign,
-					color: appearance.fgColor ?? "#fff",
-				}}
-			>
-				{/* Icon */}
-				{appearance.icon && iconPosition && (
-					<CustomIcon icon={appearance.icon} style={iconPosition} />
-				)}
-
-				{/* Time */}
-				<InfoRow
-					icon={
-						<Clock
-							width={appearance.fontSize.time}
-							height={appearance.fontSize.time}
-						/>
-					}
-					visible={appearance.visibility.time}
-					text={`${meetingTime.time.toString()}`}
-					fontKey="time"
-					fontSize={appearance.fontSize.time}
-				/>
-
-				{/* Code + Course Name */}
-				<div className="flex flex-col">
-					{appearance.visibility.code && (
-						<FitText
-							fontSize={appearance.fontSize.code}
-							className={`font-${appearance.weight.code} leading-none`}
-						>
-							{course.code}
-						</FitText>
-					)}
-					{appearance.visibility.name && course.name && (
-						<div
-							className={`opacity-90 font-${appearance.weight.name} ${layout === "rows" ? "truncate" : ""}`}
-							style={{ fontSize: appearance.fontSize.name }}
-						>
-							{course.name}
-						</div>
-					)}
-				</div>
-
-				{/* Location */}
-				<InfoRow
-					icon={
-						<MapPin
-							width={appearance.fontSize.location}
-							height={appearance.fontSize.location}
-						/>
-					}
-					visible={appearance.visibility.location}
-					text={meetingTime.location}
-					fontKey="location"
-					fontSize={appearance.fontSize.location}
-				/>
-			</div>
+		<div style={positionStyle}>
+			<CourseBlock
+				course={course}
+				meetingTime={meetingTime}
+				appearance={appearance}
+				layoutType={layout}
+			/>
 		</div>
 	);
 }
 
 function DayColumn({ day, dayIndex }: { day: string; dayIndex: number }) {
 	const { courses, timeSlots, columnHeight, rowWidth, layout } = useTimetable();
+	const prefs = useStore(TimetablePreferencesStore);
 	const meetingDay = dayIndex + 1;
 
 	const dayMeetings = courses.flatMap((course) =>
@@ -246,10 +133,13 @@ function DayColumn({ day, dayIndex }: { day: string; dayIndex: number }) {
 				))}
 
 				{dayMeetings.map(({ course, meetingTime }, idx) => (
-					<CourseBlock
+					<PositionedCourseBlock
 						key={`${course.code}-${meetingTime.day}-${idx}`}
 						course={course}
 						meetingTime={meetingTime}
+						appearance={prefs.getCellAppearance(course, meetingTime)}
+						layout={layout}
+						timeSlots={timeSlots}
 					/>
 				))}
 			</div>

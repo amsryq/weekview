@@ -1,0 +1,169 @@
+import { Clock, MapPin } from "lucide-react";
+import type React from "react";
+import { RequiredDeep } from "type-fest";
+import type { CellAppearance } from "~/lib/models/cell-appearance";
+import type { Course } from "~/lib/models/course";
+import type { MeetingTime } from "~/lib/models/meeting-time";
+import { getBackgroundStyle } from "~/lib/utils";
+import { CustomIcon } from "./ui/custom-icon";
+import { FitText } from "./ui/fit-text";
+
+interface CourseBlockProps {
+	course: Course;
+	meetingTime: MeetingTime;
+	appearance: RequiredDeep<CellAppearance>;
+	/**
+	 * Optional style override for the container
+	 */
+	style?: React.CSSProperties;
+	/**
+	 * Optional className override for the container
+	 */
+	className?: string;
+	/**
+	 * Optional layout type for conditional rendering
+	 */
+	layoutType?: "rows" | "columns";
+}
+
+function FieldInfoRow({
+	appearance,
+	icon,
+	text,
+	fieldKey,
+}: {
+	appearance: RequiredDeep<CellAppearance>;
+	icon?: React.ReactNode;
+	text: React.ReactNode;
+	fieldKey: keyof Required<typeof appearance.weight & {}>;
+}) {
+	const justifyClass =
+		appearance.textAlign === "center"
+			? "center"
+			: appearance.textAlign === "right"
+				? "end"
+				: "start";
+	return (
+		<div>
+			{appearance.visibility[fieldKey] && text && (
+				<div
+					className={`flex items-center justify-${justifyClass} gap-1 opacity-90 font-${appearance.weight![fieldKey]} truncate`}
+					style={{
+						fontSize: appearance.fontSize[fieldKey],
+						textAlign: appearance.textAlign,
+						color: appearance.fgColor,
+					}}
+				>
+					{icon}
+					<span className="truncate">{text}</span>
+				</div>
+			)}
+		</div>
+	);
+}
+
+export function CourseBlock({
+	course,
+	meetingTime,
+	appearance,
+	style,
+	className = "relative overflow-hidden",
+	layoutType,
+}: CourseBlockProps) {
+	const backgroundStyle = getBackgroundStyle(appearance.background);
+
+	const containerStyle: React.CSSProperties = {
+		borderRadius: 8,
+		height: "100%",
+		...backgroundStyle,
+		...style,
+	};
+
+	// Icon positioning logic
+	const iconPosition = appearance.icon
+		? (() => {
+				const isRightAlign = appearance.textAlign === "right";
+
+				// If text is right-aligned, place icon on top-left
+				// If text is center or left-aligned, place icon on top-right
+				const side = isRightAlign ? "left" : "right";
+
+				return {
+					position: "absolute",
+					top: `${appearance.icon.offsetY}px`,
+					[side]: `${appearance.icon.offsetX}px`,
+					fontSize: `${appearance.icon.size * 10}px`,
+					opacity: appearance.icon.opacity,
+					transform: `rotate(${appearance.icon.rotation}deg)`,
+					pointerEvents: "none",
+					userSelect: "none",
+					zIndex: 0,
+				} as const;
+			})()
+		: null;
+
+	return (
+		<div className={className} style={containerStyle}>
+			<div
+				className="p-2 h-full flex flex-col justify-between text-xs relative"
+				style={{
+					textAlign: appearance.textAlign,
+					color: appearance.fgColor ?? "#fff",
+				}}
+			>
+				{/* Icon */}
+				{appearance.icon && iconPosition && (
+					<CustomIcon icon={appearance.icon} style={iconPosition} />
+				)}
+
+				{/* Time */}
+				<FieldInfoRow
+					fieldKey="time"
+					appearance={appearance}
+					icon={
+						<Clock
+							width={appearance.fontSize.time}
+							height={appearance.fontSize.time}
+						/>
+					}
+					text={`${meetingTime.time.toString()}`}
+				/>
+
+				{/* Code + Course Name */}
+				<div className="flex flex-col">
+					{appearance.visibility.code && (
+						<FitText
+							fontSize={appearance.fontSize.code}
+							className={`font-${appearance.weight.code} leading-none`}
+						>
+							{course.code}
+						</FitText>
+					)}
+					{appearance.visibility.name && course.name && (
+						<div
+							className={`opacity-90 font-${appearance.weight.name} ${
+								layoutType === "rows" ? "truncate" : ""
+							}`}
+							style={{ fontSize: appearance.fontSize.name }}
+						>
+							{course.name}
+						</div>
+					)}
+				</div>
+
+				{/* Location */}
+				<FieldInfoRow
+					fieldKey="location"
+					appearance={appearance}
+					icon={
+						<MapPin
+							width={appearance.fontSize.location}
+							height={appearance.fontSize.location}
+						/>
+					}
+					text={meetingTime.location}
+				/>
+			</div>
+		</div>
+	);
+}
