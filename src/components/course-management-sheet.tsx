@@ -180,20 +180,18 @@ function ProviderSection({ provider }: { provider: CourseProvider }) {
 					({courses.length})
 				</span>
 			</h2>
-			<div className="flex flex-col gap-2 w-full">
+			<div className="flex flex-col gap-4 w-full">
 				{courses.length > 0 ? (
-					<>
-						<div className="mb-2">
-							{courses.map((course, idx) => (
-								<CourseCard
-									start={idx === 0}
-									end={idx === courses.length - 1}
-									key={course.id}
-									course={course}
-								/>
-							))}
-						</div>
-					</>
+					<div>
+						{courses.map((course, idx) => (
+							<CourseCard
+								start={idx === 0}
+								end={idx === courses.length - 1}
+								key={course.id}
+								course={course}
+							/>
+						))}
+					</div>
 				) : (
 					<Card>
 						<CardContent className="flex flex-col gap-4 align-center">

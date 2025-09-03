@@ -54,7 +54,7 @@
 	--font-sans: Inter Tight, ui-sans-serif, sans-serif, system-ui;
 	--font-serif: Georgia, serif;
 	--font-mono: JetBrains Mono, ui-monospace, monospace;
-	--radius: 1.25rem;
+	--radius: 0.75rem;
 	--shadow-2xs: 0px 2px 6px 0px hsl(0 0% 20% / 0.05);
 	--shadow-xs: 0px 2px 6px 0px hsl(0 0% 20% / 0.05);
 	--shadow-sm:

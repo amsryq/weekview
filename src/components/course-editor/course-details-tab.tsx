@@ -246,7 +246,7 @@ export function CourseDetailsTab() {
 									type="button"
 									variant="outline"
 									onClick={addMeetingTime}
-									className="w-full h-10 mb-4 border-dashed"
+									className="w-full h-10 border-dashed"
 								>
 									<span className="text-sm">+ Add Meeting Time</span>
 								</Button>

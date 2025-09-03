@@ -32,15 +32,15 @@ export function CoursePreview() {
 	);
 
 	return (
-		<div className="space-y-4">
-			<div>
+		<div className="flex flex-col items-center space-y-4">
+			<div className="text-center">
 				<h4 className="text-sm font-medium">Preview</h4>
 				<p className="text-xs text-muted-foreground">
 					See how your course will look in the timetable
 				</p>
 			</div>
 
-			<div className="border rounded-lg p-4 h-32">
+			<div className="border rounded-lg w-64 p-4 h-32">
 				<CourseBlock
 					course={mockCourse}
 					meetingTime={mockMeetingTime}

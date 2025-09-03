@@ -83,9 +83,10 @@ export function CourseEditorForm({
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-0">
-				<div className="flex flex-col lg:flex-row gap-6">
-					{/* Main Content with Tabs */}
-					<div className="flex-1 min-w-0">
+				{/* ScrollArea only applies for < lg */}
+				<ScrollArea className="max-lg:h-[60vh] max-lg:pr-4">
+					<div className="flex flex-col-reverse lg:flex-row gap-6">
+						{/* Main Content with Tabs */}
 						<Tabs defaultValue="details" className="w-full">
 							<TabsList className="grid w-full grid-cols-4">
 								<TabsTrigger value="details">Details</TabsTrigger>
@@ -94,8 +95,9 @@ export function CourseEditorForm({
 								<TabsTrigger value="icons">Icons</TabsTrigger>
 							</TabsList>
 
-							<div className="mt-6">
-								<ScrollArea className="h-[60vh] pr-4">
+							{/* ScrollArea only applies for > lg */}
+							<ScrollArea className="pb-4 lg:h-[60vh] lg:pr-4">
+								<div className="mt-6">
 									<TabsContent value="details" className="m-0">
 										<CourseDetailsTab />
 									</TabsContent>
@@ -111,23 +113,23 @@ export function CourseEditorForm({
 									<TabsContent value="icons" className="m-0">
 										<IconsTab />
 									</TabsContent>
-								</ScrollArea>
-							</div>
+								</div>
+							</ScrollArea>
 						</Tabs>
-					</div>
 
-					{/* Preview Sidebar */}
-					<div className="lg:w-80 border-t lg:border-t-0 lg:border-l pt-6 lg:pt-0 lg:pl-6">
-						<CoursePreview />
+						{/* Preview Sidebar */}
+						<div className="w-full lg:w-80 lg:border-l lg:pl-6 max-lg:border-b max-lg:pb-6">
+							<CoursePreview />
+						</div>
 					</div>
-				</div>
+				</ScrollArea>
 
 				{/* Form Actions */}
 				<div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-6 border-t">
 					<div className="flex gap-3">
 						<Button
 							type="button"
-							variant="ghost"
+							variant="outline"
 							onClick={() => form.reset()}
 							className="flex-1 sm:flex-none"
 						>
@@ -136,7 +138,7 @@ export function CourseEditorForm({
 						<DialogClose asChild>
 							<Button
 								type="button"
-								variant="outline"
+								variant="secondary"
 								className="flex-1 sm:flex-none"
 							>
 								Cancel
