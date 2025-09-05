@@ -2,25 +2,8 @@ import { SettingsIcon } from "lucide-react";
 import { JSX } from "react";
 import { Button } from "~/components/ui/button";
 import { CourseProvider } from "~/lib/models/course-provider";
-import { TimeRange } from "~/lib/models/time-range";
 import TechnoUniversityImporterDialog from "./importer-dialog";
-import { TechnoCourse } from "./techno-course";
-
-export interface TechnoUniversityImportData {
-	courseCodes: string[];
-	studentGroup: string;
-}
-
-export interface TechnoUniversityCourseData {
-	name: string;
-	code: string;
-	meetingTimes: {
-		day: number;
-		time: TimeRange;
-		location?: string;
-		description?: string;
-	}[];
-}
+import { TechnoGroup } from "./techno-course";
 
 let singletonCache: TechnoUniversityProvider | null = null;
 
@@ -35,8 +18,8 @@ export class TechnoUniversityProvider extends CourseProvider {
 		return (singletonCache ??= new TechnoUniversityProvider());
 	}
 
-	public useCourses(): TechnoCourse[] {
-		return super.useCourses() as TechnoCourse[];
+	public useCourses(): TechnoGroup[] {
+		return super.useCourses() as TechnoGroup[];
 	}
 
 	public sync(): Promise<void> {

@@ -341,9 +341,11 @@ if (process.env.NODE_ENV !== "production") {
 					}),
 				],
 			}),
-		].forEach((c) => {
-			CourseStore.getState().addCourse(c);
-		});
+		]
+			.slice(0, 3)
+			.forEach((c) => {
+				CourseStore.getState().addCourse(c);
+			});
 	}, 0);
 }
 

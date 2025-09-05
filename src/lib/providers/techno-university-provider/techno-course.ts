@@ -7,7 +7,7 @@ type TechnoCourseConstructorProps = ConstructorParameters<typeof Course>[0] & {
 	faculty?: string;
 };
 
-export class TechnoCourse extends Course {
+export class TechnoGroup extends Course {
 	public internal: {
 		code: string;
 		campus: string;

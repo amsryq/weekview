@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { pick } from "es-toolkit";
+import { AlertTriangleIcon } from "lucide-react";
 import { JSX, memo } from "react";
 import { create, useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import {
 	Dialog,
@@ -24,27 +26,23 @@ import {
 	ComboboxTrigger,
 } from "~/components/ui/shadcn-io/combobox";
 import { CourseStore } from "~/lib/stores/course-store";
-import {
-	fetchCampuses,
-	fetchCourses,
-	fetchFaculties,
-	fetchTimetable,
-	timetableDataToTechnoCourses,
-} from "./mock-api";
-import { TechnoCourse } from "./techno-course";
-import type { ServerCampus, ServerCourse, ServerFaculty } from "./types";
+import { Campus } from "./campus";
+import { Course } from "./course";
+import { Faculty } from "./faculty";
+import { Group } from "./group";
+import { TechnoGroup } from "./techno-course";
 
 const useImporterSelectionStore = create<{
 	open: boolean;
 	currentStep: number;
-	selectedCampus?: ServerCampus;
-	selectedFaculty?: ServerFaculty;
-	selectedCourse?: ServerCourse;
+	selectedCampus?: Campus;
+	selectedFaculty?: Faculty;
+	selectedCourse?: Course;
 	setOpen: (open: boolean) => void;
 	setCurrentStep: (step: number) => void;
-	setSelectedCampus: (c?: ServerCampus) => void;
-	setSelectedFaculty: (f?: ServerFaculty) => void;
-	setSelectedCourse: (c?: ServerCourse) => void;
+	setSelectedCampus: (c?: Campus) => void;
+	setSelectedFaculty: (f?: Faculty) => void;
+	setSelectedCourse: (c?: Course) => void;
 }>((set) => ({
 	open: false,
 	currentStep: 0,
@@ -67,6 +65,25 @@ const useImporterSelectionStore = create<{
 	setSelectedCourse: (c) => set({ selectedCourse: c }),
 }));
 
+function UnaffiliationNotice() {
+	return (
+		<div className="w-full flex mt-2 justify-center">
+			<div className="w-full max-w-lg">
+				<Alert className="border-yellow-200 bg-yellow-50 text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950/30 dark:text-yellow-200 [&>svg]:text-yellow-600 dark:[&>svg]:text-yellow-400">
+					<AlertTriangleIcon />
+					<AlertTitle>Notice</AlertTitle>
+					<AlertDescription className="text-yellow-700 dark:text-yellow-300">
+						Weekview is not affiliated with or endorsed by UiTM. Please use this
+						feature with discretion and verify your timetable against official
+						sources. While the data is sourced from UiTM, it may be incomplete
+						or outdated.
+					</AlertDescription>
+				</Alert>
+			</div>
+		</div>
+	);
+}
+
 function CourseAndFacultySelectorStep() {
 	const {
 		selectedCampus,
@@ -81,9 +98,9 @@ function CourseAndFacultySelectorStep() {
 		data: campuses,
 		isLoading: campusesLoading,
 		error: campusesError,
-	} = useQuery({
-		queryKey: ["techno", "campuses"],
-		queryFn: fetchCampuses,
+	} = useQuery<Campus[]>({
+		queryKey: ["uitm", "campuses"],
+		queryFn: Campus.fetch,
 		staleTime: 5 * 60 * 1000,
 	});
 
@@ -92,10 +109,10 @@ function CourseAndFacultySelectorStep() {
 		data: faculties,
 		isLoading: facultiesLoading,
 		error: facultiesError,
-	} = useQuery({
-		queryKey: ["techno", "faculties"],
-		queryFn: fetchFaculties,
-		enabled: Boolean(selectedCampus?.requiresFaculty),
+	} = useQuery<Faculty[]>({
+		queryKey: ["uitm", "faculties", selectedCampus?.code],
+		queryFn: () => Faculty.fetch(selectedCampus!),
+		enabled: Boolean(selectedCampus?.requireFaculty),
 		staleTime: 5 * 60 * 1000,
 	});
 
@@ -116,7 +133,7 @@ function CourseAndFacultySelectorStep() {
 	};
 
 	const canProceed =
-		selectedCampus && (!selectedCampus.requiresFaculty || selectedFaculty);
+		selectedCampus && (!selectedCampus.requireFaculty || selectedFaculty);
 
 	return (
 		<>
@@ -125,17 +142,16 @@ function CourseAndFacultySelectorStep() {
 				<DialogDescription>
 					Please select your campus and faculty from the dropdown menus.
 				</DialogDescription>
+
+				<UnaffiliationNotice />
 			</DialogHeader>
 
-			<div className="flex flex-col gap-2 py-4">
+			<div className="flex flex-col gap-2">
 				<Combobox
 					type="campus"
 					loading={campusesLoading}
 					loadingText="Loading campuses..."
-					data={
-						campuses?.map(({ code, name }) => ({ value: code, label: name })) ||
-						[]
-					}
+					data={campuses?.map((c) => ({ value: c.code, label: c.name })) || []}
 					value={selectedCampus?.code || ""}
 					onValueChange={handleCampusChange}
 				>
@@ -150,8 +166,8 @@ function CourseAndFacultySelectorStep() {
 						</ComboboxEmpty>
 						<ComboboxList>
 							<ComboboxGroup>
-								{campuses?.map(({ code, name }) => (
-									<ComboboxItem key={code} value={code}>
+								{campuses?.map(({ code, name }, idx) => (
+									<ComboboxItem key={idx} value={code}>
 										{name}
 									</ComboboxItem>
 								))}
@@ -164,47 +180,53 @@ function CourseAndFacultySelectorStep() {
 					<div className="text-sm text-red-500">{campusesError.message}</div>
 				)}
 
-				<Combobox
-					type="faculty"
-					loading={facultiesLoading}
-					loadingText="Loading faculties..."
-					data={
-						faculties?.map(({ code: id, name }) => ({
-							value: id,
-							label: name,
-						})) || []
-					}
-					value={selectedFaculty?.code || ""}
-					onValueChange={handleFacultyChange}
-				>
-					<ComboboxTrigger
-						className={`w-full ${
-							facultiesLoading
-								? "cursor-wait"
-								: !faculties
-									? "cursor-not-allowed opacity-50"
-									: ""
-						}`}
-						disabled={
-							!selectedCampus?.requiresFaculty || facultiesLoading || !faculties
+				{(!selectedCampus || selectedCampus.requireFaculty) && (
+					<Combobox
+						type="faculty"
+						loading={facultiesLoading}
+						loadingText="Loading faculties..."
+						data={
+							faculties?.map(({ code, name }) => ({
+								value: code,
+								label: name,
+							})) || []
 						}
-					/>
-					<ComboboxContent>
-						<ComboboxInput />
-						<ComboboxEmpty>
-							{facultiesLoading ? "Loading faculties..." : "No faculties found"}
-						</ComboboxEmpty>
-						<ComboboxList>
-							<ComboboxGroup>
-								{faculties?.map(({ code: id, name }) => (
-									<ComboboxItem key={id} value={id}>
-										{name}
-									</ComboboxItem>
-								))}
-							</ComboboxGroup>
-						</ComboboxList>
-					</ComboboxContent>
-				</Combobox>
+						value={selectedFaculty?.code || ""}
+						onValueChange={handleFacultyChange}
+					>
+						<ComboboxTrigger
+							className={`w-full ${
+								facultiesLoading
+									? "cursor-wait"
+									: !faculties
+										? "cursor-not-allowed opacity-50"
+										: ""
+							}`}
+							disabled={
+								!selectedCampus?.requireFaculty ||
+								facultiesLoading ||
+								!faculties
+							}
+						/>
+						<ComboboxContent>
+							<ComboboxInput />
+							<ComboboxEmpty>
+								{facultiesLoading
+									? "Loading faculties..."
+									: "No faculties found"}
+							</ComboboxEmpty>
+							<ComboboxList>
+								<ComboboxGroup>
+									{faculties?.map(({ code: id, name }, idx) => (
+										<ComboboxItem key={idx} value={id}>
+											{name}
+										</ComboboxItem>
+									))}
+								</ComboboxGroup>
+							</ComboboxList>
+						</ComboboxContent>
+					</Combobox>
+				)}
 
 				{facultiesError && (
 					<div className="text-sm text-red-500">
@@ -226,7 +248,7 @@ function CourseAndFacultySelectorStep() {
 	);
 }
 
-const GroupSelectorStep = memo(function GroupSelectorStep() {
+function GroupSelectorStep() {
 	const {
 		selectedCampus,
 		selectedFaculty,
@@ -238,7 +260,7 @@ const GroupSelectorStep = memo(function GroupSelectorStep() {
 	const selectedGroups = useStore(
 		CourseStore,
 		useShallow((state) =>
-			state.courses.filter((a): a is TechnoCourse => a instanceof TechnoCourse),
+			state.courses.filter((a): a is TechnoGroup => a instanceof TechnoGroup),
 		),
 	);
 	// Courses list for selected campus/faculty
@@ -246,21 +268,10 @@ const GroupSelectorStep = memo(function GroupSelectorStep() {
 		data: courses,
 		isLoading: coursesLoading,
 		error: coursesError,
-	} = useQuery({
-		queryKey: [
-			"techno",
-			"courses",
-			selectedCampus?.code,
-			selectedCampus?.requiresFaculty ? selectedFaculty?.code : "",
-		],
-		queryFn: () =>
-			fetchCourses(
-				selectedCampus!.code,
-				selectedCampus?.requiresFaculty ? selectedFaculty?.code : undefined,
-			),
-		enabled: Boolean(
-			selectedCampus && (!selectedCampus.requiresFaculty || selectedFaculty),
-		),
+	} = useQuery<Course[]>({
+		queryKey: ["uitm", "courses", selectedFaculty?.code],
+		queryFn: () => Course.fetch(selectedFaculty ?? selectedCampus!),
+		enabled: Boolean(selectedFaculty || selectedCampus),
 		staleTime: 5 * 60 * 1000,
 	});
 
@@ -269,18 +280,18 @@ const GroupSelectorStep = memo(function GroupSelectorStep() {
 		data: availableGroups,
 		isLoading: groupsLoading,
 		error: groupsError,
-	} = useQuery({
-		queryKey: ["techno", "timetable", selectedCourse?.code],
-		queryFn: () => fetchTimetable(selectedCourse!),
+	} = useQuery<Group[], Error, TechnoGroup[]>({
+		queryKey: ["uitm", "groups", selectedCourse?.code],
+		queryFn: () => Group.fetch(selectedCourse!),
 		enabled: Boolean(selectedCourse),
-		select: timetableDataToTechnoCourses,
+		select: (groups) => groups.map((g) => g.toTechnoCourse()),
 	});
 
-	const handleCourseSelect = (course: ServerCourse) => {
+	const handleCourseSelect = (course: Course) => {
 		setSelectedCourse(course);
 	};
 
-	const handleGroupSelect = (technoCourse: TechnoCourse) => {
+	const handleGroupSelect = (technoCourse: TechnoGroup) => {
 		const exists = selectedGroups.find(
 			(sg) =>
 				sg.internal.code === technoCourse.internal.code &&
@@ -327,9 +338,9 @@ const GroupSelectorStep = memo(function GroupSelectorStep() {
 									{coursesError.message}
 								</div>
 							) : courses && courses.length > 0 ? (
-								courses.map((course) => (
+								courses.map((course, idx) => (
 									<button
-										key={course.code}
+										key={idx}
 										onClick={() => handleCourseSelect(course)}
 										className={`block w-full text-left p-2 rounded hover:bg-muted transition-colors ${
 											selectedCourse?.code === course.code ? "bg-muted" : ""
@@ -359,7 +370,7 @@ const GroupSelectorStep = memo(function GroupSelectorStep() {
 									{(groupsError as Error).message}
 								</div>
 							) : selectedCourse && availableGroups?.length ? (
-								availableGroups.map((technoCourse) => {
+								availableGroups.map((technoCourse, idx) => {
 									const alreadyExists = selectedGroups.includes(technoCourse);
 									const conflicts =
 										CourseStore.getState().hasTimeConflicts(technoCourse);
@@ -372,7 +383,7 @@ const GroupSelectorStep = memo(function GroupSelectorStep() {
 
 									return (
 										<button
-											key={technoCourse.internal.group}
+											key={idx}
 											onClick={() => handleGroupSelect(technoCourse)}
 											className={`block w-full text-left p-2 rounded transition-colors ${
 												reason
@@ -409,11 +420,8 @@ const GroupSelectorStep = memo(function GroupSelectorStep() {
 					<div className="border rounded-lg p-3 h-full overflow-y-auto">
 						{selectedGroups.length > 0 ? (
 							<div className="space-y-2">
-								{selectedGroups.map(({ internal: { code, group } }) => (
-									<div
-										key={`${code}-${group}`}
-										className="border rounded-lg p-3 bg-muted/30"
-									>
+								{selectedGroups.map(({ internal: { code, group } }, idx) => (
+									<div key={idx} className="border rounded-lg p-3 bg-muted/30">
 										<div className="flex items-center justify-between">
 											<div>
 												<div className="font-medium">{code}</div>
@@ -460,7 +468,7 @@ const GroupSelectorStep = memo(function GroupSelectorStep() {
 			</DialogFooter>
 		</>
 	);
-});
+}
 
 export default function TechnoUniversityImporterDialog({
 	children,
