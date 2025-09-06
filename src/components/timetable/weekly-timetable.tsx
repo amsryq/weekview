@@ -6,8 +6,8 @@ import type { Course } from "~/lib/models/course";
 import type { MeetingTime } from "~/lib/models/meeting-time";
 import { CourseStore } from "~/lib/stores/course-store";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
+import { Card, CardContent } from "../ui/card";
 import { CourseBlock } from "./course-block";
-import { Card, CardContent } from "./ui/card";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const ROW_BLOCK_WIDTH_PX = 84;

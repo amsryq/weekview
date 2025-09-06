@@ -2,7 +2,6 @@ import { type JSX, useState } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import type { PartialDeep } from "type-fest";
 import { Course } from "~/lib/models/course";
-import { CourseEditorForm } from "./course-editor/course-editor-form";
 import {
 	Dialog,
 	DialogContent,
@@ -10,7 +9,8 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "./ui/dialog";
+} from "../ui/dialog";
+import { CourseEditorForm } from "./course-editor-form";
 
 export default function CourseEditorDialog({
 	children,

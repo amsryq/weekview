@@ -5,8 +5,8 @@ import { useStore } from "zustand";
 import type { CellAppearance } from "~/lib/models/cell-appearance";
 import { Course } from "~/lib/models/course";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
-import { CellAppearanceLayoutSettings } from "./cell-appearance-layout-settings";
-import { Button } from "./ui/button";
+import WeeklyTimetable from "../timetable/weekly-timetable";
+import { Button } from "../ui/button";
 import {
 	Dialog,
 	DialogClose,
@@ -14,11 +14,11 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "./ui/dialog";
-import { Label } from "./ui/label";
-import { ScrollArea } from "./ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import WeeklyTimetable from "./weekly-timetable";
+} from "../ui/dialog";
+import { Label } from "../ui/label";
+import { ScrollArea } from "../ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { CellAppearanceLayoutSettings } from "./cell-appearance-layout-settings";
 
 export default function TimetableCustomizer({
 	children,

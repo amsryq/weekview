@@ -1,6 +1,6 @@
 import { useFormContext } from "react-hook-form";
 import type { Course } from "~/lib/models/course";
-import { ColorSelectorGrid } from "../color-selector-grid";
+import { ColorSelectorGrid } from "../settings/color-selector-grid";
 import {
 	FormControl,
 	FormDescription,

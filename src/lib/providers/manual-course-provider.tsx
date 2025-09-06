@@ -1,6 +1,6 @@
 import { PlusIcon } from "lucide-react";
 import { JSX } from "react";
-import CourseEditorDialog from "~/components/course-editor-dialog";
+import CourseEditorDialog from "~/components/course-editor/course-editor-dialog";
 import { Button } from "~/components/ui/button";
 import { Course } from "../models/course";
 import { CourseProvider } from "../models/course-provider";

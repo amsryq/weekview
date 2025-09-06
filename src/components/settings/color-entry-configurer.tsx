@@ -5,17 +5,17 @@ import { Plus, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { Control, Controller, useFieldArray, useForm } from "react-hook-form";
 import { ColorEntry, GradientDirection } from "~/lib/models/color-entry";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "./ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+} from "../ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 
 interface CellBackgroundConfigurerProps {
 	value: ColorEntry.Schema;

@@ -5,16 +5,16 @@ import { Plus, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { ColorEntry } from "~/lib/models/color-entry";
 import { useColorStore } from "~/lib/stores/color-store";
-import { ColorEntryConfigurer } from "./color-entry-configurer";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import {
 	Dialog,
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "./ui/dialog";
-import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
+} from "../ui/dialog";
+import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
+import { ColorEntryConfigurer } from "./color-entry-configurer";
 
 interface ColorPickerProps {
 	value?: ColorEntry.Schema;

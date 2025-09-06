@@ -3,10 +3,10 @@
 import { DownloadIcon, Settings, Settings2Icon } from "lucide-react";
 import { domToPng } from "modern-screenshot";
 import CourseManagementSheet from "~/components/course-management-sheet";
-import { ThemeToggle } from "~/components/theme-toggle";
-import TimetableCustomizer from "~/components/timetable-customizer";
+import { ThemeToggle } from "~/components/settings/theme-toggle";
+import TimetableCustomizer from "~/components/settings/timetable-customizer";
+import WeeklyTimetable from "~/components/timetable/weekly-timetable";
 import { Button } from "~/components/ui/button";
-import WeeklyTimetable from "~/components/weekly-timetable";
 
 // TODO: Export button instead or both and show save file picker?
 const handleDownloadPng = async () => {

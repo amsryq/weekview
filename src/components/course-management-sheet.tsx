@@ -6,7 +6,7 @@ import { Course } from "~/lib/models/course";
 import type { CourseProvider } from "~/lib/models/course-provider";
 import { CourseStore } from "~/lib/stores/course-store";
 import { ProviderStore } from "~/lib/stores/provider-store";
-import CourseEditorDialog from "./course-editor-dialog";
+import CourseEditorDialog from "./course-editor/course-editor-dialog";
 import {
 	AlertDialog,
 	AlertDialogAction,

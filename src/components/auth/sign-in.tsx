@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils/styles";
-import { signIn } from "../lib/auth/auth-client";
+import { signIn } from "../../lib/auth/auth-client";
 import {
 	Dialog,
 	DialogContent,
@@ -11,7 +11,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "./ui/dialog";
+} from "../ui/dialog";
 
 export default function SignIn({ children }: { children: React.ReactNode }) {
 	const [loading, setLoading] = useState(false);

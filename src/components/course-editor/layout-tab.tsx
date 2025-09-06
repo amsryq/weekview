@@ -3,7 +3,7 @@ import { PartialDeep } from "type-fest";
 import type { CellAppearance } from "~/lib/models/cell-appearance";
 import type { Course } from "~/lib/models/course";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
-import { CellAppearanceLayoutSettings } from "../cell-appearance-layout-settings";
+import { CellAppearanceLayoutSettings } from "../settings/cell-appearance-layout-settings";
 
 export function LayoutTab() {
 	const form = useFormContext<Course.Schema>();

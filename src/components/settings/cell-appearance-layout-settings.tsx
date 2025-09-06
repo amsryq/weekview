@@ -5,16 +5,16 @@ import type {
 	CellElements,
 	TextAlign,
 } from "~/lib/models/cell-appearance";
-import { Button } from "./ui/button";
-import { Label } from "./ui/label";
+import { Button } from "../ui/button";
+import { Label } from "../ui/label";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "./ui/select";
-import { Switch } from "./ui/switch";
+} from "../ui/select";
+import { Switch } from "../ui/switch";
 
 export interface CellAppearanceLayoutSettingsProps {
 	value: CellAppearance;

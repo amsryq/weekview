@@ -1,6 +1,6 @@
 import "~/globals.css";
 import { UserIcon } from "lucide-react";
-import { AccountManagerDialog } from "~/components/account-manager-dialog";
+import { AccountManagerDialog } from "~/components/auth/account-manager-dialog";
 import { Button } from "~/components/ui/button";
 import App from "./app";
 

@@ -5,8 +5,8 @@ import type { CellAppearance } from "~/lib/models/cell-appearance";
 import { ColorEntry } from "~/lib/models/color-entry";
 import type { Course } from "~/lib/models/course";
 import type { MeetingTime } from "~/lib/models/meeting-time";
-import { CustomIcon } from "./ui/custom-icon";
-import { FitText } from "./ui/fit-text";
+import { CustomIcon } from "../ui/custom-icon";
+import { FitText } from "../ui/fit-text";
 
 interface CourseBlockProps {
 	course: Course;

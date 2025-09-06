@@ -5,7 +5,7 @@ import { Course } from "~/lib/models/course";
 import { MeetingTime } from "~/lib/models/meeting-time";
 import { ManualCourseProvider } from "~/lib/providers/manual-course-provider";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
-import { CourseBlock } from "../course-block";
+import { CourseBlock } from "../timetable/course-block";
 
 export function CoursePreview() {
 	const form = useFormContext<Course.Schema>();
