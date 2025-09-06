@@ -4,11 +4,11 @@ import { createStore } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import {
-	type BackgroundAppearance,
 	type CellAppearance,
 	type CellElements,
 	type FontWeight,
 } from "../models/cell-appearance";
+import { ColorEntry } from "../models/color-entry";
 import { Course } from "../models/course";
 import { MeetingTime } from "../models/meeting-time";
 
@@ -57,7 +57,8 @@ const defaultState = {
 		background: {
 			type: "solid",
 			color: "#22223b",
-		} satisfies BackgroundAppearance,
+			predefined: false,
+		} satisfies ColorEntry.Schema,
 
 		fgColor: "#00FF00",
 	} satisfies RequiredDeep<CellAppearance> as RequiredDeep<CellAppearance>,
@@ -84,7 +85,7 @@ interface Actions {
 		value: boolean | number | FontWeight,
 	) => void;
 
-	setBackgroundAppearance: (background: BackgroundAppearance) => void;
+	setBackgroundAppearance: (background: ColorEntry.Schema) => void;
 
 	reset: () => void;
 }
@@ -126,20 +127,11 @@ export const TimetablePreferencesStore = createStore<State & Actions>()(
 
 			setBackgroundAppearance: (background) =>
 				set((s) => {
-					if (background.type === "solid") {
-						s.cellAppearance.background = {
-							type: background.type,
-							color: background.color,
-						};
-					} else {
-						s.cellAppearance.background = {
-							type: background.type,
-							gradientColors: background.gradientColors,
-							gradientDirection: background.gradientDirection,
-						};
-					}
+					s.cellAppearance.background = {
+						...background,
+						predefined: background.predefined ?? false,
+					};
 				}),
-
 			reset: () => set(() => defaultState),
 		})),
 		{

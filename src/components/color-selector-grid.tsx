@@ -3,10 +3,9 @@
 import { isEqual } from "es-toolkit";
 import { Plus, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
-import type { BackgroundAppearance } from "~/lib/models/cell-appearance";
+import { ColorEntry } from "~/lib/models/color-entry";
 import { useColorStore } from "~/lib/stores/color-store";
-import { getBackgroundStyle } from "~/lib/utils/styles";
-import { CellBackgroundConfigurer } from "./cell-background-configurer";
+import { ColorEntryConfigurer } from "./color-entry-configurer";
 import { Button } from "./ui/button";
 import {
 	Dialog,
@@ -18,20 +17,20 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 
 interface ColorPickerProps {
-	value?: BackgroundAppearance;
-	onChange: (value: BackgroundAppearance) => void;
+	value?: ColorEntry.Schema;
+	onChange: (value: ColorEntry.Schema) => void;
 }
 
 /**
  * Allow managing (adding/removing) colors from ColorStore
  */
 export function ColorSelectorGrid({ value, onChange }: ColorPickerProps) {
-	const [backgroundType, setBackgroundType] = useState<"solid" | "gradient">(
+	const [colorType, setBackgroundType] = useState<"solid" | "gradient">(
 		value?.type || "solid",
 	);
 
 	const [showCustomDialog, setShowCustomDialog] = useState(false);
-	const [customColor, setCustomColor] = useState<BackgroundAppearance>({
+	const [customColor, setCustomColor] = useState<ColorEntry.Schema>({
 		type: "solid",
 		color: "#000000",
 	});
@@ -39,22 +38,20 @@ export function ColorSelectorGrid({ value, onChange }: ColorPickerProps) {
 	const colors = useColorStore((state) => state.colors);
 	const addColor = useColorStore((state) => state.addColor);
 	const removeColor = useColorStore((state) => state.removeColor);
-	const lastSelected = useRef<BackgroundAppearance | null>(null);
+	const lastSelected = useRef<ColorEntry.Schema | null>(null);
 
-	// Filter colors by current background type
-	const filteredColors = colors.filter(
-		(color) => color.background.type === backgroundType,
-	);
+	// Filter colors by current color type
+	const filteredColors = colors.filter((color) => color.def.type === colorType);
 
 	// Check if a color is currently selected
-	const isColorSelected = (background: BackgroundAppearance) => {
-		if (!value || value.type !== background.type) return false;
-		return isEqual(value, background);
+	const isColorSelected = (color: ColorEntry.Schema) => {
+		if (!value || value.type !== color.type) return false;
+		return isEqual(value, color);
 	};
 
-	const handleColorSelect = (background: BackgroundAppearance) => {
+	const handleColorSelect = (color: ColorEntry.Schema) => {
 		lastSelected.current = value || null;
-		onChange(background);
+		onChange(color);
 	};
 
 	const handleAddCustomColor = () => {
@@ -81,7 +78,7 @@ export function ColorSelectorGrid({ value, onChange }: ColorPickerProps) {
 		<div className="space-y-4">
 			{/* Background Type Toggle */}
 			<Tabs
-				value={backgroundType}
+				value={colorType}
 				onValueChange={(value) =>
 					handleTypeChange(value as "solid" | "gradient")
 				}
@@ -98,17 +95,16 @@ export function ColorSelectorGrid({ value, onChange }: ColorPickerProps) {
 					<div key={color.id} className="relative group">
 						<button
 							type="button"
-							onClick={() => handleColorSelect(color.background)}
+							style={color.getBackgroundStyle()}
+							onClick={() => handleColorSelect(color.def)}
 							className={`w-8 h-8 rounded transition-all flex-shrink-0 ${
-								isColorSelected(color.background)
+								isColorSelected(color.def)
 									? "border-2 border-primary shadow-md scale-110"
 									: "border border-border hover:scale-110"
 							}`}
-							style={getBackgroundStyle(color.background)}
-							title={color.name || "Color"}
 						/>
 						{/* Trash button for user-added colors */}
-						{!color.isPredefined && (
+						{!color.predefined && (
 							<Button
 								type="button"
 								size="icon"
@@ -120,9 +116,7 @@ export function ColorSelectorGrid({ value, onChange }: ColorPickerProps) {
 
 									const resortColor =
 										lastSelected.current ||
-										colors.find(
-											(c) => c.background.type === color.background.type,
-										)?.background;
+										colors.find((c) => c.def.type === color.def.type)?.def;
 
 									if (resortColor) {
 										handleColorSelect(resortColor);
@@ -150,11 +144,11 @@ export function ColorSelectorGrid({ value, onChange }: ColorPickerProps) {
 					<DialogContent>
 						<DialogHeader>
 							<DialogTitle>
-								Add Custom {backgroundType === "solid" ? "Color" : "Gradient"}
+								Add Custom {colorType === "solid" ? "Color" : "Gradient"}
 							</DialogTitle>
 						</DialogHeader>
 						<div className="space-y-4">
-							<CellBackgroundConfigurer
+							<ColorEntryConfigurer
 								value={customColor}
 								onChange={setCustomColor}
 							/>

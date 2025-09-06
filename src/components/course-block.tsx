@@ -2,9 +2,9 @@ import { Clock, MapPin } from "lucide-react";
 import type React from "react";
 import { RequiredDeep } from "type-fest";
 import type { CellAppearance } from "~/lib/models/cell-appearance";
+import { ColorEntry } from "~/lib/models/color-entry";
 import type { Course } from "~/lib/models/course";
 import type { MeetingTime } from "~/lib/models/meeting-time";
-import { getBackgroundStyle } from "~/lib/utils/styles";
 import { CustomIcon } from "./ui/custom-icon";
 import { FitText } from "./ui/fit-text";
 
@@ -78,7 +78,7 @@ export function CourseBlock({
 	className = "relative overflow-hidden",
 	layoutType,
 }: CourseBlockProps) {
-	const backgroundStyle = getBackgroundStyle(appearance.background);
+	const backgroundStyle = ColorEntry.getBackgroundStyle(appearance.background);
 
 	const containerStyle: React.CSSProperties = {
 		borderRadius: 8,

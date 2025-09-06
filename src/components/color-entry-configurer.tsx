@@ -4,12 +4,7 @@ import { isEqual } from "es-toolkit";
 import { Plus, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { Control, Controller, useFieldArray, useForm } from "react-hook-form";
-import type {
-	BackgroundAppearance,
-	GradientDirection,
-} from "~/lib/models/cell-appearance";
-import { getBackgroundStyle } from "~/lib/utils/styles";
-
+import { ColorEntry, GradientDirection } from "~/lib/models/color-entry";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -23,13 +18,13 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 interface CellBackgroundConfigurerProps {
-	value: BackgroundAppearance;
-	onChange: (value: BackgroundAppearance) => void;
+	value: ColorEntry.Schema;
+	onChange: (value: ColorEntry.Schema) => void;
 	showTabs?: boolean;
 }
 
 type FormValues = {
-	type: BackgroundAppearance["type"];
+	type: ColorEntry.Schema["type"];
 	color: string;
 	gradientColors: string[];
 	gradientDirection: GradientDirection;
@@ -46,7 +41,7 @@ const GRADIENT_DIRECTIONS: { value: GradientDirection; label: string }[] = [
 	{ value: "to-bl", label: "↙ Bottom Left" },
 ];
 
-function toFormValues(value: BackgroundAppearance): FormValues {
+function toFormValues(value: ColorEntry.Schema): FormValues {
 	if (value.type === "solid") {
 		return {
 			type: "solid",
@@ -63,7 +58,7 @@ function toFormValues(value: BackgroundAppearance): FormValues {
 	};
 }
 
-function toBackgroundAppearance(form: FormValues): BackgroundAppearance {
+function toColorEntry(form: FormValues): ColorEntry.Schema {
 	if (form.type === "solid") {
 		return { type: "solid", color: form.color || "#000000" };
 	}
@@ -163,7 +158,7 @@ const ColorPicker = ({ control }: { control: Control<FormValues> }) => (
 	/>
 );
 
-export function CellBackgroundConfigurer({
+export function ColorEntryConfigurer({
 	value,
 	onChange,
 	showTabs,
@@ -178,7 +173,7 @@ export function CellBackgroundConfigurer({
 	});
 
 	const watched = watch();
-	const previousValueRef = useRef<BackgroundAppearance>(value);
+	const previousValueRef = useRef<ColorEntry.Schema>(value);
 
 	// Sync form when external value changes
 	useEffect(() => {
@@ -194,14 +189,14 @@ export function CellBackgroundConfigurer({
 
 	// Emit changes to parent
 	useEffect(() => {
-		const newValue = toBackgroundAppearance(watched);
+		const newValue = toColorEntry(watched);
 		if (!isEqual(newValue, previousValueRef.current)) {
 			previousValueRef.current = newValue;
 			onChange(newValue);
 		}
 	}, [watched, onChange]);
 
-	const previewStyle = getBackgroundStyle(toBackgroundAppearance(watched));
+	const previewStyle = ColorEntry.getBackgroundStyle(toColorEntry(watched));
 
 	return (
 		<div className="space-y-4">

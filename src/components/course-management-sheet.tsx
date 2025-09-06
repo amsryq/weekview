@@ -1,11 +1,11 @@
 import { ClockIcon, MapPinIcon, PencilIcon, Trash2Icon } from "lucide-react";
 import { type JSX } from "react";
 import { useStore } from "zustand";
+import { ColorEntry } from "~/lib/models/color-entry";
 import { Course } from "~/lib/models/course";
 import type { CourseProvider } from "~/lib/models/course-provider";
 import { CourseStore } from "~/lib/stores/course-store";
 import { ProviderStore } from "~/lib/stores/provider-store";
-import { getBackgroundStyle } from "~/lib/utils/styles";
 import CourseEditorDialog from "./course-editor-dialog";
 import {
 	AlertDialog,
@@ -67,7 +67,9 @@ function CourseCard({
 				<div className="flex items-center gap-3">
 					<div
 						className="size-4 rounded-full"
-						style={getBackgroundStyle(course.cellAppearance.background)}
+						style={ColorEntry.getBackgroundStyle(
+							course.cellAppearance.background,
+						)}
 					/>
 					<div>
 						<CardTitle className="text-base leading-none">

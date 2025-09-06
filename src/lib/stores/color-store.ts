@@ -1,22 +1,16 @@
 import { createStore, useStore } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
-import type { BackgroundAppearance } from "../models/cell-appearance";
-import { ColorEntry } from "../models/color";
-import { randomUUID } from "../utils/random";
+import { ColorEntry } from "../models/color-entry";
 
 interface State {
 	colors: ColorEntry[];
 }
 
 interface Actions {
-	addColor: (background: BackgroundAppearance, name?: string) => string;
+	addColor: (color: ColorEntry.Schema) => string;
 	removeColor: (colorId: string) => boolean;
-	updateColor: (
-		colorId: string,
-		background: BackgroundAppearance,
-		name?: string,
-	) => boolean;
+	updateColor: (colorId: string, color: ColorEntry.Schema) => boolean;
 	getColor: (colorId: string) => ColorEntry | undefined;
 	getColorsByType: (type: "solid" | "gradient") => ColorEntry[];
 	getUserColors: () => ColorEntry[];
@@ -24,101 +18,75 @@ interface Actions {
 }
 
 // Predefined colors
-const PREDEFINED_COLORS: { name: string; background: BackgroundAppearance }[] =
-	[
-		// Solid colors
-		{ name: "Red", background: { type: "solid", color: "#ef4444" } },
-		{ name: "Green", background: { type: "solid", color: "#22c55e" } },
-		{ name: "Blue", background: { type: "solid", color: "#3b82f6" } },
-		{ name: "Yellow", background: { type: "solid", color: "#eab308" } },
-		{ name: "Purple", background: { type: "solid", color: "#a855f7" } },
-		{ name: "Pink", background: { type: "solid", color: "#ec4899" } },
-		{ name: "Orange", background: { type: "solid", color: "#f97316" } },
-		{ name: "Teal", background: { type: "solid", color: "#14b8a6" } },
-		{ name: "Indigo", background: { type: "solid", color: "#6366f1" } },
-		{ name: "Gray", background: { type: "solid", color: "#6b7280" } },
+const PREDEFINED_COLORS: { name: string; color: ColorEntry.Schema }[] = [
+	// Solid colors
+	{ name: "Red", color: { type: "solid", color: "#ef4444" } },
+	{ name: "Green", color: { type: "solid", color: "#22c55e" } },
+	{ name: "Blue", color: { type: "solid", color: "#3b82f6" } },
+	{ name: "Yellow", color: { type: "solid", color: "#eab308" } },
+	{ name: "Purple", color: { type: "solid", color: "#a855f7" } },
+	{ name: "Pink", color: { type: "solid", color: "#ec4899" } },
+	{ name: "Orange", color: { type: "solid", color: "#f97316" } },
+	{ name: "Teal", color: { type: "solid", color: "#14b8a6" } },
+	{ name: "Indigo", color: { type: "solid", color: "#6366f1" } },
+	{ name: "Gray", color: { type: "solid", color: "#6b7280" } },
 
-		// Gradient colors
-		{
-			name: "Sunset",
-			background: {
-				type: "gradient",
-				gradientColors: ["#f97316", "#ef4444"],
-				gradientDirection: "to-br",
-			},
+	// Gradient colors
+	{
+		name: "Sunset",
+		color: {
+			type: "gradient",
+			gradientColors: ["#f97316", "#ef4444"],
+			gradientDirection: "to-br",
 		},
-		{
-			name: "Ocean",
-			background: {
-				type: "gradient",
-				gradientColors: ["#06b6d4", "#3b82f6"],
-				gradientDirection: "to-r",
-			},
+	},
+	{
+		name: "Ocean",
+		color: {
+			type: "gradient",
+			gradientColors: ["#06b6d4", "#3b82f6"],
+			gradientDirection: "to-r",
 		},
-		{
-			name: "Forest",
-			background: {
-				type: "gradient",
-				gradientColors: ["#16a34a", "#065f46"],
-				gradientDirection: "to-b",
-			},
+	},
+	{
+		name: "Forest",
+		color: {
+			type: "gradient",
+			gradientColors: ["#16a34a", "#065f46"],
+			gradientDirection: "to-b",
 		},
-		{
-			name: "Lavender",
-			background: {
-				type: "gradient",
-				gradientColors: ["#a855f7", "#ec4899"],
-				gradientDirection: "to-tr",
-			},
+	},
+	{
+		name: "Lavender",
+		color: {
+			type: "gradient",
+			gradientColors: ["#a855f7", "#ec4899"],
+			gradientDirection: "to-tr",
 		},
-		{
-			name: "Gold",
-			background: {
-				type: "gradient",
-				gradientColors: ["#f59e0b", "#eab308"],
-				gradientDirection: "to-r",
-			},
+	},
+	{
+		name: "Gold",
+		color: {
+			type: "gradient",
+			gradientColors: ["#f59e0b", "#eab308"],
+			gradientDirection: "to-r",
 		},
-	];
-
-function initializePredefinedColors(state: State) {
-	const existingPredefinedIds = new Set(
-		state.colors.filter((c) => c.isPredefined).map((c) => c.name),
-	);
-
-	for (const predefined of PREDEFINED_COLORS) {
-		if (!existingPredefinedIds.has(predefined.name)) {
-			const colorEntry = new ColorEntry({
-				id: randomUUID(),
-				name: predefined.name,
-				background: predefined.background,
-				isPredefined: true,
-			});
-			state.colors.push(colorEntry);
-		}
-	}
-}
+	},
+];
 
 const ColorStore = createStore<State & Actions>()(
 	persist(
 		immer((set, get) => ({
 			colors: [],
 
-			addColor: (background, name) => {
-				const id = randomUUID();
-				const colorEntry = new ColorEntry({
-					id,
-					name,
-					background,
-					isPredefined: false,
-					createdAt: new Date(),
-				});
+			addColor: (color) => {
+				const colorEntry = ColorEntry.createFromSchema(color);
 
 				set((state) => {
 					state.colors.push(colorEntry);
 				});
 
-				return id;
+				return colorEntry.id;
 			},
 
 			removeColor: (colorId) => {
@@ -126,7 +94,7 @@ const ColorStore = createStore<State & Actions>()(
 				const color = state.colors.find((c) => c.id === colorId);
 
 				// Don't allow removing predefined colors
-				if (!color || color.isPredefined) {
+				if (!color || color.predefined) {
 					return false;
 				}
 
@@ -137,22 +105,19 @@ const ColorStore = createStore<State & Actions>()(
 				return true;
 			},
 
-			updateColor: (colorId, background, name) => {
+			updateColor: (colorId, color) => {
 				const state = get();
-				const color = state.colors.find((c) => c.id === colorId);
+				const existingColor = state.colors.find((c) => c.id === colorId);
 
 				// Don't allow updating predefined colors
-				if (!color || color.isPredefined) {
+				if (!existingColor || existingColor.predefined) {
 					return false;
 				}
 
 				set((state) => {
 					const colorIndex = state.colors.findIndex((c) => c.id === colorId);
 					if (colorIndex !== -1) {
-						state.colors[colorIndex].background = background;
-						if (name !== undefined) {
-							state.colors[colorIndex].name = name;
-						}
+						state.colors[colorIndex].def = color;
 					}
 				});
 
@@ -164,24 +129,51 @@ const ColorStore = createStore<State & Actions>()(
 			},
 
 			getColorsByType: (type) => {
-				return get().colors.filter((c) => c.background.type === type);
+				return get().colors.filter((c) => c.def.type === type);
 			},
 
 			getUserColors: () => {
-				return get().colors.filter((c) => !c.isPredefined);
+				return get().colors.filter((c) => !c.predefined);
 			},
 
 			getPredefinedColors: () => {
-				return get().colors.filter((c) => c.isPredefined);
+				return get().colors.filter((c) => c.predefined);
 			},
 		})),
 		{
 			name: "taiki-color-store",
 			// Initialize predefined colors on first load
 			onRehydrateStorage: () => (state) => {
-				if (state) {
-					initializePredefinedColors(state);
+				if (!state) return;
+
+				// Ensure all colors are instances of ColorEntry
+				for (let i = 0; i < state.colors.length; i++) {
+					const color = state.colors[i];
+					if (!(color instanceof ColorEntry)) {
+						// @ts-expect-error
+						state.colors[i] = new ColorEntry({ ...color });
+					}
 				}
+
+				// Add missing predefined colors
+				for (let i = 0; i < PREDEFINED_COLORS.length; i++) {
+					const predefined = PREDEFINED_COLORS[i];
+					if (predefined) {
+						const exists = state.colors.find(
+							(c) => c.predefined && c.id === `__predefined-${i}`,
+						);
+						if (!exists) {
+							const colorEntry = new ColorEntry({
+								id: `__predefined-${i}`,
+								def: predefined.color,
+								predefined: true,
+							});
+							state.colors.push(colorEntry);
+						}
+					}
+				}
+
+				return state;
 			},
 		},
 	),
