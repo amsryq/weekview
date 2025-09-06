@@ -1,6 +1,5 @@
 "use client";
 
-import { capitalize } from "es-toolkit";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "../../lib/contexts/themes";
 import { Button } from "../ui/button";
@@ -17,12 +16,34 @@ export function ThemeToggle() {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button variant="outline">
-					<span className="relative flex items-center justify-center w-2 h-2 mr-2">
+				<Button
+					size="icon"
+					variant="outline"
+					onContextMenu={(e) => {
+						if (process.env.NODE_ENV !== "development") {
+							return;
+						}
+
+						e.preventDefault();
+
+						if (theme === "light") {
+							setTheme("dark");
+						} else if (theme === "dark") {
+							setTheme("light");
+						} else {
+							const currentSystem = window.matchMedia(
+								"(prefers-color-scheme: dark)",
+							).matches;
+
+							if (currentSystem) setTheme("light");
+							else setTheme("dark");
+						}
+					}}
+				>
+					<span className="relative flex items-center w-2 h-2 mr-2">
 						<Sun className="absolute h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
 						<Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
 					</span>
-					{capitalize(theme)}
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end">

@@ -177,7 +177,7 @@ export default function TimetableCustomizer({
 						variant="outline"
 						onClick={() => TimetablePreferencesStore.getState().reset()}
 					>
-						Reset
+						Reset to defaults
 					</Button>
 					<DialogClose asChild>
 						<Button>Close</Button>

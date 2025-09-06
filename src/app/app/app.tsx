@@ -3,7 +3,6 @@
 import { DownloadIcon, Settings, Settings2Icon } from "lucide-react";
 import { domToPng } from "modern-screenshot";
 import CourseManagementSheet from "~/components/course-management-sheet";
-import { ThemeToggle } from "~/components/settings/theme-toggle";
 import TimetableCustomizer from "~/components/settings/timetable-customizer";
 import WeeklyTimetable from "~/components/timetable/weekly-timetable";
 import { Button } from "~/components/ui/button";
@@ -43,8 +42,6 @@ function App() {
 	return (
 		<div className="flex flex-col flex-1 items-center justify-center">
 			<div className="m-4 flex flex-wrap justify-center gap-2">
-				<ThemeToggle />
-
 				<CourseManagementSheet>
 					<Button variant="outline">
 						<Settings className="w-4 h-4" />

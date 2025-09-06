@@ -118,7 +118,7 @@ function CourseCard({
 								variant="ghost"
 								size="sm"
 								title="Remove course"
-								className="text-destructive"
+								className="text-destructive hover:text-white hover:bg-destructive/90 dark:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40"
 							>
 								<Trash2Icon className="size-4" />
 							</Button>
