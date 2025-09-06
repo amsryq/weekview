@@ -26,11 +26,11 @@ import {
 	ComboboxTrigger,
 } from "~/components/ui/shadcn-io/combobox";
 import { CourseStore } from "~/lib/stores/course-store";
-import { Campus } from "./campus";
-import { Course } from "./course";
-import { Faculty } from "./faculty";
-import { Group } from "./group";
-import { TechnoGroup } from "./techno-course";
+import { Campus } from "../models/campus";
+import { Course } from "../models/course";
+import { Faculty } from "../models/faculty";
+import { Group } from "../models/group";
+import { TechnoGroup } from "../techno-group";
 
 const useImporterSelectionStore = create<{
 	open: boolean;

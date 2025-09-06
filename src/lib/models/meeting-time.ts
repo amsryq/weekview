@@ -1,9 +1,8 @@
 import { immerable } from "immer";
 import z from "zod";
-import { randomUUID } from "../utils";
+import { randomUUID } from "../utils/random";
 import { type CellAppearance, CellAppearanceSchema } from "./cell-appearance";
-import { Clock } from "./clock";
-import { TimeRange } from "./time-range";
+import { Clock, TimeRange } from "./clock";
 
 const meetingTimeSchema = z.object({
 	day: z.number().min(1).max(7),

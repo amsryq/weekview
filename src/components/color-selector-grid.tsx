@@ -5,7 +5,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 import type { BackgroundAppearance } from "~/lib/models/cell-appearance";
 import { useColorStore } from "~/lib/stores/color-store";
-import { getBackgroundStyle } from "~/lib/utils";
+import { getBackgroundStyle } from "~/lib/utils/styles";
 import { CellBackgroundConfigurer } from "./cell-background-configurer";
 import { Button } from "./ui/button";
 import {

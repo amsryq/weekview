@@ -1,8 +1,8 @@
 import { faker } from "@faker-js/faker";
 import { MeetingTime } from "~/lib/models/meeting-time";
+import { TechnoGroup } from "../techno-group";
 import { Course } from "./course";
 import { Session } from "./session";
-import { TechnoGroup } from "./techno-course";
 
 interface ServerSession {
 	groupCode: string;

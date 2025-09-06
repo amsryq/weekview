@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
-import { cn } from "~/lib/utils";
+import { cn } from "~/lib/utils/styles";
 import { signIn } from "../lib/auth/auth-client";
 import {
 	Dialog,

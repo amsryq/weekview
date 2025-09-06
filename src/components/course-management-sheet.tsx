@@ -5,7 +5,7 @@ import { Course } from "~/lib/models/course";
 import type { CourseProvider } from "~/lib/models/course-provider";
 import { CourseStore } from "~/lib/stores/course-store";
 import { ProviderStore } from "~/lib/stores/provider-store";
-import { getBackgroundStyle } from "~/lib/utils";
+import { getBackgroundStyle } from "~/lib/utils/styles";
 import CourseEditorDialog from "./course-editor-dialog";
 import {
 	AlertDialog,

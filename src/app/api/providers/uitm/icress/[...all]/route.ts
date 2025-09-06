@@ -1,13 +1,13 @@
 import { api } from "./mock";
 
 /*
-ICRESS Mock API Routes
-
-GET /api/providers/uitm/icress/campuses - Get all campuses
-GET /api/providers/uitm/icress/faculties/{campusCode} - Get faculties for campus
-GET /api/providers/uitm/icress/courses/{facultyCode} - Get courses for faculty
-GET /api/providers/uitm/icress/groups/{courseCode} - Get groups for course
-*/
+ * ICRESS Mock API Routes
+ *
+ * GET /api/providers/uitm/icress/campuses - Get all campuses
+ * GET /api/providers/uitm/icress/faculties/{campusCode} - Get faculties for campus
+ * GET /api/providers/uitm/icress/courses/{campusCode}/{facultyCode?} - Get courses for faculty
+ * GET /api/providers/uitm/icress/groups/{courseCode} - Get groups for course
+ */
 
 export const GET = async (
 	request: Request,

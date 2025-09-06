@@ -1,7 +1,7 @@
 import { immerable } from "immer";
 import z from "zod";
 import { ManualCourseProvider } from "../providers/manual-course-provider";
-import { randomUUID } from "../utils";
+import { randomUUID } from "../utils/random";
 import { type CellAppearance, CellAppearanceSchema } from "./cell-appearance";
 import type { Clock } from "./clock";
 import type { CourseProvider } from "./course-provider";

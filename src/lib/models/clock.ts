@@ -51,3 +51,19 @@ export class Clock {
 		return `${this.hour.toString().padStart(2, "0")}:${this.minute.toString().padStart(2, "0")}`;
 	}
 }
+
+export class TimeRange {
+	[immerable] = true;
+
+	public start: Clock;
+	public end: Clock;
+
+	constructor(start: Clock, end: Clock) {
+		this.start = start;
+		this.end = end;
+	}
+
+	public toString(): string {
+		return `${this.start.toString()}-${this.end.toString()}`;
+	}
+}

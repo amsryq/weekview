@@ -1,15 +1,7 @@
 import { stripe } from "@better-auth/stripe";
 import { betterAuth } from "better-auth";
-import { Pool } from "pg";
-import { Stripe } from "stripe";
-
-const pg = new Pool({
-	connectionString: process.env.POSTGRES_URL!,
-});
-
-const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-	apiVersion: "2025-07-30.basil",
-});
+import { pg } from "../pg";
+import { stripeClient } from "../stripe";
 
 export const auth = betterAuth({
 	socialProviders: {

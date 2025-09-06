@@ -1,9 +1,8 @@
 import { createStore } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import { Clock } from "../models/clock";
+import { Clock, TimeRange } from "../models/clock";
 import { Course } from "../models/course";
 import { MeetingTime } from "../models/meeting-time";
-import { TimeRange } from "../models/time-range";
 
 interface State {
 	courses: Course[];

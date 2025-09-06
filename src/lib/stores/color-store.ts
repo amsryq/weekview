@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import type { BackgroundAppearance } from "../models/cell-appearance";
 import { ColorEntry } from "../models/color";
-import { randomUUID } from "../utils";
+import { randomUUID } from "../utils/random";
 
 interface State {
 	colors: ColorEntry[];

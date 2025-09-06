@@ -2,8 +2,8 @@ import { SettingsIcon } from "lucide-react";
 import { JSX } from "react";
 import { Button } from "~/components/ui/button";
 import { CourseProvider } from "~/lib/models/course-provider";
-import TechnoUniversityImporterDialog from "./importer-dialog";
-import { TechnoGroup } from "./techno-course";
+import TechnoUniversityImporterDialog from "./components/importer-dialog";
+import { TechnoGroup } from "./techno-group";
 
 let singletonCache: TechnoUniversityProvider | null = null;
 

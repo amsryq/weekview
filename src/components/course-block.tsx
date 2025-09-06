@@ -4,7 +4,7 @@ import { RequiredDeep } from "type-fest";
 import type { CellAppearance } from "~/lib/models/cell-appearance";
 import type { Course } from "~/lib/models/course";
 import type { MeetingTime } from "~/lib/models/meeting-time";
-import { getBackgroundStyle } from "~/lib/utils";
+import { getBackgroundStyle } from "~/lib/utils/styles";
 import { CustomIcon } from "./ui/custom-icon";
 import { FitText } from "./ui/fit-text";
 

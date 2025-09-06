@@ -2,7 +2,7 @@
 
 import { capitalize } from "es-toolkit";
 import { Monitor, Moon, Sun } from "lucide-react";
-import { useTheme } from "../lib/hooks/themes";
+import { useTheme } from "../lib/contexts/themes";
 import { Button } from "./ui/button";
 import {
 	DropdownMenu,

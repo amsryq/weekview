@@ -1,9 +1,8 @@
 import { toMerged } from "es-toolkit";
 import { useFormContext } from "react-hook-form";
-import { Clock } from "~/lib/models/clock";
+import { Clock, TimeRange } from "~/lib/models/clock";
 import { Course } from "~/lib/models/course";
 import { MeetingTime } from "~/lib/models/meeting-time";
-import { TimeRange } from "~/lib/models/time-range";
 import { ManualCourseProvider } from "~/lib/providers/manual-course-provider";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { CourseBlock } from "../course-block";

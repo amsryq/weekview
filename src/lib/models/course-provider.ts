@@ -2,7 +2,7 @@ import { JSX } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { CourseStore } from "../stores/course-store";
-import { randomUUID } from "../utils";
+import { randomUUID } from "../utils/random";
 import type { Course } from "./course";
 
 export abstract class CourseProvider {
