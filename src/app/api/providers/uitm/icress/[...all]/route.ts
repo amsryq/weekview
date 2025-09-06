@@ -1,4 +1,4 @@
-import { api, Campus, Course, Faculty } from "./mock";
+import { api } from "./mock";
 
 /*
 ICRESS Mock API Routes

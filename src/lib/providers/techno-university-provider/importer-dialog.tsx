@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { pick } from "es-toolkit";
 import { AlertTriangleIcon } from "lucide-react";
-import { JSX, memo } from "react";
+import { JSX } from "react";
 import { create, useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
