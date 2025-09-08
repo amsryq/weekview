@@ -28,10 +28,12 @@ export class ManualCourseProvider extends CourseProvider {
 				title="Add Course"
 				onSubmit={(data, form) => {
 					const course = Course.createFromSchema(data);
-
-					if (CourseStore.getState().hasTimeConflicts(course)) {
+					const conflicts = CourseStore.getState().getConflictingCourses(
+						course.meetingTimes,
+					);
+					if (conflicts.length > 0) {
 						form.setError("meetingTimes", {
-							message: "There are time conflicts with existing courses.",
+							message: `There are time conflicts with ${conflicts.map((c) => c.code).join(", ")}.`,
 						});
 						return;
 					}

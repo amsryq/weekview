@@ -4,6 +4,7 @@ import { useStore } from "zustand";
 import { ColorEntry } from "~/lib/models/color-entry";
 import { Course } from "~/lib/models/course";
 import type { CourseProvider } from "~/lib/models/course-provider";
+import { MeetingTime } from "~/lib/models/meeting-time";
 import { CourseStore } from "~/lib/stores/course-store";
 import { ProviderStore } from "~/lib/stores/provider-store";
 import CourseEditorDialog from "./course-editor/course-editor-dialog";
@@ -87,14 +88,15 @@ function CourseCard({
 					<CourseEditorDialog
 						defaultValues={course.toSchema()}
 						onSubmit={(data, form) => {
-							if (
-								CourseStore.getState().hasTimeConflicts(
-									Course.createFromSchema(data),
-									course,
+							const conflicts = CourseStore.getState()
+								.getConflictingCourses(
+									data.meetingTimes.map(MeetingTime.createFromSchema),
 								)
-							) {
+								.filter((c) => c.id !== course.id);
+
+							if (conflicts.length > 0) {
 								form.setError("meetingTimes", {
-									message: "There are time conflicts with other courses.",
+									message: `There are time conflicts with ${conflicts.map((c) => c.code).join(", ")}.`,
 								});
 								return;
 							}

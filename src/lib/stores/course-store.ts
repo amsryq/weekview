@@ -11,7 +11,7 @@ interface State {
 interface Actions {
 	addCourse: (course: Course) => void;
 	removeCourse: (courseId: string) => void;
-	hasTimeConflicts: (course: Course, exempt?: Course) => boolean;
+	getConflictingCourses: (meetingTimes: MeetingTime[]) => Course[];
 }
 
 const CourseStore = createStore<State & Actions>()(
@@ -20,6 +20,10 @@ const CourseStore = createStore<State & Actions>()(
 
 		addCourse: (course) => {
 			set((state) => {
+				if (state.getConflictingCourses(course.meetingTimes).length > 0) {
+					throw new Error("Course has time conflicts with existing courses.");
+				}
+
 				state.courses.push(course);
 			});
 		},
@@ -31,13 +35,12 @@ const CourseStore = createStore<State & Actions>()(
 				);
 			}),
 
-		hasTimeConflicts: (course, exempt) => {
-			return get().courses.some((existingCourse) => {
-				return (
-					existingCourse.id !== exempt?.id &&
-					existingCourse.hasTimeConflictWith(course)
-				);
-			});
+		getConflictingCourses: (meetingTimes) => {
+			return get().courses.filter((course) =>
+				course.meetingTimes.some((mt1) =>
+					meetingTimes.some((mt2) => mt1.overlaps(mt2)),
+				),
+			);
 		},
 	})),
 );

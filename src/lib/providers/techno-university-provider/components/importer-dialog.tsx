@@ -300,7 +300,7 @@ function GroupSelectorStep() {
 
 		if (!exists) {
 			const state = CourseStore.getState();
-			if (!state.hasTimeConflicts(technoCourse)) {
+			if (state.getConflictingCourses(technoCourse.meetingTimes).length === 0) {
 				state.addCourse(technoCourse);
 			}
 		}
@@ -373,12 +373,15 @@ function GroupSelectorStep() {
 								availableGroups.map((technoCourse, idx) => {
 									const alreadyExists = selectedGroups.includes(technoCourse);
 									const conflicts =
-										CourseStore.getState().hasTimeConflicts(technoCourse);
+										CourseStore.getState().getConflictingCourses(
+											technoCourse.meetingTimes,
+										);
 
 									const reason = alreadyExists
 										? "Already added"
-										: conflicts
-											? "Time conflict"
+										: conflicts.length > 0
+											? "Time conflict with " +
+												conflicts.map((c) => c.code).join(", ")
 											: undefined;
 
 									return (

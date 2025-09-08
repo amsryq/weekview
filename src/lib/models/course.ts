@@ -76,28 +76,4 @@ export class Course {
 		target.meetingTimes = data.meetingTimes.map(MeetingTime.createFromSchema);
 		target.cellAppearance = data.cellAppearance;
 	}
-
-	public hasTimeConflictWith(other: Course): boolean {
-		return this.meetingTimes.some((mt1) =>
-			other.meetingTimes.some((mt2) => mt1.overlaps(mt2)),
-		);
-	}
-
-	public isScheduledAt(day: number, time: Clock): boolean {
-		return this.meetingTimes.some(
-			(mt) =>
-				mt.day === day &&
-				time.isAfter(mt.time.start) &&
-				time.isBefore(mt.time.end),
-		);
-	}
-
-	public getMeetingTimeAt(day: number, time: Clock): MeetingTime | undefined {
-		return this.meetingTimes.find(
-			(mt) =>
-				mt.day === day &&
-				time.isAfter(mt.time.start) &&
-				time.isBefore(mt.time.end),
-		);
-	}
 }
