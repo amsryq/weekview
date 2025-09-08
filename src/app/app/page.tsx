@@ -1,5 +1,3 @@
-import "~/globals.css";
-
 import App from "./app";
 import { Header } from "./header";
 

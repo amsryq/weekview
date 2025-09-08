@@ -1,11 +1,8 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { LoaderCircleIcon } from "lucide-react";
-import { ReactNode } from "react";
-import { authClient, signOut, useSession } from "~/lib/auth/auth-client";
-import { fetchUserSubscriptions } from "~/lib/auth/helpers";
-import { getActiveSubscription } from "~/lib/auth/helpers-client";
+import { LoaderCircleIcon, RefreshCw } from "lucide-react";
+import { ReactNode, useEffect } from "react";
+import { signOut, useSession } from "~/lib/auth/auth-client";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import {
@@ -38,22 +35,17 @@ export function AccountManagerDialog({ children }: { children: ReactNode }) {
 function AccountManagerPanel() {
 	const session = useSession();
 
-	const {
-		data: userSubscriptions,
-		isLoading,
-		error,
-	} = useQuery({
-		queryKey: ["userSubscriptionInfo", session.data?.user.id],
-		enabled: Boolean(session.data),
-		queryFn: async () => {
-			if (session.data) {
-				const subInfo = await fetchUserSubscriptions(session.data.user.id);
-				if (subInfo) return subInfo;
-			}
+	// Refetch session data when window gains focus to ensure up-to-date info after payment
+	useEffect(() => {
+		if (!session.data) return;
 
-			return null;
-		},
-	});
+		const handleFocus = () => {
+			if (session.data) session.refetch();
+		};
+
+		window.addEventListener("focus", handleFocus);
+		return () => window.removeEventListener("focus", handleFocus);
+	}, [session.data, session.refetch]);
 
 	if (session.isPending) {
 		return (
@@ -65,26 +57,25 @@ function AccountManagerPanel() {
 	}
 
 	if (session.error) {
-		const { message, status, statusText } = session.error;
-
 		return (
 			<Card className="flex flex-col gap-2 p-4">
 				<div className="text-md font-semibold text-red-600">
 					Failed to load current session
 				</div>
 				<div className="text-sm text-muted-foreground">
-					{message && (
-						<>
-							{message}
-							<br />
-						</>
-					)}
-					{typeof status !== "undefined" && (
-						<>
-							{statusText} ({status})
-						</>
-					)}
+					{session.error instanceof Error
+						? session.error.message
+						: "Unknown error"}
 				</div>
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={() => session.refetch()}
+					className="w-fit"
+				>
+					<RefreshCw className="h-3 w-3 mr-2" />
+					Retry
+				</Button>
 			</Card>
 		);
 	}
@@ -97,31 +88,10 @@ function AccountManagerPanel() {
 		);
 	}
 
-	if (isLoading) {
-		return (
-			<div className="flex gap-2 py-8 justify-center items-center text-center font-semibold">
-				<LoaderCircleIcon className="inline w-4 h-4 animate-spin" />
-				Loading supporter status...
-			</div>
-		);
-	}
-
-	if (error) {
-		return (
-			<Card className="flex flex-col gap-2 p-4">
-				<div className="text-md font-semibold text-red-600">
-					Failed to load supporter status
-				</div>
-				<div className="text-sm text-muted-foreground">
-					{error instanceof Error ? error.message : String(error)}
-				</div>
-			</Card>
-		);
-	}
-
-	const userSubscriptionInfo =
-		userSubscriptions && getActiveSubscription(userSubscriptions);
-	const isSupporter = !!userSubscriptionInfo;
+	const supporterUntil = session.data.user.supporterUntil;
+	const isSupporter = supporterUntil
+		? supporterUntil.getTime() > Date.now()
+		: false;
 
 	return (
 		<div className="flex flex-col justify-center items-center text-center gap-4 py-4">
@@ -129,10 +99,9 @@ function AccountManagerPanel() {
 				Welcome {session.data?.user.name}! You are currently{" "}
 				{isSupporter ? "a supporter!" : "not a supporter."}
 				<br />
-				{userSubscriptionInfo?.cancelAtPeriodEnd === true && (
+				{isSupporter && supporterUntil && (
 					<span className="text-sm font-normal">
-						Your subscription will cancel at{" "}
-						{userSubscriptionInfo?.periodEnd?.toDateString()}.
+						Your supporter status will end at {supporterUntil.toDateString()}.
 					</span>
 				)}
 			</span>
@@ -140,50 +109,46 @@ function AccountManagerPanel() {
 				<Button
 					disabled={isSupporter}
 					onClick={async () => {
-						await authClient.subscription.upgrade({
-							plan: "supporter",
-							// TODO: Proper URLs for these
-							successUrl: "/",
-							cancelUrl: "/",
-						});
+						const req = await fetch("/api/supporter/generate-checkout");
+						try {
+							const { url } = await req.json();
+							window.open(url, "_blank", "noopener,noreferrer");
+						} catch {
+							// TODO: Toast notification or something
+							alert("Failed to initiate supporter checkout.");
+						}
 					}}
 				>
-					Become a Supporter
+					Support
 				</Button>
-				<Button
-					disabled={!isSupporter}
-					onClick={async () => {
-						await authClient.subscription.cancel({
-							returnUrl: "/",
-							subscriptionId: userSubscriptionInfo!.id,
-						});
-					}}
-				>
-					Unsubscribe
+				<Button variant="outline" onClick={() => void signOut()}>
+					Sign out
 				</Button>
-				<Button
-					disabled={
-						userSubscriptionInfo?.status !== "canceled" &&
-						!userSubscriptionInfo?.cancelAtPeriodEnd
-					}
-					onClick={async () => {
-						await authClient.subscription.restore({
-							subscriptionId: userSubscriptionInfo!.id,
-						});
-					}}
-				>
-					Restore
-				</Button>
-				<Button
-					onClick={async () => {
-						await authClient.subscription.billingPortal({
-							returnUrl: "/",
-						});
-					}}
-				>
-					Manage Subscription
-				</Button>
-				<Button onClick={() => void signOut()}>Sign out</Button>
+				{process.env.NODE_ENV === "development" && (
+					<>
+						<Button
+							variant="outline"
+							onClick={() => session.refetch()}
+							title="Refresh account information"
+						>
+							Refresh
+						</Button>
+						<Button
+							disabled={!isSupporter}
+							variant="destructive"
+							title="Remove Supporter Status (Dev Only)"
+							onClick={async () => {
+								await fetch("/api/supporter/remove-supporter", {
+									method: "POST",
+								});
+								// Refresh session instead of reloading the page
+								session.refetch();
+							}}
+						>
+							Unsupport
+						</Button>
+					</>
+				)}
 			</div>
 		</div>
 	);
