@@ -96,7 +96,7 @@ export function CourseEditorForm({
 							</TabsList>
 
 							{/* ScrollArea only applies for > lg */}
-							<ScrollArea className="pb-4 lg:h-[60vh] lg:pr-4">
+							<ScrollArea className="pb-4 lg:max-h-[60vh] lg:pr-4">
 								<div className="mt-6">
 									<TabsContent value="details" className="m-0">
 										<CourseDetailsTab />

@@ -1,11 +1,13 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { LoaderCircleIcon } from "lucide-react";
 import { ReactNode } from "react";
 import { authClient, signOut, useSession } from "~/lib/auth/auth-client";
 import { fetchUserSubscriptions } from "~/lib/auth/helpers";
 import { getActiveSubscription } from "~/lib/auth/helpers-client";
 import { Button } from "../ui/button";
+import { Card } from "../ui/card";
 import {
 	Dialog,
 	DialogContent,
@@ -33,7 +35,7 @@ export function AccountManagerDialog({ children }: { children: ReactNode }) {
 	);
 }
 
-export function AccountManagerPanel() {
+function AccountManagerPanel() {
 	const session = useSession();
 
 	const {
@@ -42,7 +44,7 @@ export function AccountManagerPanel() {
 		error,
 	} = useQuery({
 		queryKey: ["userSubscriptionInfo", session.data?.user.id],
-		enabled: !!session.data,
+		enabled: Boolean(session.data),
 		queryFn: async () => {
 			if (session.data) {
 				const subInfo = await fetchUserSubscriptions(session.data.user.id);
@@ -53,6 +55,40 @@ export function AccountManagerPanel() {
 		},
 	});
 
+	if (session.isPending) {
+		return (
+			<div className="flex gap-2 py-8 justify-center items-center text-center font-semibold">
+				<LoaderCircleIcon className="inline w-4 h-4 animate-spin" />
+				Loading session...
+			</div>
+		);
+	}
+
+	if (session.error) {
+		const { message, status, statusText } = session.error;
+
+		return (
+			<Card className="flex flex-col gap-2 p-4">
+				<div className="text-md font-semibold text-red-600">
+					Failed to load current session
+				</div>
+				<div className="text-sm text-muted-foreground">
+					{message && (
+						<>
+							{message}
+							<br />
+						</>
+					)}
+					{typeof status !== "undefined" && (
+						<>
+							{statusText} ({status})
+						</>
+					)}
+				</div>
+			</Card>
+		);
+	}
+
 	if (!session.data) {
 		return (
 			<SignIn>
@@ -61,19 +97,25 @@ export function AccountManagerPanel() {
 		);
 	}
 
-	if (error) {
-		return <div>Error loading supporter status: {error.message}</div>;
-	}
-
 	if (isLoading) {
-		return <div>Loading supporter status...</div>;
+		return (
+			<div className="flex gap-2 py-8 justify-center items-center text-center font-semibold">
+				<LoaderCircleIcon className="inline w-4 h-4 animate-spin" />
+				Loading supporter status...
+			</div>
+		);
 	}
 
-	if (!session.data) {
+	if (error) {
 		return (
-			<SignIn>
-				<Button>Sign In</Button>
-			</SignIn>
+			<Card className="flex flex-col gap-2 p-4">
+				<div className="text-md font-semibold text-red-600">
+					Failed to load supporter status
+				</div>
+				<div className="text-sm text-muted-foreground">
+					{error instanceof Error ? error.message : String(error)}
+				</div>
+			</Card>
 		);
 	}
 

@@ -73,7 +73,7 @@ export class Group {
 					type: "solid",
 					color: faker.color.rgb({ prefix: "#", casing: "lower" }),
 				},
-				fgColor: "#fff",
+				fgColor: "#ffffff",
 			},
 			campus: this.course.campus.code,
 			group: this.code,

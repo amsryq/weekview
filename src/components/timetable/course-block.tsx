@@ -116,7 +116,7 @@ export function CourseBlock({
 				className="p-2 h-full flex flex-col justify-between text-xs relative"
 				style={{
 					textAlign: appearance.textAlign,
-					color: appearance.fgColor ?? "#fff",
+					color: appearance.fgColor ?? "#ffffff",
 				}}
 			>
 				{/* Icon */}
