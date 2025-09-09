@@ -1,9 +1,8 @@
 import { stripe } from "@better-auth/stripe";
 import { betterAuth } from "better-auth";
-import { invariant } from "es-toolkit";
-import Stripe from "stripe";
 import { pg } from "../pg";
 import { stripeClient } from "../stripe";
+import { handleCheckoutCompleted } from "./handle-checkout";
 
 export const auth = betterAuth({
 	socialProviders: {
@@ -27,27 +26,7 @@ export const auth = betterAuth({
 
 				switch (event.type) {
 					case "checkout.session.completed": {
-						const session = event.data.object as Stripe.Checkout.Session;
-						const stripeCustomerId =
-							typeof session.customer === "string"
-								? session.customer
-								: session.customer?.id;
-
-						invariant(stripeCustomerId, "No stripe customer ID on session");
-
-						const isSupporter = session.metadata?.type === "supporter_payment";
-
-						if (isSupporter) {
-							const supporterUntil = new Date();
-							supporterUntil.setMonth(supporterUntil.getMonth() + 1);
-
-							await ctx.adapter.update({
-								model: "user",
-								where: [{ field: "stripeCustomerId", value: stripeCustomerId }],
-								update: { supporterUntil },
-							});
-						}
-
+						await handleCheckoutCompleted(event.data.object, ctx);
 						break;
 					}
 				}

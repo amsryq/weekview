@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "~/lib/auth";
+import { handleCheckoutCompleted } from "~/lib/auth/handle-checkout";
 import { stripeClient } from "~/lib/stripe";
 
 export async function GET(
@@ -33,9 +34,28 @@ export async function GET(
 			const user = (await ctx.adapter.findOne({
 				model: "user",
 				where: [{ field: "stripeCustomerId", value: stripeCustomerId }],
-			})) as { supporterUntil?: Date } | null;
+			})) as (typeof auth.$Infer.Session)["user"] | null;
 
-			supporterExpiresAt = user?.supporterUntil || null;
+			if (!user) {
+				return NextResponse.json(
+					{ error: "No user found for this Stripe customer" },
+					{ status: 404 },
+				);
+			}
+
+			if (user.supporterUntil && user.supporterUntil > new Date()) {
+				supporterExpiresAt = user.supporterUntil;
+			} else {
+				// The webhook event listener should have handled this, but just in case it is down
+				// for some reason it can't hurt to handle the checkout here
+				await handleCheckoutCompleted(session, ctx);
+				const user = (await ctx.adapter.findOne({
+					model: "user",
+					where: [{ field: "stripeCustomerId", value: stripeCustomerId }],
+				})) as (typeof auth.$Infer.Session)["user"] | null;
+
+				supporterExpiresAt = user?.supporterUntil || null;
+			}
 		}
 
 		// Return relevant session data
