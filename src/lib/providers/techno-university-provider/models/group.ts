@@ -33,7 +33,7 @@ export class Group {
 
 	static async fetch(course: Course): Promise<Group[]> {
 		const data: ServerGroup[] = await fetch(
-			`/api/providers/uitm/icress/groups/${course.__path}`,
+			new URL(`/api/providers/uitm/icress/groups/${course.__path}`, process.env.NEXT_PUBLIC_BACKEND_URL),
 		).then((r) => r.json());
 		return data.map(
 			(g) =>

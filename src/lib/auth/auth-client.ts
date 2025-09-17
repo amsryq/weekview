@@ -1,15 +1,28 @@
 import { stripeClient } from "@better-auth/stripe/client";
 import { inferAdditionalFields } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
-import { auth } from ".";
 
 export const authClient = createAuthClient({
-	baseURL: process.env.NEXT_PUBLIC_APP_URL,
+	baseURL: process.env.NEXT_PUBLIC_BACKEND_URL!,
 	plugins: [
 		stripeClient({
 			subscription: false,
 		}),
-		inferAdditionalFields<typeof auth>(),
+		inferAdditionalFields({
+			user: {
+				supporterUntil: {
+					type: "date",
+					input: false,
+					required: false,
+				},
+				// Not entirely sure why we need to explicitly set this. Should be on better-auth/stripe plugin
+				stripeCustomerId: {
+					type: "string",
+					input: false,
+					required: false,
+				},
+			},
+		})
 	],
 });
 

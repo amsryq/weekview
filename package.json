@@ -5,15 +5,8 @@
 	"scripts": {
 		"dev": "next dev --turbopack",
 		"build": "next build",
-		"start": "HOSTNAME=0.0.0.0 PORT=3000 node ./.next/standalone/server.js",
-		"postbuild": "cp -r .next/static .next/standalone/.next/ && [ -d public ] && cp -r public .next/standalone/public || true",
-		"biome:check": "biome check --write",
-		"db:up": "docker compose up -d postgres",
-		"db:down": "docker compose down",
-		"db:psql": "docker exec -it taiki-postgres psql -U taiki -d taiki",
-		"db:wait": "bash -lc 'until docker exec taiki-postgres pg_isready -U taiki -d taiki; do sleep 1; done'",
-		"db:migrate": "bun x @better-auth/cli migrate --config src/lib/auth/index.ts",
-		"db:generate": "bun x @better-auth/cli generate --config src/lib/auth/index.ts"
+		"start": "pnpx serve@latest out",
+		"lint:write": "biome check --write --unsafe"
 	},
 	"dependencies": {
 		"@better-auth/client": "^0.0.2-alpha.3",

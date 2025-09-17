@@ -19,7 +19,10 @@ export class Faculty {
 
 	static async fetch(campus: Campus): Promise<Faculty[]> {
 		const data: ServerFaculty[] = await fetch(
-			`/api/providers/uitm/icress/faculties/${campus.code}`,
+			new URL(
+				`/api/providers/uitm/icress/faculties/${campus.code}`,
+				process.env.NEXT_PUBLIC_BACKEND_URL,
+			),
 		).then((r) => r.json());
 		return data.map((f) => new Faculty(f.code, f.name, campus));
 	}

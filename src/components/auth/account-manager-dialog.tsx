@@ -36,16 +36,17 @@ function AccountManagerPanel() {
 	const session = useSession();
 
 	// Refetch session data when window gains focus to ensure up-to-date info after payment
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Only want to run this on mount
 	useEffect(() => {
 		if (!session.data) return;
 
 		const handleFocus = () => {
-			if (session.data) session.refetch();
+			if (session.data && !session.isPending) session.refetch();
 		};
 
 		window.addEventListener("focus", handleFocus);
 		return () => window.removeEventListener("focus", handleFocus);
-	}, [session.data, session.refetch]);
+	}, []);
 
 	if (session.isPending) {
 		return (
@@ -109,7 +110,16 @@ function AccountManagerPanel() {
 				<Button
 					disabled={isSupporter}
 					onClick={async () => {
-						const req = await fetch("/api/supporter/generate-checkout");
+						const req = await fetch(
+							new URL(
+								`/api/supporter/generate-checkout`,
+								process.env.NEXT_PUBLIC_BACKEND_URL,
+							),
+							{
+								credentials: "include",
+							},
+						);
+
 						try {
 							const { url } = await req.json();
 							window.open(url, "_blank", "noopener,noreferrer");
@@ -138,9 +148,16 @@ function AccountManagerPanel() {
 							variant="destructive"
 							title="Remove Supporter Status (Dev Only)"
 							onClick={async () => {
-								await fetch("/api/supporter/remove-supporter", {
-									method: "POST",
-								});
+								await fetch(
+									new URL(
+										`/api/supporter/remove-supporter`,
+										process.env.NEXT_PUBLIC_BACKEND_URL,
+									),
+									{
+										method: "POST",
+										credentials: "include",
+									},
+								);
 								// Refresh session instead of reloading the page
 								session.refetch();
 							}}

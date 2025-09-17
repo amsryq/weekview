@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { CheckCircle, Clock, XCircle } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { Button } from "~/components/ui/button";
 import {
 	Card,
@@ -35,7 +36,15 @@ const QUERY_CONFIG = {
 async function fetchSessionData(
 	sessionId: string,
 ): Promise<PaymentSessionData> {
-	const response = await fetch(`/api/stripe/session/${sessionId}`);
+	const response = await fetch(
+		new URL(
+			`/api/stripe/session/${sessionId}`,
+			process.env.NEXT_PUBLIC_BACKEND_URL,
+		),
+		{
+			credentials: "include",
+		},
+	);
 	if (!response.ok) {
 		throw new Error("Failed to fetch session data");
 	}
@@ -152,7 +161,7 @@ function PaymentDetails({ sessionData }: PaymentDetailsProps) {
 	);
 }
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessPageContent() {
 	const searchParams = useSearchParams();
 	const sessionId = searchParams.get("session_id");
 
@@ -168,17 +177,14 @@ export default function PaymentSuccessPage() {
 		staleTime: QUERY_CONFIG.STALE_TIME,
 	});
 
-	// Handle missing session ID
 	if (!sessionId) {
 		return <ErrorCard message="No session ID provided" />;
 	}
 
-	// Handle loading state
 	if (loading) {
 		return <LoadingCard />;
 	}
 
-	// Handle error state
 	if (error || !sessionData) {
 		const errorMessage =
 			error instanceof Error
@@ -212,5 +218,13 @@ export default function PaymentSuccessPage() {
 		>
 			{paymentSuccessful && <PaymentDetails sessionData={sessionData} />}
 		</StatusCard>
+	);
+}
+
+export default function PaymentSuccessPage() {
+	return (
+		<Suspense fallback={<LoadingCard />}>
+			<PaymentSuccessPageContent />
+		</Suspense>
 	);
 }

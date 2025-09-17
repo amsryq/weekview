@@ -31,7 +31,10 @@ export class Course {
 			campusOrFaculty instanceof Faculty ? campusOrFaculty : undefined;
 
 		const data: ServerCourse[] = await fetch(
-			`/api/providers/uitm/icress/courses/${campus.code}${faculty ? `/${faculty.code}` : ""}`,
+			new URL(
+				`/api/providers/uitm/icress/courses/${campus.code}${faculty ? `/${faculty.code}` : ""}`,
+				process.env.NEXT_PUBLIC_BACKEND_URL,
+			),
 		).then((r) => r.json());
 
 		return data.map(
