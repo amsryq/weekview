@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { MeetingTime } from "~/lib/models/meeting-time";
+import { fetchFromBackend } from "~/lib/utils/backend";
 import { TechnoGroup } from "../techno-group";
 import { Course } from "./course";
 import { Session } from "./session";
@@ -32,8 +33,8 @@ export class Group {
 	}
 
 	static async fetch(course: Course): Promise<Group[]> {
-		const data: ServerGroup[] = await fetch(
-			new URL(`/api/providers/uitm/icress/groups/${course.__path}`, process.env.NEXT_PUBLIC_BACKEND_URL),
+		const data: ServerGroup[] = await fetchFromBackend(
+			`/providers/uitm/icress/groups/${course.__path}`,
 		).then((r) => r.json());
 		return data.map(
 			(g) =>

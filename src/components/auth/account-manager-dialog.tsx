@@ -3,6 +3,7 @@
 import { LoaderCircleIcon, RefreshCw } from "lucide-react";
 import { ReactNode, useEffect } from "react";
 import { signOut, useSession } from "~/lib/auth/auth-client";
+import { fetchFromBackend } from "~/lib/utils/backend";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import {
@@ -36,7 +37,6 @@ function AccountManagerPanel() {
 	const session = useSession();
 
 	// Refetch session data when window gains focus to ensure up-to-date info after payment
-	// biome-ignore lint/correctness/useExhaustiveDependencies: Only want to run this on mount
 	useEffect(() => {
 		if (!session.data) return;
 
@@ -46,7 +46,7 @@ function AccountManagerPanel() {
 
 		window.addEventListener("focus", handleFocus);
 		return () => window.removeEventListener("focus", handleFocus);
-	}, []);
+	}, [session]);
 
 	if (session.isPending) {
 		return (
@@ -110,15 +110,7 @@ function AccountManagerPanel() {
 				<Button
 					disabled={isSupporter}
 					onClick={async () => {
-						const req = await fetch(
-							new URL(
-								`/api/supporter/generate-checkout`,
-								process.env.NEXT_PUBLIC_BACKEND_URL,
-							),
-							{
-								credentials: "include",
-							},
-						);
+						const req = await fetchFromBackend("/supporter/generate-checkout");
 
 						try {
 							const { url } = await req.json();
@@ -148,16 +140,9 @@ function AccountManagerPanel() {
 							variant="destructive"
 							title="Remove Supporter Status (Dev Only)"
 							onClick={async () => {
-								await fetch(
-									new URL(
-										`/api/supporter/remove-supporter`,
-										process.env.NEXT_PUBLIC_BACKEND_URL,
-									),
-									{
-										method: "POST",
-										credentials: "include",
-									},
-								);
+								await fetchFromBackend(`/supporter/remove-supporter`, {
+									method: "POST",
+								});
 								// Refresh session instead of reloading the page
 								session.refetch();
 							}}

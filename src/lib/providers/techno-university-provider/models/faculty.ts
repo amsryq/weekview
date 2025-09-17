@@ -1,3 +1,4 @@
+import { fetchFromBackend } from "~/lib/utils/backend";
 import { Campus } from "./campus";
 
 interface ServerFaculty {
@@ -18,11 +19,8 @@ export class Faculty {
 	}
 
 	static async fetch(campus: Campus): Promise<Faculty[]> {
-		const data: ServerFaculty[] = await fetch(
-			new URL(
-				`/api/providers/uitm/icress/faculties/${campus.code}`,
-				process.env.NEXT_PUBLIC_BACKEND_URL,
-			),
+		const data: ServerFaculty[] = await fetchFromBackend(
+			`/providers/uitm/icress/faculties/${campus.code}`,
 		).then((r) => r.json());
 		return data.map((f) => new Faculty(f.code, f.name, campus));
 	}

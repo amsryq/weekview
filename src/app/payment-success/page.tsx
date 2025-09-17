@@ -12,6 +12,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "~/components/ui/card";
+import { fetchFromBackend } from "~/lib/utils/backend";
 
 interface PaymentSessionData {
 	status: string;
@@ -36,15 +37,7 @@ const QUERY_CONFIG = {
 async function fetchSessionData(
 	sessionId: string,
 ): Promise<PaymentSessionData> {
-	const response = await fetch(
-		new URL(
-			`/api/stripe/session/${sessionId}`,
-			process.env.NEXT_PUBLIC_BACKEND_URL,
-		),
-		{
-			credentials: "include",
-		},
-	);
+	const response = await fetchFromBackend(`/stripe/session/${sessionId}`);
 	if (!response.ok) {
 		throw new Error("Failed to fetch session data");
 	}

@@ -1,3 +1,4 @@
+import { fetchFromBackend } from "~/lib/utils/backend";
 import { Campus } from "./campus";
 import { Faculty } from "./faculty";
 
@@ -30,11 +31,8 @@ export class Course {
 		const faculty =
 			campusOrFaculty instanceof Faculty ? campusOrFaculty : undefined;
 
-		const data: ServerCourse[] = await fetch(
-			new URL(
-				`/api/providers/uitm/icress/courses/${campus.code}${faculty ? `/${faculty.code}` : ""}`,
-				process.env.NEXT_PUBLIC_BACKEND_URL,
-			),
+		const data: ServerCourse[] = await fetchFromBackend(
+			`/providers/uitm/icress/courses/${campus.code}${faculty ? `/${faculty.code}` : ""}`,
 		).then((r) => r.json());
 
 		return data.map(
