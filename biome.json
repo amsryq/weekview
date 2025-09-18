@@ -7,7 +7,12 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!**/.next", "!node_modules", "!build"]
+		"includes": [
+			"**",
+			"!**/.next",
+			"!**/node_modules",
+			"!**/out"
+		]
 	},
 	"formatter": {
 		"enabled": true,
@@ -26,7 +31,9 @@
 	},
 	"overrides": [
 		{
-			"includes": ["**/*.{ts,tsx}"],
+			"includes": [
+				"**/*.{ts,tsx}"
+			],
 			"linter": {
 				"rules": {
 					"complexity": {
