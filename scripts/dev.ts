@@ -1,4 +1,7 @@
-import net from "net";
+import { $ } from "bun";
+import { mkdir } from "fs/promises";
+import { createProxyServer } from "http-proxy-3";
+import path from "path";
 
 const RESET = "\x1b[0m";
 const RED = "\x1b[31m";
@@ -6,65 +9,106 @@ const GREEN = "\x1b[32m";
 const YELLOW = "\x1b[33m";
 const CYAN = "\x1b[36m";
 
-const stagingUrl = "http://staging.weekview.my";
+const stagingHost = "localhost.weekview.my";
 
+const projectRootDir = path.resolve(import.meta.dir + "/..");
+
+const hostname = process.env.HOSTNAME || stagingHost;
 const port = process.env.PORT ? Number.parseInt(process.env.PORT) : 3000;
 
-function isPortTaken(port: number) {
-    return new Promise<boolean>((res, rej) => {
-        const tester = net
-            .createServer()
-            .once("error", (err) => {
-                if ("code" in err && err.code != "EADDRINUSE") return rej(err);
-                res(true);
-            })
-            .once("listening", function () {
-                tester.once("close", () => res(false)).close();
-            })
-            .listen(port);
-    });
+const cmds = [
+	"next",
+	"dev",
+	"--turbopack",
+	"--experimental-https",
+	"--hostname",
+	hostname,
+	"--port",
+	String(port),
+];
+
+const certificatesPath = projectRootDir + "/certificates/localhost.pem";
+const keyPath = projectRootDir + "/certificates/localhost-key.pem";
+
+let certificatesExist =
+	(await Bun.file(certificatesPath).exists()) &&
+	(await Bun.file(keyPath).exists());
+
+if (process.env.WSL_DISTRO_NAME && !certificatesExist) {
+	console.log(
+		YELLOW +
+			"Running in WSL and certificates not found. mkcert needs to be installed on your Windows system to generate self-signed certificates." +
+			RESET,
+	);
+	const which = await $`which mkcert.exe`.quiet().then((r) => r.text().trim());
+	if (!which) {
+		console.error(
+			RED +
+				"mkcert.exe not found. Please install mkcert for Windows from https://github.com/FiloSottile/mkcert" +
+				RESET,
+		);
+		process.exit(1);
+	}
+
+	console.log(CYAN + "Generating certificates using mkcert..." + RESET);
+	await mkdir(`${projectRootDir}/certificates`);
+	await $`mkcert.exe -install -key-file ${keyPath} -cert-file ${certificatesPath} ${{ raw: `localhost 127.0.0.1 ::1 ${stagingHost} "*.${stagingHost}"` }}`.cwd(
+		projectRootDir,
+	);
+
+	console.log(GREEN + "Certificates generated." + RESET);
+	certificatesExist = true;
 }
 
-// Small helper to wait for port to be taken
-async function waitForPort(timeout = 15000) {
-    const start = Date.now();
-    while (Date.now() - start < timeout) {
-        try {
-            const taken = await isPortTaken(port);
-            if (taken) return true;
-        } catch {
-            // not ready yet
-        }
+if (certificatesExist) {
+	cmds.push("--experimental-https-key", keyPath);
+	cmds.push("--experimental-https-cert", certificatesPath);
+} else {
+	console.log(
+		YELLOW +
+			"Certificates not found. Next.js will generate self-signed certificates, which may not include all necessary SANs." +
+			`\nIt is highly recommended to include "*.${stagingHost}" in your trusted certificates.` +
+			RESET,
+	);
 
-        await new Promise((r) => setTimeout(r, 500));
-    }
-    return false;
+	const readline = await import("readline");
+	const rl = readline.createInterface({
+		input: process.stdin,
+		output: process.stdout,
+	});
+
+	const answer = await new Promise((resolve) => {
+		rl.question("Do you want to continue? (y/N) ", (ans) => {
+			rl.close();
+			resolve(ans);
+		});
+	});
+
+	if (String(answer).toLowerCase() !== "y") {
+		console.log(RED + "Aborting." + RESET);
+		process.exit(1);
+	}
 }
 
-const proc = Bun.spawn(["next", "dev", "--port", String(port)], {
-    stdout: "inherit",
-    stderr: "inherit",
+Bun.spawn(cmds, {
+	cwd: projectRootDir,
+	stdout: "inherit",
+	stderr: "inherit",
 });
 
-// Check staging after 3000 is up
-const ready = await waitForPort();
-if (!ready) {
-    console.error(
-        `${RED}❌ Next.js server did not start on port ${port}${RESET}`,
-    );
-    proc.kill();
-    process.exit(1);
-}
-
-try {
-    const res = await fetch(stagingUrl, {
-        method: "HEAD",
-        headers: { "Is-Proxy-Check": "1" },
-    });
-    if (!res.ok) throw new Error("Bad status: " + res.status);
-    console.log(`${GREEN}✔ Proxy is up:${RESET} ${CYAN}${stagingUrl}${RESET}`);
-} catch {
-    console.log(`${YELLOW}⚠ Could not reach ${stagingUrl}.${RESET}`);
-    console.log(`${YELLOW}👉 Did you forget to enable the proxy?${RESET}`);
-    console.log(`${CYAN}${stagingUrl}${RESET}`);
-}
+createProxyServer({
+	target: "http://localhost:8787",
+	ssl: {
+		key: await Bun.file(keyPath).text(),
+		cert: await Bun.file(certificatesPath).text(),
+	},
+})
+	.on("error", (err) => {
+		console.error(RED + "Proxy server error:", err, RESET);
+	})
+	.on("proxyRes", (proxyRes, req, res) => {
+		console.log(
+			CYAN + `[Proxy] ${res.statusCode} ${req.method} ${req.url}` + RESET,
+		);
+	})
+	.listen(3200, "api.localhost.weekview.my");

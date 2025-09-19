@@ -87,7 +87,8 @@ export default function SignIn({ children }: { children: React.ReactNode }) {
 								await signIn.social(
 									{
 										provider: "github",
-										callbackURL: window.location.origin,
+										callbackURL:
+											process.env.NEXT_PUBLIC_APP_URL || window.location.origin,
 									},
 									{
 										onRequest: (ctx) => {
