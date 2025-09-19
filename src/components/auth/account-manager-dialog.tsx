@@ -1,7 +1,7 @@
 "use client";
 
 import { LoaderCircleIcon, RefreshCw } from "lucide-react";
-import { ReactNode, useEffect } from "react";
+import { ReactNode } from "react";
 import { signOut, useSession } from "~/lib/auth/auth-client";
 import { fetchFromBackend } from "~/lib/utils/backend";
 import { Button } from "../ui/button";
@@ -34,19 +34,9 @@ export function AccountManagerDialog({ children }: { children: ReactNode }) {
 }
 
 function AccountManagerPanel() {
-	const session = useSession();
-
-	// Refetch session data when window gains focus to ensure up-to-date info after payment
-	useEffect(() => {
-		if (!session.data) return;
-
-		const handleFocus = () => {
-			if (session.data && !session.isPending) session.refetch();
-		};
-
-		window.addEventListener("focus", handleFocus);
-		return () => window.removeEventListener("focus", handleFocus);
-	}, [session]);
+	const session = useSession({
+		refetchOnWindowFocus: "always",
+	});
 
 	if (session.isPending) {
 		return (

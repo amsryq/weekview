@@ -1,6 +1,7 @@
 import { type JSX, useState } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import type { PartialDeep } from "type-fest";
+import { useIsUserSupporter } from "~/lib/hooks/user";
 import { Course } from "~/lib/models/course";
 import {
 	Dialog,
@@ -23,6 +24,7 @@ export default function CourseEditorDialog({
 	defaultValues?: PartialDeep<Course.Schema>;
 	onSubmit: (data: Course.Schema, form: UseFormReturn<Course.Schema>) => void;
 }) {
+	const isSupporter = useIsUserSupporter();
 	const [open, setOpen] = useState(false);
 
 	return (
@@ -33,7 +35,13 @@ export default function CourseEditorDialog({
 					<DialogTitle>{title}</DialogTitle>
 					<DialogDescription>
 						Configure your course details, appearance, and schedule using the
-						tabs below.
+						tabs below.{" "}
+						{
+							// TODO: Temporary only, hide later
+							process.env.NODE_ENV === "development" &&
+								isSupporter &&
+								"(Supporter)"
+						}
 					</DialogDescription>
 				</DialogHeader>
 
