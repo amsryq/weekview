@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-// vibecoded this function, looks alright to me
+// amsyarasyiq: vibecoded this function, looks alright to me
 
 export function useCookie(name: string): string | undefined {
 	const [cookieValue, setCookieValue] = useState<string | undefined>(undefined);
