@@ -1,9 +1,10 @@
 "use client";
 
-import { DownloadIcon, Settings, Settings2Icon } from "lucide-react";
+import { DownloadIcon, HeartIcon, Settings, Settings2Icon } from "lucide-react";
 import { domToPng } from "modern-screenshot";
 import CourseManagementSheet from "~/components/course-management-sheet";
 import TimetableCustomizer from "~/components/settings/timetable-customizer";
+import SupportDialog from "~/components/support-dialog";
 import WeeklyTimetable from "~/components/timetable/weekly-timetable";
 import { Button } from "~/components/ui/button";
 
@@ -58,6 +59,12 @@ function App() {
 					<DownloadIcon className="w-4 h-4" />
 					Download as PNG
 				</Button>
+				<SupportDialog>
+					<Button variant="outline">
+						<HeartIcon className="w-4 h-4" />
+						Support
+					</Button>
+				</SupportDialog>
 			</div>
 			<WeeklyTimetable containerId="weekly-timetable" />
 		</div>
