@@ -127,7 +127,7 @@ function DayColumn({ day, dayIndex }: { day: string; dayIndex: number }) {
 				</div>
 			</div>
 
-			<div className="relative overflow-hidden" style={containerStyle}>
+			<div className="relative" style={containerStyle}>
 				{timeSlots.map((_, index) => (
 					<div key={index} className={lineClass} style={lineStyle(index)} />
 				))}
@@ -158,7 +158,7 @@ function RowLayout({
 
 	return (
 		<div className="overflow-x-auto">
-			<div id={containerId} className="bg-card min-w-fit">
+			<div id={containerId} className="min-w-fit">
 				<div className="flex pb-2">
 					<div className="w-16 flex-shrink-0" />
 					<div className="flex">
@@ -194,7 +194,7 @@ function ColumnLayout({
 		<div className="overflow-y-auto">
 			<div
 				id={containerId}
-				className="grid bg-card"
+				className="grid"
 				style={{
 					gridTemplateColumns: `auto repeat(${visibleDays.length}, 1fr)`,
 				}}

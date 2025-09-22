@@ -7,6 +7,7 @@ import type { Course } from "~/lib/models/course";
 import type { MeetingTime } from "~/lib/models/meeting-time";
 import { CustomIcon } from "../ui/custom-icon";
 import { FitText } from "../ui/fit-text";
+import GlassSurface from "../ui/glass-surface";
 
 interface CourseBlockProps {
 	course: Course;
@@ -70,6 +71,37 @@ function FieldInfoRow({
 	);
 }
 
+function Container({
+	kind = "basic",
+	children,
+	style,
+	className,
+}: {
+	kind?: "basic" | "glass";
+	children: React.ReactNode;
+	style?: React.CSSProperties;
+	className?: string;
+}) {
+	if (kind === "glass") {
+		return (
+			<GlassSurface
+				className={className}
+				style={style}
+				displace={2}
+				backgroundOpacity={0.7}
+			>
+				{children}
+			</GlassSurface>
+		);
+	}
+
+	return (
+		<div className={className} style={style}>
+			{children}
+		</div>
+	);
+}
+
 export function CourseBlock({
 	course,
 	meetingTime,
@@ -81,8 +113,9 @@ export function CourseBlock({
 	const backgroundStyle = ColorEntry.getBackgroundStyle(appearance.background);
 
 	const containerStyle: React.CSSProperties = {
-		borderRadius: 8,
 		height: "100%",
+		borderRadius: 12,
+		backgroundColor: backgroundStyle.backgroundColor,
 		...backgroundStyle,
 		...style,
 	};
@@ -111,9 +144,9 @@ export function CourseBlock({
 		: null;
 
 	return (
-		<div className={className} style={containerStyle}>
+		<Container className={className} style={containerStyle}>
 			<div
-				className="p-2 h-full flex flex-col justify-between text-xs relative"
+				className="h-full p-2 flex flex-col justify-between text-xs relative"
 				style={{
 					textAlign: appearance.textAlign,
 					color: appearance.fgColor ?? "#ffffff",
@@ -172,6 +205,6 @@ export function CourseBlock({
 					text={meetingTime.location}
 				/>
 			</div>
-		</div>
+		</Container>
 	);
 }
