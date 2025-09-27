@@ -1,5 +1,6 @@
 import "~/globals.css";
 import type { Metadata } from "next";
+import { Toaster } from "~/components/ui/sonner";
 import Providers from "./providers";
 
 export const metadata: Metadata = {
@@ -19,6 +20,7 @@ export default function RootLayout({
 				<Providers>
 					<div className="root">{children}</div>
 				</Providers>
+				<Toaster />
 			</body>
 		</html>
 	);

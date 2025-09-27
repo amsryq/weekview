@@ -329,13 +329,13 @@ function GroupSelectorStep() {
 					<div className="flex flex-col gap-2">
 						<h3 className="text-center font-medium">Courses</h3>
 						<div className="border rounded-lg p-3 h-32 overflow-y-auto bg-muted/30">
-							{coursesLoading ? (
-								<div className="text-sm text-muted-foreground italic p-2">
-									Loading courses...
-								</div>
-							) : coursesError ? (
+							{coursesError ? (
 								<div className="text-sm text-red-500 p-2">
 									{coursesError.message}
+								</div>
+							) : coursesLoading ? (
+								<div className="text-sm text-muted-foreground italic p-2">
+									Loading courses...
 								</div>
 							) : courses && courses.length > 0 ? (
 								courses.map((course, idx) => (
@@ -361,13 +361,13 @@ function GroupSelectorStep() {
 					<div className="flex flex-col gap-2">
 						<h3 className="text-center font-medium">Groups</h3>
 						<div className="border rounded-lg p-3 h-32 overflow-y-auto bg-muted/30">
-							{groupsLoading ? (
+							{groupsError ? (
+								<div className="text-sm text-red-501 p-2">
+									{(groupsError as Error).message}
+								</div>
+							) : groupsLoading ? (
 								<div className="text-sm text-muted-foreground italic p-2">
 									Loading groups...
-								</div>
-							) : groupsError ? (
-								<div className="text-sm text-red-500 p-2">
-									{(groupsError as Error).message}
 								</div>
 							) : selectedCourse && availableGroups?.length ? (
 								availableGroups.map((technoCourse, idx) => {
