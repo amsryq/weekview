@@ -47,7 +47,7 @@ function App() {
 				<TimetableCustomizer>
 					<Button variant="outline">
 						<Settings2Icon className="w-4 h-4" />
-						Customize
+						Customize Timetable
 					</Button>
 				</TimetableCustomizer>
 				<Button onClick={handleDownloadPng}>

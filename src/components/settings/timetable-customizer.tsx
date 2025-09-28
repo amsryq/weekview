@@ -120,8 +120,8 @@ export default function TimetableCustomizer({
 						<div className="space-y-6">
 							<Tabs defaultValue="timetable" className="w-full">
 								<TabsList className="grid grid-cols-2 w-full">
-									<TabsTrigger value="timetable">Timetable Layout</TabsTrigger>
-									<TabsTrigger value="cells">Cell Layout</TabsTrigger>
+									<TabsTrigger value="timetable">General</TabsTrigger>
+									<TabsTrigger value="cells">Cell Styles</TabsTrigger>
 								</TabsList>
 
 								<TabsContent value="timetable" className="space-y-4 mt-6">
