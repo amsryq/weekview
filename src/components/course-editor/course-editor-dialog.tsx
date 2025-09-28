@@ -30,7 +30,7 @@ export default function CourseEditorDialog({
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>{children}</DialogTrigger>
-			<DialogContent className="w-full max-w-full lg:max-w-6xl max-h-[90vh] overflow-hidden">
+			<DialogContent className="flex flex-col w-5xl sm:max-w-[90vw] h-[90vh]">
 				<DialogHeader>
 					<DialogTitle>{title}</DialogTitle>
 					<DialogDescription>

@@ -1,7 +1,10 @@
 import { Clock, MapPin } from "lucide-react";
 import type React from "react";
 import { RequiredDeep } from "type-fest";
-import type { CellAppearance } from "~/lib/models/cell-appearance";
+import type {
+	CellAppearance,
+	CellMaterial,
+} from "~/lib/models/cell-appearance";
 import { ColorEntry } from "~/lib/models/color-entry";
 import type { Course } from "~/lib/models/course";
 import type { MeetingTime } from "~/lib/models/meeting-time";
@@ -72,18 +75,17 @@ function FieldInfoRow({
 }
 
 function Container({
-	kind = "basic",
+	material = "basic",
 	children,
 	style,
 	className,
 }: {
-	kind?: "basic" | "glass";
+	material?: CellMaterial;
 	children: React.ReactNode;
 	style?: React.CSSProperties;
 	className?: string;
 }) {
-	const _abc = "this is pretty nuts ${kasdjflaksfj}";
-	if (kind === "glass") {
+	if (material === "glass") {
 		return (
 			<GlassSurface
 				className={className}
@@ -145,7 +147,11 @@ export function CourseBlock({
 		: null;
 
 	return (
-		<Container className={className} style={containerStyle}>
+		<Container
+			material={appearance.material}
+			className={className}
+			style={containerStyle}
+		>
 			<div
 				className="h-full p-2 flex flex-col justify-between text-xs relative"
 				style={{

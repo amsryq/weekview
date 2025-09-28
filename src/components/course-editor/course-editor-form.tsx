@@ -7,13 +7,10 @@ import { MeetingTime } from "~/lib/models/meeting-time";
 import { Button } from "../ui/button";
 import { DialogClose } from "../ui/dialog";
 import { Form, FormMessage } from "../ui/form";
-import { ScrollArea } from "../ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { AppearanceTab } from "./appearance-tab";
 import { CourseDetailsTab } from "./course-details-tab";
 import { CoursePreview } from "./course-preview";
-import { IconsTab } from "./icons-tab";
-import { LayoutTab } from "./layout-tab";
 
 interface CourseEditorFormProps {
 	onSubmit: (data: Course.Schema, form: UseFormReturn<Course.Schema>) => void;
@@ -82,39 +79,37 @@ export function CourseEditorForm({
 
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-0">
-				{/* ScrollArea only applies for < lg */}
-				<ScrollArea className="max-lg:h-[60vh] max-lg:pr-4">
-					<div className="flex flex-col-reverse lg:flex-row gap-6">
-						{/* Main Content with Tabs */}
-						<Tabs defaultValue="details" className="w-full">
-							<TabsList className="grid w-full grid-cols-4">
+			<form
+				onSubmit={form.handleSubmit(handleSubmit)}
+				className="flex flex-col h-full min-h-0 shrink"
+			>
+				<div className="flex-1 min-h-0 max-lg:overflow-y-scroll max-lg:pr-4 max-lg:pl-2 max-lg:-ml-2">
+					<div className="flex flex-col-reverse min-h-0 h-full lg:flex-row gap-6">
+						<Tabs className="w-full min-h-0" defaultValue="details">
+							<TabsList>
 								<TabsTrigger value="details">Details</TabsTrigger>
 								<TabsTrigger value="appearance">Appearance</TabsTrigger>
-								<TabsTrigger value="layout">Layout</TabsTrigger>
-								<TabsTrigger value="icons">Icons</TabsTrigger>
+								{/*<TabsTrigger value="layout">Layout</TabsTrigger>
+								<TabsTrigger value="icons">Icons</TabsTrigger>*/}
 							</TabsList>
 
-							{/* ScrollArea only applies for > lg */}
-							<ScrollArea className="pb-4 lg:max-h-[60vh] lg:pr-4">
-								<div className="mt-6">
-									<TabsContent value="details" className="m-0">
-										<CourseDetailsTab />
-									</TabsContent>
+							<div className="pt-2 pb-4 lg:overflow-y-scroll lg:pr-4 lg:pl-2 lg:-ml-2">
+								<TabsContent value="details" className="m-0">
+									<CourseDetailsTab />
+								</TabsContent>
 
-									<TabsContent value="appearance" className="m-0">
-										<AppearanceTab />
-									</TabsContent>
+								<TabsContent value="appearance" className="m-0">
+									<AppearanceTab />
+								</TabsContent>
 
-									<TabsContent value="layout" className="m-0">
+								{/*<TabsContent value="layout" className="m-0">
 										<LayoutTab />
 									</TabsContent>
 
 									<TabsContent value="icons" className="m-0">
 										<IconsTab />
-									</TabsContent>
-								</div>
-							</ScrollArea>
+									</TabsContent>*/}
+							</div>
 						</Tabs>
 
 						{/* Preview Sidebar */}
@@ -122,10 +117,10 @@ export function CourseEditorForm({
 							<CoursePreview />
 						</div>
 					</div>
-				</ScrollArea>
+				</div>
 
 				{/* Form Actions */}
-				<div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-6 border-t">
+				<div className="flex flex-1 flex-col-reverse grow-0 sm:flex-row justify-end gap-3 pt-6 border-t">
 					<div className="flex gap-3">
 						<Button
 							type="button"

@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { ColorEntry } from "./color-entry";
 
+export const CellMaterialSchema = z.enum(["basic", "glass"]);
+export type CellMaterial = z.infer<typeof CellMaterialSchema>;
+
 export const CellElementsSchema = z.enum(["time", "location", "code", "name"]);
 export type CellElements = z.infer<typeof CellElementsSchema>;
 
@@ -29,6 +32,7 @@ export type IconAppearance = z.infer<typeof IconAppearanceSchema>;
 export const CellAppearanceSchema = z.object({
 	background: ColorEntry.schema,
 	fgColor: z.string(),
+	material: CellMaterialSchema.optional(),
 	visibility: z
 		.partialRecord(CellElementsSchema, z.boolean().optional())
 		.optional(),

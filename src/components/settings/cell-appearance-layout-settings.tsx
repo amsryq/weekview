@@ -3,6 +3,7 @@ import { PartialDeep, UnknownRecord } from "type-fest";
 import type {
 	CellAppearance,
 	CellElements,
+	CellMaterial,
 	TextAlign,
 } from "~/lib/models/cell-appearance";
 import { Button } from "../ui/button";
@@ -158,10 +159,6 @@ export function CellAppearanceLayoutSettings({
 		onChange?.(updatedValues as PartialDeep<CellAppearance>);
 	};
 
-	const handleTextAlignChange = (textAlign: TextAlign) => {
-		handleChange("textAlign", null, textAlign);
-	};
-
 	const handleElementChange = (
 		key: keyof CellAppearance,
 		elementKey: CellElements,
@@ -174,6 +171,11 @@ export function CellAppearanceLayoutSettings({
 		{ value: "left", label: "Left" },
 		{ value: "center", label: "Center" },
 		{ value: "right", label: "Right" },
+	];
+
+	const cellMaterialOptions: { value: CellMaterial; label: string }[] = [
+		{ value: "basic", label: "Basic" },
+		{ value: "glass", label: "Glass" },
 	];
 
 	return (
@@ -191,7 +193,9 @@ export function CellAppearanceLayoutSettings({
 									? "default"
 									: "outline"
 							}
-							onClick={() => handleTextAlignChange(option.value)}
+							onClick={() => {
+								handleChange("textAlign", null, option.value);
+							}}
 						>
 							{option.label}
 						</Button>
@@ -202,6 +206,31 @@ export function CellAppearanceLayoutSettings({
 				</p>
 			</div>
 
+			<div>
+				<Label className="text-sm font-medium">Cell Material</Label>
+				<div className="flex gap-2 mt-2">
+					{cellMaterialOptions.map((option) => (
+						<Button
+							key={option.value}
+							type="button"
+							variant={
+								(internalValues.material ?? baseValues!.material) ===
+								option.value
+									? "default"
+									: "outline"
+							}
+							onClick={() => {
+								handleChange("material", null, option.value);
+							}}
+						>
+							{option.label}
+						</Button>
+					))}
+				</div>
+				<p className="text-xs text-muted-foreground mt-1">
+					Choose the visual style of the course cell
+				</p>
+			</div>
 			<div className="space-y-3">
 				<div>
 					<Label className="text-sm font-medium">Element Settings</Label>

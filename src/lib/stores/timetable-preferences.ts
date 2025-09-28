@@ -19,6 +19,7 @@ const defaultState = {
 
 	cellAppearance: {
 		textAlign: "left",
+		material: "basic",
 
 		visibility: {
 			time: true,
