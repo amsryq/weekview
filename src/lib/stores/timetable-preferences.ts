@@ -16,6 +16,10 @@ export type TimetableLayout = "rows" | "columns";
 
 const defaultState = {
 	layout: "rows" as TimetableLayout,
+	backgroundImage: null as string | null,
+	backgroundImageOptions: {
+		opacity: 0.3,
+	},
 
 	cellAppearance: {
 		textAlign: "left",
@@ -88,6 +92,12 @@ interface Actions {
 
 	setBackgroundAppearance: (background: ColorEntry.Schema) => void;
 
+	setBackgroundImage: (imageUrl: string | null) => void;
+
+	setBackgroundImageOptions: (
+		options: Partial<State["backgroundImageOptions"]>,
+	) => void;
+
 	reset: () => void;
 }
 
@@ -133,6 +143,20 @@ export const TimetablePreferencesStore = createStore<State & Actions>()(
 						predefined: background.predefined ?? false,
 					};
 				}),
+
+			setBackgroundImage: (imageUrl) =>
+				set((s) => {
+					s.backgroundImage = imageUrl;
+				}),
+
+			setBackgroundImageOptions: (options) =>
+				set((s) => {
+					s.backgroundImageOptions = {
+						...s.backgroundImageOptions,
+						...options,
+					};
+				}),
+
 			reset: () => set(() => defaultState),
 		})),
 		{

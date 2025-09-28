@@ -19,6 +19,8 @@ interface TimetableContextProps {
 	rowWidth: number;
 	columnHeight: number;
 	layout: "rows" | "columns";
+	backgroundStyle?: React.CSSProperties;
+	overlayStyle?: React.CSSProperties;
 }
 
 const TimetableContext = createContext<TimetableContextProps | null>(null);
@@ -154,29 +156,41 @@ function RowLayout({
 	visibleDays: string[];
 	containerId: string;
 }) {
-	const { timeSlots } = useTimetable();
+	const { timeSlots, backgroundStyle, overlayStyle } = useTimetable();
 
 	return (
 		<div className="overflow-x-auto">
-			<div id={containerId} className="min-w-fit">
-				<div className="flex pb-2">
-					<div className="w-16 flex-shrink-0" />
-					<div className="flex">
-						{timeSlots.map((time: string) => (
-							<div
-								key={time}
-								className="text-sm text-muted-foreground text-center -translate-x-4 flex flex-shrink-0"
-								style={{ width: `${ROW_BLOCK_WIDTH_PX}px` }}
-							>
-								<span className="font-semibold">{time}</span>
-							</div>
-						))}
+			<div
+				id={containerId}
+				className="p-6 min-w-fit relative"
+				style={backgroundStyle}
+			>
+				{overlayStyle && (
+					<div
+						className="absolute inset-0 bg-background"
+						style={overlayStyle}
+					/>
+				)}
+				<div className="relative z-10">
+					<div className="flex pb-2">
+						<div className="w-16 flex-shrink-0" />
+						<div className="flex">
+							{timeSlots.map((time: string) => (
+								<div
+									key={time}
+									className="text-sm text-muted-foreground text-center -translate-x-4 flex flex-shrink-0"
+									style={{ width: `${ROW_BLOCK_WIDTH_PX}px` }}
+								>
+									<span className="font-semibold">{time}</span>
+								</div>
+							))}
+						</div>
 					</div>
-				</div>
 
-				{visibleDays.map((day: string) => (
-					<DayColumn key={day} day={day} dayIndex={DAYS.indexOf(day)} />
-				))}
+					{visibleDays.map((day: string) => (
+						<DayColumn key={day} day={day} dayIndex={DAYS.indexOf(day)} />
+					))}
+				</div>
 			</div>
 		</div>
 	);
@@ -189,32 +203,41 @@ function ColumnLayout({
 	visibleDays: string[];
 	containerId: string;
 }) {
-	const { timeSlots } = useTimetable();
+	const { timeSlots, backgroundStyle, overlayStyle } = useTimetable();
 	return (
 		<div className="overflow-y-auto">
 			<div
 				id={containerId}
-				className="grid"
+				className="grid relative p-6"
 				style={{
 					gridTemplateColumns: `auto repeat(${visibleDays.length}, 1fr)`,
+					...backgroundStyle,
 				}}
 			>
-				<div className="space-y-0">
-					<div className="h-8" />
-					{timeSlots.map((time: string) => (
-						<span
-							key={time}
-							style={{ height: `${COLUMN_BLOCK_HEIGHT_PX}px` }}
-							className="flex text-[12px] text-muted-foreground font-semibold pr-2 -translate-y-2 justify-end"
-						>
-							{time}
-						</span>
+				{overlayStyle && (
+					<div
+						className="absolute inset-0 bg-background rounded-lg"
+						style={overlayStyle}
+					/>
+				)}
+				<div className="relative z-10 contents">
+					<div className="space-y-0">
+						<div className="h-8" />
+						{timeSlots.map((time: string) => (
+							<span
+								key={time}
+								style={{ height: `${COLUMN_BLOCK_HEIGHT_PX}px` }}
+								className="flex text-[12px] text-muted-foreground font-semibold pr-2 -translate-y-2 justify-end"
+							>
+								{time}
+							</span>
+						))}
+					</div>
+
+					{visibleDays.map((day: string) => (
+						<DayColumn key={day} day={day} dayIndex={DAYS.indexOf(day)} />
 					))}
 				</div>
-
-				{visibleDays.map((day: string) => (
-					<DayColumn key={day} day={day} dayIndex={DAYS.indexOf(day)} />
-				))}
 			</div>
 		</div>
 	);
@@ -236,6 +259,14 @@ export default function WeeklyTimetable({
 }: WeeklyTimetableProps) {
 	const courses = useStore(CourseStore, (state) => _courses || state.courses);
 	const prefsLayout = useStore(TimetablePreferencesStore, (s) => s.layout);
+	const backgroundImage = useStore(
+		TimetablePreferencesStore,
+		(s) => s.backgroundImage,
+	);
+	const backgroundImageOptions = useStore(
+		TimetablePreferencesStore,
+		(s) => s.backgroundImageOptions,
+	);
 	// Allow prop override; default to preferences
 	const effectiveLayout = layout ?? prefsLayout;
 
@@ -285,9 +316,23 @@ export default function WeeklyTimetable({
 		};
 	}, [courses]);
 
+	const backgroundStyle = backgroundImage
+		? {
+				backgroundImage: `url(${backgroundImage})`,
+				backgroundSize: "cover",
+				backgroundPosition: "center",
+				backgroundRepeat: "no-repeat",
+				borderRadius: "8px",
+			}
+		: undefined;
+
+	const overlayStyle = backgroundImage
+		? { opacity: 1 - backgroundImageOptions.opacity }
+		: undefined;
+
 	return (
-		<Card>
-			<CardContent className="max-w-[95vw]">
+		<Card className="py-0 overflow-hidden">
+			<CardContent className="max-w-[95vw] px-0">
 				<TimetableContext.Provider
 					value={{
 						courses,
@@ -295,6 +340,8 @@ export default function WeeklyTimetable({
 						columnHeight,
 						rowWidth,
 						layout: effectiveLayout,
+						backgroundStyle,
+						overlayStyle,
 					}}
 				>
 					{effectiveLayout === "rows" ? (

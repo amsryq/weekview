@@ -19,16 +19,11 @@ const handleDownloadPng = async () => {
 		return;
 	}
 
-	const padding = 16;
 	const borderRadius = 8;
 
 	const dataUrl = await domToPng(node, {
 		scale: 3,
-		// Needs recalculation because we're adding padding
-		width: node.scrollWidth + padding * 2,
-		height: node.scrollHeight + padding * 2,
 		style: {
-			padding: `${padding}px`,
 			borderRadius: `${borderRadius}px`,
 		},
 	});

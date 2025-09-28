@@ -15,6 +15,7 @@ import {
 import { Label } from "../ui/label";
 import { ScrollArea } from "../ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { BackgroundImageUpload } from "./background-image-upload";
 import { CellAppearanceLayoutSettings } from "./cell-appearance-layout-settings";
 
 export default function TimetableCustomizer({
@@ -144,6 +145,20 @@ export default function TimetableCustomizer({
 												Vertical columns
 											</Button>
 										</div>
+									</div>
+
+									<div className="space-y-2">
+										<Label>Background Image</Label>
+										<BackgroundImageUpload
+											value={prefs.backgroundImage}
+											onChange={(imageUrl) =>
+												prefs.setBackgroundImage(imageUrl)
+											}
+											options={prefs.backgroundImageOptions}
+											onOptionsChange={(options) =>
+												prefs.setBackgroundImageOptions(options)
+											}
+										/>
 									</div>
 								</TabsContent>
 
