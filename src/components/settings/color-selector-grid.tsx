@@ -90,9 +90,9 @@ export function ColorSelectorGrid({ value, onChange }: ColorPickerProps) {
 			</Tabs>
 
 			{/* Color Row */}
-			<div className="flex items-center gap-2">
+			<div className="flex flex-wrap items-center gap-2">
 				{filteredColors.map((color) => (
-					<div key={color.id} className="relative group">
+					<div key={color.id} className="flex relative items-center group">
 						<button
 							type="button"
 							style={color.getBackgroundStyle()}
