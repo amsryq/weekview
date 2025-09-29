@@ -8,6 +8,7 @@ import {
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import type { Course } from "~/lib/models/course";
+import { PaywallOverlay } from "../paywall-overlay";
 import { ColorSelectorGrid } from "../settings/color-selector-grid";
 import { Button } from "../ui/button";
 import {
@@ -142,324 +143,332 @@ export function AppearanceTab() {
 			</Card>
 
 			{/* Icon Section */}
-			<Card>
-				<CardHeader>
-					<CardTitle className="text-base">Icon</CardTitle>
-					<CardDescription>
-						Add an emoji or custom icon to personalize your course
-					</CardDescription>
-				</CardHeader>
-				<CardContent className="space-y-6">
-					<FormField
-						control={form.control}
-						name="cellAppearance.icon.type"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel className="text-sm font-medium">Icon Type</FormLabel>
-								<Select onValueChange={field.onChange} value={field.value}>
-									<FormControl>
-										<SelectTrigger>
-											<SelectValue placeholder="Choose icon type" />
-										</SelectTrigger>
-									</FormControl>
-									<SelectContent>
-										<SelectItem value="emoji">Emoji</SelectItem>
-										<SelectItem value="svg">Custom SVG</SelectItem>
-									</SelectContent>
-								</Select>
-								<FormDescription>
-									Choose between an emoji or custom SVG icon
-								</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-
-					{/* Emoji Input */}
-					{iconType === "emoji" && (
+			<PaywallOverlay
+				title="Premium Feature"
+				description="Icons are available for supporters only. Unlock this feature and support the project!"
+				className="border-1 rounded-xl"
+			>
+				<Card>
+					<CardHeader>
+						<CardTitle className="text-base">Icon</CardTitle>
+						<CardDescription>
+							Add an emoji or custom icon to personalize your course
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="space-y-6">
 						<FormField
 							control={form.control}
-							name="cellAppearance.icon.emoji"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel className="text-sm font-medium">Emoji</FormLabel>
-									<FormControl>
-										<div className="flex items-center gap-2">
-											<Popover modal={true}>
-												<PopoverTrigger asChild>
-													<Button
-														variant="outline"
-														className="py-2 text-xl bg-muted/50 hover:bg-muted/70"
-													>
-														{field.value ? (
-															<Twemoji
-																emoji={field.value}
-																className="text-xl leading-0"
-															/>
-														) : (
-															<SmileIcon />
-														)}
-													</Button>
-												</PopoverTrigger>
-												<PopoverContent className="w-fit p-0" align="start">
-													<EmojiPicker
-														className="h-[342px]"
-														onEmojiSelect={({ emoji }) => {
-															field.onChange(emoji);
-														}}
-													>
-														<EmojiPickerSearch />
-														<EmojiPickerContent />
-														<EmojiPickerFooter />
-													</EmojiPicker>
-												</PopoverContent>
-											</Popover>
-											{field.value && (
-												<Button
-													type="button"
-													variant="ghost"
-													size="sm"
-													onClick={() => field.onChange("")}
-													className="h-6 w-6 p-0 hover:text-destructive text-foreground"
-												>
-													×
-												</Button>
-											)}
-										</div>
-									</FormControl>
-									<FormDescription>
-										Click to select an emoji for your course icon
-									</FormDescription>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-					)}
-
-					{/* SVG Input */}
-					{iconType === "svg" && (
-						<FormField
-							control={form.control}
-							name="cellAppearance.icon.svg"
+							name="cellAppearance.icon.type"
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel className="text-sm font-medium">
-										SVG Code
+										Icon Type
 									</FormLabel>
-									<FormControl>
-										<div className="space-y-4">
-											<Textarea
-												placeholder={`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-</svg>`}
-												rows={6}
-												className="font-mono text-xs resize-none"
-												{...field}
-											/>
-											{field.value && (
-												<div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-													<span className="text-sm text-muted-foreground">
-														Preview:
-													</span>
-													<div className="w-8 h-8 flex items-center justify-center">
-														<img
-															src={`data:image/svg+xml;utf8,${encodeURIComponent(field.value)}`}
-															alt="SVG preview"
-															className="w-full h-full object-contain"
-															onError={(e) => {
-																(e.target as HTMLImageElement).style.display =
-																	"none";
-															}}
-														/>
-													</div>
-												</div>
-											)}
-										</div>
-									</FormControl>
+									<Select onValueChange={field.onChange} value={field.value}>
+										<FormControl>
+											<SelectTrigger>
+												<SelectValue placeholder="Choose icon type" />
+											</SelectTrigger>
+										</FormControl>
+										<SelectContent>
+											<SelectItem value="emoji">Emoji</SelectItem>
+											<SelectItem value="svg">Custom SVG</SelectItem>
+										</SelectContent>
+									</Select>
 									<FormDescription>
-										Paste your SVG code here. Use "currentColor" for fill to
-										inherit text color.
+										Choose between an emoji or custom SVG icon
 									</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
 						/>
-					)}
 
-					{/* Icon Settings - Collapsible */}
-					{hasIcon && iconType === "emoji" && (
-						<Collapsible
-							open={iconSettingsOpen}
-							onOpenChange={setIconSettingsOpen}
-						>
-							<CollapsibleTrigger asChild>
-								<Button
-									type="button"
-									variant="ghost"
-									className="flex w-full justify-between p-0 h-auto font-medium text-sm"
-								>
-									<div className="flex items-center gap-2">
-										<Settings className="w-4 h-4" />
-										Icon Settings
-									</div>
-									{iconSettingsOpen ? (
-										<ChevronDown className="w-4 h-4" />
-									) : (
-										<ChevronRight className="w-4 h-4" />
-									)}
-								</Button>
-							</CollapsibleTrigger>
-							<CollapsibleContent className="space-y-4 pt-4">
-								<Card>
-									<CardContent>
-										<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-											<FormField
-												control={form.control}
-												name="cellAppearance.icon.opacity"
-												render={({ field }) => (
-													<FormItem>
-														<FormLabel className="text-sm">
-															Opacity{" "}
-															<span className="text-muted-foreground">
-																({(field.value * 100).toFixed(0)}%)
-															</span>
-														</FormLabel>
-														<FormControl>
-															<Slider
-																value={[field.value]}
-																onValueChange={(value) =>
-																	field.onChange(value[0])
-																}
-																min={0}
-																max={1}
-																step={0.1}
-																className="w-full"
-															/>
-														</FormControl>
-														<FormMessage />
-													</FormItem>
+						{/* Emoji Input */}
+						{iconType === "emoji" && (
+							<FormField
+								control={form.control}
+								name="cellAppearance.icon.emoji"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel className="text-sm font-medium">Emoji</FormLabel>
+										<FormControl>
+											<div className="flex items-center gap-2">
+												<Popover modal={true}>
+													<PopoverTrigger asChild>
+														<Button
+															variant="outline"
+															className="py-2 text-xl bg-muted/50 hover:bg-muted/70"
+														>
+															{field.value ? (
+																<Twemoji
+																	emoji={field.value}
+																	className="text-xl leading-0"
+																/>
+															) : (
+																<SmileIcon />
+															)}
+														</Button>
+													</PopoverTrigger>
+													<PopoverContent className="w-fit p-0" align="start">
+														<EmojiPicker
+															className="h-[342px]"
+															onEmojiSelect={({ emoji }) => {
+																field.onChange(emoji);
+															}}
+														>
+															<EmojiPickerSearch />
+															<EmojiPickerContent />
+															<EmojiPickerFooter />
+														</EmojiPicker>
+													</PopoverContent>
+												</Popover>
+												{field.value && (
+													<Button
+														type="button"
+														variant="ghost"
+														size="sm"
+														onClick={() => field.onChange("")}
+														className="h-6 w-6 p-0 hover:text-destructive text-foreground"
+													>
+														×
+													</Button>
 												)}
-											/>
+											</div>
+										</FormControl>
+										<FormDescription>
+											Click to select an emoji for your course icon
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						)}
 
-											<FormField
-												control={form.control}
-												name="cellAppearance.icon.size"
-												render={({ field }) => (
-													<FormItem>
-														<FormLabel className="text-sm">
-															Size{" "}
-															<span className="text-muted-foreground">
-																({field.value.toFixed(1)}x)
-															</span>
-														</FormLabel>
-														<FormControl>
-															<Slider
-																value={[field.value]}
-																onValueChange={(value) =>
-																	field.onChange(value[0])
-																}
-																min={1}
-																max={5}
-																step={0.1}
-																className="w-full"
+						{/* SVG Input */}
+						{iconType === "svg" && (
+							<FormField
+								control={form.control}
+								name="cellAppearance.icon.svg"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel className="text-sm font-medium">
+											SVG Code
+										</FormLabel>
+										<FormControl>
+											<div className="space-y-4">
+												<Textarea
+													placeholder={`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+</svg>`}
+													rows={6}
+													className="font-mono text-xs resize-none"
+													{...field}
+												/>
+												{field.value && (
+													<div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+														<span className="text-sm text-muted-foreground">
+															Preview:
+														</span>
+														<div className="w-8 h-8 flex items-center justify-center">
+															<img
+																src={`data:image/svg+xml;utf8,${encodeURIComponent(field.value)}`}
+																alt="SVG preview"
+																className="w-full h-full object-contain"
+																onError={(e) => {
+																	(e.target as HTMLImageElement).style.display =
+																		"none";
+																}}
 															/>
-														</FormControl>
-														<FormMessage />
-													</FormItem>
+														</div>
+													</div>
 												)}
-											/>
+											</div>
+										</FormControl>
+										<FormDescription>
+											Paste your SVG code here. Use "currentColor" for fill to
+											inherit text color.
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						)}
 
-											<FormField
-												control={form.control}
-												name="cellAppearance.icon.rotation"
-												render={({ field }) => (
-													<FormItem>
-														<FormLabel className="text-sm">
-															Rotation{" "}
-															<span className="text-muted-foreground">
-																({field.value}°)
-															</span>
-														</FormLabel>
-														<FormControl>
-															<Slider
-																value={[field.value]}
-																onValueChange={(value) =>
-																	field.onChange(value[0])
-																}
-																min={-180}
-																max={180}
-																step={15}
-																className="w-full"
-															/>
-														</FormControl>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
-
-											<FormField
-												control={form.control}
-												name="cellAppearance.icon.offsetX"
-												render={({ field }) => (
-													<FormItem>
-														<FormLabel className="text-sm">
-															Horizontal Distance{" "}
-															<span className="text-muted-foreground">
-																({field.value || 8}px)
-															</span>
-														</FormLabel>
-														<FormControl>
-															<Slider
-																value={[field.value || 8]}
-																onValueChange={(value) =>
-																	field.onChange(value[0])
-																}
-																min={0}
-																max={50}
-																step={2}
-																className="w-full"
-															/>
-														</FormControl>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
-
-											<FormField
-												control={form.control}
-												name="cellAppearance.icon.offsetY"
-												render={({ field }) => (
-													<FormItem>
-														<FormLabel className="text-sm">
-															Vertical Distance{" "}
-															<span className="text-muted-foreground">
-																({field.value || 8}px)
-															</span>
-														</FormLabel>
-														<FormControl>
-															<Slider
-																value={[field.value || 8]}
-																onValueChange={(value) =>
-																	field.onChange(value[0])
-																}
-																min={0}
-																max={50}
-																step={2}
-																className="w-full"
-															/>
-														</FormControl>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
+						{/* Icon Settings - Collapsible */}
+						{hasIcon && iconType === "emoji" && (
+							<Collapsible
+								open={iconSettingsOpen}
+								onOpenChange={setIconSettingsOpen}
+							>
+								<CollapsibleTrigger asChild>
+									<Button
+										type="button"
+										variant="ghost"
+										className="flex w-full justify-between p-0 h-auto font-medium text-sm"
+									>
+										<div className="flex items-center gap-2">
+											<Settings className="w-4 h-4" />
+											Icon Settings
 										</div>
-									</CardContent>
-								</Card>
-							</CollapsibleContent>
-						</Collapsible>
-					)}
-				</CardContent>
-			</Card>
+										{iconSettingsOpen ? (
+											<ChevronDown className="w-4 h-4" />
+										) : (
+											<ChevronRight className="w-4 h-4" />
+										)}
+									</Button>
+								</CollapsibleTrigger>
+								<CollapsibleContent className="space-y-4 pt-4">
+									<Card>
+										<CardContent>
+											<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+												<FormField
+													control={form.control}
+													name="cellAppearance.icon.opacity"
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel className="text-sm">
+																Opacity{" "}
+																<span className="text-muted-foreground">
+																	({(field.value * 100).toFixed(0)}%)
+																</span>
+															</FormLabel>
+															<FormControl>
+																<Slider
+																	value={[field.value]}
+																	onValueChange={(value) =>
+																		field.onChange(value[0])
+																	}
+																	min={0}
+																	max={1}
+																	step={0.1}
+																	className="w-full"
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+
+												<FormField
+													control={form.control}
+													name="cellAppearance.icon.size"
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel className="text-sm">
+																Size{" "}
+																<span className="text-muted-foreground">
+																	({field.value.toFixed(1)}x)
+																</span>
+															</FormLabel>
+															<FormControl>
+																<Slider
+																	value={[field.value]}
+																	onValueChange={(value) =>
+																		field.onChange(value[0])
+																	}
+																	min={1}
+																	max={5}
+																	step={0.1}
+																	className="w-full"
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+
+												<FormField
+													control={form.control}
+													name="cellAppearance.icon.rotation"
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel className="text-sm">
+																Rotation{" "}
+																<span className="text-muted-foreground">
+																	({field.value}°)
+																</span>
+															</FormLabel>
+															<FormControl>
+																<Slider
+																	value={[field.value]}
+																	onValueChange={(value) =>
+																		field.onChange(value[0])
+																	}
+																	min={-180}
+																	max={180}
+																	step={15}
+																	className="w-full"
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+
+												<FormField
+													control={form.control}
+													name="cellAppearance.icon.offsetX"
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel className="text-sm">
+																Horizontal Distance{" "}
+																<span className="text-muted-foreground">
+																	({field.value || 8}px)
+																</span>
+															</FormLabel>
+															<FormControl>
+																<Slider
+																	value={[field.value || 8]}
+																	onValueChange={(value) =>
+																		field.onChange(value[0])
+																	}
+																	min={0}
+																	max={50}
+																	step={2}
+																	className="w-full"
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+
+												<FormField
+													control={form.control}
+													name="cellAppearance.icon.offsetY"
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel className="text-sm">
+																Vertical Distance{" "}
+																<span className="text-muted-foreground">
+																	({field.value || 8}px)
+																</span>
+															</FormLabel>
+															<FormControl>
+																<Slider
+																	value={[field.value || 8]}
+																	onValueChange={(value) =>
+																		field.onChange(value[0])
+																	}
+																	min={0}
+																	max={50}
+																	step={2}
+																	className="w-full"
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+											</div>
+										</CardContent>
+									</Card>
+								</CollapsibleContent>
+							</Collapsible>
+						)}
+					</CardContent>
+				</Card>
+			</PaywallOverlay>
 		</div>
 	);
 }
