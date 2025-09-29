@@ -11,13 +11,10 @@ interface ServerSession {
 	day: number;
 	start: string;
 	end: string;
-	mode: string;
-	status: string;
 }
 
 interface ServerGroup {
 	code: string;
-	courseCode: string;
 	sessions: ServerSession[];
 }
 
@@ -33,25 +30,20 @@ export class Group {
 	}
 
 	static async fetch(course: Course): Promise<Group[]> {
+		const query = new URLSearchParams({
+			path: encodeURIComponent(course.__path),
+		}).toString();
 		const data: ServerGroup[] = await fetchFromBackend(
-			`/providers/uitm/icress/groups/${course.__path}`,
+			`/providers/uitm/icress/groups?${query}`,
 		).then((r) => r.json());
+
 		return data.map(
 			(g) =>
 				new Group(
 					g.code,
 					course,
 					g.sessions.map(
-						(s) =>
-							new Session(
-								s.groupCode,
-								s.room,
-								s.day,
-								s.start,
-								s.end,
-								s.mode,
-								s.status,
-							),
+						(s) => new Session(s.groupCode, s.room, s.day, s.start, s.end),
 					),
 				),
 		);

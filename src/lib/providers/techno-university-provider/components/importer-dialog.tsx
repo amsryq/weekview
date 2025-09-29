@@ -269,7 +269,7 @@ function GroupSelectorStep() {
 		isLoading: coursesLoading,
 		error: coursesError,
 	} = useQuery<Course[]>({
-		queryKey: ["uitm", "courses", selectedFaculty?.code],
+		queryKey: ["uitm", "courses", selectedCampus?.code, selectedFaculty?.code],
 		queryFn: () => Course.fetch(selectedFaculty ?? selectedCampus!),
 		enabled: Boolean(selectedFaculty || selectedCampus),
 		staleTime: 5 * 60 * 1000,
