@@ -1,4 +1,4 @@
-import { BookOpen, Clock, MapPin, Plus, Trash2 } from "lucide-react";
+import { BookOpen, Clock, Plus, Trash2 } from "lucide-react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import type { Course } from "~/lib/models/course";
 import { Button } from "../ui/button";

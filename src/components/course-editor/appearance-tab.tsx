@@ -1,4 +1,10 @@
-import { ChevronDown, ChevronRight, Palette, Settings } from "lucide-react";
+import {
+	ChevronDown,
+	ChevronRight,
+	Palette,
+	Settings,
+	SmileIcon,
+} from "lucide-react";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import type { Course } from "~/lib/models/course";
@@ -78,7 +84,7 @@ export function AppearanceTab() {
 						Choose the background and text colors for your course
 					</CardDescription>
 				</CardHeader>
-				<CardContent>
+				<CardContent className="space-y-6">
 					<FormField
 						control={form.control}
 						name="cellAppearance.background"
@@ -178,22 +184,20 @@ export function AppearanceTab() {
 								<FormItem>
 									<FormLabel className="text-sm font-medium">Emoji</FormLabel>
 									<FormControl>
-										<div className="flex items-center gap-4">
-											<Popover>
+										<div className="flex items-center gap-2">
+											<Popover modal={true}>
 												<PopoverTrigger asChild>
 													<Button
 														variant="outline"
-														className="w-20 h-12 text-xl bg-muted/50 hover:bg-muted/70"
+														className="py-2 text-xl bg-muted/50 hover:bg-muted/70"
 													>
 														{field.value ? (
 															<Twemoji
 																emoji={field.value}
-																className="text-xl"
+																className="text-xl leading-0"
 															/>
 														) : (
-															<span className="text-muted-foreground text-sm">
-																Pick
-															</span>
+															<SmileIcon />
 														)}
 													</Button>
 												</PopoverTrigger>
@@ -211,21 +215,15 @@ export function AppearanceTab() {
 												</PopoverContent>
 											</Popover>
 											{field.value && (
-												<div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-													<span className="text-sm text-muted-foreground">
-														Preview:
-													</span>
-													<Twemoji emoji={field.value} className="text-2xl" />
-													<Button
-														type="button"
-														variant="ghost"
-														size="sm"
-														onClick={() => field.onChange("")}
-														className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
-													>
-														×
-													</Button>
-												</div>
+												<Button
+													type="button"
+													variant="ghost"
+													size="sm"
+													onClick={() => field.onChange("")}
+													className="h-6 w-6 p-0 hover:text-destructive text-foreground"
+												>
+													×
+												</Button>
 											)}
 										</div>
 									</FormControl>
@@ -289,7 +287,7 @@ export function AppearanceTab() {
 					)}
 
 					{/* Icon Settings - Collapsible */}
-					{hasIcon && (
+					{hasIcon && iconType === "emoji" && (
 						<Collapsible
 							open={iconSettingsOpen}
 							onOpenChange={setIconSettingsOpen}
@@ -312,137 +310,151 @@ export function AppearanceTab() {
 								</Button>
 							</CollapsibleTrigger>
 							<CollapsibleContent className="space-y-4 pt-4">
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-									<FormField
-										control={form.control}
-										name="cellAppearance.icon.opacity"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel className="text-sm">
-													Opacity{" "}
-													<span className="text-muted-foreground">
-														({(field.value * 100).toFixed(0)}%)
-													</span>
-												</FormLabel>
-												<FormControl>
-													<Slider
-														value={[field.value]}
-														onValueChange={(value) => field.onChange(value[0])}
-														min={0}
-														max={1}
-														step={0.1}
-														className="w-full"
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
+								<Card>
+									<CardContent>
+										<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+											<FormField
+												control={form.control}
+												name="cellAppearance.icon.opacity"
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel className="text-sm">
+															Opacity{" "}
+															<span className="text-muted-foreground">
+																({(field.value * 100).toFixed(0)}%)
+															</span>
+														</FormLabel>
+														<FormControl>
+															<Slider
+																value={[field.value]}
+																onValueChange={(value) =>
+																	field.onChange(value[0])
+																}
+																min={0}
+																max={1}
+																step={0.1}
+																className="w-full"
+															/>
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
 
-									<FormField
-										control={form.control}
-										name="cellAppearance.icon.size"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel className="text-sm">
-													Size{" "}
-													<span className="text-muted-foreground">
-														({field.value.toFixed(1)}x)
-													</span>
-												</FormLabel>
-												<FormControl>
-													<Slider
-														value={[field.value]}
-														onValueChange={(value) => field.onChange(value[0])}
-														min={1}
-														max={5}
-														step={0.1}
-														className="w-full"
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
+											<FormField
+												control={form.control}
+												name="cellAppearance.icon.size"
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel className="text-sm">
+															Size{" "}
+															<span className="text-muted-foreground">
+																({field.value.toFixed(1)}x)
+															</span>
+														</FormLabel>
+														<FormControl>
+															<Slider
+																value={[field.value]}
+																onValueChange={(value) =>
+																	field.onChange(value[0])
+																}
+																min={1}
+																max={5}
+																step={0.1}
+																className="w-full"
+															/>
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
 
-									<FormField
-										control={form.control}
-										name="cellAppearance.icon.rotation"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel className="text-sm">
-													Rotation{" "}
-													<span className="text-muted-foreground">
-														({field.value}°)
-													</span>
-												</FormLabel>
-												<FormControl>
-													<Slider
-														value={[field.value]}
-														onValueChange={(value) => field.onChange(value[0])}
-														min={-180}
-														max={180}
-														step={15}
-														className="w-full"
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
+											<FormField
+												control={form.control}
+												name="cellAppearance.icon.rotation"
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel className="text-sm">
+															Rotation{" "}
+															<span className="text-muted-foreground">
+																({field.value}°)
+															</span>
+														</FormLabel>
+														<FormControl>
+															<Slider
+																value={[field.value]}
+																onValueChange={(value) =>
+																	field.onChange(value[0])
+																}
+																min={-180}
+																max={180}
+																step={15}
+																className="w-full"
+															/>
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
 
-									<FormField
-										control={form.control}
-										name="cellAppearance.icon.offsetX"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel className="text-sm">
-													Horizontal Distance{" "}
-													<span className="text-muted-foreground">
-														({field.value || 8}px)
-													</span>
-												</FormLabel>
-												<FormControl>
-													<Slider
-														value={[field.value || 8]}
-														onValueChange={(value) => field.onChange(value[0])}
-														min={0}
-														max={50}
-														step={2}
-														className="w-full"
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
+											<FormField
+												control={form.control}
+												name="cellAppearance.icon.offsetX"
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel className="text-sm">
+															Horizontal Distance{" "}
+															<span className="text-muted-foreground">
+																({field.value || 8}px)
+															</span>
+														</FormLabel>
+														<FormControl>
+															<Slider
+																value={[field.value || 8]}
+																onValueChange={(value) =>
+																	field.onChange(value[0])
+																}
+																min={0}
+																max={50}
+																step={2}
+																className="w-full"
+															/>
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
 
-									<FormField
-										control={form.control}
-										name="cellAppearance.icon.offsetY"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel className="text-sm">
-													Vertical Distance{" "}
-													<span className="text-muted-foreground">
-														({field.value || 8}px)
-													</span>
-												</FormLabel>
-												<FormControl>
-													<Slider
-														value={[field.value || 8]}
-														onValueChange={(value) => field.onChange(value[0])}
-														min={0}
-														max={50}
-														step={2}
-														className="w-full"
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-								</div>
+											<FormField
+												control={form.control}
+												name="cellAppearance.icon.offsetY"
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel className="text-sm">
+															Vertical Distance{" "}
+															<span className="text-muted-foreground">
+																({field.value || 8}px)
+															</span>
+														</FormLabel>
+														<FormControl>
+															<Slider
+																value={[field.value || 8]}
+																onValueChange={(value) =>
+																	field.onChange(value[0])
+																}
+																min={0}
+																max={50}
+																step={2}
+																className="w-full"
+															/>
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+										</div>
+									</CardContent>
+								</Card>
 							</CollapsibleContent>
 						</Collapsible>
 					)}
