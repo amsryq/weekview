@@ -9,7 +9,7 @@ export default function Page() {
 				<App />
 			</main>
 			<footer className="flex flex-col items-center p-4">
-				<p className="font-mono">© {new Date().getFullYear()} amsyarasyiq</p>
+				<p className="font-mono">© {process.env.COPYRIGHT_YEAR} amsyarasyiq</p>
 			</footer>
 		</div>
 	);
