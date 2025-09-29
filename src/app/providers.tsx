@@ -2,6 +2,7 @@
 
 import { QueryClientProvider } from "@tanstack/react-query";
 import { getQueryClient } from "~/lib/contexts/react-query";
+import { SupportDialogProvider } from "~/lib/contexts/support-dialog";
 import { ThemeProvider } from "~/lib/contexts/themes";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
@@ -13,7 +14,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
 	return (
 		<ThemeProvider defaultTheme="system" storageKey="weekview-ui-theme">
-			<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+			<QueryClientProvider client={queryClient}>
+				<SupportDialogProvider>{children}</SupportDialogProvider>
+			</QueryClientProvider>
 		</ThemeProvider>
 	);
 }

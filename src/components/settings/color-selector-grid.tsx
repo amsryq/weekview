@@ -3,6 +3,7 @@
 import { isEqual } from "es-toolkit";
 import { Plus, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
+import { usePaywall } from "~/lib/hooks/paywall";
 import { ColorEntry } from "~/lib/models/color-entry";
 import { useColorStore } from "~/lib/stores/color-store";
 import { Button } from "../ui/button";
@@ -35,6 +36,8 @@ export function ColorSelectorGrid({ value, onChange }: ColorPickerProps) {
 		color: "#000000",
 	});
 
+	const { checkAccess } = usePaywall();
+
 	const colors = useColorStore((state) => state.colors);
 	const addColor = useColorStore((state) => state.addColor);
 	const removeColor = useColorStore((state) => state.removeColor);
@@ -61,6 +64,10 @@ export function ColorSelectorGrid({ value, onChange }: ColorPickerProps) {
 	};
 
 	const handleTypeChange = (type: "solid" | "gradient") => {
+		if (type === "gradient" && !checkAccess()) {
+			return;
+		}
+
 		setBackgroundType(type);
 		// Update custom color type when switching
 		if (type === "solid") {
@@ -137,6 +144,12 @@ export function ColorSelectorGrid({ value, onChange }: ColorPickerProps) {
 							variant="outline"
 							size="icon"
 							className="w-8 h-8 border-dashed flex-shrink-0"
+							onClick={(e) => {
+								if (colorType === "gradient" && !checkAccess()) {
+									e.preventDefault();
+									return;
+								}
+							}}
 						>
 							<Plus className="w-4 h-4" />
 						</Button>

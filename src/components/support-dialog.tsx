@@ -3,9 +3,7 @@
 import { LoaderCircle, Share2Icon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { useIsUserSupporter } from "~/lib/hooks/user";
-import { fetchFromBackend } from "~/lib/utils/backend";
-import { Button } from "./ui/button";
+import { Button } from "~/components/ui/button";
 import {
 	Card,
 	CardAction,
@@ -14,25 +12,24 @@ import {
 	CardFooter,
 	CardHeader,
 	CardTitle,
-} from "./ui/card";
+} from "~/components/ui/card";
 import {
 	Dialog,
 	DialogContent,
 	DialogDescription,
 	DialogHeader,
 	DialogTitle,
-	DialogTrigger,
-} from "./ui/dialog";
-import { Twemoji } from "./ui/twemoji";
+} from "~/components/ui/dialog";
+import { Twemoji } from "~/components/ui/twemoji";
+import { useSupportDialog } from "~/lib/contexts/support-dialog";
+import { useIsUserSupporter } from "~/lib/hooks/user";
+import { fetchFromBackend } from "~/lib/utils/backend";
 
-type SupportDialogProps = {
-	children: React.ReactNode;
-};
+export function SupportDialog() {
+	const { isOpen, config, closeSupportDialog } = useSupportDialog();
 
-export function SupportDialog({ children }: SupportDialogProps) {
 	return (
-		<Dialog>
-			<DialogTrigger asChild>{children}</DialogTrigger>
+		<Dialog open={isOpen} onOpenChange={closeSupportDialog}>
 			<DialogContent className="sm:max-w-3xl">
 				{/* Star sticker */}
 				<div className="absolute right-16 -top-2 rotate-6 select-none">
@@ -40,22 +37,21 @@ export function SupportDialog({ children }: SupportDialogProps) {
 				</div>
 
 				<DialogHeader>
-					<DialogTitle className="text-2xl">Support me!</DialogTitle>
-					<DialogDescription>
-						Thanks for checking out this project! Even though it started as a
-						hobby, I've spent a lot of time (and some money) building it. Any
-						support you give means a lot! (and I am broke and jobless so this
-						will definitely help me financially)
-					</DialogDescription>
+					<DialogTitle className="text-2xl">{config.title}</DialogTitle>
+					<DialogDescription>{config.description}</DialogDescription>
 				</DialogHeader>
 
 				<div className="grid grid-cols-1 gap-4">
 					<SupporterCard />
-					<span className="text-center">or you can</span>
-					<div className="flex [&>*]:flex-1 gap-4">
-						<GithubSponsorsCard />
-						<ShareCard />
-					</div>
+					{config.showAlternatives && (
+						<>
+							<span className="text-center">or you can</span>
+							<div className="flex [&>*]:flex-1 gap-4">
+								<GithubSponsorsCard />
+								<ShareCard />
+							</div>
+						</>
+					)}
 				</div>
 			</DialogContent>
 		</Dialog>
@@ -135,7 +131,7 @@ function GithubSponsorsCard() {
 			<CardHeader>
 				<CardTitle className="text-base">Sponsor on GitHub</CardTitle>
 				<CardDescription className="mr-4">
-					If you’d like to sponsor me on GitHub, that’s awesome!
+					If you'd like to sponsor me on GitHub, that's awesome!
 				</CardDescription>
 				<CardAction>
 					<Twemoji
@@ -207,5 +203,3 @@ function ShareCard() {
 		</Card>
 	);
 }
-
-export default SupportDialog;

@@ -4,9 +4,9 @@ import { DownloadIcon, HeartIcon, Settings, Settings2Icon } from "lucide-react";
 import { domToPng } from "modern-screenshot";
 import CourseManagementSheet from "~/components/course-management-sheet";
 import TimetableCustomizer from "~/components/settings/timetable-customizer";
-import SupportDialog from "~/components/support-dialog";
 import WeeklyTimetable from "~/components/timetable/weekly-timetable";
 import { Button } from "~/components/ui/button";
+import { useSupportDialog } from "~/lib/contexts/support-dialog";
 
 // TODO: Export button instead or both and show save file picker?
 const handleDownloadPng = async () => {
@@ -35,6 +35,8 @@ const handleDownloadPng = async () => {
 };
 
 function App() {
+	const { openSupportDialog } = useSupportDialog();
+
 	return (
 		<div className="flex flex-col flex-1 items-center justify-center">
 			<div className="m-4 flex flex-wrap justify-center gap-2">
@@ -54,12 +56,20 @@ function App() {
 					<DownloadIcon className="w-4 h-4" />
 					Download as PNG
 				</Button>
-				<SupportDialog>
-					<Button variant="outline">
-						<HeartIcon className="w-4 h-4" />
-						Support
-					</Button>
-				</SupportDialog>
+				<Button
+					onClick={() =>
+						openSupportDialog({
+							title: "Support me!",
+							description:
+								"Thanks for checking out this project! Even though it started as a hobby, I've spent a lot of time (and some money) building it. Any support you give means a lot! (and I am broke and jobless so this will definitely help me financially).",
+							showAlternatives: true,
+						})
+					}
+					variant="outline"
+				>
+					<HeartIcon className="w-4 h-4" />
+					Support
+				</Button>
 			</div>
 			<WeeklyTimetable containerId="weekly-timetable" />
 		</div>

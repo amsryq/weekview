@@ -104,7 +104,7 @@ createProxyServer({
 	},
 })
 	.on("error", (err) => {
-		console.error(RED + "Proxy server error:", err, RESET);
+		console.error(RED + "Proxy server error:", err.message, RESET);
 	})
 	.on("proxyRes", (proxyRes, req, res) => {
 		console.log(

@@ -1,5 +1,7 @@
 import "~/globals.css";
+
 import type { Metadata } from "next";
+import { SupportDialog } from "~/components/support-dialog";
 import { Toaster } from "~/components/ui/sonner";
 import Providers from "./providers";
 
@@ -19,6 +21,7 @@ export default function RootLayout({
 			<body>
 				<Providers>
 					<div className="root">{children}</div>
+					<SupportDialog />
 				</Providers>
 				<Toaster />
 			</body>
