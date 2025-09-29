@@ -17,13 +17,13 @@ import {
 	Dialog,
 	DialogClose,
 	DialogContent,
+	DialogDescription,
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
 } from "../ui/dialog";
 import { Label } from "../ui/label";
 import { ScrollArea } from "../ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { BackgroundImageUpload } from "./background-image-upload";
 import { CellAppearanceLayoutSettings } from "./cell-appearance-layout-settings";
 
@@ -123,144 +123,111 @@ export default function TimetableCustomizer({
 			<DialogContent className="flex flex-col w-2xl sm:max-w-[90vw] h-[80vh]">
 				<DialogHeader>
 					<DialogTitle>Customize Timetable</DialogTitle>
+					<DialogDescription>
+						Customize the overall appearance and layout of your timetable
+					</DialogDescription>
 				</DialogHeader>
 				<ScrollArea className="flex-1 overflow-y-auto h-full">
-					<div className="pr-4">
-						<Tabs defaultValue="general" className="w-full">
-							<TabsList className="grid grid-cols-2 w-full">
-								<TabsTrigger value="general">General</TabsTrigger>
-								<TabsTrigger value="cells">Cell Styles</TabsTrigger>
-							</TabsList>
-
-							<TabsContent value="general" className="space-y-6 mt-6">
-								{/* Header */}
-								<div className="space-y-2">
-									<h3 className="text-lg font-semibold flex items-center gap-2">
-										<Settings className="w-5 h-5" />
-										General Settings
-									</h3>
-									<p className="text-sm text-muted-foreground">
-										Customize the overall appearance and layout of your
-										timetable
+					<div className="pr-4 space-y-6">
+						{/* Table Layout Section */}
+						<Card>
+							<CardHeader>
+								<CardTitle className="text-base">Table Layout</CardTitle>
+								<CardDescription>
+									Choose how your timetable is organized
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<div className="space-y-3">
+									<Label className="text-sm font-medium">Layout Style</Label>
+									<div className="flex gap-2">
+										<Button
+											variant={prefs.layout === "rows" ? "default" : "outline"}
+											onClick={() => prefs.setValue("layout", "rows")}
+											className="flex items-center gap-2"
+										>
+											<Table className="w-4 h-4" />
+											Horizontal rows
+										</Button>
+										<Button
+											variant={
+												prefs.layout === "columns" ? "default" : "outline"
+											}
+											onClick={() => prefs.setValue("layout", "columns")}
+											className="flex items-center gap-2"
+										>
+											<Table className="w-4 h-4 rotate-90" />
+											Vertical columns
+										</Button>
+									</div>
+									<p className="text-xs text-muted-foreground">
+										Choose between horizontal rows (days as rows) or vertical
+										columns (days as columns)
 									</p>
 								</div>
+							</CardContent>
+						</Card>
 
-								{/* Table Layout Section */}
-								<Card>
-									<CardHeader>
-										<CardTitle className="text-base">Table Layout</CardTitle>
-										<CardDescription>
-											Choose how your timetable is organized
-										</CardDescription>
-									</CardHeader>
-									<CardContent>
-										<div className="space-y-3">
-											<Label className="text-sm font-medium">
-												Layout Style
-											</Label>
-											<div className="flex gap-2">
-												<Button
-													variant={
-														prefs.layout === "rows" ? "default" : "outline"
-													}
-													onClick={() => prefs.setValue("layout", "rows")}
-													className="flex items-center gap-2"
-												>
-													<Table className="w-4 h-4" />
-													Horizontal rows
-												</Button>
-												<Button
-													variant={
-														prefs.layout === "columns" ? "default" : "outline"
-													}
-													onClick={() => prefs.setValue("layout", "columns")}
-													className="flex items-center gap-2"
-												>
-													<Table className="w-4 h-4 rotate-90" />
-													Vertical columns
-												</Button>
-											</div>
-											<p className="text-xs text-muted-foreground">
-												Choose between horizontal rows (days as rows) or
-												vertical columns (days as columns)
-											</p>
-										</div>
-									</CardContent>
-								</Card>
-
-								{/* Background Image Section */}
-								<PaywallOverlay
-									title="Premium Feature"
-									description="Background images are available for supporters only. Unlock this feature and support the project!"
-									className="overflow-clip rounded-xl border-1"
-								>
-									<Card>
-										<CardHeader>
-											<CardTitle className="text-base">
-												Background Image
-											</CardTitle>
-											<CardDescription>
-												Add a custom background image to your timetable
-											</CardDescription>
-										</CardHeader>
-										<CardContent>
-											<div className="space-y-3">
-												<Label className="text-sm font-medium flex items-center gap-2">
-													<Image className="w-4 h-4" />
-													Background Image
-												</Label>
-												<BackgroundImageUpload
-													value={prefs.backgroundImage}
-													onChange={(imageUrl) =>
-														prefs.setBackgroundImage(imageUrl)
-													}
-													options={prefs.backgroundImageOptions}
-													onOptionsChange={(options) =>
-														prefs.setBackgroundImageOptions(options)
-													}
-												/>
-												<p className="text-xs text-muted-foreground">
-													Upload an image to use as the background for your
-													timetable
-												</p>
-											</div>
-										</CardContent>
-									</Card>
-								</PaywallOverlay>
-							</TabsContent>
-
-							<TabsContent value="cells" className="space-y-6 mt-6">
-								{/* Header */}
-								<div className="space-y-2">
-									<h3 className="text-lg font-semibold flex items-center gap-2">
-										<Palette className="w-5 h-5" />
-										Cell Styles
-									</h3>
-									<p className="text-sm text-muted-foreground">
-										Customize the default appearance of course cells
-									</p>
-								</div>
-
-								{/* Cell Appearance Settings */}
-								<Card>
-									<CardHeader>
-										<CardTitle className="text-base">
-											Default Cell Appearance
-										</CardTitle>
-										<CardDescription>
-											Set the default styling for all course cells in your
-											timetable
-										</CardDescription>
-									</CardHeader>
-									<CardContent>
-										<CellAppearanceLayoutSettings
-											value={prefs.cellAppearance}
-											onChange={handleCellAppearanceChange}
+						{/* Background Image Section */}
+						<PaywallOverlay
+							title="Premium Feature"
+							description="Background images are available for supporters only. Unlock this feature and support the project!"
+							className="overflow-clip rounded-xl border-1"
+						>
+							<Card>
+								<CardHeader>
+									<CardTitle className="flex items-center gap-2 text-base">
+										<Image className="w-5 h-5" />
+										Background
+									</CardTitle>
+									<CardDescription>
+										Set a custom background for your timetable
+									</CardDescription>
+								</CardHeader>
+								<CardContent>
+									<div className="space-y-3">
+										<Label className="text-sm font-medium flex items-center gap-2">
+											Image
+										</Label>
+										<BackgroundImageUpload
+											value={prefs.backgroundImage}
+											onChange={(imageUrl) =>
+												prefs.setBackgroundImage(imageUrl)
+											}
+											options={prefs.backgroundImageOptions}
+											onOptionsChange={(options) =>
+												prefs.setBackgroundImageOptions(options)
+											}
 										/>
-									</CardContent>
-								</Card>
-							</TabsContent>
-						</Tabs>
+										<p className="text-xs text-muted-foreground">
+											Upload an image to use as the background for your
+											timetable
+										</p>
+									</div>
+								</CardContent>
+							</Card>
+						</PaywallOverlay>
+
+						{/* Cell Appearance Settings */}
+						<Card>
+							{/* Cell Styles Header */}
+							<CardHeader>
+								<CardTitle className="flex items-center gap-2">
+									<Palette className="w-5 h-5" />
+									Cell Styles
+								</CardTitle>
+								<CardDescription>
+									Customize the default appearance of course cells
+								</CardDescription>
+							</CardHeader>
+
+							<CardContent>
+								<CellAppearanceLayoutSettings
+									value={prefs.cellAppearance}
+									onChange={handleCellAppearanceChange}
+								/>
+							</CardContent>
+						</Card>
 					</div>
 				</ScrollArea>
 

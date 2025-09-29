@@ -54,10 +54,10 @@ export function PaywallOverlay({
 	title = "Premium Feature",
 	description = "This feature is available for supporters only. Unlock this feature and support the project!",
 	icon: Icon = Lock,
-	primaryButtonText = "Learn more",
 	className,
 	visible,
 	compact = false,
+	primaryButtonText = compact ? "Unlock now" : "Learn more",
 	children,
 }: PaywallOverlayProps) {
 	const { isSupporter, checkAccess } = usePaywall();
