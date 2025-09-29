@@ -35,6 +35,11 @@ interface PaywallOverlayProps {
 	 */
 	visible?: boolean;
 	/**
+	 * Whether to use a compact layout for smaller areas
+	 * @default false
+	 */
+	compact?: boolean;
+	/**
 	 * Children to render behind the overlay when not a supporter
 	 */
 	children?: React.ReactNode;
@@ -52,6 +57,7 @@ export function PaywallOverlay({
 	primaryButtonText = "Learn more",
 	className,
 	visible,
+	compact = false,
 	children,
 }: PaywallOverlayProps) {
 	const { isSupporter, checkAccess } = usePaywall();
@@ -64,31 +70,48 @@ export function PaywallOverlay({
 	}
 
 	return (
-		<div className={cn("overflow-clip relative", className)}>
+		<div className={cn("relative", className)}>
 			{children}
-			<div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg">
-				<div className="text-center space-y-4 p-6">
-					<div className="flex justify-center">
-						<div className="p-3 rounded-full bg-muted">
-							<Icon className="w-6 h-6 text-muted-foreground" />
+			<div className="absolute inset-0 bg-background/90 flex items-center justify-center z-10">
+				{compact ? (
+					<div className="flex items-center justify-around w-full text-center gap-2 p-3">
+						<div className="flex items-center justify-center gap-2">
+							<Icon className="w-4 h-4 text-muted-foreground" />
+							<h4 className="font-medium text-sm">{title}</h4>
 						</div>
-					</div>
-					<div className="space-y-2">
-						<h3 className="font-semibold text-lg">{title}</h3>
-						<p className="text-sm text-muted-foreground max-w-sm">
-							{description}
-						</p>
-					</div>
-					<div className="flex flex-col sm:flex-row gap-2 justify-center">
 						<Button
 							variant="secondary"
+							size="sm"
 							onClick={() => checkAccess()}
-							className="min-w-[120px]"
+							className="text-xs"
 						>
 							{primaryButtonText}
 						</Button>
 					</div>
-				</div>
+				) : (
+					<div className="text-center space-y-4 p-6">
+						<div className="flex justify-center">
+							<div className="p-3 rounded-full bg-muted">
+								<Icon className="w-6 h-6 text-muted-foreground" />
+							</div>
+						</div>
+						<div className="space-y-2">
+							<h3 className="font-semibold text-lg">{title}</h3>
+							<p className="text-sm text-muted-foreground max-w-sm">
+								{description}
+							</p>
+						</div>
+						<div className="flex flex-col sm:flex-row gap-2 justify-center">
+							<Button
+								variant="secondary"
+								onClick={() => checkAccess()}
+								className="min-w-[120px]"
+							>
+								{primaryButtonText}
+							</Button>
+						</div>
+					</div>
+				)}
 			</div>
 		</div>
 	);

@@ -4,6 +4,7 @@ import { PartialDeep } from "type-fest";
 import { useStore } from "zustand";
 import type { CellAppearance } from "~/lib/models/cell-appearance";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
+import { PaywallOverlay } from "../paywall-overlay";
 import { Button } from "../ui/button";
 import {
 	Card,
@@ -188,38 +189,44 @@ export default function TimetableCustomizer({
 								</Card>
 
 								{/* Background Image Section */}
-								<Card>
-									<CardHeader>
-										<CardTitle className="text-base">
-											Background Image
-										</CardTitle>
-										<CardDescription>
-											Add a custom background image to your timetable
-										</CardDescription>
-									</CardHeader>
-									<CardContent>
-										<div className="space-y-3">
-											<Label className="text-sm font-medium flex items-center gap-2">
-												<Image className="w-4 h-4" />
+								<PaywallOverlay
+									title="Premium Feature"
+									description="Background images are available for supporters only. Unlock this feature and support the project!"
+									className="overflow-clip rounded-xl border-1"
+								>
+									<Card>
+										<CardHeader>
+											<CardTitle className="text-base">
 												Background Image
-											</Label>
-											<BackgroundImageUpload
-												value={prefs.backgroundImage}
-												onChange={(imageUrl) =>
-													prefs.setBackgroundImage(imageUrl)
-												}
-												options={prefs.backgroundImageOptions}
-												onOptionsChange={(options) =>
-													prefs.setBackgroundImageOptions(options)
-												}
-											/>
-											<p className="text-xs text-muted-foreground">
-												Upload an image to use as the background for your
-												timetable
-											</p>
-										</div>
-									</CardContent>
-								</Card>
+											</CardTitle>
+											<CardDescription>
+												Add a custom background image to your timetable
+											</CardDescription>
+										</CardHeader>
+										<CardContent>
+											<div className="space-y-3">
+												<Label className="text-sm font-medium flex items-center gap-2">
+													<Image className="w-4 h-4" />
+													Background Image
+												</Label>
+												<BackgroundImageUpload
+													value={prefs.backgroundImage}
+													onChange={(imageUrl) =>
+														prefs.setBackgroundImage(imageUrl)
+													}
+													options={prefs.backgroundImageOptions}
+													onOptionsChange={(options) =>
+														prefs.setBackgroundImageOptions(options)
+													}
+												/>
+												<p className="text-xs text-muted-foreground">
+													Upload an image to use as the background for your
+													timetable
+												</p>
+											</div>
+										</CardContent>
+									</Card>
+								</PaywallOverlay>
 							</TabsContent>
 
 							<TabsContent value="cells" className="space-y-6 mt-6">

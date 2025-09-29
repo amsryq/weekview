@@ -146,7 +146,7 @@ export function AppearanceTab() {
 			<PaywallOverlay
 				title="Premium Feature"
 				description="Icons are available for supporters only. Unlock this feature and support the project!"
-				className="border-1 rounded-xl"
+				className="overflow-clip border-1 rounded-xl"
 			>
 				<Card>
 					<CardHeader>
