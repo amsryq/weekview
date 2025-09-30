@@ -1,5 +1,5 @@
-import { faker } from "@faker-js/faker";
 import { MeetingTime } from "~/lib/models/meeting-time";
+import { getOrAssignSolidColorFor } from "~/lib/stores/color-store";
 import { fetchFromBackend } from "~/lib/utils/backend";
 import { UiTMGroup } from "../group";
 import { Course } from "./course";
@@ -50,6 +50,7 @@ export class Group {
 	}
 
 	toUiTMCourse(): UiTMGroup {
+		const self = this;
 		const meetingTimes = this.sessions.map((session) =>
 			MeetingTime.createFromSchema({
 				day: session.day!,
@@ -62,9 +63,10 @@ export class Group {
 		return new UiTMGroup({
 			code: this.course.code,
 			cellAppearance: {
-				background: {
-					type: "solid",
-					color: faker.color.rgb({ prefix: "#", casing: "lower" }),
+				get background() {
+					return getOrAssignSolidColorFor(
+						`${self.course.campus.code}:${self.course.code}:${self.code}`,
+					);
 				},
 				fgColor: "#ffffff",
 			},

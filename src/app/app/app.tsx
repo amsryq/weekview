@@ -61,7 +61,7 @@ function App() {
 						openSupportDialog({
 							title: "Support me!",
 							description:
-								"Thanks for checking out this project! Even though it started as a hobby, I've spent a lot of time (and some money) building it. Any support you give means a lot! (and I am broke and jobless so this will definitely help me financially).",
+								"Thanks for checking out this project! Even though it started as a hobby, I've spent a lot of time (and some money) building it. Any support you give means a lot!",
 							showAlternatives: true,
 						})
 					}

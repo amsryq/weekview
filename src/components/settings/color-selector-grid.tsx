@@ -1,6 +1,6 @@
 "use client";
 
-import { isEqual } from "es-toolkit";
+import { isEqual, omit } from "es-toolkit";
 import { Plus, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { usePaywall } from "~/lib/hooks/paywall";
@@ -49,7 +49,8 @@ export function ColorSelectorGrid({ value, onChange }: ColorPickerProps) {
 	// Check if a color is currently selected
 	const isColorSelected = (color: ColorEntry.Schema) => {
 		if (!value || value.type !== color.type) return false;
-		return isEqual(value, color);
+		// TODO: very ugly solution due to very ugly code i hate myself
+		return isEqual(omit(value, ["predefined"]), color);
 	};
 
 	const handleColorSelect = (color: ColorEntry.Schema) => {

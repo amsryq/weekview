@@ -1,3 +1,5 @@
+import Color from "color";
+import { omit } from "es-toolkit";
 import { createStore, useStore } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
@@ -5,6 +7,7 @@ import { ColorEntry } from "../models/color-entry";
 
 interface State {
 	colors: ColorEntry[];
+	assignedSolidColors: Record<string, ColorEntry.Schema>;
 }
 
 interface Actions {
@@ -15,6 +18,8 @@ interface Actions {
 	getColorsByType: (type: "solid" | "gradient") => ColorEntry[];
 	getUserColors: () => ColorEntry[];
 	getPredefinedColors: () => ColorEntry[];
+	getOrAssignSolidColor: (key: string) => ColorEntry.Schema;
+	releaseAssignedColor: (key: string) => void;
 }
 
 // Predefined colors
@@ -74,13 +79,76 @@ const PREDEFINED_COLORS: { name: string; color: ColorEntry.Schema }[] = [
 	},
 ];
 
+const SOLID_SATURATION_RANGE: [number, number] = [65, 85];
+const SOLID_LIGHTNESS_RANGE: [number, number] = [30, 45];
+
+function normalizeHexColor(hex: string): string {
+	try {
+		return Color(hex).hex().toLowerCase();
+	} catch {
+		// Fallback to original string if parsing fails; caller may sanitize further
+		return (hex || "").toString().trim().toLowerCase();
+	}
+}
+
+function isReadableOnWhite(hex: string): boolean {
+	try {
+		return Color(hex).contrast(Color("#ffffff")) >= 4.5;
+	} catch {
+		return false;
+	}
+}
+
+function pickRandom<T>(values: T[]): T {
+	return values[Math.floor(Math.random() * values.length)];
+}
+
+function generateReadableSolidColor(excludedColors: Set<string>): string {
+	const maxAttempts = 24;
+	for (let attempt = 0; attempt < maxAttempts; attempt++) {
+		const hue = Math.random() * 360;
+		const saturation =
+			SOLID_SATURATION_RANGE[0] +
+			Math.random() * (SOLID_SATURATION_RANGE[1] - SOLID_SATURATION_RANGE[0]);
+		const lightness =
+			SOLID_LIGHTNESS_RANGE[0] +
+			Math.random() * (SOLID_LIGHTNESS_RANGE[1] - SOLID_LIGHTNESS_RANGE[0]);
+		const candidate = normalizeHexColor(
+			Color(`hsl(${hue}, ${saturation}%, ${lightness}%)`).hex(),
+		);
+		if (excludedColors.has(candidate)) continue;
+		if (isReadableOnWhite(candidate)) return candidate;
+	}
+
+	const fallbackPalette = [
+		"#1f2937",
+		"#334155",
+		"#2563eb",
+		"#7c3aed",
+		"#0369a1",
+	];
+	const availableFallback = fallbackPalette.find((c) => !excludedColors.has(c));
+	return normalizeHexColor(availableFallback ?? fallbackPalette[0]);
+}
+
+function isSolidColorEntry(
+	colorEntry: ColorEntry,
+): colorEntry is ColorEntry & { def: { type: "solid"; color: string } } {
+	return colorEntry.def.type === "solid";
+}
+
 const ColorStore = createStore<State & Actions>()(
 	persist(
 		immer((set, get) => ({
 			colors: [],
+			assignedSolidColors: {},
 
 			addColor: (color) => {
-				const colorEntry = ColorEntry.createFromSchema(color);
+				const sanitizedColor =
+					color.type === "solid"
+						? { ...color, color: normalizeHexColor(color.color) }
+						: color;
+				const colorEntry = ColorEntry.createFromSchema(sanitizedColor);
 
 				set((state) => {
 					state.colors.push(colorEntry);
@@ -117,7 +185,18 @@ const ColorStore = createStore<State & Actions>()(
 				set((state) => {
 					const colorIndex = state.colors.findIndex((c) => c.id === colorId);
 					if (colorIndex !== -1) {
-						state.colors[colorIndex].def = color;
+						if (color.type === "solid") {
+							state.colors[colorIndex].def = {
+								type: "solid",
+								color: normalizeHexColor(color.color),
+							};
+						} else {
+							state.colors[colorIndex].def = {
+								type: "gradient",
+								gradientColors: [...color.gradientColors!],
+								gradientDirection: color.gradientDirection!,
+							};
+						}
 					}
 				});
 
@@ -139,9 +218,74 @@ const ColorStore = createStore<State & Actions>()(
 			getPredefinedColors: () => {
 				return get().colors.filter((c) => c.predefined);
 			},
+
+			getOrAssignSolidColor: (key) => {
+				const normalizedKey = key.trim().toLowerCase();
+				const currentState = get();
+				const existing = currentState.assignedSolidColors[normalizedKey];
+				if (existing) {
+					return { ...existing };
+				}
+
+				const assignedColors = new Set(
+					Object.values(currentState.assignedSolidColors)
+						.filter((assigned) => assigned.type === "solid")
+						.map((assigned) => normalizeHexColor(assigned.color)),
+				);
+
+				const solidColors = currentState.colors.filter(isSolidColorEntry);
+				const unusedSolidColors = solidColors.filter(
+					(colorEntry) =>
+						!assignedColors.has(normalizeHexColor(colorEntry.def.color)),
+				);
+
+				let selectedColor: ColorEntry.Schema;
+
+				if (unusedSolidColors.length > 0) {
+					const selectedEntry =
+						unusedSolidColors.length === 1
+							? unusedSolidColors[0]
+							: pickRandom(unusedSolidColors);
+					selectedColor = {
+						type: "solid",
+						color: normalizeHexColor(selectedEntry.def.color),
+						predefined: selectedEntry.predefined,
+					};
+				} else {
+					const excludedColors = new Set<string>(assignedColors);
+					for (const entry of solidColors) {
+						excludedColors.add(normalizeHexColor(entry.def.color));
+					}
+					const generatedColor = generateReadableSolidColor(excludedColors);
+					const existingEntry = solidColors.find(
+						(entry) => normalizeHexColor(entry.def.color) === generatedColor,
+					);
+					if (!existingEntry) {
+						get().addColor({ type: "solid", color: generatedColor });
+					}
+					selectedColor = {
+						type: "solid",
+						color: generatedColor,
+					};
+				}
+
+				set((state) => {
+					state.assignedSolidColors[normalizedKey] = selectedColor;
+				});
+
+				return { ...selectedColor };
+			},
+
+			releaseAssignedColor: (key) => {
+				const normalizedKey = key.trim().toLowerCase();
+				set((state) => {
+					delete state.assignedSolidColors[normalizedKey];
+				});
+			},
 		})),
 		{
 			name: "taiki-color-store",
+			partialize: (state) => omit(state, ["assignedSolidColors"]),
 			// Initialize predefined colors on first load
 			onRehydrateStorage: () => (state) => {
 				if (!state) return;
@@ -181,3 +325,9 @@ const ColorStore = createStore<State & Actions>()(
 
 export const useColorStore = <T>(selector: (state: State & Actions) => T) =>
 	useStore(ColorStore, selector);
+
+export const getOrAssignSolidColorFor = (key: string) =>
+	ColorStore.getState().getOrAssignSolidColor(key);
+
+export const releaseAssignedColorFor = (key: string) =>
+	ColorStore.getState().releaseAssignedColor(key);
