@@ -168,7 +168,7 @@ function CourseAndFacultySelectorStep() {
 						<ComboboxList>
 							<ComboboxGroup>
 								{campuses?.map(({ code, name }, idx) => (
-									<ComboboxItem key={idx} value={code}>
+									<ComboboxItem key={idx} value={code} keywords={[name]}>
 										{name}
 									</ComboboxItem>
 								))}
@@ -220,7 +220,7 @@ function CourseAndFacultySelectorStep() {
 							<ComboboxList>
 								<ComboboxGroup>
 									{faculties?.map(({ code: id, name }, idx) => (
-										<ComboboxItem key={idx} value={id}>
+										<ComboboxItem key={idx} value={id} keywords={[name]}>
 											{name}
 										</ComboboxItem>
 									))}
