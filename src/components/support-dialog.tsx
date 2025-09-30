@@ -30,7 +30,7 @@ export function SupportDialog() {
 
 	return (
 		<Dialog open={isOpen} onOpenChange={closeSupportDialog}>
-			<DialogContent className="sm:max-w-3xl">
+			<DialogContent className="sm:max-w-4xl">
 				{/* Star sticker */}
 				<div className="absolute right-16 -top-2 rotate-6 select-none">
 					<Twemoji emoji="⭐" className="block scale-500 drop-shadow" />
@@ -97,15 +97,9 @@ function SupporterCard() {
 				</CardAction>
 			</CardHeader>
 			<CardContent className="pt-4">
-				<ul className="space-y-2 text-sm">
-					<li className="flex items-center gap-2">
-						<Twemoji emoji="🎨" /> No watermark
-					</li>
+				<ul className="space-y-2 text-md">
 					<li className="flex items-center gap-2">
 						<Twemoji emoji="🖼️" /> Background images
-					</li>
-					<li className="flex items-center gap-2">
-						<Twemoji emoji="🎀" /> Fun decorations
 					</li>
 					<li className="flex items-center gap-2">
 						<Twemoji emoji="🌈" /> Gradient colors
@@ -160,15 +154,13 @@ function ShareCard() {
 	const url = typeof window !== "undefined" ? window.location.origin : "";
 
 	const share = async () => {
-		const shareData = {
-			title: "Weekview",
-			text: "Check out Weekview — a clean weekly timetable app!",
-			url,
-		};
-
 		if (navigator.share) {
 			try {
-				await navigator.share(shareData);
+				await navigator.share({
+					title: "Weekview",
+					text: "Check out Weekview — a clean weekly timetable app!",
+					url,
+				});
 				return;
 			} catch {
 				// fall through to copy

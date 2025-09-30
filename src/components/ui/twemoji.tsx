@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import twemoji from "twemoji";
+import { cn } from "~/lib/utils/styles";
 
 interface TwemojiProps {
 	emoji: string;
@@ -27,5 +28,7 @@ export function Twemoji({ emoji, className, style }: TwemojiProps) {
 		}
 	}, [emoji]);
 
-	return <span ref={ref} className={className} style={style} />;
+	return (
+		<span ref={ref} className={cn("leading-0", className)} style={style} />
+	);
 }

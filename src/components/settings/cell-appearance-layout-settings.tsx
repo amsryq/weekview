@@ -207,33 +207,35 @@ export function CellAppearanceLayoutSettings({
 				</p>
 			</div>
 
-			<PaywallOverlay className="p-2 -mx-2 rounded-lg overflow-clip" compact>
-				<div>
-					<Label className="text-sm font-medium">Cell Material</Label>
-					<div className="flex gap-2 mt-2">
-						{cellMaterialOptions.map((option) => (
-							<Button
-								key={option.value}
-								type="button"
-								variant={
-									(internalValues.material ?? baseValues!.material) ===
-									option.value
-										? "default"
-										: "outline"
-								}
-								onClick={() => {
-									handleChange("material", null, option.value);
-								}}
-							>
-								{option.label}
-							</Button>
-						))}
+			{process.env.NODE_ENV === "development" && (
+				<PaywallOverlay className="p-2 -mx-2 rounded-lg overflow-clip" compact>
+					<div>
+						<Label className="text-sm font-medium">Cell Material</Label>
+						<div className="flex gap-2 mt-2">
+							{cellMaterialOptions.map((option) => (
+								<Button
+									key={option.value}
+									type="button"
+									variant={
+										(internalValues.material ?? baseValues!.material) ===
+										option.value
+											? "default"
+											: "outline"
+									}
+									onClick={() => {
+										handleChange("material", null, option.value);
+									}}
+								>
+									{option.label}
+								</Button>
+							))}
+						</div>
+						<p className="text-xs text-muted-foreground mt-1">
+							Choose the visual style of the course cell
+						</p>
 					</div>
-					<p className="text-xs text-muted-foreground mt-1">
-						Choose the visual style of the course cell
-					</p>
-				</div>
-			</PaywallOverlay>
+				</PaywallOverlay>
+			)}
 			<div className="space-y-3">
 				<div>
 					<Label className="text-sm font-medium">Element Settings</Label>

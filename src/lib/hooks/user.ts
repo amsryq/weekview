@@ -1,7 +1,7 @@
-import { authClient } from "../auth/auth-client";
+import { useSession } from "../auth/auth-client";
 
 export function useUser() {
-	const session = authClient.useSession();
+	const session = useSession();
 	return session.data?.user ?? null;
 }
 
