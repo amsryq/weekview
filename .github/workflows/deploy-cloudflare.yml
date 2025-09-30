@@ -26,6 +26,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Cache build
+        uses: actions/cache@v4
+        with:
+            # See here for caching with `yarn`, `bun` or other package managers https://github.com/actions/cache/blob/main/examples.md or you can leverage caching with actions/setup-node https://github.com/actions/setup-node
+            path: |
+                ~/.bun/install/cache
+                ${{ github.workspace }}/.next/cache
+            # Generate a new cache whenever packages or source files change.
+            key: ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
+            # If source files changed but packages didn't, rebuild from a prior cache.
+            restore-keys: |
+                ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock') }}-
+
+
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
         with:
@@ -42,6 +56,5 @@ jobs:
         with:
           apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ env.CLOUDFLARE_ACCOUNT_ID }}
-          wranglerVersion: "3"
           command: >-
-            pages deploy out --project-name=${{ env.CLOUDFLARE_PAGES_PROJECT }}
+            pages deploy out --project-name=${{ env.CLOUDFLARE_PAGES_PROJECT }} --branch=main
