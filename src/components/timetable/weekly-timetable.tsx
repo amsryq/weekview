@@ -162,7 +162,7 @@ function RowLayout({
 		<div className="overflow-x-auto">
 			<div
 				id={containerId}
-				className="p-6 min-w-fit relative"
+				className="bg-card p-6 min-w-fit relative"
 				style={backgroundStyle}
 			>
 				{overlayStyle && (
@@ -208,7 +208,7 @@ function ColumnLayout({
 		<div className="overflow-y-auto">
 			<div
 				id={containerId}
-				className="grid relative p-6"
+				className="bg-card grid relative p-6"
 				style={{
 					gridTemplateColumns: `auto repeat(${visibleDays.length}, 1fr)`,
 					...backgroundStyle,
@@ -331,7 +331,7 @@ export default function WeeklyTimetable({
 		: undefined;
 
 	return (
-		<Card className="py-0 overflow-hidden">
+		<Card className="py-0">
 			<CardContent className="max-w-[95vw] px-0">
 				<TimetableContext.Provider
 					value={{
