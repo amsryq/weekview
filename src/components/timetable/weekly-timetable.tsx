@@ -331,7 +331,7 @@ export default function WeeklyTimetable({
 		: undefined;
 
 	return (
-		<Card className="py-0">
+		<Card className="py-0 overflow-hidden">
 			<CardContent className="max-w-[95vw] px-0">
 				<TimetableContext.Provider
 					value={{

@@ -1,5 +1,5 @@
 import { merge } from "es-toolkit";
-import { Image, Palette, Settings, Table } from "lucide-react";
+import { Image, Palette, Table } from "lucide-react";
 import { PartialDeep } from "type-fest";
 import { useStore } from "zustand";
 import type { CellAppearance } from "~/lib/models/cell-appearance";

@@ -22,7 +22,7 @@ import {
 } from "~/components/ui/dialog";
 import { Twemoji } from "~/components/ui/twemoji";
 import { useSupportDialog } from "~/lib/contexts/support-dialog";
-import { useIsUserSupporter } from "~/lib/hooks/user";
+import { useUser } from "~/lib/hooks/user";
 import { fetchFromBackend } from "~/lib/utils/backend";
 
 export function SupportDialog() {
@@ -60,11 +60,22 @@ export function SupportDialog() {
 
 function SupporterCard() {
 	const [loading, setLoading] = useState(false);
-	const isSupporter = useIsUserSupporter();
+
+	const user = useUser();
+	const isSupporter = user?.supporterUntil && user.supporterUntil > new Date();
 
 	const onSupport = async () => {
 		try {
 			setLoading(true);
+
+			if (!user) {
+				throw new Error("No session found. You must be logged in to support.");
+			}
+
+			if (!user.stripeCustomerId) {
+				throw new Error("No Stripe customer ID found. Please contact support.");
+			}
+
 			const req = await fetchFromBackend("/supporter/generate-checkout");
 			const { url } = await req.json();
 			if (typeof url === "string" && url) {
@@ -73,7 +84,6 @@ function SupporterCard() {
 				throw new Error("No checkout URL returned");
 			}
 		} catch (err) {
-			// Minimal fallback without extra deps
 			alert(
 				err instanceof Error
 					? `Failed to start checkout: ${err.message}`
