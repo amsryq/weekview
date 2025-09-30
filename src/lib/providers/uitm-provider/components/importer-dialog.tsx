@@ -149,6 +149,7 @@ function CourseAndFacultySelectorStep() {
 			<div className="flex flex-col gap-2">
 				<Combobox
 					type="campus"
+					modal={true}
 					loading={campusesLoading}
 					loadingText="Loading campuses..."
 					data={campuses?.map((c) => ({ value: c.code, label: c.name })) || []}
@@ -183,6 +184,7 @@ function CourseAndFacultySelectorStep() {
 				{(!selectedCampus || selectedCampus.requireFaculty) && (
 					<Combobox
 						type="faculty"
+						modal={true}
 						loading={facultiesLoading}
 						loadingText="Loading faculties..."
 						data={
