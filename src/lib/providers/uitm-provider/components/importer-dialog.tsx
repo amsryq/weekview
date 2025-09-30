@@ -26,11 +26,11 @@ import {
 	ComboboxTrigger,
 } from "~/components/ui/shadcn-io/combobox";
 import { CourseStore } from "~/lib/stores/course-store";
+import { UiTMGroup } from "../group";
 import { Campus } from "../models/campus";
 import { Course } from "../models/course";
 import { Faculty } from "../models/faculty";
 import { Group } from "../models/group";
-import { TechnoGroup } from "../techno-group";
 
 const useImporterSelectionStore = create<{
 	open: boolean;
@@ -260,7 +260,7 @@ function GroupSelectorStep() {
 	const selectedGroups = useStore(
 		CourseStore,
 		useShallow((state) =>
-			state.courses.filter((a): a is TechnoGroup => a instanceof TechnoGroup),
+			state.courses.filter((a): a is UiTMGroup => a instanceof UiTMGroup),
 		),
 	);
 	// Courses list for selected campus/faculty
@@ -280,28 +280,28 @@ function GroupSelectorStep() {
 		data: availableGroups,
 		isLoading: groupsLoading,
 		error: groupsError,
-	} = useQuery<Group[], Error, TechnoGroup[]>({
+	} = useQuery<Group[], Error, UiTMGroup[]>({
 		queryKey: ["uitm", "groups", selectedCourse?.code],
 		queryFn: () => Group.fetch(selectedCourse!),
 		enabled: Boolean(selectedCourse),
-		select: (groups) => groups.map((g) => g.toTechnoCourse()),
+		select: (groups) => groups.map((g) => g.toUiTMCourse()),
 	});
 
 	const handleCourseSelect = (course: Course) => {
 		setSelectedCourse(course);
 	};
 
-	const handleGroupSelect = (technoCourse: TechnoGroup) => {
+	const handleGroupSelect = (uitmCourse: UiTMGroup) => {
 		const exists = selectedGroups.find(
 			(sg) =>
-				sg.internal.code === technoCourse.internal.code &&
-				sg.internal.group === technoCourse.internal.group,
+				sg.internal.code === uitmCourse.internal.code &&
+				sg.internal.group === uitmCourse.internal.group,
 		);
 
 		if (!exists) {
 			const state = CourseStore.getState();
-			if (state.getConflictingCourses(technoCourse.meetingTimes).length === 0) {
-				state.addCourse(technoCourse);
+			if (state.getConflictingCourses(uitmCourse.meetingTimes).length === 0) {
+				state.addCourse(uitmCourse);
 			}
 		}
 	};
@@ -370,11 +370,11 @@ function GroupSelectorStep() {
 									Loading groups...
 								</div>
 							) : selectedCourse && availableGroups?.length ? (
-								availableGroups.map((technoCourse, idx) => {
-									const alreadyExists = selectedGroups.includes(technoCourse);
+								availableGroups.map((uitmCourse, idx) => {
+									const alreadyExists = selectedGroups.includes(uitmCourse);
 									const conflicts =
 										CourseStore.getState().getConflictingCourses(
-											technoCourse.meetingTimes,
+											uitmCourse.meetingTimes,
 										);
 
 									const reason = alreadyExists
@@ -387,7 +387,7 @@ function GroupSelectorStep() {
 									return (
 										<button
 											key={idx}
-											onClick={() => handleGroupSelect(technoCourse)}
+											onClick={() => handleGroupSelect(uitmCourse)}
 											className={`block w-full text-left p-2 rounded transition-colors ${
 												reason
 													? "opacity-60 cursor-not-allowed"
@@ -396,9 +396,7 @@ function GroupSelectorStep() {
 											disabled={Boolean(reason)}
 											title={reason}
 										>
-											<div className="text-sm">
-												{technoCourse.internal.group}
-											</div>
+											<div className="text-sm">{uitmCourse.internal.group}</div>
 											{reason && (
 												<div className="text-xs text-muted-foreground mt-1">
 													{reason}
@@ -473,7 +471,7 @@ function GroupSelectorStep() {
 	);
 }
 
-export default function TechnoUniversityImporterDialog({
+export default function UiTMImporterDialog({
 	children,
 }: {
 	children: JSX.Element;

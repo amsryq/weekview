@@ -1,13 +1,13 @@
 import { Course } from "~/lib/models/course";
-import { TechnoUniversityProvider } from ".";
+import { UiTMProvider } from ".";
 
-type TechnoCourseConstructorProps = ConstructorParameters<typeof Course>[0] & {
+type UiTMCourseConstructorProps = ConstructorParameters<typeof Course>[0] & {
 	group: string;
 	campus: string;
 	faculty?: string;
 };
 
-export class TechnoGroup extends Course {
+export class UiTMGroup extends Course {
 	public internal: {
 		code: string;
 		campus: string;
@@ -15,7 +15,7 @@ export class TechnoGroup extends Course {
 		group: string;
 	};
 
-	constructor(props: TechnoCourseConstructorProps) {
+	constructor(props: UiTMCourseConstructorProps) {
 		super(props);
 		this.internal = {
 			code: props.code,
@@ -23,6 +23,6 @@ export class TechnoGroup extends Course {
 			faculty: props.faculty,
 			group: props.group,
 		};
-		this.provider = TechnoUniversityProvider.instance;
+		this.provider = UiTMProvider.instance;
 	}
 }

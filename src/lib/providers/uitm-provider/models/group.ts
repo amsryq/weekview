@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { MeetingTime } from "~/lib/models/meeting-time";
 import { fetchFromBackend } from "~/lib/utils/backend";
-import { TechnoGroup } from "../techno-group";
+import { UiTMGroup } from "../group";
 import { Course } from "./course";
 import { Session } from "./session";
 
@@ -49,7 +49,7 @@ export class Group {
 		);
 	}
 
-	toTechnoCourse(): TechnoGroup {
+	toUiTMCourse(): UiTMGroup {
 		const meetingTimes = this.sessions.map((session) =>
 			MeetingTime.createFromSchema({
 				day: session.day!,
@@ -59,7 +59,7 @@ export class Group {
 			}),
 		);
 
-		return new TechnoGroup({
+		return new UiTMGroup({
 			code: this.course.code,
 			cellAppearance: {
 				background: {
