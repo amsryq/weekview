@@ -66,24 +66,26 @@ function TelegramButton() {
 	);
 }
 
-export const Header = () => (
-	<header className="flex justify-between p-4 gap-2">
-		{/** Left side */}
-		<h1 className="flex items-center">
-			<Logo className="fill-foreground" />
-		</h1>
+export function Header() {
+	return (
+		<header className="flex flex-col sm:flex-row items-center justify-between p-6 gap-6 max-w-screen">
+			{/** Left side */}
+			<h1 className="flex items-center">
+				<Logo className="fill-foreground" />
+			</h1>
 
-		{/** Right side */}
-		<div className="flex flex-wrap justify-start flex-row-reverse gap-2">
-			<div className="flex gap-2">
-				<ThemeToggle />
-				<AccountButton />
+			{/** Right side */}
+			<div className="flex flex-wrap justify-center gap-2 flex-row-reverse sm:flex-row">
+				<div className="flex gap-2">
+					<SupportButton />
+					<TelegramButton />
+				</div>
+				<div className="max-sm:hidden w-px mx-2 bg-border" />
+				<div className="flex gap-2">
+					<ThemeToggle />
+					<AccountButton />
+				</div>
 			</div>
-			<div className="max-md:hidden w-px mx-2 bg-border" />
-			<div className="flex gap-2">
-				<SupportButton />
-				<TelegramButton />
-			</div>
-		</div>
-	</header>
-);
+		</header>
+	);
+}
