@@ -1,4 +1,4 @@
-import { SettingsIcon } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 import { JSX } from "react";
 import { Button } from "~/components/ui/button";
 import { CourseProvider } from "~/lib/models/course-provider";
@@ -30,8 +30,8 @@ export class UiTMProvider extends CourseProvider {
 		return (
 			<UiTMImporterDialog>
 				<Button className="w-full">
-					<SettingsIcon className="w-4 h-4" />
-					Manage
+					<PlusIcon className="w-4 h-4" />
+					Add Courses/Groups
 				</Button>
 			</UiTMImporterDialog>
 		);

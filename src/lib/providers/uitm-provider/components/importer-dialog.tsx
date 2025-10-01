@@ -1,7 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { pick } from "es-toolkit";
-import { AlertTriangleIcon } from "lucide-react";
-import { JSX } from "react";
+import {
+	AlertTriangleIcon,
+	PlusIcon,
+	SearchIcon,
+	Trash2Icon,
+} from "lucide-react";
+import { JSX, useEffect, useState } from "react";
 import { create, useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
@@ -15,6 +20,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "~/components/ui/dialog";
+import { Input } from "~/components/ui/input";
 import {
 	Combobox,
 	ComboboxContent,
@@ -25,6 +31,7 @@ import {
 	ComboboxList,
 	ComboboxTrigger,
 } from "~/components/ui/shadcn-io/combobox";
+import { MeetingTime } from "~/lib/models/meeting-time";
 import { CourseStore } from "~/lib/stores/course-store";
 import { UiTMGroup } from "../group";
 import { Campus } from "../models/campus";
@@ -64,6 +71,18 @@ const useImporterSelectionStore = create<{
 		}),
 	setSelectedCourse: (c) => set({ selectedCourse: c }),
 }));
+
+const SHORT_DAY_NAMES = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+
+function summarizeMeetingTimes(meetingTimes: MeetingTime[]): string {
+	return meetingTimes
+		.map((meeting) => {
+			const day = SHORT_DAY_NAMES[(meeting.day - 1 + 7) % 7] ?? "";
+			const timeRange = `${meeting.time.start.toString()}-${meeting.time.end.toString()}`;
+			return `${day} ${timeRange}`.trim();
+		})
+		.join(" • ");
+}
 
 function UnaffiliationNotice() {
 	return (
@@ -259,6 +278,8 @@ function GroupSelectorStep() {
 		setCurrentStep,
 	} = useImporterSelectionStore();
 
+	const [searchQuery, setSearchQuery] = useState("");
+
 	const selectedGroups = useStore(
 		CourseStore,
 		useShallow((state) =>
@@ -289,8 +310,29 @@ function GroupSelectorStep() {
 		select: (groups) => groups.map((g) => g.toUiTMCourse()),
 	});
 
-	const handleCourseSelect = (course: Course) => {
+	const filteredGroups = availableGroups?.filter((group) => {
+		const query = searchQuery.toLowerCase();
+		const groupName = group.internal.group.toLowerCase();
+		const meetingSummary = summarizeMeetingTimes(
+			group.meetingTimes,
+		).toLowerCase();
+		return groupName.includes(query) || meetingSummary.includes(query);
+	});
+
+	const handleCourseSelect = (course: Course | undefined) => {
 		setSelectedCourse(course);
+	};
+
+	const handleCourseChange = (courseCode: string) => {
+		if (!courseCode) {
+			handleCourseSelect(undefined);
+			return;
+		}
+
+		const course = courses?.find((c) => c.code === courseCode);
+		if (course) {
+			handleCourseSelect(course);
+		}
 	};
 
 	const handleGroupSelect = (uitmCourse: UiTMGroup) => {
@@ -330,50 +372,81 @@ function GroupSelectorStep() {
 					{/* Courses Section */}
 					<div className="flex flex-col gap-2">
 						<h3 className="text-center font-medium">Courses</h3>
-						<div className="border rounded-lg p-3 h-32 overflow-y-auto bg-muted/30">
-							{coursesError ? (
-								<div className="text-sm text-red-500 p-2">
-									{coursesError.message}
-								</div>
-							) : coursesLoading ? (
-								<div className="text-sm text-muted-foreground italic p-2">
-									Loading courses...
-								</div>
-							) : courses && courses.length > 0 ? (
-								courses.map((course, idx) => (
-									<button
-										key={idx}
-										onClick={() => handleCourseSelect(course)}
-										className={`block w-full text-left p-2 rounded hover:bg-muted transition-colors ${
-											selectedCourse?.code === course.code ? "bg-muted" : ""
-										}`}
-									>
-										<div className="text-sm">{course.code}</div>
-									</button>
-								))
-							) : (
-								<div className="text-sm text-muted-foreground italic p-2">
-									No courses available
-								</div>
-							)}
-						</div>
+						<Combobox
+							type="course"
+							modal={true}
+							loading={coursesLoading}
+							loadingText="Loading courses..."
+							data={
+								courses?.map((course) => ({
+									value: course.code,
+									label: course.code,
+								})) || []
+							}
+							value={selectedCourse?.code || ""}
+							onValueChange={handleCourseChange}
+						>
+							<ComboboxTrigger
+								className={`w-full ${coursesLoading ? "cursor-wait" : ""}`}
+								disabled={coursesLoading || !courses?.length}
+							/>
+							<ComboboxContent>
+								<ComboboxInput />
+								<ComboboxEmpty>
+									{coursesLoading
+										? "Loading courses..."
+										: "No courses available"}
+								</ComboboxEmpty>
+								<ComboboxList>
+									<ComboboxGroup>
+										{courses?.map((course, idx) => (
+											<ComboboxItem
+												key={idx}
+												value={course.code}
+												keywords={[course.code]}
+											>
+												{course.code}
+											</ComboboxItem>
+										))}
+									</ComboboxGroup>
+								</ComboboxList>
+							</ComboboxContent>
+						</Combobox>
+
+						{coursesError && (
+							<div className="text-sm text-red-500">{coursesError.message}</div>
+						)}
 					</div>
 
 					{/* Groups Section */}
-					<div className="flex flex-col gap-2">
+					<div className="flex flex-col gap-2 h-full min-h-0">
 						<h3 className="text-center font-medium">Groups</h3>
-						<div className="border rounded-lg p-3 h-32 overflow-y-auto bg-muted/30">
+						<div className="border rounded-lg pS-3 h-full overflow-y-auto bg-muted/30">
+							<div className="relative m-2">
+								<SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-muted-foreground" />
+								<Input
+									placeholder="Search groups..."
+									disabled={!selectedCourse || availableGroups?.length === 0}
+									value={searchQuery}
+									onChange={(e) => setSearchQuery(e.target.value)}
+									className="pl-10"
+								/>
+							</div>
 							{groupsError ? (
-								<div className="text-sm text-red-501 p-2">
+								<div className="text-center text-sm text-destructive p-2">
 									{(groupsError as Error).message}
 								</div>
 							) : groupsLoading ? (
-								<div className="text-sm text-muted-foreground italic p-2">
+								<div className="text-center text-sm text-muted-foreground italic p-2">
 									Loading groups...
 								</div>
-							) : selectedCourse && availableGroups?.length ? (
-								availableGroups.map((uitmCourse, idx) => {
-									const alreadyExists = selectedGroups.includes(uitmCourse);
+							) : selectedCourse && filteredGroups?.length ? (
+								filteredGroups.map((uitmCourse, idx) => {
+									const alreadyExists = selectedGroups.some(
+										(sg) =>
+											sg.internal.code === uitmCourse.internal.code &&
+											sg.internal.group === uitmCourse.internal.group,
+									);
 									const conflicts =
 										CourseStore.getState().getConflictingCourses(
 											uitmCourse.meetingTimes,
@@ -386,29 +459,48 @@ function GroupSelectorStep() {
 												conflicts.map((c) => c.code).join(", ")
 											: undefined;
 
+									const summary = summarizeMeetingTimes(
+										uitmCourse.meetingTimes,
+									);
+
 									return (
 										<button
 											key={idx}
-											onClick={() => handleGroupSelect(uitmCourse)}
-											className={`block w-full text-left p-2 rounded transition-colors ${
-												reason
-													? "opacity-60 cursor-not-allowed"
-													: "hover:bg-muted"
+											className={`flex w-full items-center gap-3 rounded px-3 py-2 text-left transition-colors ${
+												reason ? "opacity-60" : ""
 											}`}
-											disabled={Boolean(reason)}
-											title={reason}
 										>
-											<div className="text-sm">{uitmCourse.internal.group}</div>
-											{reason && (
-												<div className="text-xs text-muted-foreground mt-1">
-													{reason}
+											<div className="flex min-w-0 flex-1 flex-col gap-1">
+												<div className="flex items-center justify-between gap-2">
+													<span className="text-sm font-medium">
+														{uitmCourse.internal.group}
+													</span>
+													{reason && (
+														<span className="text-xs text-muted-foreground">
+															{reason}
+														</span>
+													)}
 												</div>
-											)}
+												<span className="text-xs text-muted-foreground truncate">
+													{summary}
+												</span>
+											</div>
+											<Button
+												variant="outline"
+												size="icon"
+												className="size-8"
+												onClick={() => handleGroupSelect(uitmCourse)}
+												disabled={Boolean(reason)}
+												title={reason ?? summary}
+											>
+												<span className="sr-only">Add</span>
+												<PlusIcon className="size-4 shrink-0" />
+											</Button>
 										</button>
 									);
 								})
 							) : (
-								<div className="text-sm text-muted-foreground italic p-2">
+								<div className="text-center text-sm text-muted-foreground italic p-2">
 									{selectedCourse
 										? "No groups available"
 										: "Select a course to view groups"}
@@ -419,39 +511,31 @@ function GroupSelectorStep() {
 				</div>
 
 				{/* Right side - Selected Groups */}
-				<div className="flex flex-col gap-2 flex-1">
+				<div className="flex flex-col gap-2 w-1/3">
 					<div className="border rounded-lg p-3 h-full overflow-y-auto">
 						{selectedGroups.length > 0 ? (
 							<div className="space-y-2">
 								{selectedGroups.map(({ internal: { code, group } }, idx) => (
-									<div key={idx} className="border rounded-lg p-3 bg-muted/30">
-										<div className="flex items-center justify-between">
-											<div>
-												<div className="font-medium">{code}</div>
-												<div className="text-sm text-muted-foreground">
-													{group}
-												</div>
-											</div>
-											<div className="flex gap-1">
-												<Button
-													variant="ghost"
-													size="sm"
-													className="h-6 w-6 p-0"
-													title="Edit"
-												>
-													<span className="text-xs">✏️</span>
-												</Button>
-												<Button
-													variant="ghost"
-													size="sm"
-													className="h-6 w-6 p-0"
-													title="Remove"
-													onClick={() => handleGroupRemove(code, group)}
-												>
-													<span className="text-xs">🗑️</span>
-												</Button>
+									<div
+										key={idx}
+										className="flex items-center justify-between gap-3 rounded-lg border bg-muted/30 p-3"
+									>
+										<div className="min-w-0">
+											<div className="text-sm font-medium">{code}</div>
+											<div className="text-xs text-muted-foreground truncate">
+												{group}
 											</div>
 										</div>
+										<Button
+											variant="ghost"
+											size="icon"
+											className="size-8"
+											title="Remove"
+											onClick={() => handleGroupRemove(code, group)}
+										>
+											<Trash2Icon className="size-4" />
+											<span className="sr-only">Remove</span>
+										</Button>
 									</div>
 								))}
 							</div>
@@ -490,12 +574,12 @@ export default function UiTMImporterDialog({
 		<>
 			<Dialog open={open && currentStep === 0} onOpenChange={handleOpenChange}>
 				<DialogTrigger asChild>{children}</DialogTrigger>
-				<DialogContent className={`sm:max-w-5xl w-auto`}>
+				<DialogContent className={`sm:max-w-4xl w-auto`}>
 					<CourseAndFacultySelectorStep />
 				</DialogContent>
 			</Dialog>
 			<Dialog open={open && currentStep === 1} onOpenChange={handleOpenChange}>
-				<DialogContent className="sm:max-w-5xl w-full">
+				<DialogContent className="sm:max-w-4xl w-full">
 					<GroupSelectorStep />
 				</DialogContent>
 			</Dialog>
