@@ -127,7 +127,7 @@ export default function TimetableCustomizer({
 						Customize the overall appearance and layout of your timetable
 					</DialogDescription>
 				</DialogHeader>
-				<ScrollArea className="flex-1 overflow-y-auto h-full">
+				<div className="flex-1 overflow-y-auto h-full">
 					<div className="pr-4 space-y-6">
 						{/* Table Layout Section */}
 						<Card>
@@ -140,7 +140,7 @@ export default function TimetableCustomizer({
 							<CardContent>
 								<div className="space-y-3">
 									<Label className="text-sm font-medium">Layout Style</Label>
-									<div className="flex gap-2">
+									<div className="flex flex-wrap gap-2">
 										<Button
 											variant={prefs.layout === "rows" ? "default" : "outline"}
 											onClick={() => prefs.setValue("layout", "rows")}
@@ -229,7 +229,7 @@ export default function TimetableCustomizer({
 							</CardContent>
 						</Card>
 					</div>
-				</ScrollArea>
+				</div>
 
 				{/* Sticky footer with buttons */}
 				<div className="flex justify-end gap-2 pt-4 border-t bg-background">

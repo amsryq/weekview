@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { pick } from "es-toolkit";
 import {
 	AlertTriangleIcon,
+	ArrowLeft,
 	PlusIcon,
 	SearchIcon,
 	Trash2Icon,
@@ -511,7 +512,7 @@ function GroupSelectorStep() {
 				</div>
 
 				{/* Right side - Selected Groups */}
-				<div className="flex flex-col gap-2 w-1/3">
+				<div className="max-md:hidden flex flex-col gap-2 w-1/3">
 					<div className="border rounded-lg p-3 h-full overflow-y-auto">
 						{selectedGroups.length > 0 ? (
 							<div className="space-y-2">
@@ -548,9 +549,10 @@ function GroupSelectorStep() {
 				</div>
 			</div>
 
-			<DialogFooter className="justify-start">
+			<DialogFooter className="sm:justify-start w-full">
 				<Button variant="outline" onClick={() => setCurrentStep(0)}>
-					Previous
+					<ArrowLeft className="size-4" />
+					Change Campus/Faculty
 				</Button>
 			</DialogFooter>
 		</>
@@ -574,12 +576,12 @@ export default function UiTMImporterDialog({
 		<>
 			<Dialog open={open && currentStep === 0} onOpenChange={handleOpenChange}>
 				<DialogTrigger asChild>{children}</DialogTrigger>
-				<DialogContent className={`sm:max-w-4xl w-auto`}>
+				<DialogContent className={`flex flex-col sm:max-w-xl min-w-0`}>
 					<CourseAndFacultySelectorStep />
 				</DialogContent>
 			</Dialog>
 			<Dialog open={open && currentStep === 1} onOpenChange={handleOpenChange}>
-				<DialogContent className="sm:max-w-4xl w-full">
+				<DialogContent className="flex flex-col sm:max-w-4xl min-w-0">
 					<GroupSelectorStep />
 				</DialogContent>
 			</Dialog>

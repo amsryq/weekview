@@ -52,7 +52,7 @@ function ElementRow({
 				<div className="w-24 text-sm font-medium">{name}</div>
 			</div>
 
-			<div className="flex items-center gap-3">
+			<div className="flex flex-wrap items-center justify-end gap-3">
 				<Select
 					value={values.weight?.[elementKey] || baseValues.weight?.[elementKey]}
 					onValueChange={(value) => onChange("weight", elementKey, value)}
@@ -67,7 +67,7 @@ function ElementRow({
 					</SelectContent>
 				</Select>
 
-				<div className="flex items-center gap-2 flex-1">
+				<div className="flex flex-row md:flex-row-reverse items-center justify-end gap-2 flex-1">
 					<Button
 						type="button"
 						variant="outline"
