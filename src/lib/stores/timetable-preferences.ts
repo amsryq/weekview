@@ -22,7 +22,7 @@ const defaultState = {
 	},
 
 	cellAppearance: {
-		textAlign: "left",
+		textAlign: "center",
 		material: "basic",
 
 		visibility: {
