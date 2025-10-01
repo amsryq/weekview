@@ -464,7 +464,7 @@ function GroupSelectorStep() {
 									);
 
 									return (
-										<button
+										<div
 											key={idx}
 											className={`flex w-full items-center gap-3 rounded px-3 py-2 text-left transition-colors ${
 												reason ? "opacity-60" : ""
@@ -496,7 +496,7 @@ function GroupSelectorStep() {
 												<span className="sr-only">Add</span>
 												<PlusIcon className="size-4 shrink-0" />
 											</Button>
-										</button>
+										</div>
 									);
 								})
 							) : (

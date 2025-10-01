@@ -42,11 +42,60 @@ export class Group {
 				new Group(
 					g.code,
 					course,
-					g.sessions.map(
-						(s) => new Session(s.groupCode, s.room, s.day, s.start, s.end),
+					Group.mergeOverlappingSessions(
+						g.sessions.map(
+							(s) => new Session(s.groupCode, s.room, s.day, s.start, s.end),
+						),
 					),
 				),
 		);
+	}
+
+	private static mergeOverlappingSessions(sessions: Session[]): Session[] {
+		if (sessions.length <= 1) return sessions;
+
+		// Sort sessions by day and start time
+		const sorted = [...sessions].sort((a, b) => {
+			if (a.day !== b.day) return (a.day ?? 0) - (b.day ?? 0);
+			return (a.start ?? "").localeCompare(b.start ?? "");
+		});
+
+		const merged: Session[] = [];
+		let current = sorted[0];
+
+		for (let i = 1; i < sorted.length; i++) {
+			const next = sorted[i];
+
+			// Check if sessions are on the same day and overlap or are consecutive
+			if (
+				current.day === next.day &&
+				current.end &&
+				next.start &&
+				current.end >= next.start
+			) {
+				// Merge sessions
+				const newEnd = current.end > (next.end ?? "") ? current.end : next.end;
+				const sameRoom = current.room === next.room;
+
+				current = new Session(
+					current.groupCode,
+					sameRoom ? current.room : undefined, // Remove room if different
+					current.day,
+					current.start,
+					newEnd,
+					current.mode,
+					current.status,
+				);
+			} else {
+				// No overlap, push current and move to next
+				merged.push(current);
+				current = next;
+			}
+		}
+
+		merged.push(current);
+
+		return merged;
 	}
 
 	toUiTMCourse(): UiTMGroup {
