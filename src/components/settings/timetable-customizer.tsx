@@ -128,7 +128,7 @@ export default function TimetableCustomizer({
 					</DialogDescription>
 				</DialogHeader>
 				<div className="flex-1 overflow-y-auto h-full">
-					<div className="pr-4 space-y-6">
+					<div className="sm:pr-4 space-y-6">
 						{/* Table Layout Section */}
 						<Card>
 							<CardHeader>

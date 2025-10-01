@@ -30,9 +30,9 @@ export function SupportDialog() {
 
 	return (
 		<Dialog open={isOpen} onOpenChange={closeSupportDialog}>
-			<DialogContent className="sm:max-w-4xl">
+			<DialogContent className="sm:max-w-4xl max-h-[80vh] overflow-y-scroll sm:overflow-y-visible">
 				{/* Star sticker */}
-				<div className="absolute right-16 -top-2 rotate-6 select-none">
+				<div className="hidden sm:inline-block absolute right-16 -top-2 rotate-6 select-none">
 					<Twemoji emoji="⭐" className="block scale-500 drop-shadow" />
 				</div>
 
@@ -41,12 +41,12 @@ export function SupportDialog() {
 					<DialogDescription>{config.description}</DialogDescription>
 				</DialogHeader>
 
-				<div className="grid grid-cols-1 gap-4">
+				<div className="flex flex-col min-h-0 gap-4 overflow-y-auto">
 					<SupporterCard />
 					{config.showAlternatives && (
 						<>
 							<span className="text-center">or you can</span>
-							<div className="flex [&>*]:flex-1 gap-4">
+							<div className="flex flex-col md:flex-row [&>*]:flex-1 gap-4">
 								<GithubSponsorsCard />
 								<ShareCard />
 							</div>

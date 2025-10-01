@@ -156,7 +156,12 @@ export const ComboboxTrigger = ({
 
 	return (
 		<PopoverTrigger asChild>
-			<Button variant="outline" {...props} ref={ref}>
+			<Button
+				variant="outline"
+				{...props}
+				className={cn("truncate", props.className)}
+				ref={ref}
+			>
 				{children ?? (
 					<span className="flex w-full items-center justify-between gap-2">
 						{loading
