@@ -117,7 +117,7 @@ export function CourseBlock({
 
 	const containerStyle: React.CSSProperties = {
 		height: "100%",
-		borderRadius: 12,
+		borderRadius: 8,
 		backgroundColor: backgroundStyle.backgroundColor,
 		...backgroundStyle,
 		...style,
