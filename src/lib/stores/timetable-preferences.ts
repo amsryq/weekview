@@ -24,6 +24,8 @@ const defaultState = {
 	cellAppearance: {
 		textAlign: "center",
 		material: "basic",
+		borderRadius: 8,
+		autoSizeFont: true,
 
 		visibility: {
 			time: true,

@@ -105,7 +105,12 @@ export class ColorEntry {
 		const def = color instanceof ColorEntry ? color.def : color;
 
 		if (def.type === "solid") {
-			return { backgroundColor: def.color };
+			return {
+				borderWidth: 1,
+				borderStyle: "solid",
+				borderColor: "rgba(255, 255, 255, 0.1)",
+				backgroundColor: def.color,
+			};
 		}
 
 		if (def.type === "gradient" && def.gradientColors?.length >= 2) {

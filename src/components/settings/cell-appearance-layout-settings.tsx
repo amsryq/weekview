@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+// WARNING: This component is a monument to technical debt, duct tape, and caffeine-fueled decisions.
+// If you value your sanity, proceed with caution. Refactor at your own risk!
+import { useEffect, useId, useState } from "react";
 import { PartialDeep, UnknownRecord } from "type-fest";
 import type {
 	CellAppearance,
@@ -16,6 +18,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "../ui/select";
+import { Slider } from "../ui/slider";
 import { Switch } from "../ui/switch";
 
 export interface CellAppearanceLayoutSettingsProps {
@@ -26,7 +29,7 @@ export interface CellAppearanceLayoutSettingsProps {
 	 * Only exists as the "default value" for the UI component.
 	 */
 	baseValues?: Partial<CellAppearance>;
-	onChange?: (changes: PartialDeep<CellAppearance>) => void;
+	onChange: (changes: PartialDeep<CellAppearance>) => void;
 }
 
 function ElementRow({
@@ -72,6 +75,7 @@ function ElementRow({
 						type="button"
 						variant="outline"
 						size="sm"
+						disabled={values?.autoSizeFont ?? baseValues?.autoSizeFont ?? true}
 						onClick={() =>
 							onChange(
 								"fontSize",
@@ -96,6 +100,7 @@ function ElementRow({
 						type="button"
 						variant="outline"
 						size="sm"
+						disabled={values?.autoSizeFont ?? baseValues?.autoSizeFont ?? true}
 						onClick={() =>
 							onChange(
 								"fontSize",
@@ -126,6 +131,54 @@ function ElementRow({
 					/>
 				</Label>
 			</div>
+		</div>
+	);
+}
+
+function BorderRadiusSlider({
+	value,
+	onChange,
+}: {
+	value: number;
+	onChange: (value: number) => void;
+}) {
+	const [valueState, setValueState] = useState(value);
+	const borderRadiusSliderTextId = useId();
+
+	useEffect(() => {
+		document.getElementById(borderRadiusSliderTextId)!.textContent =
+			`${value}px`;
+		setValueState(value);
+	}, [value, borderRadiusSliderTextId]);
+
+	return (
+		<div className="space-y-3">
+			<div className="flex items-center justify-between">
+				<Label className="text-sm font-medium">Border Radius</Label>
+				<span
+					id={borderRadiusSliderTextId}
+					className="text-sm text-muted-foreground"
+				>
+					{valueState}px
+				</span>
+			</div>
+			<Slider
+				min={0}
+				max={30}
+				step={1}
+				value={[valueState]}
+				onValueCommit={([value]) => onChange(value)}
+				onValueChange={([value]) => {
+					setValueState(value);
+					// TODO: Updating the DOM directly might be a bad idea, look into whether this is fine or not
+					document.getElementById(borderRadiusSliderTextId)!.textContent =
+						`${value}px`;
+				}}
+				className="w-full"
+			/>
+			<p className="text-xs text-muted-foreground">
+				Adjust the roundness of course cell corners
+			</p>
 		</div>
 	);
 }
@@ -181,6 +234,31 @@ export function CellAppearanceLayoutSettings({
 
 	return (
 		<div className="space-y-6">
+			<BorderRadiusSlider
+				value={internalValues.borderRadius ?? baseValues.borderRadius ?? 8}
+				onChange={(value) => handleChange("borderRadius", null, value)}
+			/>
+			<div className="flex justify-between">
+				<div>
+					<Label className="text-sm font-medium">Auto-size Font</Label>
+					<p className="text-xs text-muted-foreground mb-2">
+						Automatically increase the font size of certain elements when other
+						elements are hidden. You cannot manually adjust font sizes when this
+						is enabled.
+					</p>
+				</div>
+
+				<Label className="flex items-center gap-2 cursor-pointer">
+					<Switch
+						checked={
+							internalValues.autoSizeFont ?? baseValues.autoSizeFont ?? true
+						}
+						onCheckedChange={(checked) =>
+							handleChange("autoSizeFont", null, checked)
+						}
+					/>
+				</Label>
+			</div>
 			<div>
 				<Label className="text-sm font-medium">Text Alignment</Label>
 				<div className="flex gap-2 mt-2">

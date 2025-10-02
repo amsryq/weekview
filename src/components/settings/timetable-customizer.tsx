@@ -23,7 +23,6 @@ import {
 	DialogTrigger,
 } from "../ui/dialog";
 import { Label } from "../ui/label";
-import { ScrollArea } from "../ui/scroll-area";
 import { BackgroundImageUpload } from "./background-image-upload";
 import { CellAppearanceLayoutSettings } from "./cell-appearance-layout-settings";
 
@@ -217,7 +216,7 @@ export default function TimetableCustomizer({
 									Cell Styles
 								</CardTitle>
 								<CardDescription>
-									Customize the default appearance of course cells
+									Customize the appearance of timetable cells
 								</CardDescription>
 							</CardHeader>
 

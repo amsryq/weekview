@@ -33,6 +33,8 @@ export const CellAppearanceSchema = z.object({
 	background: ColorEntry.schema,
 	fgColor: z.string(),
 	material: CellMaterialSchema.optional(),
+	borderRadius: z.number().optional(),
+	autoSizeFont: z.boolean().optional(),
 	visibility: z
 		.partialRecord(CellElementsSchema, z.boolean().optional())
 		.optional(),

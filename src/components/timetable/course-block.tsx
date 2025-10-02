@@ -117,8 +117,8 @@ export function CourseBlock({
 
 	const containerStyle: React.CSSProperties = {
 		height: "100%",
-		borderRadius: 8,
-		backgroundColor: backgroundStyle.backgroundColor,
+		margin: 1,
+		borderRadius: appearance.borderRadius ?? 8,
 		...backgroundStyle,
 		...style,
 	};
@@ -181,7 +181,12 @@ export function CourseBlock({
 				<div className="flex flex-col">
 					{appearance.visibility.code && (
 						<FitText
-							fontSize={appearance.fontSize.code}
+							fontSize={
+								appearance.autoSizeFont !== false &&
+								(!appearance.visibility.name || !course.name)
+									? appearance.fontSize.code * 1.5
+									: appearance.fontSize.code
+							}
 							className={`${FontWeightMap[appearance.weight.code]} leading-none`}
 						>
 							{course.code}
