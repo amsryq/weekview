@@ -22,19 +22,19 @@ interface Actions {
 	releaseAssignedColor: (key: string) => void;
 }
 
-// Predefined colors
+const PREDEFINED_COLORS_VERSION = "v1";
 const PREDEFINED_COLORS: { name: string; color: ColorEntry.Schema }[] = [
 	// Solid colors
-	{ name: "Red", color: { type: "solid", color: "#ef4444" } },
-	{ name: "Green", color: { type: "solid", color: "#22c55e" } },
-	{ name: "Blue", color: { type: "solid", color: "#3b82f6" } },
-	{ name: "Yellow", color: { type: "solid", color: "#eab308" } },
-	{ name: "Purple", color: { type: "solid", color: "#a855f7" } },
-	{ name: "Pink", color: { type: "solid", color: "#ec4899" } },
-	{ name: "Orange", color: { type: "solid", color: "#f97316" } },
-	{ name: "Teal", color: { type: "solid", color: "#14b8a6" } },
-	{ name: "Indigo", color: { type: "solid", color: "#6366f1" } },
-	{ name: "Gray", color: { type: "solid", color: "#6b7280" } },
+	{ name: "Red", color: { type: "solid", color: "#dc2626" } },
+	{ name: "Green", color: { type: "solid", color: "#16a34a" } },
+	{ name: "Blue", color: { type: "solid", color: "#2563eb" } },
+	{ name: "Yellow", color: { type: "solid", color: "#ca8a04" } },
+	{ name: "Purple", color: { type: "solid", color: "#9333ea" } },
+	{ name: "Pink", color: { type: "solid", color: "#db2777" } },
+	{ name: "Orange", color: { type: "solid", color: "#ea580c" } },
+	{ name: "Teal", color: { type: "solid", color: "#0f766e" } },
+	{ name: "Indigo", color: { type: "solid", color: "#4f46e5" } },
+	{ name: "Gray", color: { type: "solid", color: "#4b5563" } },
 
 	// Gradient colors
 	{
@@ -294,21 +294,37 @@ const ColorStore = createStore<State & Actions>()(
 				for (let i = 0; i < state.colors.length; i++) {
 					const color = state.colors[i];
 					if (!(color instanceof ColorEntry)) {
+						if (
+							(color as ColorEntry)?.id?.startsWith("__predefined-") &&
+							!(color as ColorEntry)?.id?.includes(
+								`-${PREDEFINED_COLORS_VERSION}-`,
+							)
+						) {
+							// @ts-expect-error
+							state.colors[i] = undefined;
+							continue;
+						}
+
 						// @ts-expect-error
 						state.colors[i] = new ColorEntry({ ...color });
 					}
 				}
+
+				state.colors = state.colors.filter((c): c is ColorEntry => !!c);
 
 				// Add missing predefined colors
 				for (let i = 0; i < PREDEFINED_COLORS.length; i++) {
 					const predefined = PREDEFINED_COLORS[i];
 					if (predefined) {
 						const exists = state.colors.find(
-							(c) => c.predefined && c.id === `__predefined-${i}`,
+							(c) =>
+								c.predefined &&
+								c.id === `__predefined-${PREDEFINED_COLORS_VERSION}-${i}`,
 						);
+
 						if (!exists) {
 							const colorEntry = new ColorEntry({
-								id: `__predefined-${i}`,
+								id: `__predefined-${PREDEFINED_COLORS_VERSION}-${i}`,
 								def: predefined.color,
 								predefined: true,
 							});
