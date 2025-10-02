@@ -3,15 +3,19 @@ import App from "./app";
 import { Footer } from "./footer";
 import { Header } from "./header";
 
+const APP_DESCRIPTION =
+	"Create beautiful, customizable weekly timetables for your classes with Weekview. Free online timetable generator. Perfect for students.";
 export const metadata: Metadata = {
 	title: "Weekview",
 	icons: {
 		icon: "/images/icon.png",
 	},
-	description:
-		"Create beautiful, customizable weekly timetables for your classes with Weekview. Free online timetable generator. Perfect for students.",
+	description: APP_DESCRIPTION,
 	keywords: [
 		"timetable",
+		"uitm",
+		"uitm timetable",
+		"uitm icress",
 		"schedule",
 		"weekly planner",
 		"class schedule",
@@ -28,8 +32,7 @@ export const metadata: Metadata = {
 	publisher: "amsyarasyiq",
 	openGraph: {
 		title: "Weekview - Generate Weekly Schedules",
-		description:
-			"Create beautiful, customizable weekly timetables for your classes. Free online timetable generator with themes, colors, and PNG export.",
+		description: APP_DESCRIPTION,
 		url: "https://weekview.my",
 		siteName: "Weekview",
 		locale: "en_US",
@@ -38,8 +41,7 @@ export const metadata: Metadata = {
 	twitter: {
 		card: "summary_large_image",
 		title: "Weekview - Generate Stunning Weekly Schedules",
-		description:
-			"Create beautiful, customizable weekly timetables for your classes. Free online timetable generator with themes, colors, and PNG export.",
+		description: APP_DESCRIPTION,
 		creator: "@amsyarasyiq",
 	},
 	robots: {
@@ -61,8 +63,7 @@ export const metadata: Metadata = {
 			"@context": "https://schema.org",
 			"@type": "WebApplication",
 			name: "Weekview",
-			description:
-				"Create beautiful, customizable weekly timetables for your classes. Free online timetable generator with themes, colors, and PNG export.",
+			description: APP_DESCRIPTION,
 			url: "https://weekview.my",
 			applicationCategory: "ProductivityApplication",
 			operatingSystem: "Web Browser",
