@@ -5,8 +5,12 @@ export async function fetchFromBackend(
 	try {
 		if (!endpoint.startsWith("/providers/uitm/icress/")) throw null;
 
-		// @ts-expect-error
-		if (globalThis.__DISABLE_BACKEND_INDEX__ === true) throw null;
+		if (
+			// @ts-expect-error
+			globalThis.__DISABLE_BACKEND_INDEX__ === true ||
+			process.env.NODE_ENV !== "production"
+		)
+			throw null;
 
 		const url = new URL(endpoint, process.env.NEXT_PUBLIC_BACKEND_URL);
 		let indexPath = url.pathname;
