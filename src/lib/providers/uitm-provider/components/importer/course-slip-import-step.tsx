@@ -55,6 +55,7 @@ function CourseSlipImportStep() {
 	const [rawText, setRawText] = useState("");
 	const parsedSchedule = useMemo(() => parseSchedule(rawText), [rawText]);
 	const [progressDialogOpen, setProgressDialogOpen] = useState(false);
+	const [howToOpen, setHowToOpen] = useState(false);
 
 	const [importPhase, setImportPhase] = useState<
 		"idle" | "setup" | "importing" | "complete"
@@ -450,7 +451,7 @@ function CourseSlipImportStep() {
 					value={rawText}
 					onChange={(event) => setRawText(event.target.value)}
 					placeholder="Paste your course slip here..."
-					className="max-h-[180px] resize-y"
+					className="max-h-48 min-h-24 resize-y"
 				/>
 
 				{rawText.trim() !== "" && (
@@ -525,6 +526,13 @@ function CourseSlipImportStep() {
 						<ArrowLeft className="size-4" />
 						Back to selection
 					</Button>
+					<Button
+						variant="ghost"
+						onClick={() => setHowToOpen(true)}
+						className="w-full sm:w-auto"
+					>
+						How to?
+					</Button>
 				</div>
 				<Button
 					onClick={handleImport}
@@ -537,6 +545,40 @@ function CourseSlipImportStep() {
 					Import courses
 				</Button>
 			</DialogFooter>
+
+			<Dialog open={howToOpen} onOpenChange={(open) => setHowToOpen(open)}>
+				<DialogContent className="sm:max-w-2xl">
+					<DialogHeader>
+						<DialogTitle>Importing your course slip</DialogTitle>
+						<DialogDescription className="sr-only">
+							A short guide on how to import your UiTM course slip.
+						</DialogDescription>
+					</DialogHeader>
+					<div className="py-2">
+						<p className="text-sm text-muted-foreground">
+							You can import your course slip by copying your course
+							registration details from the{" "}
+							<a
+								className="underline"
+								href="https://ecr.uitm.edu.my/estudent/ecr/main.cfm?status=1"
+							>
+								UiTM's e-Course Registration System (eCR)
+							</a>
+							. Here's what to copy:
+						</p>
+
+						<img
+							src="/images/uitm-course-slip-select.png"
+							alt="What to select on the course slip"
+						/>
+					</div>
+					<DialogFooter>
+						<Button variant="secondary" onClick={() => setHowToOpen(false)}>
+							Close
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 
 			<Dialog
 				open={progressDialogOpen}

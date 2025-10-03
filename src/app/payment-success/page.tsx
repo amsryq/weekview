@@ -28,11 +28,6 @@ const PAYMENT_STATUS = {
 	PAID: "paid",
 } as const;
 
-const QUERY_CONFIG = {
-	RETRY_ATTEMPTS: 2,
-	STALE_TIME: 5 * 60 * 1000, // 5 minutes
-} as const;
-
 // API Functions
 async function fetchSessionData(
 	sessionId: string,
@@ -166,8 +161,6 @@ function PaymentSuccessPageContent() {
 		queryKey: ["stripe-session", sessionId],
 		queryFn: () => fetchSessionData(sessionId!),
 		enabled: !!sessionId,
-		retry: QUERY_CONFIG.RETRY_ATTEMPTS,
-		staleTime: QUERY_CONFIG.STALE_TIME,
 	});
 
 	if (!sessionId) {
