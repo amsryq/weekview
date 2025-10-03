@@ -10,7 +10,11 @@ let singletonCache: ManualCourseProvider | null = null;
 
 export class ManualCourseProvider extends CourseProvider {
 	constructor() {
-		super({ name: "My Courses" });
+		super({
+			name: "My Courses",
+			emptyStateText:
+				"No courses added yet. Add courses by clicking the button below.",
+		});
 	}
 
 	static get instance(): ManualCourseProvider {

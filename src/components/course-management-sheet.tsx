@@ -200,7 +200,7 @@ function ProviderSection({ provider }: { provider: CourseProvider }) {
 					<Card>
 						<CardContent className="flex flex-col gap-4 align-center">
 							<span className="text-center text-sm text-muted-foreground">
-								No courses added from this provider.
+								{provider.emptyStateText ?? "No courses added yet."}
 							</span>
 						</CardContent>
 					</Card>

@@ -11,6 +11,8 @@ export class UiTMProvider extends CourseProvider {
 	constructor() {
 		super({
 			name: `UiTM iCress`,
+			emptyStateText:
+				"No courses/groups imported yet. Click the button below to import.",
 		});
 	}
 
