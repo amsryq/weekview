@@ -43,11 +43,13 @@ function FieldInfoRow({
 	icon,
 	text,
 	fieldKey,
+	layoutType,
 }: {
 	appearance: RequiredDeep<CellAppearance>;
 	icon?: React.ReactNode;
 	text: React.ReactNode;
 	fieldKey: keyof Required<typeof appearance.weight & {}>;
+	layoutType?: CourseBlockProps["layoutType"];
 }) {
 	const justifyClass =
 		appearance.textAlign === "center"
@@ -59,7 +61,7 @@ function FieldInfoRow({
 		<div>
 			{appearance.visibility[fieldKey] && text && (
 				<div
-					className={`truncate flex items-center gap-1 opacity-90 ${justifyClass} ${FontWeightMap[appearance.weight[fieldKey]]}`}
+					className={`flex items-center gap-1 opacity-90 ${justifyClass} ${FontWeightMap[appearance.weight[fieldKey]]}`}
 					style={{
 						fontSize: appearance.fontSize[fieldKey],
 						textAlign: appearance.textAlign,
@@ -67,7 +69,9 @@ function FieldInfoRow({
 					}}
 				>
 					{icon}
-					<span className="truncate">{text}</span>
+					<span className={layoutType === "rows" ? "truncate" : "text-wrap"}>
+						{text}
+					</span>
 				</div>
 			)}
 		</div>
