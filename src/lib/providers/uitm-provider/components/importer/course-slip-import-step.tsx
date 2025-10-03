@@ -1,6 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { pick } from "es-toolkit";
-import { ArrowLeft, CheckIcon, Loader2, XIcon } from "lucide-react";
+import {
+	AlertCircle,
+	ArrowLeft,
+	CheckIcon,
+	Loader2,
+	XIcon,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
@@ -22,145 +28,83 @@ import { Faculty } from "../../models/faculty";
 import { Group } from "../../models/group";
 import { parseSchedule, ScheduleInfo } from "../../utils/parse-schedule";
 import {
+	CourseImportProgress,
 	ImportFailure,
 	ImportResult,
 	ImportSuccess,
 	normalizeString,
-	ProgressItem,
 	ProgressStatus,
 	useImporterSelectionStore,
 } from "./shared";
 
 function CourseSlipImportStep() {
 	const queryClient = useQueryClient();
-	const {
-		selectedCampus,
-		selectedFaculty,
-		setCurrentStep,
-		setSelectedCampus,
-		setSelectedFaculty,
-	} = useImporterSelectionStore(
-		useShallow((state) =>
-			pick(state, [
-				"selectedCampus",
-				"selectedFaculty",
-				"setCurrentStep",
-				"setSelectedCampus",
-				"setSelectedFaculty",
-			]),
-		),
-	);
+	const { setCurrentStep, setSelectedCampus, setSelectedFaculty } =
+		useImporterSelectionStore(
+			useShallow((state) =>
+				pick(state, [
+					"selectedCampus",
+					"selectedFaculty",
+					"setCurrentStep",
+					"setSelectedCampus",
+					"setSelectedFaculty",
+				]),
+			),
+		);
 	const importerOpen = useImporterSelectionStore((state) => state.open);
 	const [rawText, setRawText] = useState("");
 	const parsedSchedule = useMemo(() => parseSchedule(rawText), [rawText]);
-	const [importSummary, setImportSummary] = useState<ImportResult | null>(null);
 	const [progressDialogOpen, setProgressDialogOpen] = useState(false);
-	const [progressItems, setProgressItems] = useState<ProgressItem[]>([]);
+
+	const [importPhase, setImportPhase] = useState<
+		"idle" | "setup" | "importing" | "complete"
+	>("idle");
+	const [campusInfo, setCampusInfo] = useState<{
+		campus?: Campus;
+		faculty?: Faculty;
+	}>({});
+	const [courseProgress, setCourseProgress] = useState<CourseImportProgress[]>(
+		[],
+	);
 
 	useEffect(() => {
 		if (!importerOpen) {
 			setProgressDialogOpen(false);
-			setProgressItems([]);
+			setImportPhase("idle");
+			setCampusInfo({});
+			setCourseProgress([]);
 		}
 	}, [importerOpen]);
 
 	const importMutation = useMutation<ImportResult, Error, ScheduleInfo>({
 		mutationFn: async (schedule) => {
-			const startStep = (id: string, label: string) => {
-				setProgressItems((prev) => {
-					const next = [...prev];
-					const index = next.findIndex((item) => item.id === id);
-					if (index === -1) {
-						next.push({ id, label, status: "running" });
-					} else {
-						const item = {
-							...next[index],
-							label,
-							status: "running",
-						} as ProgressItem;
-						if ("detail" in item) delete item.detail;
-						next[index] = item;
-					}
-					return next;
-				});
-			};
+			setImportPhase("setup");
 
-			const finishStep = (
-				id: string,
-				status: Exclude<ProgressStatus, "running">,
-				detail?: string,
-			) => {
-				setProgressItems((prev) => {
-					const next = [...prev];
-					const index = next.findIndex((item) => item.id === id);
-					if (index === -1) {
-						const item: ProgressItem = { id, label: "", status };
-						if (detail !== undefined) item.detail = detail;
-						next.push(item);
-						return next;
-					}
-					const item: ProgressItem = { ...next[index], status };
-					if (detail !== undefined) {
-						item.detail = detail;
-					} else if ("detail" in item) {
-						delete item.detail;
-					}
-					next[index] = item;
-					return next;
-				});
-			};
+			// Initialize all courses as pending
+			const initialProgress: CourseImportProgress[] = schedule.courses.map(
+				(entry) => ({
+					courseCode: entry.courseCode,
+					courseName: entry.name,
+					group: entry.group,
+					status: "pending" as ProgressStatus,
+				}),
+			);
+			setCourseProgress(initialProgress);
 
-			const runStep = async <T,>(
-				id: string,
-				label: string,
-				fn: () => Promise<T>,
-				options?: { successDetail?: (result: T) => string | undefined },
-			): Promise<T> => {
-				startStep(id, label);
-				try {
-					const result = await fn();
-					const detail = options?.successDetail?.(result);
-					finishStep(id, "success", detail);
-					return result;
-				} catch (error) {
-					const message =
-						error instanceof Error ? error.message : "Unknown error";
-					finishStep(id, "error", message);
-					throw error;
-				}
-			};
-
-			startStep("validate", "Validate course slip");
-
+			// Validate courses exist
 			if (!schedule.courses.length) {
 				const message =
 					"No courses detected in the pasted text. Please ensure you're copying the full registration list.";
-				finishStep("validate", "error", message);
+				setImportPhase("complete");
 				throw new Error(message);
 			}
 
-			finishStep(
-				"validate",
-				"success",
-				`${schedule.courses.length} course entr${schedule.courses.length === 1 ? "y" : "ies"} detected`,
-			);
-
-			const campuses = await runStep(
-				"fetch-campuses",
-				"Fetch campuses",
-				() =>
-					queryClient.fetchQuery({
-						queryKey: ["uitm", "campuses"],
-						queryFn: Campus.fetch,
-						staleTime: 5 * 60 * 1000,
-					}),
-				{
-					successDetail: (items) =>
-						`${items.length} campus${items.length === 1 ? "" : "es"}`,
-				},
-			);
-
-			startStep("match-campus", "Determine campus");
+			// Fetch and match campus
+			const campuses = await queryClient.fetchQuery({
+				queryKey: ["uitm", "campuses"],
+				queryFn: Campus.fetch,
+				staleTime: 5 * 60 * 1000,
+			});
 
 			const findCampusMatch = () => {
 				if (!schedule.campus) return undefined;
@@ -175,44 +119,23 @@ function CourseSlipImportStep() {
 				);
 			};
 
-			let campus: Campus | undefined = findCampusMatch();
-			if (!campus && selectedCampus) {
-				const selectedMatch = campuses.find(
-					(c) =>
-						normalizeString(c.code) === normalizeString(selectedCampus.code),
-				);
-				campus = selectedMatch ?? selectedCampus;
-			}
+			const campus: Campus | undefined = findCampusMatch();
 
 			if (!campus) {
 				const message =
 					"Unable to determine campus from the pasted text. Please ensure the campus header is included or select a campus manually first.";
-				finishStep("match-campus", "error", message);
+				setImportPhase("complete");
 				throw new Error(message);
 			}
 
-			finishStep("match-campus", "success", `${campus.code} – ${campus.name}`);
-
-			let faculties: Faculty[] | undefined;
+			// Fetch and match faculty if needed
 			let faculty: Faculty | undefined;
-
 			if (campus.requireFaculty) {
-				faculties = await runStep(
-					"fetch-faculties",
-					`Fetch faculties for ${campus.code}`,
-					() =>
-						queryClient.fetchQuery({
-							queryKey: ["uitm", "faculties", campus.code],
-							queryFn: () => Faculty.fetch(campus),
-							staleTime: 5 * 60 * 1000,
-						}),
-					{
-						successDetail: (items) =>
-							`${items?.length} facult${items?.length === 1 ? "y" : "ies"}`,
-					},
-				);
-
-				startStep("match-faculty", "Determine faculty");
+				const faculties = await queryClient.fetchQuery({
+					queryKey: ["uitm", "faculties", campus.code],
+					queryFn: () => Faculty.fetch(campus),
+					staleTime: 5 * 60 * 1000,
+				});
 
 				const findFacultyMatch = () => {
 					if (!schedule.faculty) return undefined;
@@ -227,14 +150,7 @@ function CourseSlipImportStep() {
 					);
 				};
 
-				const selectedFacultyMatchesCampus =
-					selectedFaculty &&
-					normalizeString(selectedFaculty.campus.code) ===
-						normalizeString(campus.code)
-						? selectedFaculty
-						: undefined;
-
-				faculty = findFacultyMatch() ?? selectedFacultyMatchesCampus;
+				faculty = findFacultyMatch();
 
 				if (faculty) {
 					const matchedFromList = faculties?.find(
@@ -248,32 +164,28 @@ function CourseSlipImportStep() {
 				if (!faculty) {
 					const message =
 						"Unable to determine faculty from the pasted text. Please ensure the faculty header is included or select a faculty manually first.";
-					finishStep("match-faculty", "error", message);
+					setImportPhase("complete");
 					throw new Error(message);
 				}
-
-				finishStep(
-					"match-faculty",
-					"success",
-					`${faculty.code} – ${faculty.name}`,
-				);
 			}
 
-			const courses = await runStep(
-				"fetch-courses",
-				`Fetch courses for ${campus.code}${faculty ? `/${faculty.code}` : ""}`,
-				() => Course.fetch(faculty ?? campus),
-				{
-					successDetail: (items) =>
-						`${items.length} course${items.length === 1 ? "" : "s"}`,
-				},
-			);
+			// Update campus/faculty info
+			setCampusInfo({ campus, faculty });
+
+			// Fetch all courses
+			const courses = await queryClient.fetchQuery({
+				queryKey: ["uitm", "courses", campus.code, faculty?.code],
+				queryFn: () => Course.fetch(faculty ?? campus),
+				staleTime: 5 * 60 * 1000,
+			});
 
 			const courseLookup = new Map<string, Course>();
 			for (const course of courses) {
 				courseLookup.set(normalizeString(course.code), course);
 			}
 
+			// Start importing courses
+			setImportPhase("importing");
 			const groupsByCourse = new Map<string, UiTMGroup[] | null>();
 			const dedupeKeys = new Set<string>();
 			const successes: ImportSuccess[] = [];
@@ -291,23 +203,12 @@ function CourseSlipImportStep() {
 				}
 
 				try {
-					const groups = await runStep(
-						`fetch-groups:${course.code}`,
-						`Fetch groups for ${course.code}`,
-						async () => {
-							const result = await queryClient.fetchQuery({
-								queryKey: ["uitm", "groups", course.code],
-								queryFn: () => Group.fetch(course),
-								staleTime: 5 * 60 * 1000,
-							});
-							return result.map((group) => group.toUiTMCourse());
-						},
-						{
-							successDetail: (items) =>
-								`${items.length} group${items.length === 1 ? "" : "s"}`,
-						},
-					);
-
+					const result = await queryClient.fetchQuery({
+						queryKey: ["uitm", "groups", course.code],
+						queryFn: () => Group.fetch(course),
+						staleTime: 5 * 60 * 1000,
+					});
+					const groups = result.map((group) => group.toUiTMCourse());
 					groupsByCourse.set(course.code, groups);
 					return groups;
 				} catch (error) {
@@ -316,9 +217,34 @@ function CourseSlipImportStep() {
 				}
 			};
 
+			const updateCourseStatus = (
+				courseCode: string,
+				group: string,
+				status: ProgressStatus,
+				reason?: string,
+			) => {
+				setCourseProgress((prev) =>
+					prev.map((item) =>
+						item.courseCode === courseCode && item.group === group
+							? { ...item, status, reason }
+							: item,
+					),
+				);
+			};
+
 			for (const entry of schedule.courses) {
 				const key = `${normalizeString(entry.courseCode)}__${normalizeString(entry.group)}`;
+
+				// Mark as running
+				updateCourseStatus(entry.courseCode, entry.group, "running");
+
 				if (dedupeKeys.has(key)) {
+					updateCourseStatus(
+						entry.courseCode,
+						entry.group,
+						"error",
+						"Duplicate entry",
+					);
 					failures.push({
 						courseCode: entry.courseCode,
 						group: entry.group,
@@ -330,6 +256,12 @@ function CourseSlipImportStep() {
 
 				const course = courseLookup.get(normalizeString(entry.courseCode));
 				if (!course) {
+					updateCourseStatus(
+						entry.courseCode,
+						entry.group,
+						"error",
+						"Course not found",
+					);
 					failures.push({
 						courseCode: entry.courseCode,
 						group: entry.group,
@@ -343,9 +275,8 @@ function CourseSlipImportStep() {
 					uitmGroups = await fetchGroupsForCourse(course);
 				} catch (error) {
 					const message =
-						error instanceof Error
-							? error.message
-							: "Failed to fetch groups for this course.";
+						error instanceof Error ? error.message : "Failed to fetch groups";
+					updateCourseStatus(entry.courseCode, entry.group, "error", message);
 					failures.push({
 						courseCode: entry.courseCode,
 						group: entry.group,
@@ -361,6 +292,12 @@ function CourseSlipImportStep() {
 				);
 
 				if (!matchingGroup) {
+					updateCourseStatus(
+						entry.courseCode,
+						entry.group,
+						"error",
+						"Group not found",
+					);
 					failures.push({
 						courseCode: entry.courseCode,
 						group: entry.group,
@@ -380,6 +317,12 @@ function CourseSlipImportStep() {
 				);
 
 				if (alreadyExists) {
+					updateCourseStatus(
+						entry.courseCode,
+						entry.group,
+						"error",
+						"Already in timetable",
+					);
 					failures.push({
 						courseCode: entry.courseCode,
 						group: entry.group,
@@ -392,25 +335,32 @@ function CourseSlipImportStep() {
 					matchingGroup.meetingTimes,
 				);
 				if (conflicts.length > 0) {
+					const conflictMsg = `Conflicts with ${conflicts.map((c) => c.code).join(", ")}`;
+					updateCourseStatus(
+						entry.courseCode,
+						entry.group,
+						"error",
+						conflictMsg,
+					);
 					failures.push({
 						courseCode: entry.courseCode,
 						group: entry.group,
-						reason: `Time conflict with ${conflicts
-							.map((conflict) => conflict.code)
-							.join(", ")}.`,
+						reason: `Time conflict with ${conflicts.map((conflict) => conflict.code).join(", ")}.`,
 					});
 					continue;
 				}
 
 				try {
 					CourseStore.getState().addCourse(matchingGroup);
+					updateCourseStatus(entry.courseCode, entry.group, "success");
 					successes.push({
 						courseCode: matchingGroup.internal.code,
 						group: matchingGroup.internal.group,
 					});
 				} catch (error) {
 					const message =
-						error instanceof Error ? error.message : "Failed to add course.";
+						error instanceof Error ? error.message : "Failed to add course";
+					updateCourseStatus(entry.courseCode, entry.group, "error", message);
 					failures.push({
 						courseCode: entry.courseCode,
 						group: entry.group,
@@ -419,6 +369,7 @@ function CourseSlipImportStep() {
 				}
 			}
 
+			setImportPhase("complete");
 			return {
 				schedule,
 				campus,
@@ -428,24 +379,18 @@ function CourseSlipImportStep() {
 			};
 		},
 		onSuccess: (result) => {
-			setImportSummary(result);
 			setSelectedCampus(result.campus);
 			setSelectedFaculty(result.faculty);
 		},
 	});
 
 	const handleImport = async () => {
-		setImportSummary(null);
 		importMutation.reset();
+		setCourseProgress([]);
+		setCampusInfo({});
+		setImportPhase("idle");
 
 		const schedule = parseSchedule(rawText);
-		setProgressItems([
-			{
-				id: "validate",
-				label: "Validate course slip",
-				status: "running",
-			},
-		]);
 		setProgressDialogOpen(true);
 
 		try {
@@ -464,19 +409,31 @@ function CourseSlipImportStep() {
 	const coursePreview = parsedSchedule.courses.slice(0, 8);
 	const remainingCourses = parsedSchedule.courses.length - coursePreview.length;
 
-	const progressHasError = progressItems.some(
+	const successCount = courseProgress.filter(
+		(item) => item.status === "success",
+	).length;
+	const errorCount = courseProgress.filter(
 		(item) => item.status === "error",
-	);
-	const progressTitle = importMutation.isPending
-		? "Importing timetable"
-		: progressHasError
-			? "Import finished with issues"
-			: "Import complete";
-	const progressSubtitle = importMutation.isPending
-		? "Hang tight while we fetch data from UiTM."
-		: progressHasError
-			? "Some steps failed. Review the details below."
-			: "All steps completed successfully.";
+	).length;
+	const isImporting = importPhase === "setup" || importPhase === "importing";
+	const isComplete = importPhase === "complete";
+
+	const progressTitle = isImporting
+		? importPhase === "setup"
+			? "Setting up import..."
+			: "Importing courses"
+		: isComplete && errorCount > 0
+			? "Import completed with issues"
+			: isComplete
+				? "Import complete"
+				: "Preparing import";
+	const progressSubtitle = isImporting
+		? importPhase === "setup"
+			? "Fetching campus and faculty data..."
+			: `Processing ${courseProgress.length} course${courseProgress.length === 1 ? "" : "s"}...`
+		: isComplete
+			? `${successCount} imported • ${errorCount} failed`
+			: "Ready to import";
 
 	return (
 		<>
@@ -506,9 +463,7 @@ function CourseSlipImportStep() {
 									{suggestedCampus}
 								</div>
 							) : (
-								<div className="text-destructive">
-									Campus not detected — we'll use your current selection.
-								</div>
+								<div className="text-destructive">Campus not detected.</div>
 							)}
 							{suggestedFaculty ? (
 								<div>
@@ -516,11 +471,7 @@ function CourseSlipImportStep() {
 									{suggestedFaculty}
 								</div>
 							) : (
-								selectedCampus?.requireFaculty && (
-									<div className="text-destructive">
-										Faculty not detected — we'll use your current selection.
-									</div>
-								)
+								<div className="text-destructive">Faculty not detected.</div>
 							)}
 						</div>
 						<div className="pt-2">
@@ -550,44 +501,17 @@ function CourseSlipImportStep() {
 						</div>
 					</div>
 				)}
+				<div className="text-sm text-muted-foreground">
+					Only essential details (campus, faculty, course codes, and groups) are
+					sent to our server. No personal information from your slip will be
+					sent or stored.
+				</div>
 
 				{importMutation.error && (
 					<Alert variant="destructive">
 						<AlertTitle>Import failed</AlertTitle>
 						<AlertDescription>{importMutation.error.message}</AlertDescription>
 					</Alert>
-				)}
-
-				{importSummary && (
-					<div className="rounded-lg border border-border bg-background p-4 space-y-3">
-						<div className="text-sm font-medium text-foreground">
-							Import summary
-						</div>
-						<div className="grid gap-2 text-sm">
-							<div className="text-foreground">
-								Imported {importSummary.successes.length} group
-								{importSummary.successes.length === 1 ? "" : "s"}.
-							</div>
-							{importSummary.failures.length > 0 && (
-								<div className="text-muted-foreground">
-									{importSummary.failures.length} entr
-									{importSummary.failures.length === 1 ? "y" : "ies"} could not
-									be imported:
-									<ul className="mt-1 space-y-1 list-disc list-inside">
-										{importSummary.failures.map((failure, idx) => (
-											<li key={`${failure.courseCode}-${failure.group}-${idx}`}>
-												<span className="font-medium text-foreground">
-													{failure.courseCode} ({failure.group})
-												</span>
-												{": "}
-												{failure.reason}
-											</li>
-										))}
-									</ul>
-								</div>
-							)}
-						</div>
-					</div>
 				)}
 			</div>
 
@@ -601,15 +525,6 @@ function CourseSlipImportStep() {
 						<ArrowLeft className="size-4" />
 						Back to selection
 					</Button>
-					{importSummary?.successes.length ? (
-						<Button
-							variant="secondary"
-							onClick={() => setCurrentStep(1)}
-							className="w-full sm:w-auto"
-						>
-							Review imported groups
-						</Button>
-					) : null}
 				</div>
 				<Button
 					onClick={handleImport}
@@ -626,63 +541,135 @@ function CourseSlipImportStep() {
 			<Dialog
 				open={progressDialogOpen}
 				onOpenChange={(open) => {
-					if (!importMutation.isPending) {
+					if (!isImporting) {
 						setProgressDialogOpen(open);
 					}
 				}}
 			>
-				<DialogContent className="sm:max-w-md">
+				<DialogContent className="sm:max-w-2xl">
 					<DialogHeader>
 						<DialogTitle className="flex items-center gap-2">
-							{importMutation.isPending ? (
-								<Loader2 className="size-4 animate-spin text-muted-foreground" />
-							) : progressHasError ? (
-								<XIcon className="size-4 text-destructive" />
+							{isImporting ? (
+								<Loader2 className="size-5 animate-spin text-primary" />
+							) : errorCount > 0 ? (
+								<AlertCircle className="size-5 text-amber-500" />
 							) : (
-								<CheckIcon className="size-4 text-emerald-500" />
+								<CheckIcon className="size-5 text-emerald-500" />
 							)}
 							<span>{progressTitle}</span>
 						</DialogTitle>
 						<DialogDescription>{progressSubtitle}</DialogDescription>
 					</DialogHeader>
 
-					<div className="flex flex-col gap-3 max-h-[300px] overflow-y-auto py-2">
-						{progressItems.map((item) => (
-							<div
-								key={item.id}
-								className="flex items-start gap-3 rounded-md border border-border/60 bg-background/80 p-3"
-							>
-								<div className="mt-0.5">
-									{item.status === "running" ? (
-										<Loader2 className="size-4 animate-spin text-muted-foreground" />
-									) : item.status === "success" ? (
-										<CheckIcon className="size-4 text-emerald-500" />
-									) : (
-										<XIcon className="size-4 text-destructive" />
-									)}
-								</div>
-								<div className="min-w-0 space-y-1">
-									<div className="text-sm font-medium text-foreground">
-										{item.label}
+					<div className="space-y-4 py-4">
+						{/* Campus & Faculty Status */}
+						<div className="rounded-lg border bg-muted/30 p-4">
+							<h3 className="text-sm font-semibold mb-3">Import Status</h3>
+							<div className="space-y-2">
+								<div className="flex items-center justify-between text-sm">
+									<span className="text-muted-foreground">Campus</span>
+									<div className="flex items-center gap-2">
+										{campusInfo.campus ? (
+											<>
+												<span className="font-medium">
+													{campusInfo.campus.name}
+												</span>
+												<CheckIcon className="size-4 text-emerald-500" />
+											</>
+										) : isImporting ? (
+											<Loader2 className="size-4 animate-spin text-muted-foreground" />
+										) : (
+											<span className="text-muted-foreground">Pending</span>
+										)}
 									</div>
-									{item.detail && (
-										<div
-											className={`text-xs ${item.status === "error" ? "text-destructive" : "text-muted-foreground"}`}
-										>
-											{item.detail}
+								</div>
+								{(campusInfo.campus?.requireFaculty || campusInfo.faculty) && (
+									<div className="flex items-center justify-between text-sm">
+										<span className="text-muted-foreground">Faculty</span>
+										<div className="flex items-center gap-2">
+											{campusInfo.faculty ? (
+												<>
+													<span className="font-medium">
+														{campusInfo.faculty.code} –{" "}
+														{campusInfo.faculty.name}
+													</span>
+													<CheckIcon className="size-4 text-emerald-500" />
+												</>
+											) : isImporting ? (
+												<Loader2 className="size-4 animate-spin text-muted-foreground" />
+											) : (
+												<span className="text-muted-foreground">Pending</span>
+											)}
 										</div>
-									)}
+									</div>
+								)}
+							</div>
+						</div>
+
+						{/* Courses Progress */}
+						{courseProgress.length > 0 && (
+							<div className="rounded-lg border bg-background">
+								<div className="border-b bg-muted/30 px-4 py-3">
+									<h3 className="text-sm font-semibold">Courses</h3>
+								</div>
+								<div className="max-h-[400px] overflow-y-auto">
+									<div className="divide-y">
+										{courseProgress.map((item, idx) => (
+											<div
+												key={`${item.courseCode}-${item.group}-${idx}`}
+												className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors"
+											>
+												<div className="flex-1 min-w-0">
+													<div className="flex items-baseline gap-2">
+														<span className="font-medium text-sm">
+															{item.courseCode}
+														</span>
+														{item.courseName && (
+															<span className="text-xs text-muted-foreground truncate">
+																{item.courseName}
+															</span>
+														)}
+													</div>
+													<div className="flex items-center gap-2 mt-0.5">
+														<span className="text-xs text-muted-foreground">
+															{item.group}
+														</span>
+														{item.reason && item.status === "error" && (
+															<span className="text-xs text-destructive">
+																• {item.reason}
+															</span>
+														)}
+													</div>
+												</div>
+												<div className="flex-shrink-0 ml-3">
+													{item.status === "pending" ? (
+														<div className="size-5 rounded-full border-2 border-muted-foreground/30" />
+													) : item.status === "running" ? (
+														<Loader2 className="size-5 animate-spin text-primary" />
+													) : item.status === "success" ? (
+														<div className="size-5 rounded-full bg-emerald-500 flex items-center justify-center">
+															<CheckIcon className="size-3 text-white" />
+														</div>
+													) : (
+														<div className="size-5 rounded-full bg-destructive flex items-center justify-center">
+															<XIcon className="size-3 text-white" />
+														</div>
+													)}
+												</div>
+											</div>
+										))}
+									</div>
 								</div>
 							</div>
-						))}
+						)}
 					</div>
 
-					<DialogFooter className="mt-4 flex w-full flex-col gap-2 sm:flex-row sm:justify-end">
+					<DialogFooter className="flex w-full flex-col gap-2 sm:flex-row sm:justify-end">
 						<Button
 							variant="secondary"
 							onClick={() => setProgressDialogOpen(false)}
 							className="w-full sm:w-auto"
-							disabled={importMutation.isPending}
+							disabled={isImporting}
 						>
 							Close
 						</Button>

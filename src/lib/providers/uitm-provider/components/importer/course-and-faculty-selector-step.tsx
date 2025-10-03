@@ -178,9 +178,9 @@ function CourseAndFacultySelectorStep({
 				)}
 			</div>
 
-			<DialogFooter className="justify-end">
+			<DialogFooter className="justify-between">
 				<Button
-					variant="ghost"
+					variant="outline"
 					onClick={onOpenImport}
 					className="w-full sm:w-auto"
 				>

@@ -7,13 +7,14 @@ import { ScheduleInfo } from "../../utils/parse-schedule";
 
 export const SHORT_DAY_NAMES = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
-export type ProgressStatus = "running" | "success" | "error";
+export type ProgressStatus = "pending" | "running" | "success" | "error";
 
-export interface ProgressItem {
-	id: string;
-	label: string;
+export interface CourseImportProgress {
+	courseCode: string;
+	courseName?: string;
+	group: string;
 	status: ProgressStatus;
-	detail?: string;
+	reason?: string;
 }
 
 export interface ImportSuccess {
