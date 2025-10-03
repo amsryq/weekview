@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { PlusIcon, SearchIcon, Trash2Icon } from "lucide-react";
+import { ArrowLeft, PlusIcon, SearchIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
@@ -307,13 +307,10 @@ function GroupSelectorStep() {
 				</div>
 			</div>
 
-			<DialogFooter className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-				<Button
-					variant="outline"
-					onClick={() => setCurrentStep(1)}
-					className="w-full sm:w-auto"
-				>
-					Next
+			<DialogFooter className="sm:justify-start w-full">
+				<Button variant="outline" onClick={() => setCurrentStep(0)}>
+					<ArrowLeft className="size-4" />
+					Change Campus/Faculty
 				</Button>
 			</DialogFooter>
 		</>
