@@ -1,6 +1,7 @@
 import { Clock, MapPin } from "lucide-react";
 import type React from "react";
 import { RequiredDeep } from "type-fest";
+import { useCourseEditor } from "~/lib/contexts/course-editor";
 import type {
 	CellAppearance,
 	CellMaterial,
@@ -8,9 +9,15 @@ import type {
 import { ColorEntry } from "~/lib/models/color-entry";
 import type { Course } from "~/lib/models/course";
 import type { MeetingTime } from "~/lib/models/meeting-time";
+import { CourseStore } from "~/lib/stores/course-store";
 import { CustomIcon } from "../ui/custom-icon";
 import { FitText } from "../ui/fit-text";
 import GlassSurface from "../ui/glass-surface";
+import {
+	HoverCard,
+	HoverCardContent,
+	HoverCardTrigger,
+} from "../ui/hover-card";
 
 interface CourseBlockProps {
 	course: Course;
@@ -80,27 +87,26 @@ function Container({
 	children,
 	style,
 	className,
+	onClick,
 }: {
 	material?: CellMaterial;
 	children: React.ReactNode;
 	style?: React.CSSProperties;
 	className?: string;
+	onClick?: React.MouseEventHandler<HTMLDivElement>;
 }) {
 	if (material === "glass") {
 		return (
-			<GlassSurface
-				className={className}
-				style={style}
-				displace={2}
-				backgroundOpacity={0.7}
-			>
-				{children}
-			</GlassSurface>
+			<div className={className} style={style} onClick={onClick}>
+				<GlassSurface displace={2} backgroundOpacity={0.7}>
+					{children}
+				</GlassSurface>
+			</div>
 		);
 	}
 
 	return (
-		<div className={className} style={style}>
+		<div className={className} style={style} onClick={onClick}>
 			{children}
 		</div>
 	);
@@ -111,9 +117,10 @@ export function CourseBlock({
 	meetingTime,
 	appearance,
 	style,
-	className = "relative overflow-hidden",
+	className = "relative overflow-hidden select-none cursor-pointer",
 	layoutType,
 }: CourseBlockProps) {
+	const { openCourseEditor } = useCourseEditor();
 	const backgroundStyle = ColorEntry.getBackgroundStyle(appearance.background);
 
 	const containerStyle: React.CSSProperties = {
@@ -148,78 +155,107 @@ export function CourseBlock({
 		: null;
 
 	return (
-		<Container
-			material={appearance.material}
-			className={className}
-			style={containerStyle}
-		>
-			<div
-				className="h-full p-2 flex flex-col justify-between text-xs relative"
-				style={{
-					textAlign: appearance.textAlign,
-					color: appearance.fgColor ?? "#ffffff",
-				}}
-			>
-				{/* Icon */}
-				{appearance.icon && iconPosition && (
-					<CustomIcon icon={appearance.icon} style={iconPosition} />
-				)}
+		<HoverCard>
+			<HoverCardTrigger>
+				<Container
+					material={appearance.material}
+					className={className}
+					style={containerStyle}
+					onClick={(e) => {
+						e.stopPropagation();
+						openCourseEditor({
+							course,
+							onSubmit: (data) => {
+								CourseStore.getState().updateCourse(course.id, data);
+							},
+						});
+					}}
+				>
+					<div
+						className="h-full p-2 flex flex-col justify-between text-xs relative"
+						style={{
+							textAlign: appearance.textAlign,
+							color: appearance.fgColor ?? "#ffffff",
+						}}
+					>
+						{/* Icon */}
+						{appearance.icon && iconPosition && (
+							<CustomIcon icon={appearance.icon} style={iconPosition} />
+						)}
 
-				{/* Time */}
-				<FieldInfoRow
-					fieldKey="time"
-					appearance={appearance}
-					layoutType={layoutType}
-					icon={
-						<Clock
-							width={appearance.fontSize.time}
-							height={appearance.fontSize.time}
-						/>
-					}
-					text={`${meetingTime.time.toString()}`}
-				/>
-
-				{/* Code + Course Name */}
-				<div className="flex flex-col">
-					{appearance.visibility.code && (
-						<FitText
-							fontSize={
-								appearance.autoSizeFont !== false &&
-								(!appearance.visibility.name || !course.name)
-									? appearance.fontSize.code * 1.5
-									: appearance.fontSize.code
+						{/* Time */}
+						<FieldInfoRow
+							fieldKey="time"
+							appearance={appearance}
+							layoutType={layoutType}
+							icon={
+								<Clock
+									width={appearance.fontSize.time}
+									height={appearance.fontSize.time}
+								/>
 							}
-							className={`${FontWeightMap[appearance.weight.code]} leading-none`}
-						>
-							{course.code}
-						</FitText>
-					)}
-					{appearance.visibility.name && course.name && (
-						<div
-							className={`opacity-90 ${FontWeightMap[appearance.weight.name]} ${
-								layoutType === "rows" ? "truncate" : ""
-							}`}
-							style={{ fontSize: appearance.fontSize.name }}
-						>
-							{course.name}
+							text={`${meetingTime.time.toString()}`}
+						/>
+
+						{/* Code + Course Name */}
+						<div className="flex flex-col">
+							{appearance.visibility.code && (
+								<FitText
+									fontSize={
+										appearance.autoSizeFont !== false &&
+										(!appearance.visibility.name || !course.name)
+											? appearance.fontSize.code * 1.5
+											: appearance.fontSize.code
+									}
+									className={`${FontWeightMap[appearance.weight.code]} leading-none`}
+								>
+									{course.code}
+								</FitText>
+							)}
+							{appearance.visibility.name && course.name && (
+								<div
+									className={`opacity-90 ${FontWeightMap[appearance.weight.name]} ${
+										layoutType === "rows" ? "truncate" : ""
+									}`}
+									style={{ fontSize: appearance.fontSize.name }}
+								>
+									{course.name}
+								</div>
+							)}
+						</div>
+
+						{/* Location */}
+						<FieldInfoRow
+							fieldKey="location"
+							layoutType={layoutType}
+							appearance={appearance}
+							icon={
+								<MapPin
+									width={appearance.fontSize.location}
+									height={appearance.fontSize.location}
+								/>
+							}
+							text={meetingTime.location}
+						/>
+					</div>
+				</Container>
+			</HoverCardTrigger>
+			<HoverCardContent>
+				<div className="space-y-2">
+					<h4 className="text-sm font-semibold">{course.code}</h4>
+					<p className="text-sm text-muted-foreground">{course.name}</p>
+					<div className="flex items-center gap-2 text-sm">
+						<Clock className="w-4 h-4" />
+						{meetingTime.time.toString()}
+					</div>
+					{meetingTime.location && (
+						<div className="flex items-center gap-2 text-sm">
+							<MapPin className="w-4 h-4" />
+							{meetingTime.location}
 						</div>
 					)}
 				</div>
-
-				{/* Location */}
-				<FieldInfoRow
-					fieldKey="location"
-					layoutType={layoutType}
-					appearance={appearance}
-					icon={
-						<MapPin
-							width={appearance.fontSize.location}
-							height={appearance.fontSize.location}
-						/>
-					}
-					text={meetingTime.location}
-				/>
-			</div>
-		</Container>
+			</HoverCardContent>
+		</HoverCard>
 	);
 }

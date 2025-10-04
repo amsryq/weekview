@@ -18,18 +18,29 @@ export default function CourseEditorDialog({
 	title = "Edit Course",
 	defaultValues = undefined,
 	onSubmit,
+	open: controlledOpen,
+	onOpenChange: controlledOnOpenChange,
 }: {
-	children: JSX.Element;
+	children?: JSX.Element;
 	title?: string;
 	defaultValues?: PartialDeep<Course.Schema>;
 	onSubmit: (data: Course.Schema, form: UseFormReturn<Course.Schema>) => void;
+	open?: boolean;
+	onOpenChange?: (open: boolean) => void;
 }) {
 	const isSupporter = useIsUserSupporter();
-	const [open, setOpen] = useState(false);
+	const [internalOpen, setInternalOpen] = useState(false);
+
+	// Use controlled state if provided, otherwise use internal state
+	const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+	const setOpen =
+		controlledOnOpenChange !== undefined
+			? controlledOnOpenChange
+			: setInternalOpen;
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>{children}</DialogTrigger>
+			{children && <DialogTrigger asChild>{children}</DialogTrigger>}
 			<DialogContent className="flex flex-col w-5xl sm:max-w-[90vw] h-[90vh]">
 				<DialogHeader>
 					<DialogTitle>{title}</DialogTitle>

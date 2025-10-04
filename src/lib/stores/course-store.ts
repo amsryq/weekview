@@ -10,6 +10,7 @@ interface State {
 
 interface Actions {
 	addCourse: (course: Course) => void;
+	updateCourse: (courseId: string, data: Course.Schema) => void;
 	removeCourse: (courseId: string) => void;
 	getConflictingCourses: (meetingTimes: MeetingTime[]) => Course[];
 }
@@ -27,6 +28,27 @@ const CourseStore = createStore<State & Actions>()(
 				state.courses.push(course);
 			});
 		},
+
+		updateCourse: (courseId, data) =>
+			set((state) => {
+				const courseIndex = state.courses.findIndex((c) => c.id === courseId);
+				if (courseIndex === -1) {
+					throw new Error("Course not found");
+				}
+
+				const updatedCourse = state.courses[courseIndex];
+				const conflictingCourses = state
+					.getConflictingCourses(
+						data.meetingTimes.map(MeetingTime.createFromSchema),
+					)
+					.filter((c) => c.id !== courseId);
+
+				if (conflictingCourses.length > 0) {
+					throw new Error("Course has time conflicts with existing courses.");
+				}
+
+				Course.assignFromSchema(updatedCourse, data);
+			}),
 
 		removeCourse: (courseId) =>
 			set((state) => {
