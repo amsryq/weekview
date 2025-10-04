@@ -446,7 +446,7 @@ function CourseSlipImportStep() {
 				</DialogDescription>
 			</DialogHeader>
 
-			<div className="flex flex-col gap-4">
+			<div className="flex flex-col gap-4 overflow-y-scroll">
 				<Textarea
 					value={rawText}
 					onChange={(event) => setRawText(event.target.value)}
@@ -455,7 +455,7 @@ function CourseSlipImportStep() {
 				/>
 
 				{rawText.trim() !== "" && (
-					<div className="rounded-lg border border-border bg-muted/30 p-4 space-y-2">
+					<div className="overflow-x-scroll overflow-y-clip whitespace-nowrap rounded-lg border border-border bg-muted/30 p-4 space-y-2">
 						<div className="text-sm font-medium">Detected details</div>
 						<div className="grid gap-1 text-sm text-muted-foreground">
 							{suggestedCampus ? (
@@ -517,7 +517,7 @@ function CourseSlipImportStep() {
 			</div>
 
 			<DialogFooter className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-				<div className="flex w-full flex-col gap-2 sm:flex-row sm:w-auto">
+				<div className="flex w-full flex-col-reverse gap-2 sm:flex-row sm:w-auto">
 					<Button
 						variant="outline"
 						onClick={() => setCurrentStep(0)}
@@ -554,8 +554,8 @@ function CourseSlipImportStep() {
 							A short guide on how to import your UiTM course slip.
 						</DialogDescription>
 					</DialogHeader>
-					<div className="py-2">
-						<p className="text-sm text-muted-foreground">
+					<div className="py-2 overflow-y-scroll">
+						<p className="text-sm text-foreground">
 							You can import your course slip by copying your course
 							registration details from the{" "}
 							<a
@@ -603,7 +603,7 @@ function CourseSlipImportStep() {
 						<DialogDescription>{progressSubtitle}</DialogDescription>
 					</DialogHeader>
 
-					<div className="space-y-4 py-4">
+					<div className="space-y-4 py-4 overflow-y-scroll">
 						{/* Campus & Faculty Status */}
 						<div className="rounded-lg border bg-muted/30 p-4">
 							<h3 className="text-sm font-semibold mb-3">Import Status</h3>
