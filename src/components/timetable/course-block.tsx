@@ -16,6 +16,7 @@ interface CourseBlockProps {
 	course: Course;
 	meetingTime: MeetingTime;
 	appearance: RequiredDeep<CellAppearance>;
+	layoutType: "rows" | "columns";
 	/**
 	 * Optional style override for the container
 	 */
@@ -24,10 +25,6 @@ interface CourseBlockProps {
 	 * Optional className override for the container
 	 */
 	className?: string;
-	/**
-	 * Optional layout type for conditional rendering
-	 */
-	layoutType?: "rows" | "columns";
 }
 
 const FontWeightMap = {
@@ -49,7 +46,7 @@ function FieldInfoRow({
 	icon?: React.ReactNode;
 	text: React.ReactNode;
 	fieldKey: keyof Required<typeof appearance.weight & {}>;
-	layoutType?: CourseBlockProps["layoutType"];
+	layoutType: CourseBlockProps["layoutType"];
 }) {
 	const justifyClass =
 		appearance.textAlign === "center"
@@ -172,6 +169,7 @@ export function CourseBlock({
 				<FieldInfoRow
 					fieldKey="time"
 					appearance={appearance}
+					layoutType={layoutType}
 					icon={
 						<Clock
 							width={appearance.fontSize.time}
@@ -211,6 +209,7 @@ export function CourseBlock({
 				{/* Location */}
 				<FieldInfoRow
 					fieldKey="location"
+					layoutType={layoutType}
 					appearance={appearance}
 					icon={
 						<MapPin

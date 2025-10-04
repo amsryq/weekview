@@ -44,6 +44,7 @@ export function CoursePreview() {
 					course={mockCourse}
 					meetingTime={mockMeetingTime}
 					appearance={appearance}
+					layoutType="rows"
 				/>
 			</div>
 		</div>
