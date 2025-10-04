@@ -1,3 +1,5 @@
+import { toast } from "sonner";
+
 export async function fetchFromBackend(
 	endpoint: string,
 	options?: RequestInit,
@@ -53,9 +55,40 @@ export async function fetchFromBackend(
 			headers: res.headers,
 		});
 	} catch {
-		return fetch(new URL(endpoint, process.env.NEXT_PUBLIC_BACKEND_URL), {
-			...options,
-			credentials: "include",
-		});
+		const response = await fetch(
+			new URL(endpoint, process.env.NEXT_PUBLIC_BACKEND_URL),
+			{
+				...options,
+				credentials: "include",
+			},
+		);
+
+		if (!response.ok) {
+			const iCressStatusCode = response.headers.get("X-Icress-Status-Code");
+			const iCressNonOk = iCressStatusCode
+				? !(
+						Number.parseInt(iCressStatusCode) >= 200 &&
+						Number.parseInt(iCressStatusCode) < 300
+					)
+				: false;
+
+			if (iCressNonOk) {
+				toast.error(
+					"An error occurred on the iCress server. Server returned code " +
+						iCressStatusCode,
+					{
+						id: "ERR_ICRESS_" + iCressStatusCode,
+					},
+				);
+			} else {
+				toast.error("An error occurred while communicating with the backend.", {
+					id: "ERR_BACKEND_COMM",
+				});
+			}
+
+			throw new Error("Failed to reach the backend: " + response.statusText);
+		}
+
+		return response;
 	}
 }
