@@ -19,6 +19,13 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "~/components/ui/dialog";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
 import { CourseStore } from "~/lib/stores/course-store";
 import { UiTMGroup } from "../../group";
@@ -39,23 +46,33 @@ import {
 
 function CourseSlipImportStep() {
 	const queryClient = useQueryClient();
-	const { setCurrentStep, setSelectedCampus, setSelectedFaculty } =
-		useImporterSelectionStore(
-			useShallow((state) =>
-				pick(state, [
-					"selectedCampus",
-					"selectedFaculty",
-					"setCurrentStep",
-					"setSelectedCampus",
-					"setSelectedFaculty",
-				]),
-			),
-		);
+	const {
+		selectedCampus,
+		selectedFaculty,
+		setCurrentStep,
+		setSelectedCampus,
+		setSelectedFaculty,
+	} = useImporterSelectionStore(
+		useShallow((state) =>
+			pick(state, [
+				"selectedCampus",
+				"selectedFaculty",
+				"setCurrentStep",
+				"setSelectedCampus",
+				"setSelectedFaculty",
+			]),
+		),
+	);
 	const importerOpen = useImporterSelectionStore((state) => state.open);
 	const [rawText, setRawText] = useState("");
 	const parsedSchedule = useMemo(() => parseSchedule(rawText), [rawText]);
 	const [progressDialogOpen, setProgressDialogOpen] = useState(false);
 	const [howToOpen, setHowToOpen] = useState(false);
+
+	const [campuses, setCampuses] = useState<Campus[]>([]);
+	const [faculties, setFaculties] = useState<Faculty[]>([]);
+	const [loadingCampuses, setLoadingCampuses] = useState(false);
+	const [loadingFaculties, setLoadingFaculties] = useState(false);
 
 	const [importPhase, setImportPhase] = useState<
 		"idle" | "setup" | "importing" | "complete"
@@ -67,6 +84,49 @@ function CourseSlipImportStep() {
 	const [courseProgress, setCourseProgress] = useState<CourseImportProgress[]>(
 		[],
 	);
+
+	// Load campuses when dialog opens
+	useEffect(() => {
+		if (importerOpen && campuses.length === 0) {
+			setLoadingCampuses(true);
+			queryClient
+				.fetchQuery({
+					queryKey: ["uitm", "campuses"],
+					queryFn: Campus.fetch,
+					staleTime: 5 * 60 * 1000,
+				})
+				.then((data) => {
+					setCampuses(data);
+					setLoadingCampuses(false);
+				})
+				.catch(() => {
+					setLoadingCampuses(false);
+				});
+		}
+	}, [importerOpen, campuses.length, queryClient]);
+
+	// Load faculties when campus changes
+	useEffect(() => {
+		if (selectedCampus?.requireFaculty) {
+			setLoadingFaculties(true);
+			queryClient
+				.fetchQuery({
+					queryKey: ["uitm", "faculties", selectedCampus.code],
+					queryFn: () => Faculty.fetch(selectedCampus),
+					staleTime: 5 * 60 * 1000,
+				})
+				.then((data) => {
+					setFaculties(data ?? []);
+					setLoadingFaculties(false);
+				})
+				.catch(() => {
+					setFaculties([]);
+					setLoadingFaculties(false);
+				});
+		} else {
+			setFaculties([]);
+		}
+	}, [selectedCampus, queryClient]);
 
 	useEffect(() => {
 		if (!importerOpen) {
@@ -100,27 +160,32 @@ function CourseSlipImportStep() {
 				throw new Error(message);
 			}
 
-			// Fetch and match campus
-			const campuses = await queryClient.fetchQuery({
-				queryKey: ["uitm", "campuses"],
-				queryFn: Campus.fetch,
-				staleTime: 5 * 60 * 1000,
-			});
+			// Prioritize user-selected campus over parsed campus
+			let campus: Campus | undefined = selectedCampus;
 
-			const findCampusMatch = () => {
-				if (!schedule.campus) return undefined;
-				const code = normalizeString(schedule.campus.code);
-				const name = schedule.campus.name
-					? normalizeString(schedule.campus.name)
-					: undefined;
-				return campuses.find(
-					(campus) =>
-						normalizeString(campus.code) === code ||
-						(name && normalizeString(campus.name) === name),
-				);
-			};
+			if (!campus) {
+				// Fetch and match campus
+				const campuses = await queryClient.fetchQuery({
+					queryKey: ["uitm", "campuses"],
+					queryFn: Campus.fetch,
+					staleTime: 5 * 60 * 1000,
+				});
 
-			const campus: Campus | undefined = findCampusMatch();
+				const findCampusMatch = () => {
+					if (!schedule.campus) return undefined;
+					const code = normalizeString(schedule.campus.code);
+					const name = schedule.campus.name
+						? normalizeString(schedule.campus.name)
+						: undefined;
+					return campuses.find(
+						(campus) =>
+							normalizeString(campus.code) === code ||
+							(name && normalizeString(campus.name) === name),
+					);
+				};
+
+				campus = findCampusMatch();
+			}
 
 			if (!campus) {
 				const message =
@@ -130,36 +195,39 @@ function CourseSlipImportStep() {
 			}
 
 			// Fetch and match faculty if needed
-			let faculty: Faculty | undefined;
+			let faculty: Faculty | undefined = selectedFaculty;
 			if (campus.requireFaculty) {
-				const faculties = await queryClient.fetchQuery({
-					queryKey: ["uitm", "faculties", campus.code],
-					queryFn: () => Faculty.fetch(campus),
-					staleTime: 5 * 60 * 1000,
-				});
+				// If no faculty is selected by user, try to parse from slip
+				if (!faculty) {
+					const faculties = await queryClient.fetchQuery({
+						queryKey: ["uitm", "faculties", campus.code],
+						queryFn: () => Faculty.fetch(campus),
+						staleTime: 5 * 60 * 1000,
+					});
 
-				const findFacultyMatch = () => {
-					if (!schedule.faculty) return undefined;
-					const code = normalizeString(schedule.faculty.code);
-					const name = schedule.faculty.name
-						? normalizeString(schedule.faculty.name)
-						: undefined;
-					return faculties?.find(
-						(facultyItem) =>
-							normalizeString(facultyItem.code) === code ||
-							(name && normalizeString(facultyItem.name) === name),
-					);
-				};
+					const findFacultyMatch = () => {
+						if (!schedule.faculty) return undefined;
+						const code = normalizeString(schedule.faculty.code);
+						const name = schedule.faculty.name
+							? normalizeString(schedule.faculty.name)
+							: undefined;
+						return faculties?.find(
+							(facultyItem) =>
+								normalizeString(facultyItem.code) === code ||
+								(name && normalizeString(facultyItem.name) === name),
+						);
+					};
 
-				faculty = findFacultyMatch();
+					faculty = findFacultyMatch();
 
-				if (faculty) {
-					const matchedFromList = faculties?.find(
-						(facultyItem) =>
-							normalizeString(facultyItem.code) ===
-							normalizeString(faculty!.code),
-					);
-					faculty = matchedFromList ?? faculty;
+					if (faculty) {
+						const matchedFromList = faculties?.find(
+							(facultyItem) =>
+								normalizeString(facultyItem.code) ===
+								normalizeString(faculty!.code),
+						);
+						faculty = matchedFromList ?? faculty;
+					}
 				}
 
 				if (!faculty) {
@@ -407,6 +475,7 @@ function CourseSlipImportStep() {
 	const suggestedFaculty = parsedSchedule.faculty?.name
 		? `${parsedSchedule.faculty.code} – ${parsedSchedule.faculty.name}`
 		: (parsedSchedule.faculty?.code ?? "");
+
 	const coursePreview = parsedSchedule.courses.slice(0, 8);
 	const remainingCourses = parsedSchedule.courses.length - coursePreview.length;
 
@@ -455,24 +524,72 @@ function CourseSlipImportStep() {
 				/>
 
 				{rawText.trim() !== "" && (
-					<div className="overflow-x-scroll overflow-y-clip whitespace-nowrap rounded-lg border border-border bg-muted/30 p-4 space-y-2">
-						<div className="text-sm font-medium">Detected details</div>
-						<div className="grid gap-1 text-sm text-muted-foreground">
-							{suggestedCampus ? (
-								<div>
-									<span className="font-medium text-foreground">Campus:</span>{" "}
-									{suggestedCampus}
+					<div className="overflow-x-scroll overflow-y-clip whitespace-nowrap rounded-lg border border-border bg-muted/30 p-4 space-y-3">
+						<div className="text-sm font-medium">Campus & Faculty</div>
+						<div className="grid gap-3">
+							{/* Campus Selection */}
+							<div className="flex flex-col gap-2">
+								<label className="text-sm font-medium text-foreground">
+									Campus
+									{suggestedCampus && !selectedCampus && (
+										<span className="ml-2 text-xs font-normal text-muted-foreground">
+											(Detected: {suggestedCampus})
+										</span>
+									)}
+								</label>
+								<Select
+									value={selectedCampus?.code ?? ""}
+									onValueChange={(value) => {
+										const campus = campuses.find((c) => c.code === value);
+										setSelectedCampus(campus);
+										setSelectedFaculty(undefined);
+									}}
+									disabled={loadingCampuses}
+								>
+									<SelectTrigger className="w-full">
+										<SelectValue placeholder="Select a campus..." />
+									</SelectTrigger>
+									<SelectContent>
+										{campuses.map((campus) => (
+											<SelectItem key={campus.code} value={campus.code}>
+												{campus.code} – {campus.name}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+
+							{/* Faculty Selection */}
+							{selectedCampus?.requireFaculty && (
+								<div className="flex flex-col gap-2">
+									<label className="text-sm font-medium text-foreground">
+										Faculty
+										{suggestedFaculty && !selectedFaculty && (
+											<span className="ml-2 text-xs font-normal text-muted-foreground">
+												(Detected: {suggestedFaculty})
+											</span>
+										)}
+									</label>
+									<Select
+										value={selectedFaculty?.code ?? ""}
+										onValueChange={(value) => {
+											const faculty = faculties.find((f) => f.code === value);
+											setSelectedFaculty(faculty);
+										}}
+										disabled={loadingFaculties || faculties.length === 0}
+									>
+										<SelectTrigger className="w-full">
+											<SelectValue placeholder="Select a faculty..." />
+										</SelectTrigger>
+										<SelectContent>
+											{faculties.map((faculty) => (
+												<SelectItem key={faculty.code} value={faculty.code}>
+													{faculty.code} – {faculty.name}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
 								</div>
-							) : (
-								<div className="text-destructive">Campus not detected.</div>
-							)}
-							{suggestedFaculty ? (
-								<div>
-									<span className="font-medium text-foreground">Faculty:</span>{" "}
-									{suggestedFaculty}
-								</div>
-							) : (
-								<div className="text-destructive">Faculty not detected.</div>
 							)}
 						</div>
 						<div className="pt-2">
