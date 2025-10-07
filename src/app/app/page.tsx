@@ -5,11 +5,28 @@ import { Header } from "./header";
 
 const APP_DESCRIPTION =
 	"Create beautiful, customizable weekly timetables for your classes with Weekview. Free online timetable generator. Perfect for students.";
+
 export const metadata: Metadata = {
 	title: "Weekview",
 	icons: {
-		icon: "/images/icon.png",
+		icon: [
+			{
+				url: "/images/favicon-96x96.png",
+				sizes: "96x96",
+				type: "image/png",
+			},
+			{
+				url: "/images/favicon.svg",
+				type: "image/svg+xml",
+			},
+		],
+		shortcut: "/images/favicon.ico",
+		apple: "/images/apple-touch-icon.png",
 	},
+	appleWebApp: {
+		title: "Weekview",
+	},
+	manifest: "/images/site.webmanifest",
 	description: APP_DESCRIPTION,
 	keywords: [
 		"timetable",

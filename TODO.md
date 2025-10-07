@@ -1,0 +1,2 @@
+- Add a "Add from UiTM iCress" button in main screen
+- Redesign Element Settings
