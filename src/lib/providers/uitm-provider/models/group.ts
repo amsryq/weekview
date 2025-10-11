@@ -51,7 +51,7 @@ export class Group {
 		);
 	}
 
-	private static mergeOverlappingSessions(sessions: Session[]): Session[] {
+	public static mergeOverlappingSessions(sessions: Session[]): Session[] {
 		if (sessions.length <= 1) return sessions;
 
 		// Sort sessions by day and start time
@@ -85,6 +85,7 @@ export class Group {
 					newEnd,
 					current.mode,
 					current.status,
+					current.lecturer === next.lecturer ? current.lecturer : undefined,
 				);
 			} else {
 				// No overlap, push current and move to next

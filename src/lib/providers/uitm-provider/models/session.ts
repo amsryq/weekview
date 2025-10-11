@@ -6,6 +6,7 @@ export class Session {
 	end?: string;
 	mode?: string;
 	status?: string;
+	lecturer?: string;
 
 	constructor(
 		groupCode: string,
@@ -15,6 +16,7 @@ export class Session {
 		end?: string,
 		mode?: string,
 		status?: string,
+		lecturer?: string,
 	) {
 		this.groupCode = groupCode;
 		this.room = room;
@@ -23,5 +25,6 @@ export class Session {
 		this.end = end;
 		this.mode = mode;
 		this.status = status;
+		this.lecturer = lecturer;
 	}
 }

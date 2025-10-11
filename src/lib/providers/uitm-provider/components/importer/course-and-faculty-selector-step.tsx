@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
 	DialogDescription,
@@ -83,8 +84,6 @@ function CourseAndFacultySelectorStep({
 				<DialogDescription>
 					Please select your campus and faculty from the dropdown menus.
 				</DialogDescription>
-
-				<UnaffiliationNotice />
 			</DialogHeader>
 
 			<div className="flex flex-col gap-2">
@@ -178,18 +177,15 @@ function CourseAndFacultySelectorStep({
 				)}
 			</div>
 
-			<DialogFooter className="justify-between">
-				<Button
-					variant="outline"
-					onClick={onOpenImport}
-					className="w-full sm:w-auto"
-				>
-					Paste from registration list
+			<DialogFooter className="justify-between sm:justify-between gap-2">
+				<Button variant="outline" onClick={() => setCurrentStep(0)}>
+					<ArrowLeft size={16} />
+					Back to selection
 				</Button>
 				<Button
 					variant="outline"
 					disabled={!canProceed}
-					onClick={() => setCurrentStep(1)}
+					onClick={() => setCurrentStep(2)}
 				>
 					Next
 				</Button>

@@ -308,7 +308,7 @@ function GroupSelectorStep() {
 			</div>
 
 			<DialogFooter className="sm:justify-start w-full">
-				<Button variant="outline" onClick={() => setCurrentStep(0)}>
+				<Button variant="outline" onClick={() => setCurrentStep(1)}>
 					<ArrowLeft className="size-4" />
 					Change Campus/Faculty
 				</Button>
