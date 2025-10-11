@@ -46,24 +46,22 @@ function SourceSelectionStep() {
 			<DialogHeader>
 				<DialogTitle>Import from UiTM</DialogTitle>
 				<DialogDescription>Choose the source to import from.</DialogDescription>
-
-				<UnaffiliationNotice />
 			</DialogHeader>
 
 			<div className="overflow-y-auto space-y-4">
+				<UnaffiliationNotice />
 				<section className="space-y-4">
 					<div className="space-y-1">
 						<h3 className="text-lg font-semibold text-foreground">
-							UiTM myStudent
+							UiTM MyStudent
 						</h3>
 						<p className="text-sm text-muted-foreground">
-							Fetch timetable information directly from myStudent using your
-							student ID.
+							Fetch timetable information directly from MyStudent.
 						</p>
 					</div>
 					<SourceOption
 						title="From your Student ID"
-						description="Fetch timetable information directly from myStudent. The simplest approach yet."
+						description="Fetch timetable information directly from MyStudent. The simplest approach yet."
 						onSelect={() => setCurrentStep(4)}
 					/>
 				</section>
