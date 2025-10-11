@@ -1,6 +1,7 @@
-import { AlertTriangleIcon } from "lucide-react";
+import { AlertTriangleIcon, X } from "lucide-react";
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { Button } from "~/components/ui/button";
 
 function UnaffiliationNotice() {
 	const [isVisible, setIsVisible] = useState(true);
@@ -8,29 +9,34 @@ function UnaffiliationNotice() {
 	if (!isVisible) return null;
 
 	return (
-		<div className="w-full flex justify-center mt-2">
-			<Alert className="text-left border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-200 [&>svg]:text-blue-600 dark:[&>svg]:text-blue-400">
-				<button
-					className="absolute top-0 right-2 text-xl text-blue-600 dark:text-blue-400"
-					onClick={() => setIsVisible(false)}
-					aria-label="Dismiss notice"
-				>
-					&times;
-				</button>
-				<AlertTriangleIcon />
-				<AlertTitle>Notice</AlertTitle>
-				<AlertDescription className="inline text-foreground">
-					Weekview is independent and not affiliated with UiTM. Please verify
-					your timetable with official sources like iCress or MyStudent. Changes
-					to UiTM's private APIs may result in inaccurate data. If you notice
-					missing courses or incorrect timings, please report them via{" "}
-					<a className="underline" href="https://t.me/myweekview">
-						our Telegram channel's DM
+		<Alert className="relative flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 text-left text-primary-foreground shadow-sm dark:border-primary/40 dark:bg-primary/10">
+			<span className="mt-1 rounded-full bg-primary/15 p-2 text-primary">
+				<AlertTriangleIcon className="size-4" />
+			</span>
+			<div className="space-y-1">
+				<AlertTitle className="flex justify-between text-sm font-semibold text-primary">
+					Weekview isn&apos;t affiliated with UiTM
+					<button
+						className="text-primary"
+						onClick={() => setIsVisible(false)}
+						aria-label="Dismiss notice"
+					>
+						<X className="size-4" />
+					</button>
+				</AlertTitle>
+				<AlertDescription className="block text-sm text-muted-foreground">
+					Double-check your timetable in official portals like iCress or
+					MyStudent. If something looks off, let us know via
+					<a
+						className="ml-1 inline-flex items-center gap-1 underline"
+						href="https://t.me/myweekview"
+					>
+						our Telegram DMs
 					</a>
 					.
 				</AlertDescription>
-			</Alert>
-		</div>
+			</div>
+		</Alert>
 	);
 }
 

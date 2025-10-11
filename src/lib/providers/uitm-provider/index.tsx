@@ -1,4 +1,4 @@
-import { PlusIcon } from "lucide-react";
+import { ImportIcon } from "lucide-react";
 import { JSX } from "react";
 import { Button } from "~/components/ui/button";
 import { CourseProvider } from "~/lib/models/course-provider";
@@ -10,7 +10,7 @@ let singletonCache: UiTMProvider | null = null;
 export class UiTMProvider extends CourseProvider {
 	constructor() {
 		super({
-			name: `UiTM iCress`,
+			name: `UiTM`,
 			emptyStateText:
 				"No courses/groups imported yet. Click the button below to import.",
 		});
@@ -32,8 +32,8 @@ export class UiTMProvider extends CourseProvider {
 		return (
 			<UiTMImporterDialog>
 				<Button className="w-full">
-					<PlusIcon className="w-4 h-4" />
-					Add Courses/Groups
+					<ImportIcon className="w-4 h-4" />
+					Import from UiTM
 				</Button>
 			</UiTMImporterDialog>
 		);

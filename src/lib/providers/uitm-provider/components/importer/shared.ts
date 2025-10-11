@@ -36,20 +36,32 @@ export interface ImportResult {
 	failures: ImportFailure[];
 }
 
+/**
+ * Ordered list of importer dialogs. We start in the source picker, and subsequent
+ * dialogs are rendered on-demand based on the user's selection.
+ */
+export type ImporterStep =
+	| "source"
+	| "campus-faculty"
+	| "group-selector"
+	| "course-slip"
+	| "my-student";
+
 export const useImporterSelectionStore = create<{
 	open: boolean;
-	currentStep: number;
+	currentStep: ImporterStep;
 	selectedCampus?: Campus;
 	selectedFaculty?: Faculty;
 	selectedCourse?: Course;
 	setOpen: (open: boolean) => void;
-	setCurrentStep: (step: number) => void;
+	setCurrentStep: (step: ImporterStep) => void;
 	setSelectedCampus: (c?: Campus) => void;
 	setSelectedFaculty: (f?: Faculty) => void;
 	setSelectedCourse: (c?: Course) => void;
+	reset: () => void;
 }>((set) => ({
 	open: false,
-	currentStep: 0,
+	currentStep: "source",
 	selectedCampus: undefined,
 	selectedFaculty: undefined,
 	selectedCourse: undefined,
@@ -67,6 +79,13 @@ export const useImporterSelectionStore = create<{
 			selectedCourse: undefined,
 		}),
 	setSelectedCourse: (c) => set({ selectedCourse: c }),
+	reset: () =>
+		set({
+			currentStep: "source",
+			selectedCampus: undefined,
+			selectedFaculty: undefined,
+			selectedCourse: undefined,
+		}),
 }));
 
 export const normalizeString = (value: string): string =>

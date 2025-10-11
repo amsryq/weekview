@@ -3,10 +3,11 @@ import {
 	AlertCircle,
 	ArrowLeft,
 	CheckIcon,
+	GraduationCap,
 	Loader2,
 	XIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import {
@@ -32,7 +33,14 @@ import {
 	useImporterSelectionStore,
 } from "./shared";
 
-function MyStudentImportStep() {
+interface MyStudentImportDialogProps {
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
+}
+
+const CANCELLED_MESSAGE = "Import cancelled";
+
+function MyStudentImportContent() {
 	const setCurrentStep = useImporterSelectionStore(
 		(state) => state.setCurrentStep,
 	);
@@ -42,19 +50,41 @@ function MyStudentImportStep() {
 	const [includeCourseName, setIncludeCourseName] = useState(false);
 	const [progressDialogOpen, setProgressDialogOpen] = useState(false);
 	const [importPhase, setImportPhase] = useState<
-		"idle" | "fetching" | "importing" | "complete"
+		"idle" | "fetching" | "importing" | "cancelled" | "complete"
 	>("idle");
 	const [courseProgress, setCourseProgress] = useState<CourseImportProgress[]>(
 		[],
 	);
+	const cancelRequestedRef = useRef(false);
+	const [cancelRequested, setCancelRequested] = useState(false);
 
 	useEffect(() => {
 		if (!importerOpen) {
 			setProgressDialogOpen(false);
 			setImportPhase("idle");
 			setCourseProgress([]);
+			cancelRequestedRef.current = false;
+			setCancelRequested(false);
 		}
 	}, [importerOpen]);
+
+	const applyCancellation = (reason = CANCELLED_MESSAGE) => {
+		setImportPhase((prev) => (prev === "cancelled" ? prev : "cancelled"));
+		setCourseProgress((prev) =>
+			prev.map((item) =>
+				item.status === "pending" || item.status === "running"
+					? { ...item, status: "error", reason }
+					: item,
+			),
+		);
+	};
+
+	const requestCancel = () => {
+		if (cancelRequestedRef.current) return;
+		cancelRequestedRef.current = true;
+		setCancelRequested(true);
+		applyCancellation();
+	};
 
 	const importMutation = useMutation<
 		{ successes: ImportSuccess[]; failures: ImportFailure[] },
@@ -68,11 +98,19 @@ function MyStudentImportStep() {
 			}
 
 			setImportPhase("fetching");
+			const ensureNotCancelled = () => {
+				if (!cancelRequestedRef.current) return;
+				applyCancellation();
+				throw new Error(CANCELLED_MESSAGE);
+			};
+
+			ensureNotCancelled();
 
 			const groups = await fetchMyStudentTimetable({
 				studentId: trimmedId,
 				includeCourseName: includeName,
 			});
+			ensureNotCancelled();
 
 			if (!groups.length) {
 				setImportPhase("complete");
@@ -88,6 +126,7 @@ function MyStudentImportStep() {
 				status: "pending",
 			}));
 			setCourseProgress(initialProgress);
+			ensureNotCancelled();
 
 			setImportPhase("importing");
 			const dedupeKeys = new Set<string>();
@@ -110,6 +149,7 @@ function MyStudentImportStep() {
 			};
 
 			for (const group of groups) {
+				ensureNotCancelled();
 				const courseCode = group.internal.code;
 				const groupCode = group.internal.group;
 
@@ -181,6 +221,7 @@ function MyStudentImportStep() {
 				}
 			}
 
+			ensureNotCancelled();
 			setImportPhase("complete");
 			return { successes, failures };
 		},
@@ -196,30 +237,40 @@ function MyStudentImportStep() {
 	);
 
 	const isImporting = importPhase === "fetching" || importPhase === "importing";
+	const isCancelled = importPhase === "cancelled";
 	const isComplete = importPhase === "complete";
+	const showImportError =
+		Boolean(importMutation.error) &&
+		importMutation.error?.message !== CANCELLED_MESSAGE;
 
 	const progressTitle = isImporting
 		? importPhase === "fetching"
 			? "Fetching timetable..."
 			: "Importing courses"
-		: isComplete && errorCount > 0
-			? "Import completed with issues"
-			: isComplete
-				? "Import complete"
-				: "Preparing import";
+		: isCancelled
+			? "Import cancelled"
+			: isComplete && errorCount > 0
+				? "Import completed with issues"
+				: isComplete
+					? "Import complete"
+					: "Preparing import";
 
 	const progressSubtitle = isImporting
 		? importPhase === "fetching"
 			? "Contacting UiTM MyStudent API..."
 			: `Processing ${courseProgress.length} course${courseProgress.length === 1 ? "" : "s"}...`
-		: isComplete
-			? `${successCount} imported • ${errorCount} failed`
-			: "Ready to import";
+		: isCancelled
+			? "Stopped early at your request"
+			: isComplete
+				? `${successCount} imported • ${errorCount} failed`
+				: "Ready to import";
 
 	const handleImport = async () => {
 		importMutation.reset();
 		setCourseProgress([]);
 		setImportPhase("idle");
+		cancelRequestedRef.current = false;
+		setCancelRequested(false);
 		setProgressDialogOpen(true);
 
 		try {
@@ -234,11 +285,16 @@ function MyStudentImportStep() {
 
 	return (
 		<>
-			<DialogHeader>
-				<DialogTitle>Import from MyStudent</DialogTitle>
+			<DialogHeader className="gap-1 text-left">
+				<DialogTitle className="flex items-center gap-2 text-lg">
+					<span className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+						<GraduationCap className="size-4" />
+					</span>
+					Import from MyStudent
+				</DialogTitle>
 				<DialogDescription>
-					Enter your UiTM student ID. We'll fetch your timetable from MyStudent
-					and add the groups to your timetable.
+					Enter your UiTM student ID and we will fetch the timetable directly
+					from the MyStudent portal.
 				</DialogDescription>
 			</DialogHeader>
 
@@ -270,10 +326,10 @@ function MyStudentImportStep() {
 					/>
 				</div>
 
-				{importMutation.error && (
+				{showImportError && (
 					<Alert variant="destructive">
 						<AlertTitle>Import failed</AlertTitle>
-						<AlertDescription>{importMutation.error.message}</AlertDescription>
+						<AlertDescription>{importMutation.error?.message}</AlertDescription>
 					</Alert>
 				)}
 			</div>
@@ -281,7 +337,7 @@ function MyStudentImportStep() {
 			<DialogFooter className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 				<Button
 					variant="outline"
-					onClick={() => setCurrentStep(0)}
+					onClick={() => setCurrentStep("source")}
 					className="w-full sm:w-auto"
 				>
 					<ArrowLeft className="size-4" />
@@ -322,7 +378,7 @@ function MyStudentImportStep() {
 						<DialogDescription>{progressSubtitle}</DialogDescription>
 					</DialogHeader>
 
-					<div className="space-y-4 py-4 overflow-y-scroll">
+					<div className="space-y-4 py-4 overflow-y-auto">
 						{courseProgress.length > 0 ? (
 							<div className="rounded-lg border bg-background">
 								<div className="border-b bg-muted/30 px-4 py-3">
@@ -384,12 +440,21 @@ function MyStudentImportStep() {
 						)}
 					</div>
 
-					<DialogFooter className="flex w-full flex-col gap-2 sm:flex-row sm:justify-end">
+					<DialogFooter className="flex w-full flex-col gap-2 sm:flex-row sm:justify-between">
+						<Button
+							variant="ghost"
+							onClick={requestCancel}
+							className="w-full sm:w-auto"
+							disabled={!isImporting || cancelRequested}
+						>
+							Cancel import
+						</Button>
+
 						<Button
 							variant="secondary"
 							onClick={() => setProgressDialogOpen(false)}
 							className="w-full sm:w-auto"
-							disabled={isImporting}
+							disabled={isImporting && !cancelRequested}
 						>
 							Close
 						</Button>
@@ -400,4 +465,15 @@ function MyStudentImportStep() {
 	);
 }
 
-export { MyStudentImportStep };
+export function MyStudentImportDialog({
+	open,
+	onOpenChange,
+}: MyStudentImportDialogProps) {
+	return (
+		<Dialog open={open} onOpenChange={onOpenChange}>
+			<DialogContent className="flex min-w-0 flex-col gap-6 sm:max-w-xl">
+				<MyStudentImportContent />
+			</DialogContent>
+		</Dialog>
+	);
+}

@@ -5,9 +5,10 @@ import {
 	ArrowLeft,
 	CheckIcon,
 	Loader2,
+	ScrollText,
 	XIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
@@ -44,7 +45,14 @@ import {
 	useImporterSelectionStore,
 } from "./shared";
 
-function CourseSlipImportStep() {
+const CANCELLED_MESSAGE = "Import cancelled";
+
+interface CourseSlipImportDialogProps {
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
+}
+
+function CourseSlipImportStepBody() {
 	const queryClient = useQueryClient();
 	const {
 		selectedCampus,
@@ -68,14 +76,75 @@ function CourseSlipImportStep() {
 	const parsedSchedule = useMemo(() => parseSchedule(rawText), [rawText]);
 	const [progressDialogOpen, setProgressDialogOpen] = useState(false);
 	const [howToOpen, setHowToOpen] = useState(false);
+	const cancelRequestedRef = useRef(false);
+	const [cancelRequested, setCancelRequested] = useState(false);
 
 	const [campuses, setCampuses] = useState<Campus[]>([]);
 	const [faculties, setFaculties] = useState<Faculty[]>([]);
 	const [loadingCampuses, setLoadingCampuses] = useState(false);
 	const [loadingFaculties, setLoadingFaculties] = useState(false);
 
+	const detectedCampus = parsedSchedule.campus;
+	const detectedFaculty = parsedSchedule.faculty;
+
+	const normalizeCode = (value?: string | null) =>
+		value?.trim().toLowerCase() ?? "";
+
+	const detectedCampusCode = normalizeCode(detectedCampus?.code);
+	const detectedFacultyCode = normalizeCode(detectedFaculty?.code);
+	const selectedCampusCode = normalizeCode(selectedCampus?.code);
+	const selectedFacultyCode = normalizeCode(selectedFaculty?.code);
+
+	const matchedDetectedCampus = detectedCampusCode
+		? campuses.find(
+				(campus) => normalizeCode(campus.code) === detectedCampusCode,
+			)
+		: undefined;
+
+	const isAutoSelection = !selectedCampus;
+
+	const campusMismatch =
+		!isAutoSelection &&
+		detectedCampusCode !== "" &&
+		selectedCampusCode !== "" &&
+		detectedCampusCode !== selectedCampusCode;
+
+	const facultyMismatch =
+		!isAutoSelection &&
+		detectedFacultyCode !== "" &&
+		selectedFacultyCode !== "" &&
+		detectedFacultyCode !== selectedFacultyCode;
+
+	const requiresFacultyInAuto = isAutoSelection
+		? (matchedDetectedCampus?.requireFaculty ?? true)
+		: false;
+
+	const shouldShowParsedFaculty = isAutoSelection
+		? true
+		: Boolean(selectedCampus?.requireFaculty);
+
+	const detectedCampusLabel = detectedCampus
+		? detectedCampus.name
+			? `${detectedCampus.code} – ${detectedCampus.name}`
+			: (detectedCampus.code ?? "")
+		: "";
+
+	const detectedFacultyLabel = detectedFaculty
+		? detectedFaculty.name
+			? `${detectedFaculty.code} – ${detectedFaculty.name}`
+			: (detectedFaculty.code ?? "")
+		: "";
+
+	const autoReady =
+		detectedCampusCode !== "" &&
+		(!requiresFacultyInAuto || detectedFacultyCode !== "");
+
+	const manualReady =
+		Boolean(selectedCampus) &&
+		(!selectedCampus?.requireFaculty || Boolean(selectedFaculty));
+
 	const [importPhase, setImportPhase] = useState<
-		"idle" | "setup" | "importing" | "complete"
+		"idle" | "setup" | "importing" | "cancelled" | "complete"
 	>("idle");
 	const [campusInfo, setCampusInfo] = useState<{
 		campus?: Campus;
@@ -134,12 +203,39 @@ function CourseSlipImportStep() {
 			setImportPhase("idle");
 			setCampusInfo({});
 			setCourseProgress([]);
+			cancelRequestedRef.current = false;
+			setCancelRequested(false);
 		}
 	}, [importerOpen]);
+
+	const applyCancellation = (reason = CANCELLED_MESSAGE) => {
+		setImportPhase((prev) => (prev === "cancelled" ? prev : "cancelled"));
+		setCourseProgress((prev) =>
+			prev.map((item) =>
+				item.status === "pending" || item.status === "running"
+					? { ...item, status: "error", reason }
+					: item,
+			),
+		);
+	};
+
+	const requestCancel = () => {
+		if (cancelRequestedRef.current) return;
+		cancelRequestedRef.current = true;
+		setCancelRequested(true);
+		applyCancellation();
+	};
 
 	const importMutation = useMutation<ImportResult, Error, ScheduleInfo>({
 		mutationFn: async (schedule) => {
 			setImportPhase("setup");
+			const ensureNotCancelled = () => {
+				if (!cancelRequestedRef.current) return;
+				applyCancellation();
+				throw new Error(CANCELLED_MESSAGE);
+			};
+
+			ensureNotCancelled();
 
 			// Initialize all courses as pending
 			const initialProgress: CourseImportProgress[] = schedule.courses.map(
@@ -151,6 +247,7 @@ function CourseSlipImportStep() {
 				}),
 			);
 			setCourseProgress(initialProgress);
+			ensureNotCancelled();
 
 			// Validate courses exist
 			if (!schedule.courses.length) {
@@ -193,6 +290,7 @@ function CourseSlipImportStep() {
 				setImportPhase("complete");
 				throw new Error(message);
 			}
+			ensureNotCancelled();
 
 			// Fetch and match faculty if needed
 			let faculty: Faculty | undefined = selectedFaculty;
@@ -237,6 +335,7 @@ function CourseSlipImportStep() {
 					throw new Error(message);
 				}
 			}
+			ensureNotCancelled();
 
 			// Update campus/faculty info
 			setCampusInfo({ campus, faculty });
@@ -247,6 +346,7 @@ function CourseSlipImportStep() {
 				queryFn: () => Course.fetch(faculty ?? campus),
 				staleTime: 5 * 60 * 1000,
 			});
+			ensureNotCancelled();
 
 			const courseLookup = new Map<string, Course>();
 			for (const course of courses) {
@@ -302,6 +402,7 @@ function CourseSlipImportStep() {
 			};
 
 			for (const entry of schedule.courses) {
+				ensureNotCancelled();
 				const key = `${normalizeString(entry.courseCode)}__${normalizeString(entry.group)}`;
 
 				// Mark as running
@@ -438,6 +539,7 @@ function CourseSlipImportStep() {
 				}
 			}
 
+			ensureNotCancelled();
 			setImportPhase("complete");
 			return {
 				schedule,
@@ -453,11 +555,23 @@ function CourseSlipImportStep() {
 		},
 	});
 
+	const canImport =
+		rawText.trim() !== "" &&
+		!importMutation.isPending &&
+		(isAutoSelection ? autoReady : manualReady);
+
 	const handleImport = async () => {
+		if (isAutoSelection) {
+			if (!autoReady) return;
+		} else if (!manualReady) {
+			return;
+		}
 		importMutation.reset();
 		setCourseProgress([]);
 		setCampusInfo({});
 		setImportPhase("idle");
+		cancelRequestedRef.current = false;
+		setCancelRequested(false);
 
 		const schedule = parseSchedule(rawText);
 		setProgressDialogOpen(true);
@@ -469,9 +583,6 @@ function CourseSlipImportStep() {
 		}
 	};
 
-	const suggestedCampus = parsedSchedule.campus?.name
-		? `${parsedSchedule.campus.code} – ${parsedSchedule.campus.name}`
-		: (parsedSchedule.campus?.code ?? "");
 	const suggestedFaculty = parsedSchedule.faculty?.name
 		? `${parsedSchedule.faculty.code} – ${parsedSchedule.faculty.name}`
 		: (parsedSchedule.faculty?.code ?? "");
@@ -486,36 +597,49 @@ function CourseSlipImportStep() {
 		(item) => item.status === "error",
 	).length;
 	const isImporting = importPhase === "setup" || importPhase === "importing";
+	const isCancelled = importPhase === "cancelled";
 	const isComplete = importPhase === "complete";
+	const showImportError =
+		Boolean(importMutation.error) &&
+		importMutation.error?.message !== CANCELLED_MESSAGE;
 
 	const progressTitle = isImporting
 		? importPhase === "setup"
 			? "Setting up import..."
 			: "Importing courses"
-		: isComplete && errorCount > 0
-			? "Import completed with issues"
-			: isComplete
-				? "Import complete"
-				: "Preparing import";
+		: isCancelled
+			? "Import cancelled"
+			: isComplete && errorCount > 0
+				? "Import completed with issues"
+				: isComplete
+					? "Import complete"
+					: "Preparing import";
 	const progressSubtitle = isImporting
 		? importPhase === "setup"
 			? "Fetching campus and faculty data..."
 			: `Processing ${courseProgress.length} course${courseProgress.length === 1 ? "" : "s"}...`
-		: isComplete
-			? `${successCount} imported • ${errorCount} failed`
-			: "Ready to import";
+		: isCancelled
+			? "Stopped early at your request"
+			: isComplete
+				? `${successCount} imported • ${errorCount} failed`
+				: "Ready to import";
 
 	return (
 		<>
-			<DialogHeader>
-				<DialogTitle>Import from registration list</DialogTitle>
+			<DialogHeader className="gap-1 text-left">
+				<DialogTitle className="flex items-center gap-2 text-lg">
+					<span className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+						<ScrollText className="size-4" />
+					</span>
+					Import from registration slip
+				</DialogTitle>
 				<DialogDescription>
-					Paste the text from your UiTM registration/course slip. We'll parse it
-					and add matching groups to your timetable.
+					Paste the text from your UiTM registration/course slip. Weekview will
+					match the courses and groups automatically.
 				</DialogDescription>
 			</DialogHeader>
 
-			<div className="flex flex-col gap-4 overflow-y-scroll">
+			<div className="flex flex-col gap-4 overflow-y-auto">
 				<Textarea
 					value={rawText}
 					onChange={(event) => setRawText(event.target.value)}
@@ -524,72 +648,145 @@ function CourseSlipImportStep() {
 				/>
 
 				{rawText.trim() !== "" && (
-					<div className="overflow-x-scroll overflow-y-clip whitespace-nowrap rounded-lg border border-border bg-muted/30 p-4 space-y-3">
+					<div className="overflow-x-auto overflow-y-clip whitespace-nowrap rounded-lg border border-border bg-muted/30 p-4 space-y-3">
 						<div className="text-sm font-medium">Campus & Faculty</div>
 						<div className="grid gap-3">
-							{/* Campus Selection */}
 							<div className="flex flex-col gap-2">
 								<label className="text-sm font-medium text-foreground">
 									Campus
-									{suggestedCampus && !selectedCampus && (
-										<span className="ml-2 text-xs font-normal text-muted-foreground">
-											(Detected: {suggestedCampus})
-										</span>
-									)}
 								</label>
 								<Select
-									value={selectedCampus?.code ?? ""}
+									value={selectedCampus?.code ?? "auto"}
 									onValueChange={(value) => {
+										if (value === "auto") {
+											setSelectedCampus(undefined);
+											setSelectedFaculty(undefined);
+											return;
+										}
 										const campus = campuses.find((c) => c.code === value);
+										if (!campus) return;
 										setSelectedCampus(campus);
 										setSelectedFaculty(undefined);
 									}}
 									disabled={loadingCampuses}
 								>
 									<SelectTrigger className="w-full">
-										<SelectValue placeholder="Select a campus..." />
+										<SelectValue placeholder="Use detected campus" />
 									</SelectTrigger>
 									<SelectContent>
+										<SelectItem value="auto">
+											{detectedCampusLabel
+												? `Auto – ${detectedCampusLabel}`
+												: "Auto (use detected details)"}
+										</SelectItem>
 										{campuses.map((campus) => (
 											<SelectItem key={campus.code} value={campus.code}>
-												{campus.code} – {campus.name}
+												{campus.name}
 											</SelectItem>
 										))}
 									</SelectContent>
 								</Select>
+								{isAutoSelection ? (
+									<p className="text-xs text-muted-foreground">
+										{detectedCampusCode
+											? "We’ll use the campus detected from your course slip."
+											: "No campus detected in your slip yet."}
+									</p>
+								) : (
+									<>
+										{campusMismatch && detectedCampusLabel ? (
+											<p className="text-xs text-amber-600">
+												Detected campus {detectedCampusLabel} doesn't match your
+												selection. Double-check before importing.
+											</p>
+										) : (
+											detectedCampusLabel && (
+												<p className="text-xs text-muted-foreground">
+													Detected campus: {detectedCampusLabel}
+												</p>
+											)
+										)}
+									</>
+								)}
 							</div>
 
-							{/* Faculty Selection */}
-							{selectedCampus?.requireFaculty && (
-								<div className="flex flex-col gap-2">
-									<label className="text-sm font-medium text-foreground">
-										Faculty
-										{suggestedFaculty && !selectedFaculty && (
-											<span className="ml-2 text-xs font-normal text-muted-foreground">
-												(Detected: {suggestedFaculty})
-											</span>
+							{isAutoSelection ? (
+								<div className="space-y-4 rounded-lg border border-border bg-background p-4 text-sm">
+									<div className="space-y-1">
+										<span className="text-sm font-medium text-foreground">
+											Campus
+										</span>
+										{detectedCampusCode ? (
+											<p className="text-sm text-foreground">
+												{detectedCampusLabel}
+											</p>
+										) : (
+											<p className="text-sm text-destructive">
+												We couldn't detect a campus yet. Select one manually
+												above to continue.
+											</p>
 										)}
-									</label>
-									<Select
-										value={selectedFaculty?.code ?? ""}
-										onValueChange={(value) => {
-											const faculty = faculties.find((f) => f.code === value);
-											setSelectedFaculty(faculty);
-										}}
-										disabled={loadingFaculties || faculties.length === 0}
-									>
-										<SelectTrigger className="w-full">
-											<SelectValue placeholder="Select a faculty..." />
-										</SelectTrigger>
-										<SelectContent>
-											{faculties.map((faculty) => (
-												<SelectItem key={faculty.code} value={faculty.code}>
-													{faculty.code} – {faculty.name}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
+									</div>
+									{shouldShowParsedFaculty && (
+										<div className="space-y-1">
+											<span className="text-sm font-medium text-foreground">
+												Faculty
+											</span>
+											{detectedFacultyCode ? (
+												<p className="text-sm text-foreground">
+													{detectedFacultyLabel}
+												</p>
+											) : requiresFacultyInAuto ? (
+												<p className="text-sm text-destructive">
+													This campus needs a faculty. Pick one manually if it
+													doesn't appear in your slip.
+												</p>
+											) : (
+												<p className="text-sm text-muted-foreground">
+													No faculty is required for this campus.
+												</p>
+											)}
+										</div>
+									)}
 								</div>
+							) : (
+								selectedCampus?.requireFaculty && (
+									<div className="flex flex-col gap-2">
+										<label className="text-sm font-medium text-foreground">
+											Faculty
+											{suggestedFaculty && (
+												<span className="ml-2 text-xs font-normal text-muted-foreground">
+													Detected: {suggestedFaculty}
+												</span>
+											)}
+										</label>
+										<Select
+											value={selectedFaculty?.code ?? ""}
+											onValueChange={(value) => {
+												const faculty = faculties.find((f) => f.code === value);
+												setSelectedFaculty(faculty);
+											}}
+											disabled={loadingFaculties || faculties.length === 0}
+										>
+											<SelectTrigger className="w-full">
+												<SelectValue placeholder="Select a faculty..." />
+											</SelectTrigger>
+											<SelectContent>
+												{faculties.map((faculty) => (
+													<SelectItem key={faculty.code} value={faculty.code}>
+														{faculty.name}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+										{facultyMismatch && detectedFacultyLabel && (
+											<p className="text-xs text-amber-600">
+												Detected faculty {detectedFacultyLabel} doesn't match
+												your selection. Double-check before importing.
+											</p>
+										)}
+									</div>
+								)
 							)}
 						</div>
 						<div className="pt-2">
@@ -625,10 +822,10 @@ function CourseSlipImportStep() {
 					sent or stored.
 				</div>
 
-				{importMutation.error && (
+				{showImportError && (
 					<Alert variant="destructive">
 						<AlertTitle>Import failed</AlertTitle>
-						<AlertDescription>{importMutation.error.message}</AlertDescription>
+						<AlertDescription>{importMutation.error?.message}</AlertDescription>
 					</Alert>
 				)}
 			</div>
@@ -637,7 +834,7 @@ function CourseSlipImportStep() {
 				<div className="flex w-full flex-col-reverse gap-2 sm:flex-row sm:w-auto">
 					<Button
 						variant="outline"
-						onClick={() => setCurrentStep(0)}
+						onClick={() => setCurrentStep("source")}
 						className="w-full sm:w-auto"
 					>
 						<ArrowLeft className="size-4" />
@@ -653,7 +850,7 @@ function CourseSlipImportStep() {
 				</div>
 				<Button
 					onClick={handleImport}
-					disabled={importMutation.isPending || rawText.trim() === ""}
+					disabled={!canImport}
 					className="w-full sm:w-auto"
 				>
 					{importMutation.isPending && (
@@ -671,7 +868,7 @@ function CourseSlipImportStep() {
 							A short guide on how to import your UiTM course slip.
 						</DialogDescription>
 					</DialogHeader>
-					<div className="py-2 overflow-y-scroll">
+					<div className="py-2 overflow-y-auto">
 						<p className="text-sm text-foreground">
 							You can import your course slip by copying your course
 							registration details from the{" "}
@@ -720,7 +917,7 @@ function CourseSlipImportStep() {
 						<DialogDescription>{progressSubtitle}</DialogDescription>
 					</DialogHeader>
 
-					<div className="space-y-4 py-4 overflow-y-scroll">
+					<div className="space-y-4 py-4 overflow-y-auto">
 						{/* Campus & Faculty Status */}
 						<div className="rounded-lg border bg-muted/30 p-4">
 							<h3 className="text-sm font-semibold mb-3">Import Status</h3>
@@ -823,12 +1020,21 @@ function CourseSlipImportStep() {
 						)}
 					</div>
 
-					<DialogFooter className="flex w-full flex-col gap-2 sm:flex-row sm:justify-end">
+					<DialogFooter className="flex w-full flex-col gap-2 sm:flex-row sm:justify-between">
+						<Button
+							variant="ghost"
+							onClick={requestCancel}
+							className="w-full sm:w-auto"
+							disabled={!isImporting || cancelRequested}
+						>
+							Cancel import
+						</Button>
+
 						<Button
 							variant="secondary"
 							onClick={() => setProgressDialogOpen(false)}
 							className="w-full sm:w-auto"
-							disabled={isImporting}
+							disabled={isImporting && !cancelRequested}
 						>
 							Close
 						</Button>
@@ -839,4 +1045,15 @@ function CourseSlipImportStep() {
 	);
 }
 
-export { CourseSlipImportStep };
+export function CourseSlipImportDialog({
+	open,
+	onOpenChange,
+}: CourseSlipImportDialogProps) {
+	return (
+		<Dialog open={open} onOpenChange={onOpenChange}>
+			<DialogContent className="flex min-w-0 flex-col gap-6 sm:max-w-2xl">
+				<CourseSlipImportStepBody />
+			</DialogContent>
+		</Dialog>
+	);
+}

@@ -1,7 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Compass } from "lucide-react";
+import { useMemo } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { Button } from "~/components/ui/button";
 import {
+	Dialog,
+	DialogContent,
 	DialogDescription,
 	DialogFooter,
 	DialogHeader,
@@ -20,22 +24,26 @@ import {
 import { Campus } from "../../models/campus";
 import { Faculty } from "../../models/faculty";
 import { useImporterSelectionStore } from "./shared";
-import { UnaffiliationNotice } from "./unaffiliation-notice";
 
-function CourseAndFacultySelectorStep({
-	onOpenImport,
-}: {
-	onOpenImport: () => void;
-}) {
+interface CourseAndFacultySelectorDialogProps {
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
+}
+
+export function CourseAndFacultySelectorDialog({
+	open,
+	onOpenChange,
+}: CourseAndFacultySelectorDialogProps) {
 	const {
 		selectedCampus,
-		setSelectedCampus,
 		selectedFaculty,
+		setSelectedCampus,
 		setSelectedFaculty,
 		setCurrentStep,
-	} = useImporterSelectionStore();
+	} = useImporterSelectionStore(
+		useShallow((state) => pickSelectorState(state)),
+	);
 
-	// Campuses
 	const {
 		data: campuses,
 		isLoading: campusesLoading,
@@ -46,7 +54,6 @@ function CourseAndFacultySelectorStep({
 		staleTime: 5 * 60 * 1000,
 	});
 
-	// Faculties (per-campus)
 	const {
 		data: faculties,
 		isLoading: facultiesLoading,
@@ -58,140 +65,194 @@ function CourseAndFacultySelectorStep({
 		staleTime: 5 * 60 * 1000,
 	});
 
+	const canProceed = useMemo(() => {
+		if (!selectedCampus) return false;
+		return selectedCampus.requireFaculty ? Boolean(selectedFaculty) : true;
+	}, [selectedCampus, selectedFaculty]);
+
+	const handleBack = () => setCurrentStep("source");
+	const handleNext = () => setCurrentStep("group-selector");
+
 	const handleCampusChange = (campusId: string) => {
 		const campus = campuses?.find((c) => c.code === campusId);
-		if (campus) {
-			setSelectedCampus(campus);
-			// Reset dependent selections
-			setSelectedFaculty(undefined);
-		}
+		if (!campus) return;
+		setSelectedCampus(campus);
 	};
 
 	const handleFacultyChange = (facultyId: string) => {
 		const faculty = faculties?.find((f) => f.code === facultyId);
-		if (faculty) {
-			setSelectedFaculty(faculty);
-		}
+		if (!faculty) return;
+		setSelectedFaculty(faculty);
 	};
 
-	const canProceed =
-		selectedCampus && (!selectedCampus.requireFaculty || selectedFaculty);
-
 	return (
-		<>
-			<DialogHeader>
-				<DialogTitle>Choose your campus & faculty</DialogTitle>
-				<DialogDescription>
-					Please select your campus and faculty from the dropdown menus.
-				</DialogDescription>
-			</DialogHeader>
+		<Dialog open={open} onOpenChange={onOpenChange}>
+			<DialogContent className="flex min-w-0 flex-col gap-6 sm:max-w-xl">
+				<DialogHeader className="gap-1 text-left">
+					<DialogTitle className="flex items-center gap-2 text-lg">
+						<span className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+							<Compass className="size-4" />
+						</span>
+						Choose your campus & faculty
+					</DialogTitle>
+					<DialogDescription>
+						Select where you study so we can show the exact courses available to
+						you.
+					</DialogDescription>
+				</DialogHeader>
 
-			<div className="flex flex-col gap-2">
-				<Combobox
-					type="campus"
-					modal={true}
-					loading={campusesLoading}
-					loadingText="Loading campuses..."
-					data={campuses?.map((c) => ({ value: c.code, label: c.name })) || []}
-					value={selectedCampus?.code || ""}
-					onValueChange={handleCampusChange}
-				>
-					<ComboboxTrigger
-						className={`w-full ${campusesLoading ? "cursor-wait" : ""}`}
-						disabled={campusesLoading}
-					/>
-					<ComboboxContent>
-						<ComboboxInput />
-						<ComboboxEmpty>
-							{campusesLoading ? "Loading campuses..." : "No campuses found"}
-						</ComboboxEmpty>
-						<ComboboxList>
-							<ComboboxGroup>
-								{campuses?.map(({ code, name }, idx) => (
-									<ComboboxItem key={idx} value={code} keywords={[name]}>
-										{name}
-									</ComboboxItem>
-								))}
-							</ComboboxGroup>
-						</ComboboxList>
-					</ComboboxContent>
-				</Combobox>
-
-				{campusesError && (
-					<div className="text-sm text-red-500">{campusesError.message}</div>
-				)}
-
-				{(!selectedCampus || selectedCampus.requireFaculty) && (
-					<Combobox
-						type="faculty"
-						modal={true}
-						loading={facultiesLoading}
-						loadingText="Loading faculties..."
-						data={
-							faculties?.map(({ code, name }) => ({
-								value: code,
-								label: name,
-							})) || []
-						}
-						value={selectedFaculty?.code || ""}
-						onValueChange={handleFacultyChange}
-					>
-						<ComboboxTrigger
-							className={`w-full ${
-								facultiesLoading
-									? "cursor-wait"
-									: !faculties
-										? "cursor-not-allowed opacity-50"
-										: ""
-							}`}
-							disabled={
-								!selectedCampus?.requireFaculty ||
-								facultiesLoading ||
-								!faculties
+				<div className="space-y-5">
+					<section className="space-y-2">
+						<div className="flex items-center justify-between">
+							<h3 className="text-sm font-medium text-muted-foreground">
+								Campus
+							</h3>
+							{campusesLoading && (
+								<span className="text-xs text-muted-foreground">Loading…</span>
+							)}
+						</div>
+						<Combobox
+							type="campus"
+							modal
+							loading={campusesLoading}
+							loadingText="Loading campuses…"
+							data={
+								campuses?.map((campus) => ({
+									value: campus.code,
+									label: campus.name,
+								})) ?? []
 							}
-						/>
-						<ComboboxContent>
-							<ComboboxInput />
-							<ComboboxEmpty>
-								{facultiesLoading
-									? "Loading faculties..."
-									: "No faculties found"}
-							</ComboboxEmpty>
-							<ComboboxList>
-								<ComboboxGroup>
-									{faculties?.map(({ code: id, name }, idx) => (
-										<ComboboxItem key={idx} value={id} keywords={[name]}>
-											{name}
-										</ComboboxItem>
-									))}
-								</ComboboxGroup>
-							</ComboboxList>
-						</ComboboxContent>
-					</Combobox>
-				)}
+							value={selectedCampus?.code ?? ""}
+							onValueChange={handleCampusChange}
+						>
+							<ComboboxTrigger
+								className="w-full"
+								disabled={campusesLoading || !campuses?.length}
+							/>
+							<ComboboxContent className="max-h-60">
+								<ComboboxInput placeholder="Search campuses…" />
+								<ComboboxEmpty>
+									{campusesLoading ? "Loading campuses…" : "No campuses found"}
+								</ComboboxEmpty>
+								<ComboboxList>
+									<ComboboxGroup>
+										{campuses?.map((campus) => (
+											<ComboboxItem
+												key={campus.code}
+												value={campus.code}
+												keywords={[campus.name]}
+											>
+												{campus.code} – {campus.name}
+											</ComboboxItem>
+										))}
+									</ComboboxGroup>
+								</ComboboxList>
+							</ComboboxContent>
+						</Combobox>
+						{campusesError ? (
+							<p className="text-sm text-destructive">
+								{campusesError.message}
+							</p>
+						) : null}
+					</section>
 
-				{facultiesError && (
-					<div className="text-sm text-red-500">
-						{(facultiesError as Error).message}
-					</div>
-				)}
-			</div>
+					{selectedCampus?.requireFaculty ? (
+						<section className="space-y-2">
+							<div className="flex items-center justify-between">
+								<h3 className="text-sm font-medium text-muted-foreground">
+									Faculty
+								</h3>
+								{facultiesLoading && (
+									<span className="text-xs text-muted-foreground">
+										Loading…
+									</span>
+								)}
+							</div>
+							<Combobox
+								type="faculty"
+								modal
+								loading={facultiesLoading}
+								loadingText="Loading faculties…"
+								data={
+									faculties?.map((faculty) => ({
+										value: faculty.code,
+										label: faculty.name,
+									})) ?? []
+								}
+								value={selectedFaculty?.code ?? ""}
+								onValueChange={handleFacultyChange}
+							>
+								<ComboboxTrigger
+									className="w-full"
+									disabled={facultiesLoading || !faculties?.length}
+								/>
+								<ComboboxContent className="max-h-60">
+									<ComboboxInput placeholder="Search faculties…" />
+									<ComboboxEmpty>
+										{facultiesLoading
+											? "Loading faculties…"
+											: "No faculties for this campus"}
+									</ComboboxEmpty>
+									<ComboboxList>
+										<ComboboxGroup>
+											{faculties?.map((faculty) => (
+												<ComboboxItem
+													key={faculty.code}
+													value={faculty.code}
+													keywords={[faculty.name]}
+												>
+													{faculty.code} – {faculty.name}
+												</ComboboxItem>
+											))}
+										</ComboboxGroup>
+									</ComboboxList>
+								</ComboboxContent>
+							</Combobox>
+							{facultiesError ? (
+								<p className="text-sm text-destructive">
+									{(facultiesError as Error).message}
+								</p>
+							) : null}
+						</section>
+					) : null}
 
-			<DialogFooter className="justify-between sm:justify-between gap-2">
-				<Button variant="outline" onClick={() => setCurrentStep(0)}>
-					<ArrowLeft size={16} />
-					Back to selection
-				</Button>
-				<Button
-					variant="outline"
-					disabled={!canProceed}
-					onClick={() => setCurrentStep(2)}
-				>
-					Next
-				</Button>
-			</DialogFooter>
-		</>
+					<p className="text-xs text-muted-foreground">
+						Your selections help narrow down the exact course catalogue. You can
+						change them later if needed.
+					</p>
+				</div>
+
+				<DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-between">
+					<Button
+						variant="ghost"
+						className="w-full sm:w-auto"
+						onClick={handleBack}
+					>
+						<ArrowLeft className="size-4" />
+						Back
+					</Button>
+					<Button
+						variant="default"
+						className="w-full sm:w-auto"
+						disabled={!canProceed}
+						onClick={handleNext}
+					>
+						Continue to groups
+					</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
 	);
 }
 
-export { CourseAndFacultySelectorStep };
+function pickSelectorState(
+	state: ReturnType<typeof useImporterSelectionStore.getState>,
+) {
+	return {
+		selectedCampus: state.selectedCampus,
+		selectedFaculty: state.selectedFaculty,
+		setSelectedCampus: state.setSelectedCampus,
+		setSelectedFaculty: state.setSelectedFaculty,
+		setCurrentStep: state.setCurrentStep,
+	};
+}
