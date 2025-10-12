@@ -45,7 +45,7 @@ export function createUiTMGroupFromMyStudentGroup(
 			),
 	);
 
-	const mergedSessions = Group.mergeOverlappingSessions(sessions);
+	const mergedSessions = Group.mergeOverlappingAndConsecutiveSessions(sessions);
 
 	const meetingTimes = mergedSessions.map((session) => {
 		const meeting = MeetingTime.createFromSchema({

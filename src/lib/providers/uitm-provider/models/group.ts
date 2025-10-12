@@ -1,3 +1,4 @@
+import { uniq } from "es-toolkit";
 import { MeetingTime } from "~/lib/models/meeting-time";
 import { getOrAssignSolidColorFor } from "~/lib/stores/color-store";
 import { fetchFromBackend } from "~/lib/utils/backend";
@@ -42,7 +43,7 @@ export class Group {
 				new Group(
 					g.code,
 					course,
-					Group.mergeOverlappingSessions(
+					Group.mergeOverlappingAndConsecutiveSessions(
 						g.sessions.map(
 							(s) => new Session(s.groupCode, s.room, s.day, s.start, s.end),
 						),
@@ -51,7 +52,9 @@ export class Group {
 		);
 	}
 
-	public static mergeOverlappingSessions(sessions: Session[]): Session[] {
+	public static mergeOverlappingAndConsecutiveSessions(
+		sessions: Session[],
+	): Session[] {
 		if (sessions.length <= 1) return sessions;
 
 		// Sort sessions by day and start time
@@ -71,15 +74,18 @@ export class Group {
 				current.day === next.day &&
 				current.end &&
 				next.start &&
-				current.end >= next.start
+				(current.end === next.start // Consecutive
+					? current.room === next.room // Same room for consecutive
+					: current.end > next.start) // Overlapping
 			) {
-				// Merge sessions
 				const newEnd = current.end > (next.end ?? "") ? current.end : next.end;
-				const sameRoom = current.room === next.room;
+				const newRoom = uniq(
+					[current.room, next.room].map((u) => (!u ? "Online" : u)),
+				).join(" / ");
 
 				current = new Session(
 					current.groupCode,
-					sameRoom ? current.room : undefined, // Remove room if different
+					newRoom,
 					current.day,
 					current.start,
 					newEnd,

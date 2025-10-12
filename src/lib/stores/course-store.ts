@@ -368,7 +368,7 @@ if (process.env.NODE_ENV !== "production") {
 		]
 			.slice(0, 3)
 			.forEach((c) => {
-				CourseStore.getState().addCourse(c);
+				// CourseStore.getState().addCourse(c);
 			});
 	}, 0);
 }

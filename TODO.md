@@ -1,3 +1,3 @@
 - Add a "Add from UiTM iCress" button in main screen
 - Redesign Element Settings
-- Keep room names after merging overlaps
+- Add a "clear all" button for courses
