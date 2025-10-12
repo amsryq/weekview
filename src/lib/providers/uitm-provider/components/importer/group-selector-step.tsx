@@ -224,7 +224,7 @@ export function GroupSelectorDialog({
 
 					<section className="space-y-3 rounded-xl border border-border/70 bg-muted/30 p-4">
 						<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-							<div className="flex items-center gap-2">
+							<div className="flex items-center justify-between gap-2">
 								<h3 className="text-sm font-medium text-muted-foreground">
 									Available groups
 								</h3>
@@ -235,7 +235,7 @@ export function GroupSelectorDialog({
 									<SheetTrigger asChild>
 										<Button
 											variant="secondary"
-											className="w-full justify-between gap-3 px-3 py-2 text-sm sm:w-auto"
+											className="w-fit justify-between gap-3 px-3 py-2 text-sm"
 										>
 											<span className="font-medium">Selected groups</span>
 											<span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">

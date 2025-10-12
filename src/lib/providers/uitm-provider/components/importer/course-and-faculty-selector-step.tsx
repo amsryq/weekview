@@ -142,7 +142,7 @@ export function CourseAndFacultySelectorDialog({
 												value={campus.code}
 												keywords={[campus.name]}
 											>
-												{campus.code} – {campus.name}
+												{campus.name}
 											</ComboboxItem>
 										))}
 									</ComboboxGroup>
@@ -201,7 +201,7 @@ export function CourseAndFacultySelectorDialog({
 													value={faculty.code}
 													keywords={[faculty.name]}
 												>
-													{faculty.code} – {faculty.name}
+													{faculty.name}
 												</ComboboxItem>
 											))}
 										</ComboboxGroup>
