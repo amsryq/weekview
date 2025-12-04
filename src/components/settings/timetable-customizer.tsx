@@ -1,18 +1,19 @@
+"use client";
+
 import { merge } from "es-toolkit";
-import { Image, Palette, Table } from "lucide-react";
-import { PartialDeep } from "type-fest";
+import {
+	ImageIcon,
+	LayoutGridIcon,
+	Palette,
+	RotateCcwIcon,
+} from "lucide-react";
+import { useState } from "react";
+import type { PartialDeep } from "type-fest";
 import { useStore } from "zustand";
 import type { CellAppearance } from "~/lib/models/cell-appearance";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { PaywallOverlay } from "../paywall-overlay";
 import { Button } from "../ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "../ui/card";
 import {
 	Dialog,
 	DialogClose,
@@ -22,17 +23,21 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "../ui/dialog";
-import { Label } from "../ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { BackgroundImageUpload } from "./background-image-upload";
 import { CellAppearanceLayoutSettings } from "./cell-appearance-layout-settings";
 
+type TabValue = "layout" | "background" | "cells";
+
+interface TimetableCustomizerProps {
+	children: React.ReactNode;
+}
+
 export default function TimetableCustomizer({
 	children,
-}: {
-	children: React.ReactNode;
-}) {
+}: TimetableCustomizerProps) {
 	const prefs = useStore(TimetablePreferencesStore);
-	// const previewLayout = prefs.layout;
+	const [activeTab, setActiveTab] = useState<TabValue>("layout");
 
 	const handleCellAppearanceChange = (changes: PartialDeep<CellAppearance>) => {
 		TimetablePreferencesStore.setState((writable) => {
@@ -40,209 +45,225 @@ export default function TimetableCustomizer({
 		});
 	};
 
-	// const preview = useMemo(
-	//   () => (
-	//     <WeeklyTimetable
-	//       layout={previewLayout}
-	//       containerId="weekly-timetable-preview"
-	//       courses={[
-	//         Course.createFromSchema({
-	//           code: "CS101",
-	//           name: "Intro to Computer Science",
-	//           cellAppearance: {
-	//             background: {
-	//               type: "solid",
-	//               color: "#4F46E5",
-	//             },
-	//             fgColor: "#ffffff",
-	//           },
-	//           meetingTimes: [
-	//             {
-	//               day: 1,
-	//               startTime: "09:00",
-	//               endTime: "10:30",
-	//               location: "Room A",
-	//             },
-	//             {
-	//               day: 2,
-	//               startTime: "10:00",
-	//               endTime: "12:00",
-	//               location: "Room B",
-	//             },
-	//           ],
-	//         }),
-	//         Course.createFromSchema({
-	//           code: "MA201",
-	//           meetingTimes: [
-	//             {
-	//               day: 3,
-	//               startTime: "08:30",
-	//               endTime: "10:30",
-	//               location: "Room C",
-	//             },
-	//           ],
-	//           cellAppearance: {
-	//             background: {
-	//               type: "gradient",
-	//               gradientColors: ["#059669", "#34D399"],
-	//               gradientDirection: "to-br",
-	//             },
-	//             fgColor: "#ffffff",
-	//           },
-	//         }),
-	//         Course.createFromSchema({
-	//           code: "PH102",
-	//           cellAppearance: {
-	//             background: {
-	//               type: "gradient",
-	//               gradientColors: ["#F59E42", "#F97316", "#EF4444"],
-	//               gradientDirection: "to-t",
-	//             },
-	//             fgColor: "#ffffff",
-	//           },
-	//           name: "Physics",
-	//           meetingTimes: [
-	//             {
-	//               day: 4,
-	//               startTime: "08:00",
-	//               endTime: "10:00",
-	//               location: "Lab 1",
-	//             },
-	//           ],
-	//         }),
-	//       ]}
-	//     />
-	//   ),
-	//   [previewLayout],
-	// );
+	const handleReset = () => {
+		TimetablePreferencesStore.getState().reset();
+	};
 
 	return (
 		<Dialog>
 			<DialogTrigger asChild>{children}</DialogTrigger>
-			<DialogContent className="flex flex-col w-2xl sm:max-w-[90vw] h-[80vh]">
+			<DialogContent className="flex flex-col sm:max-w-2xl max-h-[85vh]">
 				<DialogHeader>
 					<DialogTitle>Customize Timetable</DialogTitle>
 					<DialogDescription>
-						Customize the overall appearance and layout of your timetable
+						Customize the appearance and layout of your timetable
 					</DialogDescription>
 				</DialogHeader>
-				<div className="flex-1 overflow-y-auto h-full">
-					<div className="sm:pr-4 space-y-6">
-						{/* Table Layout Section */}
-						<Card>
-							<CardHeader>
-								<CardTitle className="text-base">Table Layout</CardTitle>
-								<CardDescription>
-									Choose how your timetable is organized
-								</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<div className="space-y-3">
-									<Label className="text-sm font-medium">Layout Style</Label>
-									<div className="flex flex-wrap gap-2">
-										<Button
-											variant={prefs.layout === "rows" ? "default" : "outline"}
-											onClick={() => prefs.setValue("layout", "rows")}
-											className="flex items-center gap-2"
-										>
-											<Table className="w-4 h-4" />
-											Horizontal rows
-										</Button>
-										<Button
-											variant={
-												prefs.layout === "columns" ? "default" : "outline"
-											}
-											onClick={() => prefs.setValue("layout", "columns")}
-											className="flex items-center gap-2"
-										>
-											<Table className="w-4 h-4 rotate-90" />
-											Vertical columns
-										</Button>
-									</div>
-									<p className="text-xs text-muted-foreground">
-										Choose between horizontal rows (days as rows) or vertical
-										columns (days as columns)
-									</p>
-								</div>
-							</CardContent>
-						</Card>
 
-						{/* Background Image Section */}
-						<PaywallOverlay
-							title="Premium Feature"
-							description="Background images are available for supporters only. Unlock this feature and support the project!"
-							className="overflow-clip rounded-xl border-1"
-						>
-							<Card>
-								<CardHeader>
-									<CardTitle className="flex items-center gap-2 text-base">
-										<Image className="w-5 h-5" />
-										Background
-									</CardTitle>
-									<CardDescription>
-										Set a custom background for your timetable
-									</CardDescription>
-								</CardHeader>
-								<CardContent>
-									<div className="space-y-3">
-										<Label className="text-sm font-medium flex items-center gap-2">
-											Image
-										</Label>
-										<BackgroundImageUpload
-											value={prefs.backgroundImage}
-											onChange={(imageUrl) =>
-												prefs.setBackgroundImage(imageUrl)
-											}
-											options={prefs.backgroundImageOptions}
-											onOptionsChange={(options) =>
-												prefs.setBackgroundImageOptions(options)
-											}
-										/>
-										<p className="text-xs text-muted-foreground">
-											Upload an image to use as the background for your
-											timetable
-										</p>
-									</div>
-								</CardContent>
-							</Card>
-						</PaywallOverlay>
+				<Tabs
+					value={activeTab}
+					onValueChange={(v) => setActiveTab(v as TabValue)}
+					className="flex-1 flex flex-col min-h-0"
+				>
+					<TabsList className="w-full grid grid-cols-3">
+						<TabsTrigger value="layout" className="gap-2">
+							<LayoutGridIcon className="size-4" />
+							<span className="hidden sm:inline">Layout</span>
+						</TabsTrigger>
+						<TabsTrigger value="background" className="gap-2">
+							<ImageIcon className="size-4" />
+							<span className="hidden sm:inline">Background</span>
+						</TabsTrigger>
+						<TabsTrigger value="cells" className="gap-2">
+							<Palette className="size-4" />
+							<span className="hidden sm:inline">Cell Styles</span>
+						</TabsTrigger>
+					</TabsList>
 
-						{/* Cell Appearance Settings */}
-						<Card>
-							{/* Cell Styles Header */}
-							<CardHeader>
-								<CardTitle className="flex items-center gap-2">
-									<Palette className="w-5 h-5" />
-									Cell Styles
-								</CardTitle>
-								<CardDescription>
-									Customize the appearance of timetable cells
-								</CardDescription>
-							</CardHeader>
+					<div className="flex-1 overflow-y-auto py-4 min-h-0">
+						<TabsContent value="layout" className="mt-0 space-y-6">
+							<LayoutSettings
+								layout={prefs.layout}
+								onLayoutChange={(layout) => prefs.setValue("layout", layout)}
+							/>
+						</TabsContent>
 
-							<CardContent>
-								<CellAppearanceLayoutSettings
-									value={prefs.cellAppearance}
-									onChange={handleCellAppearanceChange}
+						<TabsContent value="background" className="mt-0">
+							<PaywallOverlay
+								title="Premium Feature"
+								description="Background images are available for supporters only."
+								className="rounded-lg"
+							>
+								<BackgroundSettings
+									backgroundImage={prefs.backgroundImage}
+									backgroundImageOptions={prefs.backgroundImageOptions}
+									onBackgroundImageChange={prefs.setBackgroundImage}
+									onBackgroundImageOptionsChange={
+										prefs.setBackgroundImageOptions
+									}
 								/>
-							</CardContent>
-						</Card>
-					</div>
-				</div>
+							</PaywallOverlay>
+						</TabsContent>
 
-				{/* Sticky footer with buttons */}
-				<div className="flex justify-end gap-2 pt-4 border-t bg-background">
-					<Button
-						variant="outline"
-						onClick={() => TimetablePreferencesStore.getState().reset()}
-					>
+						<TabsContent value="cells" className="mt-0">
+							<CellAppearanceLayoutSettings
+								value={prefs.cellAppearance}
+								onChange={handleCellAppearanceChange}
+							/>
+						</TabsContent>
+					</div>
+				</Tabs>
+
+				<div className="flex justify-between gap-2 pt-4 border-t">
+					<Button variant="ghost" size="sm" onClick={handleReset}>
+						<RotateCcwIcon className="size-4 mr-2" />
 						Reset to defaults
 					</Button>
 					<DialogClose asChild>
-						<Button>Close</Button>
+						<Button>Done</Button>
 					</DialogClose>
 				</div>
 			</DialogContent>
 		</Dialog>
+	);
+}
+
+interface LayoutSettingsProps {
+	layout: "rows" | "columns";
+	onLayoutChange: (layout: "rows" | "columns") => void;
+}
+
+function LayoutSettings({ layout, onLayoutChange }: LayoutSettingsProps) {
+	return (
+		<div className="space-y-4">
+			<div>
+				<h4 className="text-sm font-medium mb-2">Table Layout</h4>
+				<p className="text-xs text-muted-foreground mb-4">
+					Choose how your timetable is organized
+				</p>
+			</div>
+
+			<div className="grid grid-cols-2 gap-3">
+				<LayoutOption
+					title="Horizontal"
+					description="Days as rows"
+					isSelected={layout === "rows"}
+					onClick={() => onLayoutChange("rows")}
+					icon={<HorizontalLayoutIcon />}
+				/>
+				<LayoutOption
+					title="Vertical"
+					description="Days as columns"
+					isSelected={layout === "columns"}
+					onClick={() => onLayoutChange("columns")}
+					icon={<VerticalLayoutIcon />}
+				/>
+			</div>
+		</div>
+	);
+}
+
+interface LayoutOptionProps {
+	title: string;
+	description: string;
+	isSelected: boolean;
+	onClick: () => void;
+	icon: React.ReactNode;
+}
+
+function LayoutOption({
+	title,
+	description,
+	isSelected,
+	onClick,
+	icon,
+}: LayoutOptionProps) {
+	return (
+		<button
+			type="button"
+			onClick={onClick}
+			className={`
+				flex flex-col items-center gap-3 p-4 rounded-lg border-2 transition-all
+				${
+					isSelected
+						? "border-primary bg-primary/5"
+						: "border-muted hover:border-muted-foreground/30"
+				}
+			`}
+		>
+			<div
+				className={`p-2 rounded-md ${isSelected ? "text-primary" : "text-muted-foreground"}`}
+			>
+				{icon}
+			</div>
+			<div className="text-center">
+				<div className="text-sm font-medium">{title}</div>
+				<div className="text-xs text-muted-foreground">{description}</div>
+			</div>
+		</button>
+	);
+}
+
+function HorizontalLayoutIcon() {
+	return (
+		<svg
+			className="size-8"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="1.5"
+		>
+			<rect x="2" y="4" width="20" height="4" rx="1" />
+			<rect x="2" y="10" width="20" height="4" rx="1" />
+			<rect x="2" y="16" width="20" height="4" rx="1" />
+		</svg>
+	);
+}
+
+function VerticalLayoutIcon() {
+	return (
+		<svg
+			className="size-8"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="1.5"
+		>
+			<rect x="3" y="2" width="5" height="20" rx="1" />
+			<rect x="10" y="2" width="5" height="20" rx="1" />
+			<rect x="17" y="2" width="5" height="20" rx="1" />
+		</svg>
+	);
+}
+
+interface BackgroundSettingsProps {
+	backgroundImage: string | null;
+	backgroundImageOptions: { opacity: number };
+	onBackgroundImageChange: (imageUrl: string | null) => void;
+	onBackgroundImageOptionsChange: (options: { opacity?: number }) => void;
+}
+
+function BackgroundSettings({
+	backgroundImage,
+	backgroundImageOptions,
+	onBackgroundImageChange,
+	onBackgroundImageOptionsChange,
+}: BackgroundSettingsProps) {
+	return (
+		<div className="space-y-4">
+			<div>
+				<h4 className="text-sm font-medium mb-2">Background Image</h4>
+				<p className="text-xs text-muted-foreground mb-4">
+					Set a custom background for your timetable
+				</p>
+			</div>
+
+			<BackgroundImageUpload
+				value={backgroundImage}
+				onChange={onBackgroundImageChange}
+				options={backgroundImageOptions}
+				onOptionsChange={onBackgroundImageOptionsChange}
+			/>
+		</div>
 	);
 }

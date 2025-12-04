@@ -1,9 +1,7 @@
 "use client";
 
-import { isEqual } from "es-toolkit";
-import { Plus, X } from "lucide-react";
-import { useEffect, useRef } from "react";
-import { Control, Controller, useFieldArray, useForm } from "react-hook-form";
+import { Plus, XIcon } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ColorEntry, GradientDirection } from "~/lib/models/color-entry";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -17,18 +15,11 @@ import {
 } from "../ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 
-interface CellBackgroundConfigurerProps {
+interface ColorEntryConfigurerProps {
 	value: ColorEntry.Schema;
 	onChange: (value: ColorEntry.Schema) => void;
 	showTabs?: boolean;
 }
-
-type FormValues = {
-	type: ColorEntry.Schema["type"];
-	color: string;
-	gradientColors: string[];
-	gradientDirection: GradientDirection;
-};
 
 const GRADIENT_DIRECTIONS: { value: GradientDirection; label: string }[] = [
 	{ value: "to-r", label: "→ Right" },
@@ -41,250 +32,219 @@ const GRADIENT_DIRECTIONS: { value: GradientDirection; label: string }[] = [
 	{ value: "to-bl", label: "↙ Bottom Left" },
 ];
 
-function toFormValues(value: ColorEntry.Schema): FormValues {
-	if (value.type === "solid") {
-		return {
-			type: "solid",
-			color: value.color,
-			gradientColors: [],
-			gradientDirection: "to-r",
-		};
-	}
-	return {
-		type: "gradient",
-		color: value.gradientColors[0] || "#000000",
-		gradientColors: [...value.gradientColors],
-		gradientDirection: value.gradientDirection,
-	};
-}
-
-function toColorEntry(form: FormValues): ColorEntry.Schema {
-	if (form.type === "solid") {
-		return { type: "solid", color: form.color || "#000000" };
-	}
-	const colors = form.gradientColors?.length
-		? form.gradientColors
-		: [form.color || "#000000", "#ffffff"];
-	return {
-		type: "gradient",
-		gradientColors: colors,
-		gradientDirection: form.gradientDirection || "to-r",
-	};
-}
-
-const ColorInputRow = ({
-	value,
-	onChange,
-	onRemove,
-	showRemove,
-}: {
-	value: string;
-	onChange: (value: string) => void;
-	onRemove?: () => void;
-	showRemove?: boolean;
-}) => (
-	<div className="flex items-center gap-2">
-		<Input
-			type="color"
-			value={value}
-			onChange={(e) => onChange(e.target.value)}
-			className="w-12 h-8 p-1 flex-shrink-0"
-		/>
-		<Input
-			type="text"
-			value={value}
-			onChange={(e) => onChange(e.target.value)}
-			className="flex-1"
-		/>
-		{showRemove && onRemove && (
-			<Button
-				type="button"
-				size="icon"
-				variant="outline"
-				onClick={onRemove}
-				className="w-8 h-8"
-			>
-				<X className="w-4 h-4" />
-			</Button>
-		)}
-	</div>
-);
-
-const GradientDirectionSelect = ({
-	control,
-}: {
-	control: Control<FormValues>;
-}) => (
-	<Controller
-		control={control}
-		name="gradientDirection"
-		render={({ field }) => (
-			<Select value={field.value} onValueChange={field.onChange}>
-				<SelectTrigger>
-					<SelectValue placeholder="Direction" />
-				</SelectTrigger>
-				<SelectContent>
-					{GRADIENT_DIRECTIONS.map(({ value, label }) => (
-						<SelectItem key={value} value={value}>
-							{label}
-						</SelectItem>
-					))}
-				</SelectContent>
-			</Select>
-		)}
-	/>
-);
-
-const ColorPicker = ({ control }: { control: Control<FormValues> }) => (
-	<Controller
-		control={control}
-		name="color"
-		render={({ field }) => (
-			<div className="flex items-center gap-3">
-				<Input
-					type="color"
-					value={field.value}
-					onChange={(e) => field.onChange(e.target.value)}
-					className="w-20 h-10 p-1"
-				/>
-				<Input
-					type="text"
-					value={field.value}
-					onChange={(e) => field.onChange(e.target.value)}
-					className="flex-1"
-				/>
-			</div>
-		)}
-	/>
-);
-
 export function ColorEntryConfigurer({
 	value,
 	onChange,
-	showTabs,
-}: CellBackgroundConfigurerProps) {
-	const { control, watch, setValue, getValues } = useForm<FormValues>({
-		defaultValues: toFormValues(value),
-	});
+	showTabs = true,
+}: ColorEntryConfigurerProps) {
+	const [type, setType] = useState<"solid" | "gradient">(value.type);
+	const [solidColor, setSolidColor] = useState(
+		value.type === "solid" ? value.color : "#000000",
+	);
+	const [gradientColors, setGradientColors] = useState<string[]>(
+		value.type === "gradient" ? value.gradientColors : ["#000000", "#ffffff"],
+	);
+	const [gradientDirection, setGradientDirection] = useState<GradientDirection>(
+		value.type === "gradient" ? value.gradientDirection : "to-r",
+	);
 
-	const { fields, append, remove } = useFieldArray({
-		control,
-		name: "gradientColors" as never,
-	});
+	const lastEmittedRef = useRef<ColorEntry.Schema>(value);
 
-	const watched = watch();
-	const previousValueRef = useRef<ColorEntry.Schema>(value);
-
-	// Sync form when external value changes
-	useEffect(() => {
-		if (!isEqual(value, previousValueRef.current)) {
-			const formValues = toFormValues(value);
-			setValue("type", formValues.type);
-			setValue("color", formValues.color);
-			setValue("gradientColors", formValues.gradientColors);
-			setValue("gradientDirection", formValues.gradientDirection);
-			previousValueRef.current = value;
+	// Build the current color entry from state
+	const currentEntry = useMemo((): ColorEntry.Schema => {
+		if (type === "solid") {
+			return { type: "solid", color: solidColor };
 		}
-	}, [value, setValue]);
+		return {
+			type: "gradient",
+			gradientColors:
+				gradientColors.length >= 2 ? gradientColors : ["#000000", "#ffffff"],
+			gradientDirection,
+		};
+	}, [type, solidColor, gradientColors, gradientDirection]);
+
+	// Sync internal state when external value changes
+	useEffect(() => {
+		const prev = lastEmittedRef.current;
+		if (value.type !== prev.type) {
+			setType(value.type);
+		}
+		if (
+			value.type === "solid" &&
+			(prev.type !== "solid" || value.color !== prev.color)
+		) {
+			setSolidColor(value.color);
+		}
+		if (value.type === "gradient") {
+			if (
+				prev.type !== "gradient" ||
+				JSON.stringify(value.gradientColors) !==
+					JSON.stringify(prev.gradientColors)
+			) {
+				setGradientColors(value.gradientColors);
+			}
+			if (
+				prev.type !== "gradient" ||
+				value.gradientDirection !== prev.gradientDirection
+			) {
+				setGradientDirection(value.gradientDirection);
+			}
+		}
+		lastEmittedRef.current = value;
+	}, [value]);
 
 	// Emit changes to parent
 	useEffect(() => {
-		const newValue = toColorEntry(watched);
-		if (!isEqual(newValue, previousValueRef.current)) {
-			previousValueRef.current = newValue;
-			onChange(newValue);
+		if (
+			JSON.stringify(currentEntry) !== JSON.stringify(lastEmittedRef.current)
+		) {
+			lastEmittedRef.current = currentEntry;
+			onChange(currentEntry);
 		}
-	}, [watched, onChange]);
+	}, [currentEntry, onChange]);
 
-	const previewStyle = ColorEntry.getBackgroundStyle(toColorEntry(watched));
+	const handleTypeChange = useCallback(
+		(newType: "solid" | "gradient") => {
+			setType(newType);
+			if (newType === "gradient" && gradientColors.length < 2) {
+				setGradientColors(["#000000", "#ffffff"]);
+			}
+		},
+		[gradientColors.length],
+	);
+
+	const handleGradientColorChange = useCallback(
+		(index: number, color: string) => {
+			setGradientColors((prev) => {
+				const newColors = [...prev];
+				newColors[index] = color;
+				return newColors;
+			});
+		},
+		[],
+	);
+
+	const handleAddGradientColor = useCallback(() => {
+		setGradientColors((prev) => [...prev, "#888888"]);
+	}, []);
+
+	const handleRemoveGradientColor = useCallback((index: number) => {
+		setGradientColors((prev) => prev.filter((_, i) => i !== index));
+	}, []);
+
+	const previewStyle = ColorEntry.getBackgroundStyle(currentEntry);
 
 	return (
 		<div className="space-y-4">
-			{/* Tabs */}
 			<Tabs
-				value={watched.type}
-				onValueChange={(val) => {
-					if (val === "solid") {
-						setValue("type", "solid");
-					} else {
-						setValue("type", "gradient");
-						const current = getValues();
-						if (!current.gradientColors?.length) {
-							setValue("gradientColors", [
-								current.color || "#000000",
-								"#ffffff",
-							]);
-						}
-						if (!current.gradientDirection) {
-							setValue("gradientDirection", "to-r");
-						}
-					}
-				}}
+				value={type}
+				onValueChange={(v) => handleTypeChange(v as "solid" | "gradient")}
 			>
 				{showTabs && (
-					<TabsList className="w-full">
+					<TabsList className="w-full grid grid-cols-2">
 						<TabsTrigger value="solid">Solid</TabsTrigger>
 						<TabsTrigger value="gradient">Gradient</TabsTrigger>
 					</TabsList>
 				)}
 
 				{/* Preview */}
-				<div className="space-y-2">
+				<div className="space-y-2 mt-4">
 					<Label>Preview</Label>
-					<div
-						className="h-12 rounded border border-border"
-						style={previewStyle}
-					/>
+					<div className="h-12 rounded-lg border" style={previewStyle} />
 				</div>
 
-				{/* Solid Tab */}
-				<TabsContent value="solid" className="space-y-4">
+				{/* Solid Color Tab */}
+				<TabsContent value="solid" className="space-y-4 mt-4">
 					<div className="space-y-2">
 						<Label>Color</Label>
-						<ColorPicker control={control} />
+						<ColorInput value={solidColor} onChange={setSolidColor} />
 					</div>
 				</TabsContent>
 
 				{/* Gradient Tab */}
-				<TabsContent value="gradient" className="space-y-4">
-					{/* Direction */}
+				<TabsContent value="gradient" className="space-y-4 mt-4">
 					<div className="space-y-2">
-						<Label>Gradient Direction</Label>
-						<GradientDirectionSelect control={control} />
+						<Label>Direction</Label>
+						<Select
+							value={gradientDirection}
+							onValueChange={(v) =>
+								setGradientDirection(v as GradientDirection)
+							}
+						>
+							<SelectTrigger>
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								{GRADIENT_DIRECTIONS.map(({ value, label }) => (
+									<SelectItem key={value} value={value}>
+										{label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
 					</div>
 
-					{/* Colors */}
 					<div className="space-y-2">
-						<Label>Gradient Colors</Label>
+						<Label>Colors</Label>
 						<div className="space-y-2">
-							{fields.map((fieldItem, index) => (
-								<Controller
-									key={fieldItem.id}
-									control={control}
-									name={`gradientColors.${index}` as const}
-									render={({ field }) => (
-										<ColorInputRow
-											value={field.value}
-											onChange={field.onChange}
-											onRemove={() => remove(index)}
-											showRemove={fields.length > 2}
-										/>
+							{gradientColors.map((color, index) => (
+								<div key={index} className="flex items-center gap-2">
+									<ColorInput
+										value={color}
+										onChange={(c) => handleGradientColorChange(index, c)}
+									/>
+									{gradientColors.length > 2 && (
+										<Button
+											type="button"
+											variant="ghost"
+											size="icon"
+											onClick={() => handleRemoveGradientColor(index)}
+											className="size-8 shrink-0"
+										>
+											<XIcon className="size-4" />
+										</Button>
 									)}
-								/>
+								</div>
 							))}
 							<Button
 								type="button"
 								variant="outline"
 								size="sm"
-								onClick={() => append("#000000")}
-								className="flex items-center gap-1"
+								onClick={handleAddGradientColor}
+								className="w-full"
 							>
-								<Plus className="w-4 h-4" /> Add Color
+								<Plus className="size-4 mr-1" />
+								Add Color
 							</Button>
 						</div>
 					</div>
 				</TabsContent>
 			</Tabs>
+		</div>
+	);
+}
+
+interface ColorInputProps {
+	value: string;
+	onChange: (value: string) => void;
+}
+
+function ColorInput({ value, onChange }: ColorInputProps) {
+	return (
+		<div className="flex items-center gap-2">
+			<Input
+				type="color"
+				value={value}
+				onChange={(e) => onChange(e.target.value)}
+				className="w-12 h-10 p-1 shrink-0 cursor-pointer"
+			/>
+			<Input
+				type="text"
+				value={value}
+				onChange={(e) => onChange(e.target.value)}
+				placeholder="#000000"
+				className="flex-1 font-mono"
+			/>
 		</div>
 	);
 }

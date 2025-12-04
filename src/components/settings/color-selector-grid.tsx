@@ -1,11 +1,12 @@
 "use client";
 
 import { isEqual, omit } from "es-toolkit";
-import { Plus, Trash2 } from "lucide-react";
-import { useRef, useState } from "react";
+import { PlusIcon, Trash2Icon } from "lucide-react";
+import { useCallback, useRef, useState } from "react";
 import { usePaywall } from "~/lib/hooks/paywall";
 import { ColorEntry } from "~/lib/models/color-entry";
 import { useColorStore } from "~/lib/stores/color-store";
+import { cn } from "~/lib/utils/styles";
 import { Button } from "../ui/button";
 import {
 	Dialog,
@@ -17,79 +18,111 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
 import { ColorEntryConfigurer } from "./color-entry-configurer";
 
-interface ColorPickerProps {
+interface ColorSelectorGridProps {
 	value?: ColorEntry.Schema;
 	onChange: (value: ColorEntry.Schema) => void;
 }
 
-/**
- * Allow managing (adding/removing) colors from ColorStore
- */
-export function ColorSelectorGrid({ value, onChange }: ColorPickerProps) {
-	const [colorType, setBackgroundType] = useState<"solid" | "gradient">(
-		value?.type || "solid",
-	);
+type ColorType = "solid" | "gradient";
 
-	const [showCustomDialog, setShowCustomDialog] = useState(false);
+export function ColorSelectorGrid({ value, onChange }: ColorSelectorGridProps) {
+	const [colorType, setColorType] = useState<ColorType>(value?.type || "solid");
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [customColor, setCustomColor] = useState<ColorEntry.Schema>({
 		type: "solid",
 		color: "#000000",
 	});
 
 	const { checkAccess } = usePaywall();
-
 	const colors = useColorStore((state) => state.colors);
 	const addColor = useColorStore((state) => state.addColor);
 	const removeColor = useColorStore((state) => state.removeColor);
-	const lastSelected = useRef<ColorEntry.Schema | null>(null);
+	const lastSelectedRef = useRef<ColorEntry.Schema | null>(null);
 
-	// Filter colors by current color type
-	const filteredColors = colors.filter((color) => color.def.type === colorType);
+	const filteredColors = colors.filter((c) => c.def.type === colorType);
 
-	// Check if a color is currently selected
-	const isColorSelected = (color: ColorEntry.Schema) => {
-		if (!value || value.type !== color.type) return false;
-		// TODO: very ugly solution due to very ugly code i hate myself
-		return isEqual(omit(value, ["predefined"]), color);
-	};
+	const isColorSelected = useCallback(
+		(color: ColorEntry.Schema) => {
+			if (!value || value.type !== color.type) return false;
+			return isEqual(omit(value, ["predefined"]), color);
+		},
+		[value],
+	);
 
-	const handleColorSelect = (color: ColorEntry.Schema) => {
-		lastSelected.current = value || null;
-		onChange(color);
-	};
+	const handleColorSelect = useCallback(
+		(color: ColorEntry.Schema) => {
+			lastSelectedRef.current = value || null;
+			onChange(color);
+		},
+		[value, onChange],
+	);
 
-	const handleAddCustomColor = () => {
+	const handleTypeChange = useCallback(
+		(type: ColorType) => {
+			if (type === "gradient" && !checkAccess()) return;
+
+			setColorType(type);
+			setCustomColor(
+				type === "solid"
+					? { type: "solid", color: "#000000" }
+					: {
+							type: "gradient",
+							gradientColors: ["#000000", "#ffffff"],
+							gradientDirection: "to-r",
+						},
+			);
+		},
+		[checkAccess],
+	);
+
+	const handleAddCustomColor = useCallback(() => {
 		addColor(customColor);
 		handleColorSelect(customColor);
-		setShowCustomDialog(false);
-	};
+		setIsDialogOpen(false);
+		setCustomColor(
+			colorType === "solid"
+				? { type: "solid", color: "#000000" }
+				: {
+						type: "gradient",
+						gradientColors: ["#000000", "#ffffff"],
+						gradientDirection: "to-r",
+					},
+		);
+	}, [customColor, colorType, addColor, handleColorSelect]);
 
-	const handleTypeChange = (type: "solid" | "gradient") => {
-		if (type === "gradient" && !checkAccess()) {
-			return;
-		}
+	const handleRemoveColor = useCallback(
+		(colorId: string, colorDef: ColorEntry.Schema) => {
+			removeColor(colorId);
 
-		setBackgroundType(type);
-		// Update custom color type when switching
-		if (type === "solid") {
-			setCustomColor({ type: "solid", color: "#000000" });
-		} else {
-			setCustomColor({
-				type: "gradient",
-				gradientColors: ["#000000", "#ffffff"],
-				gradientDirection: "to-r",
-			});
-		}
-	};
+			// Select a fallback color after removal
+			const fallback =
+				lastSelectedRef.current ||
+				colors.find((c) => c.def.type === colorDef.type && c.id !== colorId)
+					?.def;
+
+			if (fallback) {
+				handleColorSelect(fallback);
+			}
+		},
+		[colors, removeColor, handleColorSelect],
+	);
+
+	const handleOpenAddDialog = useCallback(
+		(e: React.MouseEvent) => {
+			if (colorType === "gradient" && !checkAccess()) {
+				e.preventDefault();
+				return;
+			}
+		},
+		[colorType, checkAccess],
+	);
 
 	return (
 		<div className="space-y-4">
-			{/* Background Type Toggle */}
+			{/* Type Toggle */}
 			<Tabs
 				value={colorType}
-				onValueChange={(value) =>
-					handleTypeChange(value as "solid" | "gradient")
-				}
+				onValueChange={(v) => handleTypeChange(v as ColorType)}
 			>
 				<TabsList>
 					<TabsTrigger value="solid">Solid</TabsTrigger>
@@ -97,62 +130,29 @@ export function ColorSelectorGrid({ value, onChange }: ColorPickerProps) {
 				</TabsList>
 			</Tabs>
 
-			{/* Color Row */}
+			{/* Color Grid */}
 			<div className="flex flex-wrap items-center gap-2">
 				{filteredColors.map((color) => (
-					<div key={color.id} className="flex relative items-center group">
-						<button
-							type="button"
-							style={color.getBackgroundStyle()}
-							onClick={() => handleColorSelect(color.def)}
-							className={`w-8 h-8 rounded transition-all flex-shrink-0 ${
-								isColorSelected(color.def)
-									? "border-2 border-primary shadow-md scale-110"
-									: "border border-border hover:scale-110"
-							}`}
-						/>
-						{/* Trash button for user-added colors */}
-						{!color.predefined && (
-							<Button
-								type="button"
-								size="icon"
-								variant="destructive"
-								className="absolute -top-2 -right-2 w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity"
-								onClick={(e) => {
-									e.stopPropagation();
-									removeColor(color.id);
-
-									const resortColor =
-										lastSelected.current ||
-										colors.find((c) => c.def.type === color.def.type)?.def;
-
-									if (resortColor) {
-										handleColorSelect(resortColor);
-									}
-								}}
-							>
-								<Trash2 className="w-2 h-2" />
-							</Button>
-						)}
-					</div>
+					<ColorSwatch
+						key={color.id}
+						color={color}
+						isSelected={isColorSelected(color.def)}
+						onSelect={() => handleColorSelect(color.def)}
+						onRemove={() => handleRemoveColor(color.id, color.def)}
+					/>
 				))}
 
 				{/* Add Button */}
-				<Dialog open={showCustomDialog} onOpenChange={setShowCustomDialog}>
+				<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 					<DialogTrigger asChild>
 						<Button
 							type="button"
 							variant="outline"
 							size="icon"
-							className="w-8 h-8 border-dashed flex-shrink-0"
-							onClick={(e) => {
-								if (colorType === "gradient" && !checkAccess()) {
-									e.preventDefault();
-									return;
-								}
-							}}
+							className="size-8 border-dashed"
+							onClick={handleOpenAddDialog}
 						>
-							<Plus className="w-4 h-4" />
+							<PlusIcon className="size-4" />
 						</Button>
 					</DialogTrigger>
 					<DialogContent>
@@ -165,23 +165,68 @@ export function ColorSelectorGrid({ value, onChange }: ColorPickerProps) {
 							<ColorEntryConfigurer
 								value={customColor}
 								onChange={setCustomColor}
+								showTabs={false}
 							/>
-							<div className="flex gap-2">
-								<Button type="button" onClick={handleAddCustomColor}>
-									Add
-								</Button>
+							<div className="flex gap-2 justify-end">
 								<Button
 									type="button"
 									variant="outline"
-									onClick={() => setShowCustomDialog(false)}
+									onClick={() => setIsDialogOpen(false)}
 								>
 									Cancel
+								</Button>
+								<Button type="button" onClick={handleAddCustomColor}>
+									Add
 								</Button>
 							</div>
 						</div>
 					</DialogContent>
 				</Dialog>
 			</div>
+		</div>
+	);
+}
+
+interface ColorSwatchProps {
+	color: ColorEntry;
+	isSelected: boolean;
+	onSelect: () => void;
+	onRemove: () => void;
+}
+
+function ColorSwatch({
+	color,
+	isSelected,
+	onSelect,
+	onRemove,
+}: ColorSwatchProps) {
+	return (
+		<div className="relative group">
+			<button
+				type="button"
+				style={color.getBackgroundStyle()}
+				onClick={onSelect}
+				className={cn(
+					"size-8 rounded transition-all border",
+					isSelected
+						? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-110"
+						: "border-border hover:scale-110",
+				)}
+			/>
+			{!color.predefined && (
+				<Button
+					type="button"
+					size="icon"
+					variant="destructive"
+					className="absolute -top-1.5 -right-1.5 size-5 opacity-0 group-hover:opacity-100 transition-opacity"
+					onClick={(e) => {
+						e.stopPropagation();
+						onRemove();
+					}}
+				>
+					<Trash2Icon className="size-3" />
+				</Button>
+			)}
 		</div>
 	);
 }

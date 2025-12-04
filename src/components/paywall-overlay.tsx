@@ -40,6 +40,11 @@ interface PaywallOverlayProps {
 	 */
 	compact?: boolean;
 	/**
+	 * Whether to bypass the paywall and always show children
+	 * @default false
+	 */
+	bypass?: boolean;
+	/**
 	 * Children to render behind the overlay when not a supporter
 	 */
 	children?: React.ReactNode;
@@ -57,13 +62,15 @@ export function PaywallOverlay({
 	className,
 	visible,
 	compact = false,
+	bypass = false,
 	primaryButtonText = compact ? "Unlock now" : "Learn more",
 	children,
 }: PaywallOverlayProps) {
 	const { isSupporter, checkAccess } = usePaywall();
 
 	// If visible prop is provided, use it; otherwise check supporter status
-	const shouldShowOverlay = visible !== undefined ? visible : !isSupporter;
+	const shouldShowOverlay =
+		!bypass && (visible !== undefined ? visible : !isSupporter);
 
 	if (!shouldShowOverlay) {
 		return <>{children}</>;
