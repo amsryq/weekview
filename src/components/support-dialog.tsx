@@ -147,7 +147,7 @@ function GithubSponsorsCard() {
 			<CardFooter className="justify-end pt-0">
 				<Button asChild variant="outline">
 					<Link
-						href="https://github.com/sponsors/amsyarasyiq"
+						href="https://github.com/sponsors/amsryq"
 						target="_blank"
 						rel="noopener noreferrer"
 					>

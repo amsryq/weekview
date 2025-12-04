@@ -21,7 +21,7 @@ export function Footer() {
 						onClick={() => setOpenCard(true)}
 						className="underline inline-block ml-2"
 					>
-						amsyarasyiq
+						amsryq
 					</HoverCardTrigger>
 					<HoverCardContent className="w-80">
 						<div className="flex justify-between gap-4">
@@ -30,14 +30,14 @@ export function Footer() {
 								<AvatarFallback>AR</AvatarFallback>
 							</Avatar>
 							<div className="space-y-1">
-								<h4 className="text-sm font-semibold">amsyarasyiq</h4>
+								<h4 className="text-sm font-semibold">amsryq</h4>
 								<p className="text-sm">
 									Hi! I'm the developer behind Weekview, and I'm currently
 									pursuing a Diploma in Computer Science at UiTM Jasin.
 								</p>
 								<div className="flex pt-2 gap-3 text-xs font-semibold text-muted-foreground">
-									<Link href="https://github.com/amsyarasyiq">GitHub</Link>
-									<Link href="https://x.com/amsyarasyiq">X</Link>
+									<Link href="https://github.com/amsryq">GitHub</Link>
+									<Link href="https://x.com/amsryq">X</Link>
 								</div>
 							</div>
 						</div>

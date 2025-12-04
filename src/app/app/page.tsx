@@ -44,9 +44,9 @@ export const metadata: Metadata = {
 		"PNG export",
 		"customizable timetable",
 	],
-	authors: [{ name: "amsyarasyiq" }],
-	creator: "amsyarasyiq",
-	publisher: "amsyarasyiq",
+	authors: [{ name: "amsryq" }],
+	creator: "amsryq",
+	publisher: "amsryq",
 	openGraph: {
 		title: "Weekview - Generate Weekly Schedules",
 		description: APP_DESCRIPTION,
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
 		card: "summary_large_image",
 		title: "Weekview - Generate Stunning Weekly Schedules",
 		description: APP_DESCRIPTION,
-		creator: "@amsyarasyiq",
+		creator: "@amsryq",
 	},
 	robots: {
 		index: true,
@@ -86,12 +86,12 @@ export const metadata: Metadata = {
 			operatingSystem: "Web Browser",
 			author: {
 				"@type": "Person",
-				name: "amsyarasyiq",
-				url: "https://github.com/amsyarasyiq",
+				name: "amsryq",
+				url: "https://github.com/amsryq",
 			},
 			publisher: {
 				"@type": "Person",
-				name: "amsyarasyiq",
+				name: "amsryq",
 			},
 			datePublished: `${new Date().toISOString().split("T")[0]}`,
 		}),
