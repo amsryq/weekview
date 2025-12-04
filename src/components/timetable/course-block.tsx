@@ -97,11 +97,14 @@ function Container({
 }) {
 	if (material === "glass") {
 		return (
-			<div className={className} style={style} onClick={onClick}>
-				<GlassSurface displace={2} backgroundOpacity={0.7}>
-					{children}
-				</GlassSurface>
-			</div>
+			<GlassSurface
+				className={className}
+				style={style}
+				displace={1}
+				backgroundOpacity={0.7}
+			>
+				<span onClick={onClick}>{children}</span>
+			</GlassSurface>
 		);
 	}
 
