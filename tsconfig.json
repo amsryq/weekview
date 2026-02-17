@@ -2,7 +2,11 @@
 	"compilerOptions": {
 		"target": "esnext",
 		"useDefineForClassFields": true,
-		"lib": ["esnext", "DOM", "DOM.Iterable"],
+		"lib": [
+			"esnext",
+			"DOM",
+			"DOM.Iterable"
+		],
 		"module": "esnext",
 		"esModuleInterop": true,
 		"erasableSyntaxOnly": true,
@@ -17,21 +21,19 @@
 		"allowJs": true,
 		"forceConsistentCasingInFileNames": true,
 		"incremental": true,
-		"plugins": [
-			{
-				"name": "next"
-			}
-		],
+		"plugins": [],
 		"baseUrl": ".",
 		"paths": {
-			"~/*": ["./src/*"]
+			"~/*": [
+				"./src/*"
+			]
 		}
 	},
 	"include": [
-		"./dist/types/**/*.ts",
-		"./next-env.d.ts",
 		"./src",
-		".next/types/**/*.ts"
+		".tanstack"
 	],
-	"exclude": ["./node_modules"]
+	"exclude": [
+		"./node_modules"
+	]
 }

@@ -56,7 +56,7 @@ export async function fetchFromBackend(
 	// 	});
 	// } catch {
 	const response = await fetch(
-		new URL(endpoint, process.env.NEXT_PUBLIC_BACKEND_URL),
+		new URL(endpoint, import.meta.env.VITE_BACKEND_URL),
 		{
 			...options,
 			credentials: "include",
@@ -67,15 +67,15 @@ export async function fetchFromBackend(
 		const iCressStatusCode = response.headers.get("X-Icress-Status-Code");
 		const iCressNonOk = iCressStatusCode
 			? !(
-					Number.parseInt(iCressStatusCode) >= 200 &&
-					Number.parseInt(iCressStatusCode) < 300
-				)
+				Number.parseInt(iCressStatusCode) >= 200 &&
+				Number.parseInt(iCressStatusCode) < 300
+			)
 			: false;
 
 		if (iCressNonOk) {
 			toast.error(
 				"An error occurred on the iCress server. Server returned code " +
-					iCressStatusCode,
+				iCressStatusCode,
 				{
 					id: "ERR_ICRESS_" + iCressStatusCode,
 				},

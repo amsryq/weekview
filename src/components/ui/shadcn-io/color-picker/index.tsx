@@ -1,4 +1,3 @@
-"use client";
 
 import Color from "color";
 import { PipetteIcon } from "lucide-react";

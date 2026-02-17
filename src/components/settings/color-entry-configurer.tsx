@@ -1,4 +1,3 @@
-"use client";
 
 import { Plus, XIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";

@@ -1,6 +1,4 @@
-"use client";
-
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
@@ -15,7 +13,7 @@ export function Footer() {
 	return (
 		<footer className="flex font-mono justify-center gap-4 p-4 text-sm text-center">
 			<p>
-				© {process.env.COPYRIGHT_YEAR}
+				© {import.meta.env.VITE_COPYRIGHT_YEAR || new Date().getFullYear()}
 				<HoverCard openDelay={50} open={openCard} onOpenChange={setOpenCard}>
 					<HoverCardTrigger
 						onClick={() => setOpenCard(true)}
@@ -36,8 +34,8 @@ export function Footer() {
 									pursuing a Diploma in Computer Science at UiTM Jasin.
 								</p>
 								<div className="flex pt-2 gap-3 text-xs font-semibold text-muted-foreground">
-									<Link href="https://github.com/amsryq">GitHub</Link>
-									<Link href="https://x.com/amsryq">X</Link>
+									<a href="https://github.com/amsryq">GitHub</a>
+									<a href="https://x.com/amsryq">X</a>
 								</div>
 							</div>
 						</div>
@@ -46,11 +44,11 @@ export function Footer() {
 			</p>
 			<span className="hidden md:inline">|</span>
 			<nav className="flex gap-4">
-				<Link href="/privacy" className="underline">
+				<Link to="/privacy" className="underline">
 					Privacy Policy
 				</Link>
 				<span className="hidden md:inline">-</span>
-				<Link href="/terms" className="underline">
+				<Link to="/terms" className="underline">
 					Terms of Service
 				</Link>
 			</nav>

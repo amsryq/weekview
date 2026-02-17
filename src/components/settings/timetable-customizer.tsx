@@ -1,4 +1,3 @@
-"use client";
 
 import { merge } from "es-toolkit";
 import {

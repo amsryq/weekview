@@ -1,4 +1,3 @@
-"use client";
 
 import type { IconAppearance } from "~/lib/models/cell-appearance";
 import { Twemoji } from "./twemoji";

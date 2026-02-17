@@ -7,7 +7,7 @@ import { useCookie } from "../hooks/cookies";
 
 export const authClient = createAuthClient({
 	basePath: "/auth",
-	baseURL: process.env.NEXT_PUBLIC_BACKEND_URL!,
+	baseURL: import.meta.env.VITE_BACKEND_URL!,
 	plugins: [
 		stripeClient({
 			subscription: false,

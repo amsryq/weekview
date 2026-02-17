@@ -1,6 +1,4 @@
-"use client";
-
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils/styles";
@@ -37,7 +35,7 @@ export default function SignIn({ children }: { children: React.ReactNode }) {
 									{
 										provider: "github",
 										callbackURL:
-											process.env.NEXT_PUBLIC_APP_URL || window.location.origin,
+											import.meta.env.VITE_APP_URL || window.location.origin,
 									},
 									{
 										onRequest: () => setLoading(true),
@@ -67,7 +65,7 @@ export default function SignIn({ children }: { children: React.ReactNode }) {
 									{
 										provider: "google",
 										callbackURL:
-											process.env.NEXT_PUBLIC_APP_URL || window.location.origin,
+											import.meta.env.VITE_APP_URL || window.location.origin,
 									},
 									{
 										onRequest: () => setLoading(true),
@@ -100,11 +98,11 @@ export default function SignIn({ children }: { children: React.ReactNode }) {
 					</div>
 					<p className="text-xs text-muted-foreground">
 						By signing in, you agree to our{" "}
-						<Link href="/terms" className="underline">
+						<Link to="/terms" className="underline">
 							Terms of Service
 						</Link>{" "}
 						and{" "}
-						<Link href="/privacy" className="underline">
+						<Link to="/privacy" className="underline">
 							Privacy Policy
 						</Link>
 						.

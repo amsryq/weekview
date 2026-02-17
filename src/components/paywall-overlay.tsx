@@ -1,4 +1,3 @@
-"use client";
 
 import { Lock, LucideIcon } from "lucide-react";
 import { usePaywall } from "~/lib/hooks/paywall";

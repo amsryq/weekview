@@ -1,4 +1,3 @@
-"use client";
 
 import { DownloadIcon } from "lucide-react";
 import { domToPng, domToSvg } from "modern-screenshot";

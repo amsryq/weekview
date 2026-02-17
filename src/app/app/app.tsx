@@ -1,5 +1,3 @@
-"use client";
-
 import { Settings, Settings2Icon } from "lucide-react";
 import CourseManagementSheet from "~/components/course-management-sheet";
 import TimetableCustomizer from "~/components/settings/timetable-customizer";

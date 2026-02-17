@@ -1,4 +1,3 @@
-"use client";
 
 import { UploadIcon } from "lucide-react";
 import type { ReactNode } from "react";

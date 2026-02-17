@@ -1,5 +1,3 @@
-"use client";
-
 import { HeartIcon, UserIcon } from "lucide-react";
 import { AccountManagerDialog } from "~/components/auth/account-manager-dialog";
 import SignIn from "~/components/auth/sign-in";

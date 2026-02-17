@@ -1,7 +1,4 @@
-"use client";
-
 import { LoaderCircle, Share2Icon } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
@@ -146,13 +143,13 @@ function GithubSponsorsCard() {
 			</CardHeader>
 			<CardFooter className="justify-end pt-0">
 				<Button asChild variant="outline">
-					<Link
+					<a
 						href="https://github.com/sponsors/amsryq"
 						target="_blank"
 						rel="noopener noreferrer"
 					>
 						Sponsor
-					</Link>
+					</a>
 				</Button>
 			</CardFooter>
 		</Card>

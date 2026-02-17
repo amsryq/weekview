@@ -1,4 +1,3 @@
-"use client";
 
 import { Trash2Icon, UploadIcon } from "lucide-react";
 import { useCallback, useState } from "react";

@@ -1,4 +1,3 @@
-"use client";
 
 import { LoaderCircleIcon, RefreshCw } from "lucide-react";
 import { ReactNode } from "react";

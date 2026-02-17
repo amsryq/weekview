@@ -1,4 +1,3 @@
-"use client";
 
 import { Toaster as Sonner, ToasterProps } from "sonner";
 import { useTheme } from "~/lib/contexts/themes";
