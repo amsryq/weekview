@@ -74,7 +74,7 @@ function SupporterCard() {
 			}
 
 			const req = await fetchFromBackend("/supporter/generate-checkout");
-			const { url } = await req.json();
+			const { url } = (await req.json()) as { url: string };
 			if (typeof url === "string" && url) {
 				window.open(url, "_blank", "noopener,noreferrer");
 			} else {

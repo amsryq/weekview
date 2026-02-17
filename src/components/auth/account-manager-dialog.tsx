@@ -102,7 +102,7 @@ function AccountManagerPanel() {
 						const req = await fetchFromBackend("/supporter/generate-checkout");
 
 						try {
-							const { url } = await req.json();
+							const { url } = (await req.json()) as { url: string };
 							window.open(url, "_blank", "noopener,noreferrer");
 						} catch {
 							// TODO: Toast notification or something
@@ -115,7 +115,7 @@ function AccountManagerPanel() {
 				<Button variant="outline" onClick={() => void signOut()}>
 					Sign out
 				</Button>
-				{process.env.NODE_ENV === "development" && (
+				{import.meta.env.DEV && (
 					<>
 						<Button
 							variant="outline"

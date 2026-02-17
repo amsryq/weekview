@@ -1,0 +1,72 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "weekview",
+    "compatibility_date": "2025-09-13",
+    "compatibility_flags": [
+        "nodejs_compat"
+    ],
+    "main": "./.output/server/index.mjs",
+    "assets": {
+        "directory": "./.output/public",
+        "binding": "ASSETS"
+    },
+    "observability": {
+        "enabled": true
+    },
+    "kv_namespaces": [
+        {
+            "binding": "KV",
+            "id": "c225e0c92abd4cbbbed691333fa663d4"
+        }
+    ],
+    "env": {
+        "staging": {
+            "vars": {
+                "DEV": "1"
+            },
+            "routes": [
+                {
+                    "pattern": "app.localhost.weekview.my",
+                    "custom_domain": true
+                }
+            ],
+            "workers_dev": false,
+            "observability": {
+                "enabled": true,
+                "head_sampling_rate": 1
+            },
+            "kv_namespaces": [
+                {
+                    "binding": "KV",
+                    "id": "c225e0c92abd4cbbbed691333fa663d4"
+                }
+            ]
+        },
+        "production": {
+            "vars": {
+                "DEV": ""
+            },
+            "routes": [
+                {
+                    "pattern": "weekview.my",
+                    "custom_domain": true
+                },
+                {
+                    "pattern": "www.weekview.my",
+                    "custom_domain": true
+                }
+            ],
+            "workers_dev": false,
+            "kv_namespaces": [
+                {
+                    "binding": "KV",
+                    "id": "c225e0c92abd4cbbbed691333fa663d4"
+                }
+            ]
+        }
+    }
+}
