@@ -1,4 +1,4 @@
-import { fetchFromBackend } from "~/lib/utils/backend";
+import { getCampuses } from "~/server/functions/uitm";
 import { Campus } from "./campus";
 
 interface ServerFaculty {
@@ -19,9 +19,7 @@ export class Faculty {
 	}
 
 	static async fetch(campus: Campus): Promise<Faculty[]> {
-		const data: ServerFaculty[] = await fetchFromBackend(
-			`/providers/uitm/icress/faculties/${campus.code}`,
-		).then((r) => r.json());
-		return data.map((f) => new Faculty(f.code, f.name, campus));
+		const data = await getCampuses({ data: "faculty" });
+		return data.map((f: any) => new Faculty(f.code, f.name, campus));
 	}
 }

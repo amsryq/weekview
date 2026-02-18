@@ -1,7 +1,7 @@
 import { uniq } from "es-toolkit";
 import { MeetingTime } from "~/lib/models/meeting-time";
 import { getOrAssignSolidColorFor } from "~/lib/stores/color-store";
-import { fetchFromBackend } from "~/lib/utils/backend";
+import { getGroups } from "~/server/functions/uitm";
 import { UiTMGroup } from "../group";
 import { Course } from "./course";
 import { Session } from "./session";
@@ -31,12 +31,7 @@ export class Group {
 	}
 
 	static async fetch(course: Course): Promise<Group[]> {
-		const query = new URLSearchParams({
-			path: encodeURIComponent(course.__path),
-		}).toString();
-		const data: ServerGroup[] = await fetchFromBackend(
-			`/providers/uitm/icress/groups?${query}`,
-		).then((r) => r.json());
+		const data = await getGroups({ data: course.__path });
 
 		return data.map(
 			(g) =>

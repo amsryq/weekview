@@ -1,4 +1,4 @@
-import { fetchFromBackend } from "~/lib/utils/backend";
+import { getCourses } from "~/server/functions/uitm";
 import { Campus } from "./campus";
 import { Faculty } from "./faculty";
 
@@ -31,9 +31,9 @@ export class Course {
 		const faculty =
 			campusOrFaculty instanceof Faculty ? campusOrFaculty : undefined;
 
-		const data: ServerCourse[] = await fetchFromBackend(
-			`/providers/uitm/icress/courses/${campus.code}${faculty ? `/${faculty.code}` : ""}`,
-		).then((r) => r.json());
+		const data = await getCourses({
+			data: { campus: campus.code, faculty: faculty?.code },
+		});
 
 		return data.map(
 			(c) => new Course(c.code, c.__internal.path, campus, faculty),

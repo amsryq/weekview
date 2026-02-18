@@ -25,6 +25,17 @@ export interface CloudflareEnv {
     TRUSTED_ORIGINS: string;
     ROOT_REDIRECTS: string;
     // Add other bindings here
+    DATABASE_URL: string;
+    DATABASE_AUTH_TOKEN: string;
+    BETTER_AUTH_SECRET: string;
+    BETTER_AUTH_URL: string;
+    GOOGLE_CLIENT_ID: string;
+    GOOGLE_CLIENT_SECRET: string;
+    GITHUB_CLIENT_ID: string;
+    GITHUB_CLIENT_SECRET: string;
+    STRIPE_SECRET_KEY: string;
+    STRIPE_WEBHOOK_SECRET: string;
+    BACKEND_URL: string;
 }
 
 export type Platform = "cloudflare" | "node";

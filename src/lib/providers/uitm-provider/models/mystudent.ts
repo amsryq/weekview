@@ -1,6 +1,6 @@
 import { MeetingTime } from "~/lib/models/meeting-time";
 import { getOrAssignSolidColorFor } from "~/lib/stores/color-store";
-import { fetchFromBackend } from "~/lib/utils/backend";
+import { getStudentTimetable } from "~/server/functions/uitm";
 import { UiTMGroup } from "../group";
 import { Group } from "./group";
 import { Session } from "./session";
@@ -83,11 +83,7 @@ export async function fetchMyStudentTimetable(
 		throw new Error("Student ID is required.");
 	}
 
-	const response = await fetchFromBackend(
-		`/providers/uitm/mystudent/timetable/${encodeURIComponent(studentId)}`,
-	);
-
-	const data: MyStudentGroup[] = await response.json();
+	const data = await getStudentTimetable({ data: studentId });
 
 	return data.map((group) =>
 		createUiTMGroupFromMyStudentGroup(

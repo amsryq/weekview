@@ -30,5 +30,7 @@ next-env.d.ts
 *.sln
 *.sw?
 
+.wrangler
+
 # TODO: Uncomment this
 README.md

@@ -9,11 +9,6 @@
     "compatibility_flags": [
         "nodejs_compat"
     ],
-    "main": "./.output/server/index.mjs",
-    "assets": {
-        "directory": "./.output/public",
-        "binding": "ASSETS"
-    },
     "observability": {
         "enabled": true
     },

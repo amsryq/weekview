@@ -10,13 +10,13 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { fetchFromBackend } from "~/lib/utils/backend";
+import { getStripeSession } from "~/server/functions/stripe";
 
 interface PaymentSessionData {
-  status: string;
-  customer_email: string;
-  amount_total: number;
-  currency: string;
+  status: string | null;
+  customer_email: string | null;
+  amount_total: number | null;
+  currency: string | null;
   supporter_expires_at: number | null;
   payment_status: string;
 }
@@ -29,11 +29,8 @@ const PAYMENT_STATUS = {
 async function fetchSessionData(
   sessionId: string,
 ): Promise<PaymentSessionData> {
-  const response = await fetchFromBackend(`/stripe/session/${sessionId}`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch session data");
-  }
-  return response.json();
+  const response = await getStripeSession({ data: sessionId });
+  return response;
 }
 
 const formatCurrency = (amount: number, currency: string): string =>
@@ -120,7 +117,9 @@ function PaymentDetails({ sessionData }: PaymentDetailsProps) {
       <div className="text-center space-y-2">
         <p className="text-sm text-muted-foreground">
           Amount:{" "}
-          {formatCurrency(sessionData.amount_total, sessionData.currency)}
+          {sessionData.amount_total && sessionData.currency
+            ? formatCurrency(sessionData.amount_total, sessionData.currency)
+            : "N/A"}
         </p>
         {sessionData.customer_email && (
           <p className="text-sm text-muted-foreground">

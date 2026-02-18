@@ -2,7 +2,7 @@
 import { LoaderCircleIcon, RefreshCw } from "lucide-react";
 import { ReactNode } from "react";
 import { signOut, useSession } from "~/lib/auth/auth-client";
-import { fetchFromBackend } from "~/lib/utils/backend";
+import { generateCheckout, removeSupporter } from "~/server/functions/stripe";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import {
@@ -99,13 +99,14 @@ function AccountManagerPanel() {
 				<Button
 					disabled={isSupporter}
 					onClick={async () => {
-						const req = await fetchFromBackend("/supporter/generate-checkout");
-
 						try {
-							const { url } = (await req.json()) as { url: string };
-							window.open(url, "_blank", "noopener,noreferrer");
+							const { url } = await generateCheckout();
+							if (typeof url === "string" && url) {
+								window.open(url, "_blank", "noopener,noreferrer");
+							} else {
+								throw new Error("No checkout URL returned");
+							}
 						} catch {
-							// TODO: Toast notification or something
 							alert("Failed to initiate supporter checkout.");
 						}
 					}}
@@ -129,9 +130,7 @@ function AccountManagerPanel() {
 							variant="destructive"
 							title="Remove Supporter Status (Dev Only)"
 							onClick={async () => {
-								await fetchFromBackend(`/supporter/remove-supporter`, {
-									method: "POST",
-								});
+								await removeSupporter();
 								// Refresh session instead of reloading the page
 								session.refetch();
 							}}

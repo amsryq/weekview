@@ -20,7 +20,7 @@ import {
 import { Twemoji } from "~/components/ui/twemoji";
 import { useSupportDialog } from "~/lib/contexts/support-dialog";
 import { useUser } from "~/lib/hooks/user";
-import { fetchFromBackend } from "~/lib/utils/backend";
+import { generateCheckout } from "~/server/functions/stripe";
 
 export function SupportDialog() {
 	const { isOpen, config, closeSupportDialog } = useSupportDialog();
@@ -73,8 +73,7 @@ function SupporterCard() {
 				throw new Error("No Stripe customer ID found. Please contact support.");
 			}
 
-			const req = await fetchFromBackend("/supporter/generate-checkout");
-			const { url } = (await req.json()) as { url: string };
+			const { url } = await generateCheckout();
 			if (typeof url === "string" && url) {
 				window.open(url, "_blank", "noopener,noreferrer");
 			} else {
