@@ -37,5 +37,9 @@ local.db
 local.db-wal
 local.db-shm
 
+# Build artifacts
+package-lock.json
+tsconfig.tsbuildinfo
+
 # TODO: Uncomment this
 README.md
