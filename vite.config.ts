@@ -5,6 +5,10 @@ import viteReact from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import tsConfigPaths from "vite-tsconfig-paths";
 
+const vars = {
+    "COPYRIGHT_YEAR": new Date().getFullYear(),
+}
+
 export default defineConfig({
     server: {
         port: 3000,
@@ -22,4 +26,5 @@ export default defineConfig({
         }),
         viteReact(),
     ],
+    define: Object.fromEntries(Object.entries(vars).map(([key, value]) => ["import.meta.env." + key, JSON.stringify(value)])),
 });

@@ -5,31 +5,36 @@ import { createAuthMiddleware } from "better-auth/plugins";
 import { cloudflare } from "better-auth-cloudflare";
 import { stripe } from "@better-auth/stripe";
 import { createDb } from "./db";
-import { CloudflareEnv } from "./platform/types";
 import { createStripeClient } from "./stripe";
 import { handleCheckoutCompleted } from "./handlers/checkout";
+import { getRequest } from "@tanstack/react-start/server";
 
 const IS_LOGGED_IN = "is_logged_in";
 
-export function createAuth(env: CloudflareEnv, cf?: IncomingRequestCfProperties) {
+export function createAuth(cf?: IncomingRequestCfProperties) {
+    try {
+        var req = getRequest();
+    } catch {
+        var req = new Request("http://localhost");
+    }
+
     const db = createDb({
-        DATABASE_URL: env.DATABASE_URL,
-        DATABASE_AUTH_TOKEN: env.DATABASE_AUTH_TOKEN,
+        DATABASE_URL: process.env.DATABASE_URL!,
+        DATABASE_AUTH_TOKEN: process.env.DATABASE_AUTH_TOKEN!,
     });
 
     const auth = betterAuth({
         appName: "Weekview",
         basePath: "/api/auth",
-        baseURL: env.BETTER_AUTH_URL || env.APP_URL + "/api/auth",
-        trustedOrigins: env.TRUSTED_ORIGINS?.split(","),
+        baseURL: new URL(req.url).origin,
         socialProviders: {
             google: {
-                clientId: env.GOOGLE_CLIENT_ID,
-                clientSecret: env.GOOGLE_CLIENT_SECRET,
+                clientId: process.env.GOOGLE_CLIENT_ID!,
+                clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
             },
             github: {
-                clientId: env.GITHUB_CLIENT_ID,
-                clientSecret: env.GITHUB_CLIENT_SECRET,
+                clientId: process.env.GITHUB_CLIENT_ID!,
+                clientSecret: process.env.GITHUB_CLIENT_SECRET!,
             },
         },
         hooks: {
@@ -90,8 +95,8 @@ export function createAuth(env: CloudflareEnv, cf?: IncomingRequestCfProperties)
                 geolocationTracking: true,
             }),
             stripe({
-                stripeClient: createStripeClient(env),
-                stripeWebhookSecret: env.STRIPE_WEBHOOK_SECRET,
+                stripeClient: createStripeClient(process.env.STRIPE_SECRET_KEY!),
+                stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
                 createCustomerOnSignUp: true,
                 onEvent: async (event) => {
                     const ctx = await auth.$context;
@@ -121,8 +126,16 @@ export function createAuth(env: CloudflareEnv, cf?: IncomingRequestCfProperties)
         telemetry: {
             enabled: false,
         },
-        secret: env.BETTER_AUTH_SECRET,
+        secret: process.env.BETTER_AUTH_SECRET,
     });
 
     return auth;
 }
+
+/**
+ * @deprecated
+ * @internal
+ * For CLI usage (schema generation) only. Do not use in runtime code.
+ * Get instance from CF variables instead.
+ */
+export const auth = createAuth() as unknown;

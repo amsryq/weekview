@@ -22,7 +22,6 @@
 		"forceConsistentCasingInFileNames": true,
 		"incremental": true,
 		"plugins": [],
-		"baseUrl": ".",
 		"paths": {
 			"~/*": [
 				"./src/*"

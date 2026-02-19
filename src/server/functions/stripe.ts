@@ -1,14 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getEnv } from "../platform/env";
 import { createAuth } from "../auth";
 import { createStripeClient } from "../stripe";
+import { getRequest } from '@tanstack/react-start/server'
 
 export const getStripeSession = createServerFn({ method: "GET" })
     .inputValidator((sessionId: string) => sessionId)
     .handler(async ({ data: sessionId }) => {
-        const env = getEnv();
-        const auth = createAuth(env);
-        const stripe = createStripeClient(env);
+        const auth = createAuth();
+        const stripe = createStripeClient(process.env.STRIPE_SECRET_KEY!);
 
         const session = await stripe.checkout.sessions.retrieve(sessionId);
 
@@ -49,11 +48,10 @@ export const getStripeSession = createServerFn({ method: "GET" })
 
 export const generateCheckout = createServerFn({ method: "POST" })
     .handler(async () => {
-        const env = getEnv();
-        const auth = createAuth(env);
-        // Cast event to any to access request property which might be missing in type def but present in runtime
-        const request = (event as any).request as Request;
+        const auth = createAuth();
+        const request = getRequest();
         const headers = request.headers;
+        const url = new URL(request.url);
 
         const session = await auth.api.getSession({
             headers,
@@ -65,21 +63,21 @@ export const generateCheckout = createServerFn({ method: "POST" })
             throw new Error("No Stripe customer linked to user");
         }
 
-        const stripe = createStripeClient(env);
+        const stripe = createStripeClient(process.env.STRIPE_SECRET_KEY!);
         const checkoutSession = await stripe.checkout.sessions.create({
             mode: "payment",
             customer: customerId,
             line_items: [
                 {
-                    price: env.SUPPORTER_ONE_TIME_PRICE_ID,
+                    price: process.env.SUPPORTER_ONE_TIME_PRICE_ID!,
                     quantity: 1,
                 },
             ],
             metadata: {
                 type: "supporter_payment",
             },
-            success_url: `${env.APP_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${env.APP_URL}/payment-cancel`,
+            success_url: `${url.host}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${url.host}/payment-cancel`,
         });
 
         return { url: checkoutSession.url };
@@ -87,9 +85,8 @@ export const generateCheckout = createServerFn({ method: "POST" })
 
 export const removeSupporter = createServerFn({ method: "POST" })
     .handler(async () => {
-        const env = getEnv();
-        const auth = createAuth(env);
-        const request = (event as any).request as Request;
+        const auth = createAuth();
+        const request = getRequest();
         const headers = request.headers;
 
         const session = await auth.api.getSession({ headers });

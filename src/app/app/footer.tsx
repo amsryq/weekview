@@ -13,7 +13,7 @@ export function Footer() {
 	return (
 		<footer className="flex font-mono justify-center gap-4 p-4 text-sm text-center">
 			<p>
-				© {import.meta.env.VITE_COPYRIGHT_YEAR || new Date().getFullYear()}
+				© {import.meta.env.COPYRIGHT_YEAR}
 				<HoverCard openDelay={50} open={openCard} onOpenChange={setOpenCard}>
 					<HoverCardTrigger
 						onClick={() => setOpenCard(true)}

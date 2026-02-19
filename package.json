@@ -5,9 +5,17 @@
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
+		"deploy": "pnpm run build && wrangler deploy",
 		"preview": "vite preview",
 		"start": "node .output/server/index.mjs",
-		"lint:write": "biome check --write --unsafe"
+		"lint:write": "biome check --write --unsafe",
+		"auth:generate": "npx --yes @better-auth/cli@latest generate --config src/server/auth.ts --output src/server/db/auth.schema.ts -y",
+		"db:up": "turso dev --port=5555 --db-file=local.db",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate:dev": "drizzle-kit migrate",
+		"db:migrate:prod": "NODE_ENV=production drizzle-kit migrate",
+		"db:studio:dev": "drizzle-kit studio",
+		"db:studio:prod": "NODE_ENV=production drizzle-kit studio"
 	},
 	"dependencies": {
 		"@better-auth/client": "0.0.2-alpha.3",
@@ -15,6 +23,7 @@
 		"@faker-js/faker": "^10.3.0",
 		"@headlessui/react": "^2.2.9",
 		"@hookform/resolvers": "^5.2.2",
+		"@libsql/client": "^0.15.15",
 		"@radix-ui/react-alert-dialog": "^1.1.15",
 		"@radix-ui/react-avatar": "^1.1.11",
 		"@radix-ui/react-collapsible": "^1.1.12",
@@ -30,8 +39,8 @@
 		"@radix-ui/react-switch": "^1.2.6",
 		"@radix-ui/react-tabs": "^1.1.13",
 		"@radix-ui/react-use-controllable-state": "^1.2.2",
-		"@tailwindcss/postcss": "^4.1.18",
-		"@tailwindcss/vite": "^4.1.18",
+		"@tailwindcss/postcss": "^4.2.0",
+		"@tailwindcss/vite": "^4.2.0",
 		"@tanstack/react-query": "^5.90.21",
 		"@tanstack/react-router": "^1.161.1",
 		"@tanstack/react-start": "^1.161.1",
@@ -42,6 +51,8 @@
 		"clsx": "^2.1.1",
 		"cmdk": "^1.1.1",
 		"color": "^5.0.3",
+		"drizzle-kit": "^0.31.9",
+		"drizzle-orm": "^0.45.1",
 		"es-toolkit": "^1.44.0",
 		"frimousse": "^0.3.0",
 		"immer": "^10.2.0",
@@ -60,8 +71,8 @@
 		"react-hook-form": "^7.71.1",
 		"sonner": "^2.0.7",
 		"stripe": "^18.5.0",
-		"tailwind-merge": "^3.4.1",
-		"tailwindcss": "^4.1.18",
+		"tailwind-merge": "^3.5.0",
+		"tailwindcss": "^4.2.0",
 		"tough-cookie": "^6.0.0",
 		"twemoji": "^14.0.2",
 		"vinxi": "^0.5.11",
@@ -73,8 +84,8 @@
 	"devDependencies": {
 		"@better-auth/cli": "^1.4.18",
 		"@biomejs/biome": "2.1.4",
-		"@cloudflare/vite-plugin": "^1.15.1",
-		"@cloudflare/workers-types": "^4.20260218.0",
+		"@cloudflare/vite-plugin": "^1.25.2",
+		"@cloudflare/workers-types": "^4.20260219.0",
 		"@tanstack/react-router-devtools": "^1.161.1",
 		"@types/color": "^4.2.0",
 		"@types/node": "^24.10.13",
@@ -90,7 +101,7 @@
 		"type-fest": "^4.41.0",
 		"typescript": "~5.9.3",
 		"typescript-eslint": "^8.56.0",
-		"wrangler": "^4.49.1"
+		"wrangler": "^4.67.0"
 	},
 	"trustedDependencies": [
 		"@tailwindcss/oxide"

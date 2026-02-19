@@ -11,6 +11,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "../ui/dialog";
+
 export default function SignIn({ children }: { children: React.ReactNode }) {
 	const [loading, setLoading] = useState(false);
 
@@ -34,8 +35,7 @@ export default function SignIn({ children }: { children: React.ReactNode }) {
 								await signIn.social(
 									{
 										provider: "github",
-										callbackURL:
-											import.meta.env.VITE_APP_URL || window.location.origin,
+										callbackURL: window.location.origin,
 									},
 									{
 										onRequest: () => setLoading(true),
@@ -64,8 +64,7 @@ export default function SignIn({ children }: { children: React.ReactNode }) {
 								await signIn.social(
 									{
 										provider: "google",
-										callbackURL:
-											import.meta.env.VITE_APP_URL || window.location.origin,
+										callbackURL: window.location.origin,
 									},
 									{
 										onRequest: () => setLoading(true),

@@ -3,66 +3,60 @@
  * https://developers.cloudflare.com/workers/wrangler/configuration/
  */
 {
-    "$schema": "node_modules/wrangler/config-schema.json",
-    "name": "weekview",
-    "compatibility_date": "2026-02-17",
-    "compatibility_flags": [
-        "nodejs_compat"
-    ],
-    "main": "@tanstack/react-start/server-entry",
-    "observability": {
-        "enabled": true
-    },
-    "kv_namespaces": [
-        {
-            "binding": "KV",
-            "id": "c225e0c92abd4cbbbed691333fa663d4"
-        }
-    ],
-    "env": {
-        "staging": {
-            "vars": {
-                "DEV": "1"
-            },
-            "routes": [
-                {
-                    "pattern": "app.localhost.weekview.my",
-                    "custom_domain": true
-                }
-            ],
-            "workers_dev": false,
-            "observability": {
-                "enabled": true,
-                "head_sampling_rate": 1
-            },
-            "kv_namespaces": [
-                {
-                    "binding": "KV",
-                    "id": "c225e0c92abd4cbbbed691333fa663d4"
-                }
-            ]
-        },
-        "production": {
-            "vars": {
-                "DEV": ""
-            },
-            "routes": [
-                {
-                    "pattern": "weekview.my",
-                    "custom_domain": true
-                },
-                {
-                    "pattern": "www.weekview.my",
-                    "custom_domain": true
-                }
-            ],
-            "workers_dev": false,
-            "kv_namespaces": [
-                {
-                    "binding": "KV",
-                    "id": "c225e0c92abd4cbbbed691333fa663d4"
-                }
-            ]
-        }
-    }
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "weekview",
+	"compatibility_date": "2026-02-17",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"main": "@tanstack/react-start/server-entry",
+	"observability": {
+		"enabled": true
+	},
+	"kv_namespaces": [
+		{
+			"binding": "KV",
+			"id": "c225e0c92abd4cbbbed691333fa663d4"
+		}
+	],
+	"env": {
+		"staging": {
+			"workers_dev": false,
+			"observability": {
+				"enabled": true,
+				"head_sampling_rate": 1
+			},
+			"kv_namespaces": [
+				{
+					"binding": "KV",
+					"id": "c225e0c92abd4cbbbed691333fa663d4"
+				}
+			]
+		},
+		"production": {
+			"vars": {
+				"UITM_MOCK": "true"
+			},
+			"routes": [
+				{
+					"pattern": "weekview.my",
+					"custom_domain": true
+				},
+				{
+					"pattern": "www.weekview.my",
+					"custom_domain": true
+				}
+			],
+			"workers_dev": false,
+			"kv_namespaces": [
+				{
+					"binding": "KV",
+					"id": "c225e0c92abd4cbbbed691333fa663d4"
+				}
+			]
+		}
+	},
+	"vars": {
+		"UITM_MOCK": "true"
+	}
 }

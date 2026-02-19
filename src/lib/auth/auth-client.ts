@@ -6,8 +6,7 @@ import { useEffect } from "react";
 import { useCookie } from "../hooks/cookies";
 
 export const authClient = createAuthClient({
-	basePath: "/api/auth",
-	baseURL: import.meta.env.VITE_APP_URL,
+	baseURL: typeof window !== "undefined" ? new URL(window.location.origin).toString() : "http://localhost:3000",
 	plugins: [
 		stripeClient({
 			subscription: false,
