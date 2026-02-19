@@ -1,9 +1,10 @@
-import { Settings, Settings2Icon } from "lucide-react";
+import { ImportIcon, Settings, Settings2Icon } from "lucide-react";
 import CourseManagementSheet from "~/components/course-management-sheet";
 import TimetableCustomizer from "~/components/settings/timetable-customizer";
 import TimetableExportMenu from "~/components/timetable/export-menu";
 import WeeklyTimetable from "~/components/timetable/weekly-timetable";
 import { Button } from "~/components/ui/button";
+import UiTMImporterDialog from "~/lib/providers/uitm-provider/components/importer-dialog";
 
 function App() {
 	return (
@@ -15,6 +16,12 @@ function App() {
 						Manage Courses
 					</Button>
 				</CourseManagementSheet>
+				<UiTMImporterDialog>
+					<Button variant="outline">
+						<ImportIcon className="w-4 h-4" />
+						Import from UiTM iCress
+					</Button>
+				</UiTMImporterDialog>
 				<TimetableCustomizer>
 					<Button variant="outline">
 						<Settings2Icon className="w-4 h-4" />

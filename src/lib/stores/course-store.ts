@@ -12,6 +12,7 @@ interface Actions {
 	addCourse: (course: Course) => void;
 	updateCourse: (courseId: string, data: Course.Schema) => void;
 	removeCourse: (courseId: string) => void;
+	clearAll: () => void;
 	getConflictingCourses: (meetingTimes: MeetingTime[]) => Course[];
 }
 
@@ -55,6 +56,11 @@ const CourseStore = createStore<State & Actions>()(
 				state.courses = state.courses.filter(
 					(course) => course.id !== courseId,
 				);
+			}),
+
+		clearAll: () =>
+			set((state) => {
+				state.courses = [];
 			}),
 
 		getConflictingCourses: (meetingTimes) => {

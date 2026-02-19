@@ -211,6 +211,46 @@ function ProviderSection({ provider }: { provider: CourseProvider }) {
 	);
 }
 
+function ClearAllButton() {
+	const courseCount = useStore(CourseStore, (s) => s.courses.length);
+
+	if (courseCount === 0) return null;
+
+	return (
+		<AlertDialog>
+			<AlertDialogTrigger asChild>
+				<Button
+					variant="ghost"
+					size="sm"
+					className="text-destructive hover:text-white hover:bg-destructive/90 dark:hover:bg-destructive/90"
+				>
+					<Trash2Icon className="size-4 mr-1" />
+					Clear All
+				</Button>
+			</AlertDialogTrigger>
+			<AlertDialogContent>
+				<AlertDialogHeader>
+					<AlertDialogTitle>Clear all courses?</AlertDialogTitle>
+					<AlertDialogDescription>
+						This will remove all {courseCount} course
+						{courseCount !== 1 ? "s" : ""} from your timetable. This action
+						cannot be undone.
+					</AlertDialogDescription>
+				</AlertDialogHeader>
+				<AlertDialogFooter>
+					<AlertDialogCancel>Cancel</AlertDialogCancel>
+					<AlertDialogAction
+						onClick={() => CourseStore.getState().clearAll()}
+						className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+					>
+						Clear All
+					</AlertDialogAction>
+				</AlertDialogFooter>
+			</AlertDialogContent>
+		</AlertDialog>
+	);
+}
+
 function CourseList() {
 	const providers = useStore(ProviderStore, (s) => s.providers).toReversed();
 
@@ -235,9 +275,12 @@ export default function CourseManagementSheet({
 			<SheetTrigger asChild>{children}</SheetTrigger>
 			<SheetContent className="sm:max-w-lg max-sm:w-screen" side="left">
 				<SheetHeader>
-					<SheetTitle className="flex items-center gap-2">
-						Course Management
-					</SheetTitle>
+					<div className="flex items-center justify-between pr-2">
+						<SheetTitle className="flex items-center gap-2">
+							Course Management
+						</SheetTitle>
+						<ClearAllButton />
+					</div>
 					<SheetDescription>
 						Manage your selected courses here.
 					</SheetDescription>

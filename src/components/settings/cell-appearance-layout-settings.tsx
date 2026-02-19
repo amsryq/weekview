@@ -110,9 +110,9 @@ export function CellAppearanceLayoutSettings({
 				</PaywallOverlay>
 			)}
 
-			{/* Typography */}
+			{/* Element Settings */}
 			<Section
-				title="Typography"
+				title="Element Settings"
 				action={
 					<div className="flex items-center gap-2">
 						<Label
@@ -284,35 +284,41 @@ function ElementRow({
 	return (
 		<div
 			className={cn(
-				"flex items-center gap-3 rounded-lg border px-3 py-2 transition-opacity",
+				"rounded-lg border px-3 py-2 flex flex-col gap-2 transition-opacity",
 				!visible && "opacity-40",
 			)}
 		>
-			{/* Visibility toggle */}
-			<button
-				type="button"
-				onClick={onToggleVisibility}
-				className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
-			>
-				{visible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
-			</button>
+			<div className="flex items-center gap-3">
+				{/* Visibility toggle */}
+				<button
+					type="button"
+					onClick={onToggleVisibility}
+					className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+				>
+					{visible ? (
+						<Eye className="size-4" />
+					) : (
+						<EyeOff className="size-4" />
+					)}
+				</button>
 
-			{/* Label */}
-			<span className="text-sm font-medium w-16">{label}</span>
+				{/* Label */}
+				<span className="text-sm font-medium w-16 shrink-0">{label}</span>
 
-			{/* Weight picker */}
-			<WeightPicker
-				value={fontWeight}
-				onChange={onFontWeightChange}
-				disabled={!visible}
-			/>
+				{/* Weight picker */}
+				<WeightPicker
+					value={fontWeight}
+					onChange={onFontWeightChange}
+					disabled={!visible}
+				/>
+			</div>
 
 			{/* Size control */}
 			{showSizeControl && (
-				<div className="ml-auto flex items-center gap-2">
-					<Type className="size-3.5 text-muted-foreground" />
+				<div className="flex items-center gap-2 pl-7">
+					<Type className="size-3.5 text-muted-foreground shrink-0" />
 					<Slider
-						className="w-20"
+						className="w-32"
 						min={8}
 						max={24}
 						step={1}
