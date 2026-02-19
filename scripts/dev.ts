@@ -1,6 +1,5 @@
 import { $ } from "bun";
 import { mkdir } from "fs/promises";
-import { createProxyServer } from "http-proxy-3";
 import path from "path";
 
 const RESET = "\x1b[0m";
@@ -37,15 +36,15 @@ let certificatesExist =
 if (process.env.WSL_DISTRO_NAME && !certificatesExist) {
 	console.log(
 		YELLOW +
-			"Running in WSL and certificates not found. mkcert needs to be installed on your Windows system to generate self-signed certificates." +
-			RESET,
+		"Running in WSL and certificates not found. mkcert needs to be installed on your Windows system to generate self-signed certificates." +
+		RESET,
 	);
 	const which = await $`which mkcert.exe`.quiet().then((r) => r.text().trim());
 	if (!which) {
 		console.error(
 			RED +
-				"mkcert.exe not found. Please install mkcert for Windows from https://github.com/FiloSottile/mkcert" +
-				RESET,
+			"mkcert.exe not found. Please install mkcert for Windows from https://github.com/FiloSottile/mkcert" +
+			RESET,
 		);
 		process.exit(1);
 	}
@@ -60,15 +59,41 @@ if (process.env.WSL_DISTRO_NAME && !certificatesExist) {
 	certificatesExist = true;
 }
 
+if (!certificatesExist) {
+	console.log(
+		YELLOW +
+		"Certificates not found. mkcert needs to be installed on your system to generate self-signed certificates."
+		+ RESET,
+	);
+	const which = await $`which mkcert`.quiet().then((r) => r.text().trim());
+	if (!which) {
+		console.error(
+			RED +
+			"mkcert not found. Please install mkcert from https://github.com/FiloSottile/mkcert" +
+			RESET,
+		);
+		process.exit(1);
+	}
+
+	console.log(CYAN + "Generating certificates using mkcert..." + RESET);
+	await mkdir(`${projectRootDir}/certificates`);
+	await $`mkcert -install -key-file ${keyPath} -cert-file ${certificatesPath} ${{ raw: `localhost 127.0.0.1 ::1 ${stagingHost} "*.${stagingHost}"` }}`.cwd(
+		projectRootDir,
+	);
+
+	console.log(GREEN + "Certificates generated." + RESET);
+	certificatesExist = true;
+}
+
 if (certificatesExist) {
 	cmds.push("--experimental-https-key", keyPath);
 	cmds.push("--experimental-https-cert", certificatesPath);
 } else {
 	console.log(
 		YELLOW +
-			"Certificates not found. Next.js will generate self-signed certificates, which may not include all necessary SANs." +
-			`\nIt is highly recommended to include "*.${stagingHost}" in your trusted certificates.` +
-			RESET,
+		"Certificates not found. Next.js will generate self-signed certificates, which may not include all necessary SANs." +
+		`\nIt is highly recommended to include "*.${stagingHost}" in your trusted certificates.` +
+		RESET,
 	);
 
 	const readline = await import("readline");
@@ -90,25 +115,25 @@ if (certificatesExist) {
 	}
 }
 
-Bun.spawn(cmds, {
-	cwd: projectRootDir,
-	stdout: "inherit",
-	stderr: "inherit",
-});
+// Bun.spawn(cmds, {
+// 	cwd: projectRootDir,
+// 	stdout: "inherit",
+// 	stderr: "inherit",
+// });
 
-createProxyServer({
-	target: "http://localhost:8787",
-	ssl: {
-		key: await Bun.file(keyPath).text(),
-		cert: await Bun.file(certificatesPath).text(),
-	},
-})
-	.on("error", (err) => {
-		console.error(RED + "Proxy server error:", err.message, RESET);
-	})
-	.on("proxyRes", (proxyRes, req, res) => {
-		console.log(
-			CYAN + `[Proxy] ${res.statusCode} ${req.method} ${req.url}` + RESET,
-		);
-	})
-	.listen(3200, "api.localhost.weekview.my");
+// createProxyServer({
+// 	target: "http://localhost:8787",
+// 	ssl: {
+// 		key: await Bun.file(keyPath).text(),
+// 		cert: await Bun.file(certificatesPath).text(),
+// 	},
+// })
+// 	.on("error", (err) => {
+// 		console.error(RED + "Proxy server error:", err.message, RESET);
+// 	})
+// 	.on("proxyRes", (proxyRes, req, res) => {
+// 		console.log(
+// 			CYAN + `[Proxy] ${res.statusCode} ${req.method} ${req.url}` + RESET,
+// 		);
+// 	})
+// 	.listen(3200, "api.localhost.weekview.my");

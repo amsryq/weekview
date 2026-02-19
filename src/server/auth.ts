@@ -1,5 +1,5 @@
 import { betterAuth } from "better-auth";
-import { reactStartCookies } from "better-auth/react-start";
+import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { createAuthMiddleware } from "better-auth/plugins";
 import { cloudflare } from "better-auth-cloudflare";
@@ -83,7 +83,7 @@ export function createAuth(env: CloudflareEnv, cf?: IncomingRequestCfProperties)
             usePlural: true,
         }),
         plugins: [
-            reactStartCookies(),
+            tanstackStartCookies(),
             cloudflare({
                 cf,
                 autoDetectIpAddress: true,
