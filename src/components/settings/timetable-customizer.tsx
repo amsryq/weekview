@@ -32,7 +32,7 @@ interface TimetableCustomizerProps {
 	children: React.ReactNode;
 }
 
-export default function TimetableCustomizer({
+export function TimetableCustomizer({
 	children,
 }: TimetableCustomizerProps) {
 	const prefs = useStore(TimetablePreferencesStore);

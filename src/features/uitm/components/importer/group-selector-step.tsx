@@ -40,7 +40,7 @@ import {
 	SheetTrigger,
 } from "~/components/ui/sheet";
 import { CourseStore } from "~/lib/stores/course-store";
-import { UiTMGroup } from "../../group";
+import { UiTMCourseSection } from "../../course-section";
 import { Course } from "../../models/course";
 import { Group } from "../../models/group";
 import { summarizeMeetingTimes, useImporterSelectionStore } from "./shared";
@@ -71,7 +71,7 @@ export function GroupSelectorDialog({
 		CourseStore,
 		useShallow((state) =>
 			state.courses.filter(
-				(course): course is UiTMGroup => course instanceof UiTMGroup,
+				(course): course is UiTMCourseSection => course instanceof UiTMCourseSection,
 			),
 		),
 	);
@@ -91,7 +91,7 @@ export function GroupSelectorDialog({
 		data: availableGroups,
 		isLoading: groupsLoading,
 		error: groupsError,
-	} = useQuery<Group[], Error, UiTMGroup[]>({
+	} = useQuery<Group[], Error, UiTMCourseSection[]>({
 		queryKey: ["uitm", "groups", selectedCourse?.code],
 		queryFn: () => Group.fetch(selectedCourse!),
 		enabled: Boolean(selectedCourse),
@@ -120,7 +120,7 @@ export function GroupSelectorDialog({
 		setSelectedCourse(nextCourse);
 	};
 
-	const handleGroupSelect = (uitmCourse: UiTMGroup) => {
+	const handleGroupSelect = (uitmCourse: UiTMCourseSection) => {
 		const { internal } = uitmCourse;
 		const exists = selectedGroups.some(
 			(group) =>

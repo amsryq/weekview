@@ -1,8 +1,8 @@
 import { uniq } from "es-toolkit";
 import { MeetingTime } from "~/lib/models/meeting-time";
 import { getOrAssignSolidColorFor } from "~/lib/stores/color-store";
-import { getGroups } from "~/server/functions/uitm";
-import { UiTMGroup } from "../group";
+import { getGroups } from "../server/functions";
+import { UiTMCourseSection } from "../course-section";
 import { Course } from "./course";
 import { Session } from "./session";
 
@@ -100,7 +100,7 @@ export class Group {
 		return merged;
 	}
 
-	toUiTMCourse(): UiTMGroup {
+	toUiTMCourse(): UiTMCourseSection {
 		const self = this;
 		const meetingTimes = this.sessions.map((session) =>
 			MeetingTime.createFromSchema({
@@ -111,7 +111,7 @@ export class Group {
 			}),
 		);
 
-		return new UiTMGroup({
+		return new UiTMCourseSection({
 			code: this.course.code,
 			cellAppearance: {
 				get background() {

@@ -1,8 +1,8 @@
 import { Settings, Settings2Icon } from "lucide-react";
-import CourseManagementSheet from "~/components/course-management-sheet";
-import TimetableCustomizer from "~/components/settings/timetable-customizer";
-import TimetableExportMenu from "~/components/timetable/export-menu";
-import WeeklyTimetable from "~/components/timetable/weekly-timetable";
+import { CourseManagementSheet } from "~/components/course-management-sheet";
+import { TimetableCustomizer } from "~/components/settings/timetable-customizer";
+import { TimetableExportMenu } from "~/components/timetable/export-menu";
+import { WeeklyTimetable } from "~/components/timetable/weekly-timetable";
 import { Button } from "~/components/ui/button";
 
 function App() {

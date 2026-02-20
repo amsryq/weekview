@@ -12,7 +12,7 @@ import {
 	DialogTrigger,
 } from "../ui/dialog";
 
-export default function SignIn({ children }: { children: React.ReactNode }) {
+export function SignIn({ children }: { children: React.ReactNode }) {
 	const [loading, setLoading] = useState(false);
 
 	return (

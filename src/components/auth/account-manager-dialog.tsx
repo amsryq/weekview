@@ -13,7 +13,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "../ui/dialog";
-import SignIn from "./sign-in";
+import { SignIn } from "./sign-in";
 
 export function AccountManagerDialog({ children }: { children: ReactNode }) {
 	return (

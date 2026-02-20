@@ -1,9 +1,8 @@
 import { ImportIcon } from "lucide-react";
-import { JSX } from "react";
 import { Button } from "~/components/ui/button";
 import { CourseProvider } from "~/lib/models/course-provider";
-import UiTMImporterDialog from "./components/importer-dialog";
-import { UiTMGroup } from "./group";
+import { UiTMImporterDialog } from "./components/importer-dialog";
+import { UiTMCourseSection } from "./course-section";
 
 let singletonCache: UiTMProvider | null = null;
 
@@ -20,22 +19,23 @@ export class UiTMProvider extends CourseProvider {
 		return (singletonCache ??= new UiTMProvider());
 	}
 
-	public useCourses(): UiTMGroup[] {
-		return super.useCourses() as UiTMGroup[];
+	public useCourses(): UiTMCourseSection[] {
+		return super.useCourses() as UiTMCourseSection[];
 	}
 
 	public sync(): Promise<void> {
 		return Promise.resolve();
 	}
 
-	public renderAddCourseButton(): JSX.Element {
-		return (
-			<UiTMImporterDialog>
-				<Button className="w-full">
-					<ImportIcon className="w-4 h-4" />
-					Import from UiTM
-				</Button>
-			</UiTMImporterDialog>
-		);
-	}
+}
+
+export function UiTMAddCourseButton() {
+	return (
+		<UiTMImporterDialog>
+			<Button className="w-full">
+				<ImportIcon className="w-4 h-4" />
+				Import from UiTM
+			</Button>
+		</UiTMImporterDialog>
+	);
 }

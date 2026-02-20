@@ -29,7 +29,7 @@ import {
 } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
 import { CourseStore } from "~/lib/stores/course-store";
-import { UiTMGroup } from "../../group";
+import { UiTMCourseSection } from "../../course-section";
 import { Campus } from "../../models/campus";
 import { Course } from "../../models/course";
 import { Faculty } from "../../models/faculty";
@@ -355,14 +355,14 @@ function CourseSlipImportStepBody() {
 
 			// Start importing courses
 			setImportPhase("importing");
-			const groupsByCourse = new Map<string, UiTMGroup[] | null>();
+			const groupsByCourse = new Map<string, UiTMCourseSection[] | null>();
 			const dedupeKeys = new Set<string>();
 			const successes: ImportSuccess[] = [];
 			const failures: ImportFailure[] = [];
 
 			const fetchGroupsForCourse = async (
 				course: Course,
-			): Promise<UiTMGroup[]> => {
+			): Promise<UiTMCourseSection[]> => {
 				const cachedGroups = groupsByCourse.get(course.code);
 				if (cachedGroups !== undefined) {
 					if (cachedGroups === null) {
@@ -440,7 +440,7 @@ function CourseSlipImportStepBody() {
 					continue;
 				}
 
-				let uitmGroups: UiTMGroup[];
+				let uitmGroups: UiTMCourseSection[];
 				try {
 					uitmGroups = await fetchGroupsForCourse(course);
 				} catch (error) {
@@ -479,7 +479,7 @@ function CourseSlipImportStepBody() {
 				const storeState = CourseStore.getState();
 				const alreadyExists = storeState.courses.some(
 					(courseItem) =>
-						courseItem instanceof UiTMGroup &&
+						courseItem instanceof UiTMCourseSection &&
 						normalizeString(courseItem.internal.code) ===
 							normalizeString(matchingGroup.internal.code) &&
 						normalizeString(courseItem.internal.group) ===

@@ -1,13 +1,14 @@
 import { ClockIcon, MapPinIcon, PencilIcon, Trash2Icon } from "lucide-react";
-import { type JSX } from "react";
 import { useStore } from "zustand";
 import { ColorEntry } from "~/lib/models/color-entry";
 import { Course } from "~/lib/models/course";
 import type { CourseProvider } from "~/lib/models/course-provider";
+import { UiTMProvider, UiTMAddCourseButton } from "~/features/uitm/provider";
+import { ManualCourseProvider, ManualAddCourseButton } from "~/lib/providers/manual-course-provider";
 import { MeetingTime } from "~/lib/models/meeting-time";
 import { CourseStore } from "~/lib/stores/course-store";
 import { ProviderStore } from "~/lib/stores/provider-store";
-import CourseEditorDialog from "./course-editor/course-editor-dialog";
+import { CourseEditorDialog } from "./course-editor/course-editor-dialog";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -173,6 +174,12 @@ function CourseCard({
 	);
 }
 
+function AddCourseButton({ provider }: { provider: CourseProvider }) {
+	if (provider instanceof ManualCourseProvider) return <ManualAddCourseButton />;
+	if (provider instanceof UiTMProvider) return <UiTMAddCourseButton />;
+	return null;
+}
+
 function ProviderSection({ provider }: { provider: CourseProvider }) {
 	const courses = provider.useCourses();
 
@@ -205,7 +212,7 @@ function ProviderSection({ provider }: { provider: CourseProvider }) {
 						</CardContent>
 					</Card>
 				)}
-				<provider.renderAddCourseButton />
+				<AddCourseButton provider={provider} />
 			</div>
 		</div>
 	);
@@ -225,7 +232,7 @@ function CourseList() {
 	);
 }
 
-export default function CourseManagementSheet({
+export function CourseManagementSheet({
 	children,
 }: {
 	children: JSX.Element;

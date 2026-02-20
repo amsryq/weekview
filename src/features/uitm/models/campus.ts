@@ -1,4 +1,4 @@
-import { getCampuses } from "~/server/functions/uitm";
+import { getCampuses } from "../server/functions";
 
 export class Campus {
 	code: string;

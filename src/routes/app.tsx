@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import App from "~/app/app/app";
-import { Footer } from "~/app/app/footer";
-import { Header } from "~/app/app/header";
+import App from "~/components/app/app";
+import { Footer } from "~/components/app/footer";
+import { Header } from "~/components/app/header";
 
 const APP_DESCRIPTION =
   "Create beautiful, customizable weekly timetables for your classes with Weekview. Free online timetable generator. Perfect for students.";

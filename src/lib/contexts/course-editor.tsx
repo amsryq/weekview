@@ -2,8 +2,14 @@
 import { createContext, type ReactNode, useContext, useState } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import type { PartialDeep } from "type-fest";
-import CourseEditorDialog from "~/components/course-editor/course-editor-dialog";
+import { CourseEditorDialog } from "~/components/course-editor/course-editor-dialog";
 import type { Course } from "../models/course";
+
+type EditorProps = {
+	title?: string;
+	defaultValues?: PartialDeep<Course.Schema>;
+	onSubmit: (data: Course.Schema, form: UseFormReturn<Course.Schema>) => void;
+};
 
 interface CourseEditorContextType {
 	openCourseEditor: (options: {
@@ -13,17 +19,19 @@ interface CourseEditorContextType {
 		onSubmit: (data: Course.Schema, form: UseFormReturn<Course.Schema>) => void;
 	}) => void;
 	closeCourseEditor: () => void;
+	/** Internal — consumed by CourseEditorDialogRenderer. Do not use in application code. */
+	_internal: {
+		isOpen: boolean;
+		setIsOpen: (open: boolean) => void;
+		editorProps: EditorProps | null;
+	};
 }
 
 const CourseEditorContext = createContext<CourseEditorContextType | null>(null);
 
 export function CourseEditorProvider({ children }: { children: ReactNode }) {
 	const [isOpen, setIsOpen] = useState(false);
-	const [editorProps, setEditorProps] = useState<{
-		title?: string;
-		defaultValues?: PartialDeep<Course.Schema>;
-		onSubmit: (data: Course.Schema, form: UseFormReturn<Course.Schema>) => void;
-	} | null>(null);
+	const [editorProps, setEditorProps] = useState<EditorProps | null>(null);
 
 	const openCourseEditor = ({
 		course,
@@ -51,28 +59,13 @@ export function CourseEditorProvider({ children }: { children: ReactNode }) {
 
 	return (
 		<CourseEditorContext.Provider
-			value={{ openCourseEditor, closeCourseEditor }}
+			value={{
+				openCourseEditor,
+				closeCourseEditor,
+				_internal: { isOpen, setIsOpen, editorProps },
+			}}
 		>
 			{children}
-			{isOpen && editorProps && (
-				<CourseEditorDialog
-					title={editorProps.title}
-					defaultValues={editorProps.defaultValues}
-					onSubmit={(data, form) => {
-						editorProps.onSubmit(data, form);
-
-						// Check for errors before closing
-						const fields = form.getValues();
-						const hasError = Object.keys(fields).some(
-							(key) => form.getFieldState(key as keyof typeof fields).error,
-						);
-
-						if (!hasError) closeCourseEditor();
-					}}
-					open={isOpen}
-					onOpenChange={setIsOpen}
-				/>
-			)}
 		</CourseEditorContext.Provider>
 	);
 }
@@ -85,4 +78,37 @@ export function useCourseEditor() {
 		);
 	}
 	return context;
+}
+
+/**
+ * Renders the CourseEditorDialog as a global singleton.
+ * Mount this once in the root layout alongside <Toaster> and <SupportDialog>.
+ */
+export function CourseEditorDialogRenderer() {
+	const {
+		closeCourseEditor,
+		_internal: { isOpen, setIsOpen, editorProps },
+	} = useCourseEditor();
+
+	if (!isOpen || !editorProps) return null;
+
+	return (
+		<CourseEditorDialog
+			title={editorProps.title}
+			defaultValues={editorProps.defaultValues}
+			onSubmit={(data, form) => {
+				editorProps.onSubmit(data, form);
+
+				// Only close if no validation errors remain
+				const fields = form.getValues();
+				const hasError = Object.keys(fields).some(
+					(key) => form.getFieldState(key as keyof typeof fields).error,
+				);
+
+				if (!hasError) closeCourseEditor();
+			}}
+			open={isOpen}
+			onOpenChange={setIsOpen}
+		/>
+	);
 }

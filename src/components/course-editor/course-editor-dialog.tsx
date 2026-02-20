@@ -13,7 +13,7 @@ import {
 } from "../ui/dialog";
 import { CourseEditorForm } from "./course-editor-form";
 
-export default function CourseEditorDialog({
+export function CourseEditorDialog({
 	children,
 	title = "Edit Course",
 	defaultValues = undefined,

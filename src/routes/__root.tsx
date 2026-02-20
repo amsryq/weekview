@@ -6,7 +6,7 @@ import {
     createRootRoute,
 } from "@tanstack/react-router";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { CourseEditorProvider } from "~/lib/contexts/course-editor";
+import { CourseEditorDialogRenderer, CourseEditorProvider } from "~/lib/contexts/course-editor";
 import { getQueryClient } from "~/lib/contexts/react-query";
 import { SupportDialogProvider } from "~/lib/contexts/support-dialog";
 import { ThemeProvider } from "~/lib/contexts/themes";
@@ -66,6 +66,7 @@ function RootComponent() {
                             <Outlet />
                         </div>
                         <SupportDialog />
+                        <CourseEditorDialogRenderer />
                     </CourseEditorProvider>
                 </SupportDialogProvider>
             </QueryClientProvider>

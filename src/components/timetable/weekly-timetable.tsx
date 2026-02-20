@@ -252,7 +252,7 @@ interface WeeklyTimetableProps {
 	containerId?: string;
 }
 
-export default function WeeklyTimetable({
+export function WeeklyTimetable({
 	layout,
 	courses: _courses,
 	containerId = "weekly-timetable",

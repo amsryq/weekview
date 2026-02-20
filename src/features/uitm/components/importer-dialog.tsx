@@ -8,7 +8,7 @@ import { MyStudentImportDialog } from "./importer/my-student-import-step";
 import { ImporterStep, useImporterSelectionStore } from "./importer/shared";
 import { SourceSelectionDialog } from "./importer/source-selection-step";
 
-export default function UiTMImporterDialog({
+export function UiTMImporterDialog({
 	children,
 }: {
 	children: JSX.Element;

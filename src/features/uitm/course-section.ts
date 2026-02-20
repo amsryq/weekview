@@ -1,5 +1,5 @@
 import { Course } from "~/lib/models/course";
-import { UiTMProvider } from ".";
+import { UiTMProvider } from "./provider";
 
 type UiTMCourseConstructorProps = ConstructorParameters<typeof Course>[0] & {
 	group: string;
@@ -7,7 +7,7 @@ type UiTMCourseConstructorProps = ConstructorParameters<typeof Course>[0] & {
 	faculty?: string;
 };
 
-export class UiTMGroup extends Course {
+export class UiTMCourseSection extends Course {
 	public internal: {
 		code: string;
 		campus: string;

@@ -1,6 +1,6 @@
-import { CloudflareStorage } from "../platform/cloudflare";
-import { CloudflareEnv, Storage } from "../platform/types";
+import { Storage } from "../platform/types";
 
+// TODO: Wire up Cloudflare KV binding when ready (see src/server/platform/cloudflare.ts)
 export function getStorage(): Storage {
     const storage = new Map<string, any>();
     return {

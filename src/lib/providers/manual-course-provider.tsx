@@ -1,6 +1,5 @@
 import { PlusIcon } from "lucide-react";
-import { JSX } from "react";
-import CourseEditorDialog from "~/components/course-editor/course-editor-dialog";
+import { CourseEditorDialog } from "~/components/course-editor/course-editor-dialog";
 import { Button } from "~/components/ui/button";
 import { Course } from "../models/course";
 import { CourseProvider } from "../models/course-provider";
@@ -26,30 +25,31 @@ export class ManualCourseProvider extends CourseProvider {
 		return Promise.resolve();
 	}
 
-	public renderAddCourseButton(): JSX.Element {
-		return (
-			<CourseEditorDialog
-				title="Add Course"
-				onSubmit={(data, form) => {
-					const course = Course.createFromSchema(data);
-					const conflicts = CourseStore.getState().getConflictingCourses(
-						course.meetingTimes,
-					);
-					if (conflicts.length > 0) {
-						form.setError("meetingTimes", {
-							message: `There are time conflicts with ${conflicts.map((c) => c.code).join(", ")}.`,
-						});
-						return;
-					}
+}
 
-					CourseStore.getState().addCourse(course);
-				}}
-			>
-				<Button>
-					<PlusIcon className="w-4 h-4" />
-					Add Course
-				</Button>
-			</CourseEditorDialog>
-		);
-	}
+export function ManualAddCourseButton() {
+	return (
+		<CourseEditorDialog
+			title="Add Course"
+			onSubmit={(data, form) => {
+				const course = Course.createFromSchema(data);
+				const conflicts = CourseStore.getState().getConflictingCourses(
+					course.meetingTimes,
+				);
+				if (conflicts.length > 0) {
+					form.setError("meetingTimes", {
+						message: `There are time conflicts with ${conflicts.map((c) => c.code).join(", ")}.`,
+					});
+					return;
+				}
+
+				CourseStore.getState().addCourse(course);
+			}}
+		>
+			<Button>
+				<PlusIcon className="w-4 h-4" />
+				Add Course
+			</Button>
+		</CourseEditorDialog>
+	);
 }

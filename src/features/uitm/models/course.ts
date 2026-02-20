@@ -1,4 +1,4 @@
-import { getCourses } from "~/server/functions/uitm";
+import { getCourses } from "../server/functions";
 import { Campus } from "./campus";
 import { Faculty } from "./faculty";
 

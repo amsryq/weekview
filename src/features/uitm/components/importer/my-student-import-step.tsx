@@ -22,7 +22,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import { CourseStore } from "~/lib/stores/course-store";
-import { UiTMGroup } from "../../group";
+import { UiTMCourseSection } from "../../course-section";
 import { fetchMyStudentTimetable } from "../../models/mystudent";
 import {
 	CourseImportProgress,
@@ -171,7 +171,7 @@ function MyStudentImportContent() {
 
 				const alreadyExists = storeState.courses.some(
 					(courseItem) =>
-						courseItem instanceof UiTMGroup &&
+						courseItem instanceof UiTMCourseSection &&
 						normalizeString(courseItem.internal.code) ===
 							normalizeString(courseCode) &&
 						normalizeString(courseItem.internal.group) ===

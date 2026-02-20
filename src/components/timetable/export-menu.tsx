@@ -91,7 +91,7 @@ const saveBlobWithPicker = async (
 	await writable.close();
 };
 
-export default function TimetableExportMenu({
+export function TimetableExportMenu({
 	targetSelector = DEFAULT_SELECTOR,
 	filenameBase = DEFAULT_FILENAME_BASE,
 	scale = DEFAULT_SCALE,
