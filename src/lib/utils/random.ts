@@ -7,6 +7,7 @@
 
 export function randomUUID(): string {
 	if (
+		typeof window !== "undefined" &&
 		typeof crypto !== "undefined" &&
 		typeof crypto.randomUUID === "function"
 	) {
