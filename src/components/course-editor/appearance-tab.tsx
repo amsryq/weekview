@@ -7,7 +7,10 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
+import { useStore } from "zustand";
 import type { Course } from "~/lib/models/course";
+import { getStyleById } from "~/lib/models/style";
+import { PREDEFINED_FONTS } from "~/lib/utils/fonts";
 import { PaywallOverlay } from "../paywall-overlay";
 import { ColorSelectorGrid } from "../settings/color-selector-grid";
 import { Button } from "../ui/button";
@@ -47,6 +50,7 @@ import {
 	SelectValue,
 } from "../ui/select";
 import { Slider } from "../ui/slider";
+import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { Textarea } from "../ui/textarea";
 import { Twemoji } from "../ui/twemoji";
 
@@ -58,6 +62,8 @@ export function AppearanceTab() {
 	const iconType = form.watch("cellAppearance.icon.type");
 	const iconEmoji = form.watch("cellAppearance.icon.emoji");
 	const iconSvg = form.watch("cellAppearance.icon.svg");
+	const activeStyleId = useStore(TimetablePreferencesStore, (s) => s.activeStyleId);
+	const style = getStyleById(activeStyleId);
 
 	const hasIcon =
 		iconType &&
@@ -97,7 +103,12 @@ export function AppearanceTab() {
 								<FormControl>
 									<ColorSelectorGrid
 										value={field.value}
-										onChange={field.onChange}
+										onChange={(value) => {
+											field.onChange(value);
+											form.setValue("themeColorIndex", null, {
+												shouldDirty: true,
+											});
+										}}
 									/>
 								</FormControl>
 								<FormDescription>
@@ -134,6 +145,49 @@ export function AppearanceTab() {
 								</FormControl>
 								<FormDescription>
 									Select the text color that contrasts well with your background
+								</FormDescription>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				</CardContent>
+			</Card>
+
+			<Card>
+				<CardHeader>
+					<CardTitle className="text-base">Typography</CardTitle>
+					<CardDescription>
+						Choose a font for this course. This can override the active style font.
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<FormField
+						control={form.control}
+						name="cellAppearance.fontFamily"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel className="text-sm font-medium">Font</FormLabel>
+								<Select
+									onValueChange={field.onChange}
+									value={field.value ?? style.fontFamily}
+								>
+									<FormControl>
+										<SelectTrigger>
+											<SelectValue placeholder="Select font" />
+										</SelectTrigger>
+									</FormControl>
+									<SelectContent>
+										{PREDEFINED_FONTS.map((font) => (
+											<SelectItem key={font} value={font}>
+												<span style={{ fontFamily: `'${font}', sans-serif` }}>
+													{font}
+												</span>
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+								<FormDescription>
+									Style font: {style.fontFamily}
 								</FormDescription>
 								<FormMessage />
 							</FormItem>

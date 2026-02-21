@@ -1,8 +1,10 @@
 import { toMerged } from "es-toolkit";
 import { useFormContext } from "react-hook-form";
+import { useStore } from "zustand";
 import { Clock, TimeRange } from "~/lib/models/clock";
 import { Course } from "~/lib/models/course";
 import { MeetingTime } from "~/lib/models/meeting-time";
+import { getStyleColorByIndex } from "~/lib/models/style";
 import { ManualCourseProvider } from "~/lib/providers/manual-course-provider";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { CourseBlock } from "../timetable/course-block";
@@ -10,6 +12,7 @@ import { CourseBlock } from "../timetable/course-block";
 export function CoursePreview() {
 	const form = useFormContext<Course.Schema>();
 	const formData = form.watch();
+	const activeStyleId = useStore(TimetablePreferencesStore, (s) => s.activeStyleId);
 
 	const mockMeetingTime = new MeetingTime({
 		day: 1,
@@ -30,6 +33,13 @@ export function CoursePreview() {
 		formData.cellAppearance,
 	);
 
+	const resolvedAppearance =
+		formData.themeColorIndex !== null && formData.themeColorIndex !== undefined
+			? toMerged(appearance, {
+					background: getStyleColorByIndex(activeStyleId, formData.themeColorIndex),
+				})
+			: appearance;
+
 	return (
 		<div className="flex flex-col items-center space-y-4">
 			<div className="text-center">
@@ -43,7 +53,7 @@ export function CoursePreview() {
 				<CourseBlock
 					course={mockCourse}
 					meetingTime={mockMeetingTime}
-					appearance={appearance}
+					appearance={resolvedAppearance}
 					layoutType="rows"
 				/>
 			</div>

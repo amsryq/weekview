@@ -12,6 +12,7 @@ type CourseConstructorProps = {
 	name?: string;
 	provider?: CourseProvider;
 	cellAppearance: CellAppearance;
+	themeColorIndex?: number | null;
 };
 
 const courseSchema = z.object({
@@ -21,6 +22,7 @@ const courseSchema = z.object({
 		.min(1, "At least one meeting time is required"),
 	name: z.string().optional(),
 	cellAppearance: CellAppearanceSchema,
+	themeColorIndex: z.number().nullable().optional(),
 });
 
 export namespace Course {
@@ -38,6 +40,7 @@ export class Course {
 	public name?: string;
 	public meetingTimes: MeetingTime[];
 	public cellAppearance: CellAppearance;
+	public themeColorIndex: number | null;
 
 	public provider: CourseProvider;
 	public syncStatus: Course.SyncStatus = "synced";
@@ -48,6 +51,7 @@ export class Course {
 		this.name = data.name;
 		this.meetingTimes = data.meetingTimes || [];
 		this.cellAppearance = data.cellAppearance;
+		this.themeColorIndex = data.themeColorIndex ?? null;
 		this.provider = data.provider ?? ManualCourseProvider.instance;
 	}
 
@@ -57,6 +61,7 @@ export class Course {
 			name: data.name,
 			meetingTimes: data.meetingTimes.map(MeetingTime.createFromSchema),
 			cellAppearance: data.cellAppearance,
+			themeColorIndex: data.themeColorIndex,
 		});
 	}
 
@@ -66,6 +71,7 @@ export class Course {
 			name: this.name,
 			meetingTimes: this.meetingTimes.map((mt) => mt.toSchema()),
 			cellAppearance: this.cellAppearance,
+			themeColorIndex: this.themeColorIndex,
 		};
 	}
 
@@ -74,5 +80,6 @@ export class Course {
 		target.name = data.name;
 		target.meetingTimes = data.meetingTimes.map(MeetingTime.createFromSchema);
 		target.cellAppearance = data.cellAppearance;
+		target.themeColorIndex = data.themeColorIndex ?? null;
 	}
 }

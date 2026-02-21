@@ -1,6 +1,10 @@
 import { uniq } from "es-toolkit";
 import { MeetingTime } from "~/lib/models/meeting-time";
-import { getOrAssignSolidColorFor } from "~/lib/stores/color-store";
+import {
+	DEFAULT_TIMETABLE_STYLE_ID,
+	getStableStyleIndex,
+	getStyleColorByIndex,
+} from "~/lib/models/style";
 import { getGroups } from "../server/functions";
 import { UiTMCourseSection } from "../course-section";
 import { Course } from "./course";
@@ -101,7 +105,9 @@ export class Group {
 	}
 
 	toUiTMCourse(): UiTMCourseSection {
-		const self = this;
+		const colorIndex = getStableStyleIndex(
+			`${this.course.campus.code}:${this.course.code}:${this.code}`,
+		);
 		const meetingTimes = this.sessions.map((session) =>
 			MeetingTime.createFromSchema({
 				day: session.day!,
@@ -113,12 +119,9 @@ export class Group {
 
 		return new UiTMCourseSection({
 			code: this.course.code,
+			themeColorIndex: colorIndex,
 			cellAppearance: {
-				get background() {
-					return getOrAssignSolidColorFor(
-						`${self.course.campus.code}:${self.course.code}:${self.code}`,
-					);
-				},
+				background: getStyleColorByIndex(DEFAULT_TIMETABLE_STYLE_ID, colorIndex),
 				fgColor: "#ffffff",
 			},
 			campus: this.course.campus.code,

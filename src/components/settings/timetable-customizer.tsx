@@ -5,11 +5,14 @@ import {
 	LayoutGridIcon,
 	Palette,
 	RotateCcwIcon,
+	SwatchBook,
 } from "lucide-react";
 import { useState } from "react";
 import type { PartialDeep } from "type-fest";
 import { useStore } from "zustand";
 import type { CellAppearance } from "~/lib/models/cell-appearance";
+import { DEFAULT_TIMETABLE_STYLE_ID } from "~/lib/models/style";
+import { CourseStore } from "~/lib/stores/course-store";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { PaywallOverlay } from "../paywall-overlay";
 import { Button } from "../ui/button";
@@ -25,8 +28,9 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { BackgroundImageUpload } from "./background-image-upload";
 import { CellAppearanceLayoutSettings } from "./cell-appearance-layout-settings";
+import { StyleSelector } from "./style-selector";
 
-type TabValue = "layout" | "background" | "cells";
+type TabValue = "styles" | "layout" | "background" | "cells";
 
 interface TimetableCustomizerProps {
 	children: React.ReactNode;
@@ -36,7 +40,7 @@ export function TimetableCustomizer({
 	children,
 }: TimetableCustomizerProps) {
 	const prefs = useStore(TimetablePreferencesStore);
-	const [activeTab, setActiveTab] = useState<TabValue>("layout");
+	const [activeTab, setActiveTab] = useState<TabValue>("styles");
 
 	const handleCellAppearanceChange = (changes: PartialDeep<CellAppearance>) => {
 		TimetablePreferencesStore.setState((writable) => {
@@ -46,6 +50,7 @@ export function TimetableCustomizer({
 
 	const handleReset = () => {
 		TimetablePreferencesStore.getState().reset();
+		CourseStore.getState().resetAllToStyle(DEFAULT_TIMETABLE_STYLE_ID);
 	};
 
 	return (
@@ -64,7 +69,11 @@ export function TimetableCustomizer({
 					onValueChange={(v) => setActiveTab(v as TabValue)}
 					className="flex-1 flex flex-col min-h-0"
 				>
-					<TabsList className="w-full grid grid-cols-3">
+					<TabsList className="w-full grid grid-cols-4">
+						<TabsTrigger value="styles" className="gap-2">
+							<SwatchBook className="size-4" />
+							<span className="hidden sm:inline">Styles</span>
+						</TabsTrigger>
 						<TabsTrigger value="layout" className="gap-2">
 							<LayoutGridIcon className="size-4" />
 							<span className="hidden sm:inline">Layout</span>
@@ -80,6 +89,10 @@ export function TimetableCustomizer({
 					</TabsList>
 
 					<div className="flex-1 overflow-y-auto py-4 min-h-0">
+						<TabsContent value="styles" className="mt-0">
+							<StyleSelector />
+						</TabsContent>
+
 						<TabsContent value="layout" className="mt-0 space-y-6">
 							<LayoutSettings
 								layout={prefs.layout}

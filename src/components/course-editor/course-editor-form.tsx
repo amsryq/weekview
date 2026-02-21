@@ -2,8 +2,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toMerged } from "es-toolkit";
 import { type UseFormReturn, useForm } from "react-hook-form";
 import type { PartialDeep } from "type-fest";
+import { useStore } from "zustand";
 import { Course } from "~/lib/models/course";
 import { MeetingTime } from "~/lib/models/meeting-time";
+import { getStyleById, getStyleColorByIndex } from "~/lib/models/style";
+import { CourseStore } from "~/lib/stores/course-store";
+import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { Button } from "../ui/button";
 import { DialogClose } from "../ui/dialog";
 import { Form, FormMessage } from "../ui/form";
@@ -21,12 +25,18 @@ export function CourseEditorForm({
 	onSubmit,
 	defaultValues,
 }: CourseEditorFormProps) {
+	const activeStyleId = useStore(TimetablePreferencesStore, (s) => s.activeStyleId);
+	const courseCount = useStore(CourseStore, (s) => s.courses.length);
+	const style = getStyleById(activeStyleId);
+	const defaultThemeColorIndex = courseCount % style.gridColors.length;
+
 	const form = useForm<Course.Schema>({
 		resolver: zodResolver(Course.schema),
 		defaultValues: toMerged(
 			{
 				code: "",
 				name: "",
+				themeColorIndex: defaultThemeColorIndex,
 				meetingTimes: [
 					{
 						day: 1,
@@ -36,10 +46,7 @@ export function CourseEditorForm({
 					},
 				],
 				cellAppearance: {
-					background: {
-						type: "solid",
-						color: "#3b82f6",
-					},
+					background: getStyleColorByIndex(activeStyleId, defaultThemeColorIndex),
 					fgColor: "#ffffff",
 					icon: {
 						type: "emoji",

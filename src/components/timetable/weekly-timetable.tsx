@@ -4,6 +4,7 @@ import { useStore } from "zustand";
 import type { CellAppearance } from "~/lib/models/cell-appearance";
 import type { Course } from "~/lib/models/course";
 import type { MeetingTime } from "~/lib/models/meeting-time";
+import { getStyleById } from "~/lib/models/style";
 import { CourseStore } from "~/lib/stores/course-store";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { Card, CardContent } from "../ui/card";
@@ -92,6 +93,8 @@ function PositionedCourseBlock({
 function DayColumn({ day, dayIndex }: { day: string; dayIndex: number }) {
 	const { courses, timeSlots, columnHeight, rowWidth, layout } = useTimetable();
 	const prefs = useStore(TimetablePreferencesStore);
+	const activeStyleId = useStore(TimetablePreferencesStore, (s) => s.activeStyleId);
+	const activeStyle = getStyleById(activeStyleId);
 	const meetingDay = dayIndex + 1;
 
 	const dayMeetings = courses.flatMap((course) =>
@@ -107,8 +110,8 @@ function DayColumn({ day, dayIndex }: { day: string; dayIndex: number }) {
 
 	const lineClass =
 		layout === "rows"
-			? "absolute top-0 bottom-0 border-l border-border/50"
-			: "absolute left-0 right-0 border-t border-border/50";
+			? "absolute top-0 bottom-0 border-l"
+			: "absolute left-0 right-0 border-t";
 
 	const lineStyle = (index: number) =>
 		layout === "rows"
@@ -124,14 +127,24 @@ function DayColumn({ day, dayIndex }: { day: string; dayIndex: number }) {
 						: "h-8 flex items-center justify-center"
 				}
 			>
-				<div className="text-secondary-foreground text-sm font-medium">
+				<div
+					className="text-sm font-medium"
+					style={{ color: activeStyle.chrome.labelColor }}
+				>
 					{day}
 				</div>
 			</div>
 
 			<div className="relative" style={containerStyle}>
 				{timeSlots.map((_, index) => (
-					<div key={index} className={lineClass} style={lineStyle(index)} />
+					<div
+						key={index}
+						className={lineClass}
+						style={{
+							...lineStyle(index),
+							borderColor: activeStyle.chrome.gridLineColor,
+						}}
+					/>
 				))}
 
 				{dayMeetings.map(({ course, meetingTime }, idx) => (
@@ -157,6 +170,8 @@ function RowLayout({
 	containerId: string;
 }) {
 	const { timeSlots, backgroundStyle, overlayStyle } = useTimetable();
+	const activeStyleId = useStore(TimetablePreferencesStore, (s) => s.activeStyleId);
+	const activeStyle = getStyleById(activeStyleId);
 
 	return (
 		<div className="overflow-x-auto">
@@ -178,8 +193,11 @@ function RowLayout({
 							{timeSlots.map((time: string) => (
 								<div
 									key={time}
-									className="text-sm text-muted-foreground text-center -translate-x-4 flex flex-shrink-0"
-									style={{ width: `${ROW_BLOCK_WIDTH_PX}px` }}
+									className="text-sm text-center -translate-x-4 flex flex-shrink-0"
+									style={{
+										width: `${ROW_BLOCK_WIDTH_PX}px`,
+										color: activeStyle.chrome.timeColor,
+									}}
 								>
 									<span className="font-semibold">{time}</span>
 								</div>
@@ -204,6 +222,8 @@ function ColumnLayout({
 	containerId: string;
 }) {
 	const { timeSlots, backgroundStyle, overlayStyle } = useTimetable();
+	const activeStyleId = useStore(TimetablePreferencesStore, (s) => s.activeStyleId);
+	const activeStyle = getStyleById(activeStyleId);
 	return (
 		<div className="overflow-y-auto">
 			<div
@@ -226,8 +246,11 @@ function ColumnLayout({
 						{timeSlots.map((time: string) => (
 							<span
 								key={time}
-								style={{ height: `${COLUMN_BLOCK_HEIGHT_PX}px` }}
-								className="flex text-[12px] text-muted-foreground font-semibold pr-2 -translate-y-2 justify-end"
+								style={{
+									height: `${COLUMN_BLOCK_HEIGHT_PX}px`,
+									color: activeStyle.chrome.timeColor,
+								}}
+								className="flex text-[12px] font-semibold pr-2 -translate-y-2 justify-end"
 							>
 								{time}
 							</span>
@@ -263,10 +286,19 @@ export function WeeklyTimetable({
 		TimetablePreferencesStore,
 		(s) => s.backgroundImage,
 	);
+	const activeStyleId = useStore(
+		TimetablePreferencesStore,
+		(s) => s.activeStyleId,
+	);
+	const globalFontFamily = useStore(
+		TimetablePreferencesStore,
+		(s) => s.cellAppearance.fontFamily,
+	);
 	const backgroundImageOptions = useStore(
 		TimetablePreferencesStore,
 		(s) => s.backgroundImageOptions,
 	);
+	const activeStyle = getStyleById(activeStyleId);
 	// Allow prop override; default to preferences
 	const effectiveLayout = layout ?? prefsLayout;
 
@@ -322,9 +354,14 @@ export function WeeklyTimetable({
 				backgroundSize: "cover",
 				backgroundPosition: "center",
 				backgroundRepeat: "no-repeat",
+				backgroundColor: activeStyle.background.color,
+				fontFamily: `'${globalFontFamily ?? activeStyle.fontFamily}', sans-serif`,
 				borderRadius: "8px",
 			}
-		: undefined;
+		: {
+				backgroundColor: activeStyle.background.color,
+				fontFamily: `'${globalFontFamily ?? activeStyle.fontFamily}', sans-serif`,
+			};
 
 	const overlayStyle = backgroundImage
 		? { opacity: 1 - backgroundImageOptions.opacity }

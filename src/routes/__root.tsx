@@ -12,6 +12,7 @@ import { SupportDialogProvider } from "~/lib/contexts/support-dialog";
 import { ThemeProvider } from "~/lib/contexts/themes";
 import { SupportDialog } from "~/components/support-dialog";
 import { Toaster } from "~/components/ui/sonner";
+import { buildGoogleFontsUrl, PREDEFINED_FONTS } from "~/lib/utils/fonts";
 import globalsCss from "~/globals.css?url";
 
 export const Route = createRootRoute({
@@ -33,6 +34,7 @@ export const Route = createRootRoute({
         ],
         links: [
             { rel: "stylesheet", href: globalsCss },
+            { rel: "stylesheet", href: buildGoogleFontsUrl(PREDEFINED_FONTS) },
             { rel: "icon", href: "/icon.svg" },
         ],
     }),

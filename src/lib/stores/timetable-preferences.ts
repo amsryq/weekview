@@ -11,11 +11,18 @@ import {
 import { ColorEntry } from "../models/color-entry";
 import { Course } from "../models/course";
 import { MeetingTime } from "../models/meeting-time";
+import {
+	DEFAULT_TIMETABLE_STYLE_ID,
+	getStyleById,
+	getStyleColorByIndex,
+} from "../models/style";
+
 
 export type TimetableLayout = "rows" | "columns";
 
 const defaultState = {
 	layout: "rows" as TimetableLayout,
+	activeStyleId: DEFAULT_TIMETABLE_STYLE_ID,
 	backgroundImage: null as string | null,
 	backgroundImageOptions: {
 		opacity: 0.3,
@@ -68,6 +75,7 @@ const defaultState = {
 		} satisfies ColorEntry.Schema,
 
 		fgColor: "#00FF00",
+		fontFamily: getStyleById(DEFAULT_TIMETABLE_STYLE_ID).fontFamily,
 	} satisfies RequiredDeep<CellAppearance> as RequiredDeep<CellAppearance>,
 };
 
@@ -100,6 +108,8 @@ interface Actions {
 		options: Partial<State["backgroundImageOptions"]>,
 	) => void;
 
+	applyStyle: (styleId: string) => void;
+
 	reset: () => void;
 }
 
@@ -113,6 +123,16 @@ export const TimetablePreferencesStore = createStore<State & Actions>()(
 				if (course.cellAppearance) {
 					appearance = toMerged(appearance, course.cellAppearance);
 				}
+
+				if (course.themeColorIndex !== null && course.themeColorIndex !== undefined) {
+					appearance = toMerged(appearance, {
+						background: getStyleColorByIndex(
+							get().activeStyleId,
+							course.themeColorIndex,
+						),
+					});
+				}
+
 				if (meetingTime.cellAppearance) {
 					appearance = toMerged(appearance, meetingTime.cellAppearance);
 				}
@@ -157,6 +177,17 @@ export const TimetablePreferencesStore = createStore<State & Actions>()(
 						...s.backgroundImageOptions,
 						...options,
 					};
+				}),
+
+			applyStyle: (styleId) =>
+				set((s) => {
+					const style = getStyleById(styleId);
+					s.activeStyleId = style.id;
+					s.backgroundImage = null;
+					s.backgroundImageOptions = {
+						opacity: 0.3,
+					};
+					s.cellAppearance.fontFamily = style.fontFamily;
 				}),
 
 			reset: () => set(() => defaultState),

@@ -14,9 +14,17 @@ import type {
 	FontWeight,
 	TextAlign,
 } from "~/lib/models/cell-appearance";
+import { PREDEFINED_FONTS } from "~/lib/utils/fonts";
 import { cn } from "~/lib/utils/styles";
 import { PaywallOverlay } from "../paywall-overlay";
 import { Label } from "../ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "../ui/select";
 import { Slider } from "../ui/slider";
 import { Switch } from "../ui/switch";
 
@@ -57,6 +65,7 @@ export function CellAppearanceLayoutSettings({
 	const borderRadius = get("borderRadius", 8);
 	const textAlign = get("textAlign", "center");
 	const autoSize = get("autoSizeFont", true);
+	const fontFamily = get("fontFamily", "Inter");
 
 	const getElementProp = <T,>(
 		prop: "visibility" | "fontSize" | "weight",
@@ -129,6 +138,26 @@ export function CellAppearanceLayoutSettings({
 					</div>
 				}
 			>
+				<Field label="Font family">
+					<Select
+						value={fontFamily}
+						onValueChange={(v) => onChange({ fontFamily: v })}
+					>
+						<SelectTrigger className="w-52">
+							<SelectValue placeholder="Select font" />
+						</SelectTrigger>
+						<SelectContent>
+							{PREDEFINED_FONTS.map((font) => (
+								<SelectItem key={font} value={font}>
+									<span style={{ fontFamily: `'${font}', sans-serif` }}>
+										{font}
+									</span>
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</Field>
+
 				<div className="grid gap-3">
 					{CELL_ELEMENTS.map((element) => {
 						const visible = getElementProp("visibility", element, true);

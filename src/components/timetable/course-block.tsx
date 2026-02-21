@@ -179,6 +179,9 @@ export function CourseBlock({
 						style={{
 							textAlign: appearance.textAlign,
 							color: appearance.fgColor ?? "#ffffff",
+							fontFamily: appearance.fontFamily
+								? `'${appearance.fontFamily}', sans-serif`
+								: undefined,
 						}}
 					>
 						{/* Icon */}

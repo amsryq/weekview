@@ -1,5 +1,9 @@
 import { MeetingTime } from "~/lib/models/meeting-time";
-import { getOrAssignSolidColorFor } from "~/lib/stores/color-store";
+import {
+	DEFAULT_TIMETABLE_STYLE_ID,
+	getStableStyleIndex,
+	getStyleColorByIndex,
+} from "~/lib/models/style";
 import { getStudentTimetable } from "../server/functions";
 import { UiTMCourseSection } from "../course-section";
 import { Group } from "./group";
@@ -60,16 +64,17 @@ export function createUiTMCourseSectionFromMyStudentGroup(
 		return meeting;
 	});
 
-	const color = getOrAssignSolidColorFor(colorKey);
+	const colorIndex = getStableStyleIndex(colorKey);
 
 	return new UiTMCourseSection({
 		code: group.courseCode,
 		name: includeCourseName ? group.courseName : undefined,
+		themeColorIndex: colorIndex,
 		meetingTimes,
 		group: group.code,
 		campus: "mystudent",
 		cellAppearance: {
-			background: color,
+			background: getStyleColorByIndex(DEFAULT_TIMETABLE_STYLE_ID, colorIndex),
 			fgColor: "#ffffff",
 		},
 	});
