@@ -24,7 +24,6 @@ export class ManualCourseProvider extends CourseProvider {
 		// Manual sources don't sync - they're user-managed
 		return Promise.resolve();
 	}
-
 }
 
 export function ManualAddCourseButton() {

@@ -1,7 +1,6 @@
 import { AlertTriangleIcon, X } from "lucide-react";
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
-import { Button } from "~/components/ui/button";
 
 function UnaffiliationNotice() {
 	const [isVisible, setIsVisible] = useState(true);

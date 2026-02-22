@@ -24,7 +24,9 @@ export const PREDEFINED_FONTS = [
 export type PredefinedFont = (typeof PREDEFINED_FONTS)[number];
 
 export function buildGoogleFontsUrl(fonts: readonly string[]): string {
-	const families = fonts.map((font) => `${font.replaceAll(" ", "+")}:wght@300;400;500;600;700`);
+	const families = fonts.map(
+		(font) => `${font.replaceAll(" ", "+")}:wght@300;400;500;600;700`,
+	);
 	return `https://fonts.googleapis.com/css2?${families
 		.map((family) => `family=${family}`)
 		.join("&")}&display=swap`;

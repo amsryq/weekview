@@ -8,11 +8,7 @@ import { MyStudentImportDialog } from "./importer/my-student-import-step";
 import { ImporterStep, useImporterSelectionStore } from "./importer/shared";
 import { SourceSelectionDialog } from "./importer/source-selection-step";
 
-export function UiTMImporterDialog({
-	children,
-}: {
-	children: JSX.Element;
-}) {
+export function UiTMImporterDialog({ children }: { children: JSX.Element }) {
 	const { open, currentStep, setOpen, setCurrentStep, reset } =
 		useImporterSelectionStore(
 			useShallow((state) =>

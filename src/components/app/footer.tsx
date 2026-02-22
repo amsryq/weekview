@@ -6,6 +6,7 @@ import {
 	HoverCardContent,
 	HoverCardTrigger,
 } from "~/components/ui/hover-card";
+import { ENABLE_AUTH_PAYWALL } from "~/lib/config/feature-flags";
 
 export function Footer() {
 	const [openCard, setOpenCard] = useState(false);
@@ -42,16 +43,20 @@ export function Footer() {
 					</HoverCardContent>
 				</HoverCard>
 			</p>
-			<span className="hidden md:inline">|</span>
-			<nav className="flex gap-4">
-				<Link to="/privacy" className="underline">
-					Privacy Policy
-				</Link>
-				<span className="hidden md:inline">-</span>
-				<Link to="/terms" className="underline">
-					Terms of Service
-				</Link>
-			</nav>
+			{ENABLE_AUTH_PAYWALL && (
+				<>
+					<span className="hidden md:inline">|</span>
+					<nav className="flex gap-4">
+						<Link to="/privacy" className="underline">
+							Privacy Policy
+						</Link>
+						<span className="hidden md:inline">-</span>
+						<Link to="/terms" className="underline">
+							Terms of Service
+						</Link>
+					</nav>
+				</>
+			)}
 		</footer>
 	);
 }

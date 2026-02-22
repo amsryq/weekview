@@ -1,11 +1,14 @@
 import { ClockIcon, MapPinIcon, PencilIcon, Trash2Icon } from "lucide-react";
 import { useStore } from "zustand";
+import { UiTMAddCourseButton, UiTMProvider } from "~/features/uitm/provider";
 import { ColorEntry } from "~/lib/models/color-entry";
 import { Course } from "~/lib/models/course";
 import type { CourseProvider } from "~/lib/models/course-provider";
-import { UiTMProvider, UiTMAddCourseButton } from "~/features/uitm/provider";
-import { ManualCourseProvider, ManualAddCourseButton } from "~/lib/providers/manual-course-provider";
 import { MeetingTime } from "~/lib/models/meeting-time";
+import {
+	ManualAddCourseButton,
+	ManualCourseProvider,
+} from "~/lib/providers/manual-course-provider";
 import { CourseStore } from "~/lib/stores/course-store";
 import { ProviderStore } from "~/lib/stores/provider-store";
 import { CourseEditorDialog } from "./course-editor/course-editor-dialog";
@@ -175,7 +178,8 @@ function CourseCard({
 }
 
 function AddCourseButton({ provider }: { provider: CourseProvider }) {
-	if (provider instanceof ManualCourseProvider) return <ManualAddCourseButton />;
+	if (provider instanceof ManualCourseProvider)
+		return <ManualAddCourseButton />;
 	if (provider instanceof UiTMProvider) return <UiTMAddCourseButton />;
 	return null;
 }
@@ -232,11 +236,7 @@ function CourseList() {
 	);
 }
 
-export function CourseManagementSheet({
-	children,
-}: {
-	children: JSX.Element;
-}) {
+export function CourseManagementSheet({ children }: { children: JSX.Element }) {
 	return (
 		<Sheet>
 			<SheetTrigger asChild>{children}</SheetTrigger>

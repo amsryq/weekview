@@ -26,7 +26,6 @@ export class UiTMProvider extends CourseProvider {
 	public sync(): Promise<void> {
 		return Promise.resolve();
 	}
-
 }
 
 export function UiTMAddCourseButton() {

@@ -4,6 +4,7 @@ import { SignIn } from "~/components/auth/sign-in";
 import { Logo } from "~/components/brand/logo";
 import { ThemeToggle } from "~/components/settings/theme-toggle";
 import { Button } from "~/components/ui/button";
+import { ENABLE_AUTH_PAYWALL } from "~/lib/config/feature-flags";
 import { useSupportDialog } from "~/lib/contexts/support-dialog";
 import { useUser } from "~/lib/hooks/user";
 
@@ -27,7 +28,23 @@ function AccountButton() {
 }
 
 function SupportButton() {
+	// always call the hook to satisfy rules of hooks
 	const { openSupportDialog } = useSupportDialog();
+
+	if (!ENABLE_AUTH_PAYWALL) {
+		return (
+			<Button asChild variant="outline">
+				<a
+					href="https://github.com/sponsors/amsryq"
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					<HeartIcon className="w-4 h-4" />
+					Support
+				</a>
+			</Button>
+		);
+	}
 
 	return (
 		<Button
@@ -81,7 +98,7 @@ export function Header() {
 				<div className="max-sm:hidden w-px mx-2 bg-border" />
 				<div className="flex gap-2">
 					<ThemeToggle />
-					<AccountButton />
+					{ENABLE_AUTH_PAYWALL && <AccountButton />}
 				</div>
 			</div>
 		</header>

@@ -1,4 +1,3 @@
-
 import { LoaderCircleIcon, RefreshCw } from "lucide-react";
 import { ReactNode } from "react";
 import { signOut, useSession } from "~/lib/auth/auth-client";

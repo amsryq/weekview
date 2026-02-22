@@ -1,5 +1,5 @@
-
 import { Lock, LucideIcon } from "lucide-react";
+import { ENABLE_AUTH_PAYWALL } from "~/lib/config/feature-flags";
 import { usePaywall } from "~/lib/hooks/paywall";
 import { cn } from "~/lib/utils/styles";
 import { Button } from "./ui/button";
@@ -65,7 +65,12 @@ export function PaywallOverlay({
 	primaryButtonText = compact ? "Unlock now" : "Learn more",
 	children,
 }: PaywallOverlayProps) {
+	// always invoke hook for consistent order
 	const { isSupporter, checkAccess } = usePaywall();
+
+	if (!ENABLE_AUTH_PAYWALL) {
+		return <>{children}</>;
+	}
 
 	// If visible prop is provided, use it; otherwise check supporter status
 	const shouldShowOverlay =

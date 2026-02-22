@@ -1,4 +1,3 @@
-
 import { Trash2Icon, UploadIcon } from "lucide-react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";

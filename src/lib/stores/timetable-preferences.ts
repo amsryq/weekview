@@ -17,7 +17,6 @@ import {
 	getStyleColorByIndex,
 } from "../models/style";
 
-
 export type TimetableLayout = "rows" | "columns";
 
 const defaultState = {
@@ -124,7 +123,10 @@ export const TimetablePreferencesStore = createStore<State & Actions>()(
 					appearance = toMerged(appearance, course.cellAppearance);
 				}
 
-				if (course.themeColorIndex !== null && course.themeColorIndex !== undefined) {
+				if (
+					course.themeColorIndex !== null &&
+					course.themeColorIndex !== undefined
+				) {
 					appearance = toMerged(appearance, {
 						background: getStyleColorByIndex(
 							get().activeStyleId,

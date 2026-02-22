@@ -1,104 +1,119 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { createAuth } from "../auth";
+import { ENABLE_AUTH_PAYWALL_SERVER } from "../config/feature-flags";
 import { createStripeClient } from "../stripe";
-import { getRequest } from '@tanstack/react-start/server'
 
 export const getStripeSession = createServerFn({ method: "GET" })
-    .inputValidator((sessionId: string) => sessionId)
-    .handler(async ({ data: sessionId }) => {
-        const auth = createAuth();
-        const stripe = createStripeClient(process.env.STRIPE_SECRET_KEY!);
+	.inputValidator((sessionId: string) => sessionId)
+	.handler(async ({ data: sessionId }) => {
+		if (!ENABLE_AUTH_PAYWALL_SERVER) {
+			throw new Error("Payments are disabled");
+		}
 
-        const session = await stripe.checkout.sessions.retrieve(sessionId);
+		const auth = createAuth();
+		const stripe = createStripeClient(process.env.STRIPE_SECRET_KEY!);
 
-        // Logic from backend/src/index.ts
-        const stripeCustomerId =
-            typeof session.customer === "string"
-                ? session.customer
-                : session.customer?.id;
+		const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-        let supporterExpiresAt: Date | null = null;
+		// Logic from backend/src/index.ts
+		const stripeCustomerId =
+			typeof session.customer === "string"
+				? session.customer
+				: session.customer?.id;
 
-        if (session.metadata?.type === "supporter_payment" && stripeCustomerId) {
-            const ctx = await auth.$context;
-            const user = (await ctx.adapter.findOne({
-                model: "user",
-                where: [{ field: "stripeCustomerId", value: stripeCustomerId }],
-            })) as (typeof auth.$Infer.Session)["user"] | null;
+		let supporterExpiresAt: Date | null = null;
 
-            if (user) {
-                if (user.supporterUntil && user.supporterUntil > new Date()) {
-                    supporterExpiresAt = user.supporterUntil;
-                }
-                // We skipping the fallback handleCheckoutCompleted call for simplicity, or we can add it verify safe
-            }
-        }
+		if (session.metadata?.type === "supporter_payment" && stripeCustomerId) {
+			const ctx = await auth.$context;
+			const user = (await ctx.adapter.findOne({
+				model: "user",
+				where: [{ field: "stripeCustomerId", value: stripeCustomerId }],
+			})) as (typeof auth.$Infer.Session)["user"] | null;
 
-        return {
-            status: session.status,
-            customer_email: session.customer_email,
-            amount_total: session.amount_total,
-            currency: session.currency,
-            payment_status: session.payment_status,
-            supporter_expires_at: supporterExpiresAt
-                ? Math.floor(supporterExpiresAt.getTime() / 1000)
-                : null,
-        };
-    });
+			if (user) {
+				if (user.supporterUntil && user.supporterUntil > new Date()) {
+					supporterExpiresAt = user.supporterUntil;
+				}
+				// We skipping the fallback handleCheckoutCompleted call for simplicity, or we can add it verify safe
+			}
+		}
 
-export const generateCheckout = createServerFn({ method: "POST" })
-    .handler(async () => {
-        const auth = createAuth();
-        const request = getRequest();
-        const headers = request.headers;
-        const url = new URL(request.url);
+		return {
+			status: session.status,
+			customer_email: session.customer_email,
+			amount_total: session.amount_total,
+			currency: session.currency,
+			payment_status: session.payment_status,
+			supporter_expires_at: supporterExpiresAt
+				? Math.floor(supporterExpiresAt.getTime() / 1000)
+				: null,
+		};
+	});
 
-        const session = await auth.api.getSession({
-            headers,
-            query: { disableCookieCache: true }
-        });
+export const generateCheckout = createServerFn({ method: "POST" }).handler(
+	async () => {
+		if (!ENABLE_AUTH_PAYWALL_SERVER) {
+			throw new Error("Payments are disabled");
+		}
 
-        const customerId = session?.user.stripeCustomerId;
-        if (!customerId) {
-            throw new Error("No Stripe customer linked to user");
-        }
+		const auth = createAuth();
+		const request = getRequest();
+		const headers = request.headers;
+		const url = new URL(request.url);
 
-        const stripe = createStripeClient(process.env.STRIPE_SECRET_KEY!);
-        const checkoutSession = await stripe.checkout.sessions.create({
-            mode: "payment",
-            customer: customerId,
-            line_items: [
-                {
-                    price: process.env.SUPPORTER_ONE_TIME_PRICE_ID!,
-                    quantity: 1,
-                },
-            ],
-            metadata: {
-                type: "supporter_payment",
-            },
-            success_url: `${url.host}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${url.host}/payment-cancel`,
-        });
+		const session = await auth.api.getSession({
+			headers,
+			query: { disableCookieCache: true },
+		});
 
-        return { url: checkoutSession.url };
-    });
+		const customerId = session?.user.stripeCustomerId;
+		if (!customerId) {
+			throw new Error("No Stripe customer linked to user");
+		}
 
-export const removeSupporter = createServerFn({ method: "POST" })
-    .handler(async () => {
-        const auth = createAuth();
-        const request = getRequest();
-        const headers = request.headers;
+		const stripe = createStripeClient(process.env.STRIPE_SECRET_KEY!);
+		const checkoutSession = await stripe.checkout.sessions.create({
+			mode: "payment",
+			customer: customerId,
+			line_items: [
+				{
+					price: process.env.SUPPORTER_ONE_TIME_PRICE_ID!,
+					quantity: 1,
+				},
+			],
+			metadata: {
+				type: "supporter_payment",
+			},
+			success_url: `${url.host}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+			cancel_url: `${url.host}/payment-cancel`,
+		});
 
-        const session = await auth.api.getSession({ headers });
-        if (!session?.user) {
-            throw new Error("Unauthorized");
-        }
+		return { url: checkoutSession.url };
+	},
+);
 
-        const ctx = await auth.$context;
-        // Logic to remove supporter status
-        await ctx.internalAdapter.updateUser(session.user.id, {
-            supporterUntil: null,
-        });
+export const removeSupporter = createServerFn({ method: "POST" }).handler(
+	async () => {
+		if (!ENABLE_AUTH_PAYWALL_SERVER) {
+			throw new Error("Payments are disabled");
+		}
 
-        return { success: true };
-    });
+		const auth = createAuth();
+		const request = getRequest();
+		const headers = request.headers;
+
+		const session = await auth.api.getSession({ headers });
+		if (!session?.user) {
+			throw new Error("Unauthorized");
+		}
+
+		const ctx = await auth.$context;
+		// Logic to remove supporter status
+		await ctx.internalAdapter.updateUser(session.user.id, {
+			supporterUntil: null,
+		});
+
+		return { success: true };
+	},
+);

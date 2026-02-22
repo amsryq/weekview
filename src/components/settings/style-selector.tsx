@@ -6,7 +6,10 @@ import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { cn } from "~/lib/utils/styles";
 
 export function StyleSelector() {
-	const activeStyleId = useStore(TimetablePreferencesStore, (s) => s.activeStyleId);
+	const activeStyleId = useStore(
+		TimetablePreferencesStore,
+		(s) => s.activeStyleId,
+	);
 
 	const applyStyle = (styleId: string) => {
 		TimetablePreferencesStore.getState().applyStyle(styleId);
@@ -50,7 +53,9 @@ export function StyleSelector() {
 									</p>
 								</div>
 								{isActive && (
-									<span className="text-xs font-medium text-primary">Active</span>
+									<span className="text-xs font-medium text-primary">
+										Active
+									</span>
 								)}
 							</div>
 
@@ -69,7 +74,8 @@ export function StyleSelector() {
 			</div>
 
 			<p className="text-xs text-muted-foreground">
-				Switching style resets per-course color/font overrides to the selected style.
+				Switching style resets per-course color/font overrides to the selected
+				style.
 			</p>
 		</div>
 	);

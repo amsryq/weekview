@@ -161,7 +161,10 @@ export function getStyleById(styleId: string): TimetableStyle {
 	);
 }
 
-export function getStyleColorByIndex(styleId: string, index: number): ColorEntry.Schema {
+export function getStyleColorByIndex(
+	styleId: string,
+	index: number,
+): ColorEntry.Schema {
 	const style = getStyleById(styleId);
 	const paletteIndex =
 		((index % style.gridColors.length) + style.gridColors.length) %

@@ -3,10 +3,14 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { inferAdditionalFields } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 import { useEffect } from "react";
+import { ENABLE_AUTH_PAYWALL } from "~/lib/config/feature-flags";
 import { useCookie } from "../hooks/cookies";
 
 export const authClient = createAuthClient({
-	baseURL: typeof window !== "undefined" ? new URL(window.location.origin).toString() : "http://localhost:3000",
+	baseURL:
+		typeof window !== "undefined"
+			? new URL(window.location.origin).toString()
+			: "http://localhost:3000",
 	plugins: [
 		stripeClient({
 			subscription: false,
@@ -39,7 +43,9 @@ export function useSession(options?: {
 	refetchOnWindowFocus?: boolean | "always";
 }) {
 	const queryClient = useQueryClient();
-	const isLoggedIn = useCookie("__Secure-weekview-auth.is_logged_in") === "1";
+	const isLoggedInCookie =
+		useCookie("__Secure-weekview-auth.is_logged_in") === "1";
+	const isLoggedIn = ENABLE_AUTH_PAYWALL && isLoggedInCookie;
 
 	const sessionQuery = useQuery({
 		queryKey: ["session", isLoggedIn],
@@ -52,7 +58,7 @@ export function useSession(options?: {
 	});
 
 	useEffect(() => {
-		if (!isLoggedIn) {
+		if (!ENABLE_AUTH_PAYWALL || !isLoggedIn) {
 			// clear cached session and stop any ongoing fetches when logged out
 			queryClient.setQueryData(["session"], null);
 			queryClient.cancelQueries({ queryKey: ["session"] });
@@ -64,7 +70,7 @@ export function useSession(options?: {
 	};
 
 	return {
-		data: sessionQuery.data?.data ?? null,
+		data: ENABLE_AUTH_PAYWALL ? (sessionQuery.data?.data ?? null) : null,
 		isPending: sessionQuery.isFetching,
 		error: sessionQuery.error ?? null,
 		refetch,

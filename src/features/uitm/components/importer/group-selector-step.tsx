@@ -71,7 +71,8 @@ export function GroupSelectorDialog({
 		CourseStore,
 		useShallow((state) =>
 			state.courses.filter(
-				(course): course is UiTMCourseSection => course instanceof UiTMCourseSection,
+				(course): course is UiTMCourseSection =>
+					course instanceof UiTMCourseSection,
 			),
 		),
 	);

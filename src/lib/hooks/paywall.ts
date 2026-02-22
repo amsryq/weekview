@@ -1,3 +1,4 @@
+import { ENABLE_AUTH_PAYWALL } from "~/lib/config/feature-flags";
 import { useSupportDialog } from "~/lib/contexts/support-dialog";
 import { useIsUserSupporter } from "~/lib/hooks/user";
 
@@ -6,7 +7,8 @@ import { useIsUserSupporter } from "~/lib/hooks/user";
  * Returns a function that can be called to check access to premium features.
  */
 export function usePaywall() {
-	const isSupporter = useIsUserSupporter();
+	const rawIsSupporter = useIsUserSupporter();
+	const isSupporter = !ENABLE_AUTH_PAYWALL || rawIsSupporter;
 	const { openSupportDialog } = useSupportDialog();
 
 	/**
@@ -15,6 +17,10 @@ export function usePaywall() {
 	 * @returns true if user is a supporter, false otherwise
 	 */
 	const checkAccess = (): boolean => {
+		if (!ENABLE_AUTH_PAYWALL) {
+			return true;
+		}
+
 		if (isSupporter) {
 			return true;
 		}

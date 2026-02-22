@@ -18,6 +18,7 @@ import {
 	DialogTitle,
 } from "~/components/ui/dialog";
 import { Twemoji } from "~/components/ui/twemoji";
+import { ENABLE_AUTH_PAYWALL } from "~/lib/config/feature-flags";
 import { useSupportDialog } from "~/lib/contexts/support-dialog";
 import { useUser } from "~/lib/hooks/user";
 import { generateCheckout } from "~/server/functions/stripe";
@@ -59,9 +60,21 @@ function SupporterCard() {
 	const [loading, setLoading] = useState(false);
 
 	const user = useUser();
-	const isSupporter = user?.supporterUntil && user.supporterUntil > new Date();
+	const isSupporter =
+		ENABLE_AUTH_PAYWALL &&
+		user?.supporterUntil &&
+		user.supporterUntil > new Date();
 
 	const onSupport = async () => {
+		if (!ENABLE_AUTH_PAYWALL) {
+			window.open(
+				"https://github.com/sponsors/amsryq",
+				"_blank",
+				"noopener,noreferrer",
+			);
+			return;
+		}
+
 		try {
 			setLoading(true);
 
@@ -93,32 +106,47 @@ function SupporterCard() {
 	return (
 		<Card className="gap-2 h-full">
 			<CardHeader>
-				<CardTitle className="text-xl">Become a Supporter</CardTitle>
+				<CardTitle className="text-xl">
+					{ENABLE_AUTH_PAYWALL ? "Become a Supporter" : "Sponsor on GitHub"}
+				</CardTitle>
 				<CardDescription>
-					You can get additional perks by becoming a supporter:
+					{ENABLE_AUTH_PAYWALL
+						? "You can get additional perks by becoming a supporter:"
+						: "Support the project directly through GitHub Sponsors."}
 				</CardDescription>
-				<CardAction className="text-right">
-					<div className="text-4xl font-semibold">RM10</div>
-					<div className="italic">for a month access</div>
-				</CardAction>
+				{ENABLE_AUTH_PAYWALL && (
+					<CardAction className="text-right">
+						<div className="text-4xl font-semibold">RM10</div>
+						<div className="italic">for a month access</div>
+					</CardAction>
+				)}
 			</CardHeader>
-			<CardContent className="pt-4">
-				<ul className="space-y-2 text-md">
-					<li className="flex items-center gap-2">
-						<Twemoji emoji="🖼️" /> Background images
-					</li>
-					<li className="flex items-center gap-2">
-						<Twemoji emoji="🌈" /> Gradient colors
-					</li>
-					<li className="flex items-center gap-2">
-						<Twemoji emoji="⭐" /> Icons for cells
-					</li>
-				</ul>
-			</CardContent>
+			{ENABLE_AUTH_PAYWALL && (
+				<CardContent className="pt-4">
+					<ul className="space-y-2 text-md">
+						<li className="flex items-center gap-2">
+							<Twemoji emoji="🖼️" /> Background images
+						</li>
+						<li className="flex items-center gap-2">
+							<Twemoji emoji="🌈" /> Gradient colors
+						</li>
+						<li className="flex items-center gap-2">
+							<Twemoji emoji="⭐" /> Icons for cells
+						</li>
+					</ul>
+				</CardContent>
+			)}
 			<CardFooter className="justify-end">
-				<Button onClick={onSupport} disabled={isSupporter || loading}>
+				<Button
+					onClick={onSupport}
+					disabled={ENABLE_AUTH_PAYWALL ? isSupporter || loading : loading}
+				>
 					{loading && <LoaderCircle className="mr-2 size-4 animate-spin" />}
-					{isSupporter ? "Active" : "Support"}
+					{ENABLE_AUTH_PAYWALL
+						? isSupporter
+							? "Active"
+							: "Support"
+						: "Sponsor"}
 				</Button>
 			</CardFooter>
 		</Card>

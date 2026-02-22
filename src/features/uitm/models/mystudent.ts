@@ -4,8 +4,8 @@ import {
 	getStableStyleIndex,
 	getStyleColorByIndex,
 } from "~/lib/models/style";
-import { getStudentTimetable } from "../server/functions";
 import { UiTMCourseSection } from "../course-section";
+import { getStudentTimetable } from "../server/functions";
 import { Group } from "./group";
 import { Session } from "./session";
 

@@ -1,4 +1,3 @@
-
 import { merge } from "es-toolkit";
 import {
 	ImageIcon,
@@ -36,9 +35,7 @@ interface TimetableCustomizerProps {
 	children: React.ReactNode;
 }
 
-export function TimetableCustomizer({
-	children,
-}: TimetableCustomizerProps) {
+export function TimetableCustomizer({ children }: TimetableCustomizerProps) {
 	const prefs = useStore(TimetablePreferencesStore);
 	const [activeTab, setActiveTab] = useState<TabValue>("styles");
 

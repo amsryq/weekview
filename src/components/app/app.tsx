@@ -1,13 +1,11 @@
-import { useEffect } from "react";
 import { Settings, Settings2Icon } from "lucide-react";
+import { useEffect } from "react";
 import { CourseManagementSheet } from "~/components/course-management-sheet";
 import { TimetableCustomizer } from "~/components/settings/timetable-customizer";
 import { TimetableExportMenu } from "~/components/timetable/export-menu";
 import { WeeklyTimetable } from "~/components/timetable/weekly-timetable";
 import { Button } from "~/components/ui/button";
-import {
-	DARK_TIMETABLE_STYLE_ID,
-} from "~/lib/models/style";
+import { DARK_TIMETABLE_STYLE_ID } from "~/lib/models/style";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 
 const PREFS_STORAGE_KEY = "taiki-timetable-preferences";

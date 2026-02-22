@@ -1,4 +1,3 @@
-
 import { DownloadIcon } from "lucide-react";
 import { domToPng, domToSvg } from "modern-screenshot";
 import { useCallback } from "react";

@@ -27,8 +27,12 @@ const CourseStore = createStore<State & Actions>()(
 					throw new Error("Course has time conflicts with existing courses.");
 				}
 
-				if (course.themeColorIndex === null || course.themeColorIndex === undefined) {
-					const activeStyleId = TimetablePreferencesStore.getState().activeStyleId;
+				if (
+					course.themeColorIndex === null ||
+					course.themeColorIndex === undefined
+				) {
+					const activeStyleId =
+						TimetablePreferencesStore.getState().activeStyleId;
 					const colorIndex = state.courses.length;
 					course.themeColorIndex = colorIndex;
 					course.cellAppearance.background = getStyleColorByIndex(
@@ -84,7 +88,10 @@ const CourseStore = createStore<State & Actions>()(
 				state.courses.forEach((course, index) => {
 					const colorIndex = index % paletteSize;
 					course.themeColorIndex = colorIndex;
-					course.cellAppearance.background = getStyleColorByIndex(styleId, colorIndex);
+					course.cellAppearance.background = getStyleColorByIndex(
+						styleId,
+						colorIndex,
+					);
 					course.cellAppearance.fontFamily = undefined;
 				});
 			}),

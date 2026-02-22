@@ -5,8 +5,8 @@ import {
 	getStableStyleIndex,
 	getStyleColorByIndex,
 } from "~/lib/models/style";
-import { getGroups } from "../server/functions";
 import { UiTMCourseSection } from "../course-section";
+import { getGroups } from "../server/functions";
 import { Course } from "./course";
 import { Session } from "./session";
 
@@ -121,7 +121,10 @@ export class Group {
 			code: this.course.code,
 			themeColorIndex: colorIndex,
 			cellAppearance: {
-				background: getStyleColorByIndex(DEFAULT_TIMETABLE_STYLE_ID, colorIndex),
+				background: getStyleColorByIndex(
+					DEFAULT_TIMETABLE_STYLE_ID,
+					colorIndex,
+				),
 				fgColor: "#ffffff",
 			},
 			campus: this.course.campus.code,

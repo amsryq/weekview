@@ -193,7 +193,6 @@
 }
 
 @layer utilities {
-
 	.no-scroll,
 	.no-scroll * {
 		@apply overflow-hidden overscroll-none touch-none;

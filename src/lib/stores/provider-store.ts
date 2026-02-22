@@ -1,7 +1,7 @@
 import { createStore } from "zustand";
+import { UiTMProvider } from "~/features/uitm/provider";
 import type { CourseProvider } from "../models/course-provider";
 import { ManualCourseProvider } from "../providers/manual-course-provider";
-import { UiTMProvider } from "~/features/uitm/provider";
 
 interface State {
 	providers: CourseProvider[];
