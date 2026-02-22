@@ -9,6 +9,7 @@ import { CourseStore } from "~/lib/stores/course-store";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { Card, CardContent } from "../ui/card";
 import { CourseBlock } from "./course-block";
+import { useMounted } from "~/lib/hooks/useMounted";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const ROW_BLOCK_WIDTH_PX = 84;
@@ -289,6 +290,7 @@ export function WeeklyTimetable({
   courses: _courses,
   containerId = "weekly-timetable",
 }: WeeklyTimetableProps) {
+  const mounted = useMounted();
   const courses = useStore(CourseStore, (state) => _courses || state.courses);
   const prefsLayout = useStore(TimetablePreferencesStore, (s) => s.layout);
   const backgroundImage = useStore(
@@ -377,7 +379,12 @@ export function WeeklyTimetable({
     : undefined;
 
   return (
-    <Card className="py-0 overflow-hidden">
+    <Card
+      className="py-0 overflow-hidden"
+      style={{
+        visibility: mounted ? "visible" : "hidden",
+      }}
+    >
       <CardContent className="max-w-[95vw] px-0">
         <TimetableContext.Provider
           value={{
