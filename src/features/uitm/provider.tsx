@@ -28,10 +28,10 @@ export class UiTMProvider extends CourseProvider {
 	}
 }
 
-export function UiTMAddCourseButton() {
+export function UiTMAddCourseButton({ className }: { className?: string }) {
 	return (
 		<UiTMImporterDialog>
-			<Button className="w-full">
+			<Button className={className}>
 				<ImportIcon className="w-4 h-4" />
 				Import from UiTM
 			</Button>

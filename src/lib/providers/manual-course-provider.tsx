@@ -26,7 +26,7 @@ export class ManualCourseProvider extends CourseProvider {
 	}
 }
 
-export function ManualAddCourseButton() {
+export function ManualAddCourseButton({ className }: { className?: string }) {
 	return (
 		<CourseEditorDialog
 			title="Add Course"
@@ -45,7 +45,7 @@ export function ManualAddCourseButton() {
 				CourseStore.getState().addCourse(course);
 			}}
 		>
-			<Button>
+			<Button className={className}>
 				<PlusIcon className="w-4 h-4" />
 				Add Course
 			</Button>

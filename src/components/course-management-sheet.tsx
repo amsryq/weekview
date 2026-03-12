@@ -1,4 +1,5 @@
 import { ClockIcon, MapPinIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import type { ReactElement } from "react";
 import { useStore } from "zustand";
 import { UiTMAddCourseButton, UiTMProvider } from "~/features/uitm/provider";
 import { ColorEntry } from "~/lib/models/color-entry";
@@ -24,14 +25,7 @@ import {
 	AlertDialogTrigger,
 } from "./ui/alert-dialog";
 import { Button } from "./ui/button";
-import {
-	Card,
-	CardAction,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "./ui/card";
+import { Card } from "./ui/card";
 import { ScrollArea } from "./ui/scroll-area";
 import {
 	Sheet,
@@ -55,125 +49,116 @@ function dayName(day: number) {
 	return days[(day - 1) % 7] || "";
 }
 
-function CourseCard({
-	course,
-	start,
-	end,
-}: {
-	course: Course;
-	start: boolean;
-	end: boolean;
-}) {
+function CourseCard({ course }: { course: Course }) {
 	return (
-		<Card
-			className={`gap-0 rounded-none ${start ? "rounded-t-xl" : ""} ${end ? "rounded-b-xl" : ""}`}
-		>
-			<CardHeader className="flex items-center justify-between">
-				<div className="flex items-center gap-3">
-					<div
-						className="size-4 rounded-full"
-						style={ColorEntry.getBackgroundStyle(
-							course.cellAppearance.background,
-						)}
-					/>
+		<div className="group flex items-start justify-between gap-2 px-4 py-3">
+			<div className="flex min-w-0 items-start gap-2.5">
+				<div
+					className="mt-1 size-2.5 shrink-0 rounded-full"
+					style={ColorEntry.getBackgroundStyle(
+						course.cellAppearance.background,
+					)}
+				/>
+				<div className="min-w-0 space-y-1.5">
 					<div>
-						<CardTitle className="text-base leading-none">
-							{course.code}
-						</CardTitle>
+						<p className="text-sm font-semibold leading-none">{course.code}</p>
 						{course.name && (
-							<CardDescription className="text-xs">
+							<p className="mt-0.5 truncate text-xs text-muted-foreground">
 								{course.name}
-							</CardDescription>
+							</p>
 						)}
 					</div>
-				</div>
-
-				<CardAction className="flex items-center gap-1">
-					<CourseEditorDialog
-						defaultValues={course.toSchema()}
-						onSubmit={(data, form) => {
-							const conflicts = CourseStore.getState()
-								.getConflictingCourses(
-									data.meetingTimes.map(MeetingTime.createFromSchema),
-								)
-								.filter((c) => c.id !== course.id);
-
-							if (conflicts.length > 0) {
-								form.setError("meetingTimes", {
-									message: `There are time conflicts with ${conflicts.map((c) => c.code).join(", ")}.`,
-								});
-								return;
-							}
-
-							CourseStore.setState((state) => {
-								const courseToUpdate = state.courses.find(
-									(c) => c.id === course.id,
-								)!;
-								Course.assignFromSchema(courseToUpdate, data);
-							});
-						}}
-					>
-						<Button variant="ghost" size="sm" title="Edit course">
-							<PencilIcon className="size-4" />
-						</Button>
-					</CourseEditorDialog>
-
-					<AlertDialog>
-						<AlertDialogTrigger asChild>
-							<Button
-								variant="ghost"
-								size="sm"
-								title="Remove course"
-								className="text-destructive hover:text-white hover:bg-destructive/90 dark:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40"
-							>
-								<Trash2Icon className="size-4" />
-							</Button>
-						</AlertDialogTrigger>
-						<AlertDialogContent>
-							<AlertDialogHeader>
-								<AlertDialogTitle>Remove {course.code}?</AlertDialogTitle>
-								<AlertDialogDescription>
-									This action will remove the course and its meetings from your
-									timetable.
-								</AlertDialogDescription>
-							</AlertDialogHeader>
-							<AlertDialogFooter>
-								<AlertDialogCancel>Cancel</AlertDialogCancel>
-								<AlertDialogAction
-									onClick={() => CourseStore.getState().removeCourse(course.id)}
-									className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+					{course.meetingTimes.length === 0 ? (
+						<p className="text-xs text-muted-foreground/60">No meeting times</p>
+					) : (
+						<ul className="space-y-1">
+							{course.meetingTimes.map((time, idx) => (
+								<li
+									key={idx}
+									className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs"
 								>
-									Remove
-								</AlertDialogAction>
-							</AlertDialogFooter>
-						</AlertDialogContent>
-					</AlertDialog>
-				</CardAction>
-			</CardHeader>
-
-			<CardContent className="pt-4">
-				{course.meetingTimes.length === 0 ? (
-					<p className="text-sm text-muted-foreground">No meeting times</p>
-				) : (
-					<ul className="space-y-2">
-						{course.meetingTimes.map((time, idx) => (
-							<li key={idx} className="text-sm flex items-center gap-2">
-								<ClockIcon className="size-4 text-muted-foreground" />
-								<span className="font-medium">{dayName(time.day)}</span>
-								<span className="text-muted-foreground">
-									{time.time.toString()}
-								</span>
-								{time.location && (
-									<span className="inline-flex items-center gap-1 text-muted-foreground">
-										<MapPinIcon className="size-3.5" /> {time.location}
+									<ClockIcon className="size-3 shrink-0 text-muted-foreground/60" />
+									<span className="font-medium text-foreground/80">
+										{dayName(time.day)}
 									</span>
-								)}
-							</li>
-						))}
-					</ul>
-				)}
-			</CardContent>
-		</Card>
+									<span className="text-muted-foreground">
+										{time.time.toString()}
+									</span>
+									{time.location && (
+										<span className="inline-flex items-center gap-1 text-muted-foreground">
+											<MapPinIcon className="size-3 shrink-0" />
+											{time.location}
+										</span>
+									)}
+								</li>
+							))}
+						</ul>
+					)}
+				</div>
+			</div>
+
+			<div className="flex shrink-0 items-center gap-0.5 pt-0.5 opacity-100 transition-opacity focus-within:opacity-100 sm:opacity-0 sm:group-hover:opacity-100">
+				<CourseEditorDialog
+					defaultValues={course.toSchema()}
+					onSubmit={(data, form) => {
+						const conflicts = CourseStore.getState()
+							.getConflictingCourses(
+								data.meetingTimes.map(MeetingTime.createFromSchema),
+							)
+							.filter((c) => c.id !== course.id);
+
+						if (conflicts.length > 0) {
+							form.setError("meetingTimes", {
+								message: `There are time conflicts with ${conflicts.map((c) => c.code).join(", ")}.`,
+							});
+							return;
+						}
+
+						CourseStore.setState((state) => {
+							const courseToUpdate = state.courses.find(
+								(c) => c.id === course.id,
+							)!;
+							Course.assignFromSchema(courseToUpdate, data);
+						});
+					}}
+				>
+					<Button variant="ghost" size="sm" title="Edit course">
+						<PencilIcon className="size-3.5" />
+					</Button>
+				</CourseEditorDialog>
+
+				<AlertDialog>
+					<AlertDialogTrigger asChild>
+						<Button
+							variant="ghost"
+							size="sm"
+							title="Remove course"
+							className="text-destructive hover:text-white hover:bg-destructive/90 dark:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40"
+						>
+							<Trash2Icon className="size-3.5" />
+						</Button>
+					</AlertDialogTrigger>
+					<AlertDialogContent>
+						<AlertDialogHeader>
+							<AlertDialogTitle>Remove {course.code}?</AlertDialogTitle>
+							<AlertDialogDescription>
+								This action will remove the course and its meetings from your
+								timetable.
+							</AlertDialogDescription>
+						</AlertDialogHeader>
+						<AlertDialogFooter>
+							<AlertDialogCancel>Cancel</AlertDialogCancel>
+							<AlertDialogAction
+								onClick={() => CourseStore.getState().removeCourse(course.id)}
+								className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+							>
+								Remove
+							</AlertDialogAction>
+						</AlertDialogFooter>
+					</AlertDialogContent>
+				</AlertDialog>
+			</div>
+		</div>
 	);
 }
 
@@ -184,41 +169,42 @@ function AddCourseButton({ provider }: { provider: CourseProvider }) {
 	return null;
 }
 
+function ProviderEmptyState({ provider }: { provider: CourseProvider }) {
+	return (
+		<div className="flex flex-col items-center gap-3 px-4 py-8 text-center">
+			<p className="max-w-[22ch] text-sm text-muted-foreground">
+				{provider.emptyStateText ?? "No courses added yet."}
+			</p>
+			<AddCourseButton provider={provider} />
+		</div>
+	);
+}
+
 function ProviderSection({ provider }: { provider: CourseProvider }) {
 	const courses = provider.useCourses();
+	const hasCourses = courses.length > 0;
 
 	return (
-		<div className="space-y-2">
-			<h2 className="text-lg font-semibold flex items-center gap-1">
-				{provider.name}
-				<span className="text-xs text-muted-foreground">
-					({courses.length})
-				</span>
-			</h2>
-			<div className="flex flex-col gap-4 w-full">
-				{courses.length > 0 ? (
-					<div>
-						{courses.map((course, idx) => (
-							<CourseCard
-								start={idx === 0}
-								end={idx === courses.length - 1}
-								key={course.id}
-								course={course}
-							/>
-						))}
-					</div>
-				) : (
-					<Card>
-						<CardContent className="flex flex-col gap-4 align-center">
-							<span className="text-center text-sm text-muted-foreground">
-								{provider.emptyStateText ?? "No courses added yet."}
-							</span>
-						</CardContent>
-					</Card>
-				)}
-				<AddCourseButton provider={provider} />
+		<Card className="gap-0 overflow-hidden py-0">
+			<div className="flex items-center justify-between gap-3 border-b border-border/60 px-4 py-3">
+				<div className="flex items-center gap-2">
+					<h2 className="text-sm font-semibold">{provider.name}</h2>
+					<span className="rounded bg-muted px-1.5 py-0.5 text-[11px] font-medium tabular-nums text-muted-foreground">
+						{courses.length}
+					</span>
+				</div>
+				{hasCourses && <AddCourseButton provider={provider} />}
 			</div>
-		</div>
+			{hasCourses ? (
+				<div className="divide-y divide-border/60">
+					{courses.map((course) => (
+						<CourseCard key={course.id} course={course} />
+					))}
+				</div>
+			) : (
+				<ProviderEmptyState provider={provider} />
+			)}
+		</Card>
 	);
 }
 
@@ -227,7 +213,7 @@ function CourseList() {
 
 	return (
 		<ScrollArea className="min-h-0">
-			<div className="space-y-4 px-4 pb-4">
+			<div className="space-y-3 px-4 pb-6 pt-1">
 				{providers.map((provider, idx) => (
 					<ProviderSection key={idx} provider={provider} />
 				))}
@@ -236,17 +222,19 @@ function CourseList() {
 	);
 }
 
-export function CourseManagementSheet({ children }: { children: JSX.Element }) {
+export function CourseManagementSheet({
+	children,
+}: {
+	children: ReactElement;
+}) {
 	return (
 		<Sheet>
 			<SheetTrigger asChild>{children}</SheetTrigger>
 			<SheetContent className="sm:max-w-lg max-sm:w-screen" side="left">
 				<SheetHeader>
-					<SheetTitle className="flex items-center gap-2">
-						Course Management
-					</SheetTitle>
+					<SheetTitle>Course Management</SheetTitle>
 					<SheetDescription>
-						Manage your selected courses here.
+						Import from UiTM or add courses manually.
 					</SheetDescription>
 				</SheetHeader>
 				<CourseList />
