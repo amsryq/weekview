@@ -7,7 +7,14 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!**/.next", "!**/node_modules", "!**/out"]
+		"includes": [
+			"**",
+			"!**/.next",
+			"!**/node_modules",
+			"!**/out",
+			"!**/dist",
+			"!src/routeTree.gen.ts"
+		]
 	},
 	"css": {
 		"parser": {
@@ -21,7 +28,10 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": false
+			"recommended": false,
+			"suspicious": {
+				"noExplicitAny": "error"
+			}
 		}
 	},
 	"javascript": {
@@ -223,6 +233,21 @@
 			"includes": ["src/routeTree.gen.ts"],
 			"linter": {
 				"enabled": false
+			}
+		},
+		{
+			"includes": [
+				"src/components/course-editor/**",
+				"src/components/course-management-sheet.tsx",
+				"src/features/uitm/components/importer-dialog.tsx",
+				"src/lib/contexts/course-editor.tsx"
+			],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noExplicitAny": "off"
+					}
+				}
 			}
 		}
 	],

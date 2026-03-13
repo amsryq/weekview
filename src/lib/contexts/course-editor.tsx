@@ -1,21 +1,36 @@
 import { createContext, type ReactNode, useContext, useState } from "react";
-import type { UseFormReturn } from "react-hook-form";
 import type { PartialDeep } from "type-fest";
 import { CourseEditorDialog } from "~/components/course-editor/course-editor-dialog";
 import type { Course } from "../models/course";
 
+export type CourseFormApi = any;
+
 type EditorProps = {
 	title?: string;
 	defaultValues?: PartialDeep<Course.Schema>;
-	onSubmit: (data: Course.Schema, form: UseFormReturn<Course.Schema>) => void;
+	onSubmit: (data: Course.Schema, form: CourseFormApi) => void;
 };
+
+export const CourseEditorFormContext = createContext<CourseFormApi | null>(
+	null,
+);
+
+export function useCourseEditorForm() {
+	const context = useContext(CourseEditorFormContext);
+	if (!context) {
+		throw new Error(
+			"useCourseEditorForm must be used within a CourseEditorFormContext",
+		);
+	}
+	return context;
+}
 
 interface CourseEditorContextType {
 	openCourseEditor: (options: {
 		course?: Course;
 		defaultValues?: PartialDeep<Course.Schema>;
 		title?: string;
-		onSubmit: (data: Course.Schema, form: UseFormReturn<Course.Schema>) => void;
+		onSubmit: (data: Course.Schema, form: CourseFormApi) => void;
 	}) => void;
 	closeCourseEditor: () => void;
 	/** Internal — consumed by CourseEditorDialogRenderer. Do not use in application code. */
@@ -41,7 +56,7 @@ export function CourseEditorProvider({ children }: { children: ReactNode }) {
 		course?: Course;
 		defaultValues?: PartialDeep<Course.Schema>;
 		title?: string;
-		onSubmit: (data: Course.Schema, form: UseFormReturn<Course.Schema>) => void;
+		onSubmit: (data: Course.Schema, form: CourseFormApi) => void;
 	}) => {
 		setEditorProps({
 			title,
@@ -98,11 +113,15 @@ export function CourseEditorDialogRenderer() {
 			onSubmit={(data, form) => {
 				editorProps.onSubmit(data, form);
 
-				// Only close if no validation errors remain
-				const fields = form.getValues();
-				const hasError = Object.keys(fields).some(
-					(key) => form.getFieldState(key as keyof typeof fields).error,
-				);
+				const hasError =
+					(form.state.errorMap &&
+						(form.state.errorMap.onServer !== undefined ||
+							form.state.errorMap.onChange !== undefined ||
+							form.state.errorMap.onBlur !== undefined ||
+							form.state.errorMap.onSubmit !== undefined)) ||
+					Object.values(form.state.fieldMeta).some(
+						(meta: any) => meta.errors.length > 0,
+					);
 
 				if (!hasError) closeCourseEditor();
 			}}

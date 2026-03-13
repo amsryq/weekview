@@ -1,19 +1,19 @@
-import { useFormContext } from "react-hook-form";
+import { useStore as useFormStore } from "@tanstack/react-form";
 import { PartialDeep } from "type-fest";
+import { useCourseEditorForm } from "~/lib/contexts/course-editor";
 import type { CellAppearance } from "~/lib/models/cell-appearance";
-import type { Course } from "~/lib/models/course";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { CellAppearanceLayoutSettings } from "../settings/cell-appearance-layout-settings";
 
 export function LayoutTab() {
-	const form = useFormContext<Course.Schema>();
+	const form = useCourseEditorForm();
+	const currentCellAppearance = useFormStore(
+		form.store,
+		(s: any) => s.values.cellAppearance,
+	);
 
-	const currentCellAppearance = form.watch("cellAppearance");
 	const handleCellAppearanceChange = (values: PartialDeep<CellAppearance>) => {
-		form.setValue("cellAppearance", values as CellAppearance, {
-			shouldDirty: true,
-			shouldValidate: true,
-		});
+		form.setFieldValue("cellAppearance", values as CellAppearance);
 	};
 
 	return (

@@ -1,6 +1,7 @@
+import { useStore as useFormStore } from "@tanstack/react-form";
 import { toMerged } from "es-toolkit";
-import { useFormContext } from "react-hook-form";
 import { useStore } from "zustand";
+import { useCourseEditorForm } from "~/lib/contexts/course-editor";
 import { Clock, TimeRange } from "~/lib/models/clock";
 import { Course } from "~/lib/models/course";
 import { MeetingTime } from "~/lib/models/meeting-time";
@@ -10,15 +11,15 @@ import { resolveTimetableStyleColorByIndex } from "~/lib/utils/timetable-styles"
 import { CourseBlock } from "../timetable/course-block";
 
 export function CoursePreview() {
-	const form = useFormContext<Course.Schema>();
-	const formData = form.watch();
+	const form = useCourseEditorForm();
+	const formData = useFormStore(form.store, (s: any) => s.values);
 	const activeStyleId = useStore(
 		TimetablePreferencesStore,
-		(s) => s.activeStyleId,
+		(s: any) => s.activeStyleId,
 	);
 	const timetableColorMode = useStore(
 		TimetablePreferencesStore,
-		(s) => s.timetableColorMode,
+		(s: any) => s.timetableColorMode,
 	);
 
 	const mockMeetingTime = new MeetingTime({

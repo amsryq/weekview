@@ -1,13 +1,6 @@
-import { useFormContext } from "react-hook-form";
-import type { Course } from "~/lib/models/course";
-import {
-	FormControl,
-	FormDescription,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from "../ui/form";
+import { useStore as useFormStore } from "@tanstack/react-form";
+import { useCourseEditorForm } from "~/lib/contexts/course-editor";
+import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
 import {
 	Select,
@@ -22,7 +15,11 @@ import { Textarea } from "../ui/textarea";
 import { Twemoji } from "../ui/twemoji";
 
 export function IconsTab() {
-	const form = useFormContext<Course.Schema>();
+	const form = useCourseEditorForm();
+	const iconType = useFormStore(
+		form.store,
+		(s: any) => s.values.cellAppearance?.icon?.type,
+	);
 
 	return (
 		<div className="space-y-6">
@@ -33,35 +30,41 @@ export function IconsTab() {
 				</p>
 			</div>
 
-			<FormField
-				control={form.control}
-				name="cellAppearance.icon.type"
-				render={({ field }) => (
-					<FormItem>
-						<FormLabel>Icon Type</FormLabel>
-						<Select onValueChange={field.onChange} value={field.value}>
-							<FormControl>
-								<SelectTrigger>
-									<SelectValue placeholder="Select icon type" />
-								</SelectTrigger>
-							</FormControl>
+			<form.Field name="cellAppearance.icon.type">
+				{(field: any) => (
+					<Field>
+						<FieldLabel>Icon Type</FieldLabel>
+						<Select
+							onValueChange={(v) => field.handleChange(v as "emoji" | "svg")}
+							value={field.state.value}
+						>
+							<SelectTrigger>
+								<SelectValue placeholder="Select icon type" />
+							</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="emoji">Emoji</SelectItem>
 								<SelectItem value="svg">Custom SVG</SelectItem>
 							</SelectContent>
 						</Select>
-						<FormDescription>
+						<FieldDescription>
 							Choose between emoji or custom SVG
-						</FormDescription>
-						<FormMessage />
-					</FormItem>
+						</FieldDescription>
+						<FieldError
+							errors={field.state.meta.errors.map((e: any) => ({
+								message: String(e?.message ?? e),
+							}))}
+						/>
+					</Field>
 				)}
-			/>
+			</form.Field>
 
 			<Tabs
-				value={form.watch("cellAppearance.icon.type") || "emoji"}
+				value={iconType || "emoji"}
 				onValueChange={(value) =>
-					form.setValue("cellAppearance.icon.type", value as "emoji" | "svg")
+					form.setFieldValue(
+						"cellAppearance.icon.type",
+						value as "emoji" | "svg",
+					)
 				}
 				className="w-full"
 			>
@@ -71,77 +74,81 @@ export function IconsTab() {
 				</TabsList> */}
 
 				<TabsContent value="emoji" className="space-y-6">
-					<FormField
-						control={form.control}
-						name="cellAppearance.icon.emoji"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Emoji</FormLabel>
-								<FormControl>
-									<div className="flex items-center gap-3">
-										<Input
-											placeholder="📚"
-											className="w-20 text-center text-lg"
-											{...field}
-										/>
-										{field.value && (
-											<div className="flex items-center gap-2 text-sm text-muted-foreground">
-												<span>Preview:</span>
-												<Twemoji
-													emoji={field.value}
-													style={{ fontSize: "1.5em" }}
-												/>
-											</div>
-										)}
-									</div>
-								</FormControl>
-								<FormDescription>
+					<form.Field name="cellAppearance.icon.emoji">
+						{(field: any) => (
+							<Field>
+								<FieldLabel>Emoji</FieldLabel>
+								<div className="flex items-center gap-3">
+									<Input
+										placeholder="📚"
+										className="w-20 text-center text-lg"
+										value={field.state.value}
+										onChange={(e) => field.handleChange(e.target.value)}
+										onBlur={field.handleBlur}
+									/>
+									{field.state.value && (
+										<div className="flex items-center gap-2 text-sm text-muted-foreground">
+											<span>Preview:</span>
+											<Twemoji
+												emoji={field.state.value}
+												style={{ fontSize: "1.5em" }}
+											/>
+										</div>
+									)}
+								</div>
+								<FieldDescription>
 									Choose an emoji to display as a background icon
-								</FormDescription>
-								<FormMessage />
-							</FormItem>
+								</FieldDescription>
+								<FieldError
+									errors={field.state.meta.errors.map((e: any) => ({
+										message: String(e?.message ?? e),
+									}))}
+								/>
+							</Field>
 						)}
-					/>
+					</form.Field>
 				</TabsContent>
 
 				<TabsContent value="svg" className="space-y-6">
-					<FormField
-						control={form.control}
-						name="cellAppearance.icon.svg"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>SVG Code</FormLabel>
-								<FormControl>
-									<div className="space-y-3">
-										<Textarea
-											placeholder={`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+					<form.Field name="cellAppearance.icon.svg">
+						{(field: any) => (
+							<Field>
+								<FieldLabel>SVG Code</FieldLabel>
+								<div className="space-y-3">
+									<Textarea
+										placeholder={`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
 </svg>`}
-											rows={4}
-											className="font-mono text-xs"
-											{...field}
-										/>
-										{field.value && (
-											<div className="flex items-center gap-2 text-sm text-muted-foreground">
-												<span>Preview:</span>
-												<div style={{ fontSize: "1.5em" }}>
-													<img
-														src={`data:image/svg+xml;utf8,${encodeURIComponent(field.value)}`}
-														alt="SVG preview"
-													/>
-												</div>
+										rows={4}
+										className="font-mono text-xs"
+										value={field.state.value}
+										onChange={(e) => field.handleChange(e.target.value)}
+										onBlur={field.handleBlur}
+									/>
+									{field.state.value && (
+										<div className="flex items-center gap-2 text-sm text-muted-foreground">
+											<span>Preview:</span>
+											<div style={{ fontSize: "1.5em" }}>
+												<img
+													src={`data:image/svg+xml;utf8,${encodeURIComponent(field.state.value)}`}
+													alt="SVG preview"
+												/>
 											</div>
-										)}
-									</div>
-								</FormControl>
-								<FormDescription>
+										</div>
+									)}
+								</div>
+								<FieldDescription>
 									Enter custom SVG code. Use `fill="currentColor"` to inherit
 									colors.
-								</FormDescription>
-								<FormMessage />
-							</FormItem>
+								</FieldDescription>
+								<FieldError
+									errors={field.state.meta.errors.map((e: any) => ({
+										message: String(e?.message ?? e),
+									}))}
+								/>
+							</Field>
 						)}
-					/>
+					</form.Field>
 				</TabsContent>
 			</Tabs>
 
@@ -149,120 +156,124 @@ export function IconsTab() {
 			<div className="space-y-4 border rounded-lg p-4">
 				<h4 className="text-sm font-medium">Icon Settings</h4>
 
-				<FormField
-					control={form.control}
-					name="cellAppearance.icon.opacity"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>
-								Opacity: {((field.value ?? 0) * 100).toFixed(0)}%
-							</FormLabel>
-							<FormControl>
-								<Slider
-									value={[field.value ?? 0]}
-									onValueChange={(value) => field.onChange(value[0])}
-									min={0}
-									max={1}
-									step={0.1}
-									className="w-full"
-								/>
-							</FormControl>
-							<FormDescription>Adjust the icon transparency</FormDescription>
-							<FormMessage />
-						</FormItem>
+				<form.Field name="cellAppearance.icon.opacity">
+					{(field: any) => (
+						<Field>
+							<FieldLabel>
+								Opacity: {((field.state.value ?? 0) * 100).toFixed(0)}%
+							</FieldLabel>
+							<Slider
+								value={[field.state.value ?? 0]}
+								onValueChange={(value) => field.handleChange(value[0])}
+								min={0}
+								max={1}
+								step={0.1}
+								className="w-full"
+							/>
+							<FieldDescription>Adjust the icon transparency</FieldDescription>
+							<FieldError
+								errors={field.state.meta.errors.map((e: any) => ({
+									message: String(e?.message ?? e),
+								}))}
+							/>
+						</Field>
 					)}
-				/>
+				</form.Field>
 
-				<FormField
-					control={form.control}
-					name="cellAppearance.icon.size"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Size: {(field.value ?? 1).toFixed(1)}x</FormLabel>
-							<FormControl>
-								<Slider
-									value={[field.value ?? 1]}
-									onValueChange={(value) => field.onChange(value[0])}
-									min={1}
-									max={5}
-									step={0.1}
-									className="w-full"
-								/>
-							</FormControl>
-							<FormDescription>Adjust the icon size</FormDescription>
-							<FormMessage />
-						</FormItem>
+				<form.Field name="cellAppearance.icon.size">
+					{(field: any) => (
+						<Field>
+							<FieldLabel>
+								Size: {(field.state.value ?? 1).toFixed(1)}x
+							</FieldLabel>
+							<Slider
+								value={[field.state.value ?? 1]}
+								onValueChange={(value) => field.handleChange(value[0])}
+								min={1}
+								max={5}
+								step={0.1}
+								className="w-full"
+							/>
+							<FieldDescription>Adjust the icon size</FieldDescription>
+							<FieldError
+								errors={field.state.meta.errors.map((e: any) => ({
+									message: String(e?.message ?? e),
+								}))}
+							/>
+						</Field>
 					)}
-				/>
+				</form.Field>
 
-				<FormField
-					control={form.control}
-					name="cellAppearance.icon.rotation"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Rotation: {field.value ?? 0}°</FormLabel>
-							<FormControl>
-								<Slider
-									value={[field.value ?? 0]}
-									onValueChange={(value) => field.onChange(value[0])}
-									min={-180}
-									max={180}
-									step={15}
-									className="w-full"
-								/>
-							</FormControl>
-							<FormDescription>Rotate the icon</FormDescription>
-							<FormMessage />
-						</FormItem>
+				<form.Field name="cellAppearance.icon.rotation">
+					{(field: any) => (
+						<Field>
+							<FieldLabel>Rotation: {field.state.value ?? 0}°</FieldLabel>
+							<Slider
+								value={[field.state.value ?? 0]}
+								onValueChange={(value) => field.handleChange(value[0])}
+								min={-180}
+								max={180}
+								step={15}
+								className="w-full"
+							/>
+							<FieldDescription>Rotate the icon</FieldDescription>
+							<FieldError
+								errors={field.state.meta.errors.map((e: any) => ({
+									message: String(e?.message ?? e),
+								}))}
+							/>
+						</Field>
 					)}
-				/>
+				</form.Field>
 
 				<div className="grid grid-cols-2 gap-4">
-					<FormField
-						control={form.control}
-						name="cellAppearance.icon.offsetX"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>
-									Distance from Corner: {field.value || 8}px
-								</FormLabel>
-								<FormControl>
-									<Slider
-										value={[field.value || 8]}
-										onValueChange={(value) => field.onChange(value[0])}
-										min={0}
-										max={50}
-										step={2}
-										className="w-full"
-									/>
-								</FormControl>
-								<FormDescription>Horizontal distance</FormDescription>
-								<FormMessage />
-							</FormItem>
+					<form.Field name="cellAppearance.icon.offsetX">
+						{(field: any) => (
+							<Field>
+								<FieldLabel>
+									Distance from Corner: {field.state.value || 8}px
+								</FieldLabel>
+								<Slider
+									value={[field.state.value || 8]}
+									onValueChange={(value) => field.handleChange(value[0])}
+									min={0}
+									max={50}
+									step={2}
+									className="w-full"
+								/>
+								<FieldDescription>Horizontal distance</FieldDescription>
+								<FieldError
+									errors={field.state.meta.errors.map((e: any) => ({
+										message: String(e?.message ?? e),
+									}))}
+								/>
+							</Field>
 						)}
-					/>
+					</form.Field>
 
-					<FormField
-						control={form.control}
-						name="cellAppearance.icon.offsetY"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Vertical Distance: {field.value || 8}px</FormLabel>
-								<FormControl>
-									<Slider
-										value={[field.value || 8]}
-										onValueChange={(value) => field.onChange(value[0])}
-										min={0}
-										max={50}
-										step={2}
-										className="w-full"
-									/>
-								</FormControl>
-								<FormDescription>Vertical distance from top</FormDescription>
-								<FormMessage />
-							</FormItem>
+					<form.Field name="cellAppearance.icon.offsetY">
+						{(field: any) => (
+							<Field>
+								<FieldLabel>
+									Vertical Distance: {field.state.value || 8}px
+								</FieldLabel>
+								<Slider
+									value={[field.state.value || 8]}
+									onValueChange={(value) => field.handleChange(value[0])}
+									min={0}
+									max={50}
+									step={2}
+									className="w-full"
+								/>
+								<FieldDescription>Vertical distance from top</FieldDescription>
+								<FieldError
+									errors={field.state.meta.errors.map((e: any) => ({
+										message: String(e?.message ?? e),
+									}))}
+								/>
+							</Field>
 						)}
-					/>
+					</form.Field>
 				</div>
 			</div>
 		</div>

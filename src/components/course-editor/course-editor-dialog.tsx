@@ -1,6 +1,6 @@
 import { type JSX, useState } from "react";
-import type { UseFormReturn } from "react-hook-form";
 import type { PartialDeep } from "type-fest";
+import type { CourseFormApi } from "~/lib/contexts/course-editor";
 import { useIsUserSupporter } from "~/lib/hooks/user";
 import { Course } from "~/lib/models/course";
 import {
@@ -24,7 +24,7 @@ export function CourseEditorDialog({
 	children?: JSX.Element;
 	title?: string;
 	defaultValues?: PartialDeep<Course.Schema>;
-	onSubmit: (data: Course.Schema, form: UseFormReturn<Course.Schema>) => void;
+	onSubmit: (data: Course.Schema, form: CourseFormApi) => void;
 	open?: boolean;
 	onOpenChange?: (open: boolean) => void;
 }) {
@@ -61,10 +61,15 @@ export function CourseEditorDialog({
 						onSubmit(data, form);
 
 						// This is used instead of form.formState.errors because form.formState.errors could be outdated
-						const fields = form.getValues();
-						const hasError = Object.keys(fields).some(
-							(key) => form.getFieldState(key as keyof typeof fields).error,
-						);
+						const hasError =
+							(form.state.errorMap &&
+								(form.state.errorMap.onServer !== undefined ||
+									form.state.errorMap.onChange !== undefined ||
+									form.state.errorMap.onBlur !== undefined ||
+									form.state.errorMap.onSubmit !== undefined)) ||
+							Object.values(form.state.fieldMeta).some(
+								(meta: any) => (meta?.errors?.length ?? 0) > 0,
+							);
 
 						if (!hasError) setOpen(false);
 					}}

@@ -1,3 +1,4 @@
+import { useStore as useFormStore } from "@tanstack/react-form";
 import {
 	ChevronDown,
 	ChevronRight,
@@ -6,9 +7,8 @@ import {
 	SmileIcon,
 } from "lucide-react";
 import { useState } from "react";
-import { useFormContext } from "react-hook-form";
 import { useStore } from "zustand";
-import type { Course } from "~/lib/models/course";
+import { useCourseEditorForm } from "~/lib/contexts/course-editor";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { PREDEFINED_FONTS } from "~/lib/utils/fonts";
 import { resolveTimetableStyle } from "~/lib/utils/timetable-styles";
@@ -33,14 +33,7 @@ import {
 	EmojiPickerFooter,
 	EmojiPickerSearch,
 } from "../ui/emoji-picker";
-import {
-	FormControl,
-	FormDescription,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from "../ui/form";
+import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import {
@@ -55,16 +48,25 @@ import { Textarea } from "../ui/textarea";
 import { Twemoji } from "../ui/twemoji";
 
 export function AppearanceTab() {
-	const form = useFormContext<Course.Schema>();
+	const form = useCourseEditorForm();
 	const [iconSettingsOpen, setIconSettingsOpen] = useState(false);
 
 	// Watch all icon-related fields at the top level to avoid conditional hook usage
-	const iconType = form.watch("cellAppearance.icon.type");
-	const iconEmoji = form.watch("cellAppearance.icon.emoji");
-	const iconSvg = form.watch("cellAppearance.icon.svg");
+	const iconType = useFormStore(
+		form.store,
+		(s: any) => s.values.cellAppearance?.icon?.type,
+	);
+	const iconEmoji = useFormStore(
+		form.store,
+		(s: any) => s.values.cellAppearance?.icon?.emoji,
+	);
+	const iconSvg = useFormStore(
+		form.store,
+		(s: any) => s.values.cellAppearance?.icon?.svg,
+	);
 	const activeStyleId = useStore(
 		TimetablePreferencesStore,
-		(s) => s.activeStyleId,
+		(s: any) => s.activeStyleId,
 	);
 	const style = resolveTimetableStyle(activeStyleId);
 
@@ -95,64 +97,69 @@ export function AppearanceTab() {
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-6">
-					<FormField
-						control={form.control}
-						name="cellAppearance.background"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel className="text-sm font-medium">
+					<form.Field name="cellAppearance.background">
+						{(field: any) => (
+							<Field>
+								<FieldLabel className="text-sm font-medium">
 									Background
-								</FormLabel>
-								<FormControl>
-									<ColorSelectorGrid
-										value={field.value}
-										onChange={(value) => {
-											field.onChange(value);
-											form.setValue("themeColorIndex", null, {
-												shouldDirty: true,
-											});
-										}}
-									/>
-								</FormControl>
-								<FormDescription>
+								</FieldLabel>
+								<ColorSelectorGrid
+									value={field.state.value}
+									onChange={(value) => {
+										field.handleChange(value);
+										form.setFieldValue(
+											"themeColorIndex",
+											null as unknown as number,
+										);
+									}}
+								/>
+								<FieldDescription>
 									Choose a solid color or gradient for your course background
-								</FormDescription>
-								<FormMessage />
-							</FormItem>
+								</FieldDescription>
+								<FieldError
+									errors={field.state.meta.errors.map((e: any) => ({
+										message: String(e?.message ?? e),
+									}))}
+								/>
+							</Field>
 						)}
-					/>
+					</form.Field>
 
-					<FormField
-						control={form.control}
-						name="cellAppearance.fgColor"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel className="text-sm font-medium">
+					<form.Field name="cellAppearance.fgColor">
+						{(field: any) => (
+							<Field>
+								<FieldLabel className="text-sm font-medium">
 									Text Color
-								</FormLabel>
-								<FormControl>
-									<div className="flex items-center gap-3">
-										<div className="relative">
-											<Input
-												type="color"
-												className="w-14 h-10 p-1 rounded-md border cursor-pointer"
-												{...field}
-											/>
-										</div>
+								</FieldLabel>
+								<div className="flex items-center gap-3">
+									<div className="relative">
 										<Input
-											placeholder="#ffffff"
-											className="flex-1 font-mono text-sm"
-											{...field}
+											type="color"
+											className="w-14 h-10 p-1 rounded-md border cursor-pointer"
+											value={field.state.value}
+											onChange={(e: any) => field.handleChange(e.target.value)}
+											onBlur={field.handleBlur}
 										/>
 									</div>
-								</FormControl>
-								<FormDescription>
+									<Input
+										placeholder="#ffffff"
+										className="flex-1 font-mono text-sm"
+										value={field.state.value}
+										onChange={(e: any) => field.handleChange(e.target.value)}
+										onBlur={field.handleBlur}
+									/>
+								</div>
+								<FieldDescription>
 									Select the text color that contrasts well with your background
-								</FormDescription>
-								<FormMessage />
-							</FormItem>
+								</FieldDescription>
+								<FieldError
+									errors={field.state.meta.errors.map((e: any) => ({
+										message: String(e?.message ?? e),
+									}))}
+								/>
+							</Field>
 						)}
-					/>
+					</form.Field>
 				</CardContent>
 			</Card>
 
@@ -165,21 +172,17 @@ export function AppearanceTab() {
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<FormField
-						control={form.control}
-						name="cellAppearance.fontFamily"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel className="text-sm font-medium">Font</FormLabel>
+					<form.Field name="cellAppearance.fontFamily">
+						{(field: any) => (
+							<Field>
+								<FieldLabel className="text-sm font-medium">Font</FieldLabel>
 								<Select
-									onValueChange={field.onChange}
-									value={field.value ?? style.fontFamily}
+									onValueChange={field.handleChange}
+									value={field.state.value ?? style.fontFamily}
 								>
-									<FormControl>
-										<SelectTrigger>
-											<SelectValue placeholder="Select font" />
-										</SelectTrigger>
-									</FormControl>
+									<SelectTrigger>
+										<SelectValue placeholder="Select font" />
+									</SelectTrigger>
 									<SelectContent>
 										{PREDEFINED_FONTS.map((font) => (
 											<SelectItem key={font} value={font}>
@@ -190,13 +193,17 @@ export function AppearanceTab() {
 										))}
 									</SelectContent>
 								</Select>
-								<FormDescription>
+								<FieldDescription>
 									Style font: {style.fontFamily}
-								</FormDescription>
-								<FormMessage />
-							</FormItem>
+								</FieldDescription>
+								<FieldError
+									errors={field.state.meta.errors.map((e: any) => ({
+										message: String(e?.message ?? e),
+									}))}
+								/>
+							</Field>
 						)}
-					/>
+					</form.Field>
 				</CardContent>
 			</Card>
 
@@ -214,142 +221,153 @@ export function AppearanceTab() {
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-6">
-						<FormField
-							control={form.control}
-							name="cellAppearance.icon.type"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel className="text-sm font-medium">
+						<form.Field name="cellAppearance.icon.type">
+							{(field: any) => (
+								<Field>
+									<FieldLabel className="text-sm font-medium">
 										Icon Type
-									</FormLabel>
-									<Select onValueChange={field.onChange} value={field.value}>
-										<FormControl>
-											<SelectTrigger>
-												<SelectValue placeholder="Choose icon type" />
-											</SelectTrigger>
-										</FormControl>
+									</FieldLabel>
+									<Select
+										onValueChange={(v: any) =>
+											field.handleChange(v as "emoji" | "svg")
+										}
+										value={field.state.value}
+									>
+										<SelectTrigger>
+											<SelectValue placeholder="Choose icon type" />
+										</SelectTrigger>
 										<SelectContent>
 											<SelectItem value="emoji">Emoji</SelectItem>
 											<SelectItem value="svg">Custom SVG</SelectItem>
 										</SelectContent>
 									</Select>
-									<FormDescription>
+									<FieldDescription>
 										Choose between an emoji or custom SVG icon
-									</FormDescription>
-									<FormMessage />
-								</FormItem>
+									</FieldDescription>
+									<FieldError
+										errors={field.state.meta.errors.map((e: any) => ({
+											message: String(e?.message ?? e),
+										}))}
+									/>
+								</Field>
 							)}
-						/>
+						</form.Field>
 
 						{/* Emoji Input */}
 						{iconType === "emoji" && (
-							<FormField
-								control={form.control}
-								name="cellAppearance.icon.emoji"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel className="text-sm font-medium">Emoji</FormLabel>
-										<FormControl>
-											<div className="flex items-center gap-2">
-												<Popover modal={true}>
-													<PopoverTrigger asChild>
-														<Button
-															variant="outline"
-															className="py-2 text-xl bg-muted/50 hover:bg-muted/70"
-														>
-															{field.value ? (
-																<Twemoji
-																	emoji={field.value}
-																	className="text-xl leading-0"
-																/>
-															) : (
-																<SmileIcon />
-															)}
-														</Button>
-													</PopoverTrigger>
-													<PopoverContent className="w-fit p-0" align="start">
-														<EmojiPicker
-															className="h-[342px]"
-															onEmojiSelect={({ emoji }) => {
-																field.onChange(emoji);
-															}}
-														>
-															<EmojiPickerSearch />
-															<EmojiPickerContent />
-															<EmojiPickerFooter />
-														</EmojiPicker>
-													</PopoverContent>
-												</Popover>
-												{field.value && (
+							<form.Field name="cellAppearance.icon.emoji">
+								{(field: any) => (
+									<Field>
+										<FieldLabel className="text-sm font-medium">
+											Emoji
+										</FieldLabel>
+										<div className="flex items-center gap-2">
+											<Popover modal={true}>
+												<PopoverTrigger asChild>
 													<Button
-														type="button"
-														variant="ghost"
-														size="sm"
-														onClick={() => field.onChange("")}
-														className="h-6 w-6 p-0 hover:text-destructive text-foreground"
+														variant="outline"
+														className="py-2 text-xl bg-muted/50 hover:bg-muted/70"
 													>
-														×
+														{field.state.value ? (
+															<Twemoji
+																emoji={field.state.value}
+																className="text-xl leading-0"
+															/>
+														) : (
+															<SmileIcon />
+														)}
 													</Button>
-												)}
-											</div>
-										</FormControl>
-										<FormDescription>
+												</PopoverTrigger>
+												<PopoverContent className="w-fit p-0" align="start">
+													<EmojiPicker
+														className="h-[342px]"
+														onEmojiSelect={({ emoji }: { emoji: string }) => {
+															field.handleChange(emoji);
+														}}
+													>
+														<EmojiPickerSearch />
+														<EmojiPickerContent />
+														<EmojiPickerFooter />
+													</EmojiPicker>
+												</PopoverContent>
+											</Popover>
+											{field.state.value && (
+												<Button
+													type="button"
+													variant="ghost"
+													size="sm"
+													onClick={() => field.handleChange("")}
+													className="h-6 w-6 p-0 hover:text-destructive text-foreground"
+												>
+													×
+												</Button>
+											)}
+										</div>
+										<FieldDescription>
 											Click to select an emoji for your course icon
-										</FormDescription>
-										<FormMessage />
-									</FormItem>
+										</FieldDescription>
+										<FieldError
+											errors={field.state.meta.errors.map((e: any) => ({
+												message: String(e?.message ?? e),
+											}))}
+										/>
+									</Field>
 								)}
-							/>
+							</form.Field>
 						)}
 
 						{/* SVG Input */}
 						{iconType === "svg" && (
-							<FormField
-								control={form.control}
-								name="cellAppearance.icon.svg"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel className="text-sm font-medium">
+							<form.Field name="cellAppearance.icon.svg">
+								{(field: any) => (
+									<Field>
+										<FieldLabel className="text-sm font-medium">
 											SVG Code
-										</FormLabel>
-										<FormControl>
-											<div className="space-y-4">
-												<Textarea
-													placeholder={`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+										</FieldLabel>
+										<div className="space-y-4 w-full">
+											<Textarea
+												placeholder={`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
 </svg>`}
-													rows={6}
-													className="font-mono text-xs resize-none"
-													{...field}
-												/>
-												{field.value && (
-													<div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-														<span className="text-sm text-muted-foreground">
-															Preview:
-														</span>
-														<div className="w-8 h-8 flex items-center justify-center">
-															<img
-																src={`data:image/svg+xml;utf8,${encodeURIComponent(field.value)}`}
-																alt="SVG preview"
-																className="w-full h-full object-contain"
-																onError={(e) => {
-																	(e.target as HTMLImageElement).style.display =
-																		"none";
-																}}
-															/>
-														</div>
+												rows={6}
+												className="font-mono text-xs resize-none"
+												value={field.state.value}
+												onChange={(e: any) =>
+													field.handleChange(e.target.value)
+												}
+												onBlur={field.handleBlur}
+											/>
+											{field.state.value && (
+												<div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+													<span className="text-sm text-muted-foreground">
+														Preview:
+													</span>
+													<div className="w-8 h-8 flex items-center justify-center">
+														<img
+															src={`data:image/svg+xml;utf8,${encodeURIComponent(field.state.value)}`}
+															alt="SVG preview"
+															className="w-full h-full object-contain"
+															onError={(e: any) => {
+																(e.target as HTMLImageElement).style.display =
+																	"none";
+															}}
+														/>
 													</div>
-												)}
-											</div>
-										</FormControl>
-										<FormDescription>
+												</div>
+											)}
+										</div>
+										<FieldDescription>
 											Paste your SVG code here. Use "currentColor" for fill to
 											inherit text color.
-										</FormDescription>
-										<FormMessage />
-									</FormItem>
+										</FieldDescription>
+										<FieldError
+											errors={field.state.meta.errors.map((e: any) => ({
+												message: String(e?.message ?? e),
+											}))}
+										/>
+									</Field>
 								)}
-							/>
+							</form.Field>
 						)}
 
 						{/* Icon Settings - Collapsible */}
@@ -379,145 +397,156 @@ export function AppearanceTab() {
 									<Card>
 										<CardContent>
 											<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-												<FormField
-													control={form.control}
-													name="cellAppearance.icon.opacity"
-													render={({ field }) => (
-														<FormItem>
-															<FormLabel className="text-sm">
+												<form.Field name="cellAppearance.icon.opacity">
+													{(field: any) => (
+														<Field>
+															<FieldLabel className="text-sm">
 																Opacity{" "}
 																<span className="text-muted-foreground">
-																	({((field.value ?? 0) * 100).toFixed(0)}%)
+																	({((field.state.value ?? 0) * 100).toFixed(0)}
+																	%)
 																</span>
-															</FormLabel>
-															<FormControl>
-																<Slider
-																	value={[field.value ?? 0]}
-																	onValueChange={(value) =>
-																		field.onChange(value[0])
-																	}
-																	min={0}
-																	max={1}
-																	step={0.1}
-																	className="w-full"
-																/>
-															</FormControl>
-															<FormMessage />
-														</FormItem>
+															</FieldLabel>
+															<Slider
+																value={[field.state.value ?? 0]}
+																onValueChange={(value: any) =>
+																	field.handleChange(value[0])
+																}
+																min={0}
+																max={1}
+																step={0.1}
+																className="w-full"
+															/>
+															<FieldError
+																errors={field.state.meta.errors.map(
+																	(e: any) => ({
+																		message: String(e?.message ?? e),
+																	}),
+																)}
+															/>
+														</Field>
 													)}
-												/>
+												</form.Field>
 
-												<FormField
-													control={form.control}
-													name="cellAppearance.icon.size"
-													render={({ field }) => (
-														<FormItem>
-															<FormLabel className="text-sm">
+												<form.Field name="cellAppearance.icon.size">
+													{(field: any) => (
+														<Field>
+															<FieldLabel className="text-sm">
 																Size{" "}
 																<span className="text-muted-foreground">
-																	({(field.value ?? 1).toFixed(1)}x)
+																	({(field.state.value ?? 1).toFixed(1)}x)
 																</span>
-															</FormLabel>
-															<FormControl>
-																<Slider
-																	value={[field.value ?? 1]}
-																	onValueChange={(value) =>
-																		field.onChange(value[0])
-																	}
-																	min={1}
-																	max={5}
-																	step={0.1}
-																	className="w-full"
-																/>
-															</FormControl>
-															<FormMessage />
-														</FormItem>
+															</FieldLabel>
+															<Slider
+																value={[field.state.value ?? 1]}
+																onValueChange={(value: any) =>
+																	field.handleChange(value[0])
+																}
+																min={1}
+																max={5}
+																step={0.1}
+																className="w-full"
+															/>
+															<FieldError
+																errors={field.state.meta.errors.map(
+																	(e: any) => ({
+																		message: String(e?.message ?? e),
+																	}),
+																)}
+															/>
+														</Field>
 													)}
-												/>
+												</form.Field>
 
-												<FormField
-													control={form.control}
-													name="cellAppearance.icon.rotation"
-													render={({ field }) => (
-														<FormItem>
-															<FormLabel className="text-sm">
+												<form.Field name="cellAppearance.icon.rotation">
+													{(field: any) => (
+														<Field>
+															<FieldLabel className="text-sm">
 																Rotation{" "}
 																<span className="text-muted-foreground">
-																	({field.value ?? 0}°)
+																	({field.state.value ?? 0}°)
 																</span>
-															</FormLabel>
-															<FormControl>
-																<Slider
-																	value={[field.value ?? 0]}
-																	onValueChange={(value) =>
-																		field.onChange(value[0])
-																	}
-																	min={-180}
-																	max={180}
-																	step={15}
-																	className="w-full"
-																/>
-															</FormControl>
-															<FormMessage />
-														</FormItem>
+															</FieldLabel>
+															<Slider
+																value={[field.state.value ?? 0]}
+																onValueChange={(value: any) =>
+																	field.handleChange(value[0])
+																}
+																min={-180}
+																max={180}
+																step={15}
+																className="w-full"
+															/>
+															<FieldError
+																errors={field.state.meta.errors.map(
+																	(e: any) => ({
+																		message: String(e?.message ?? e),
+																	}),
+																)}
+															/>
+														</Field>
 													)}
-												/>
+												</form.Field>
 
-												<FormField
-													control={form.control}
-													name="cellAppearance.icon.offsetX"
-													render={({ field }) => (
-														<FormItem>
-															<FormLabel className="text-sm">
+												<form.Field name="cellAppearance.icon.offsetX">
+													{(field: any) => (
+														<Field>
+															<FieldLabel className="text-sm">
 																Horizontal Distance{" "}
 																<span className="text-muted-foreground">
-																	({field.value || 8}px)
+																	({field.state.value || 8}px)
 																</span>
-															</FormLabel>
-															<FormControl>
-																<Slider
-																	value={[field.value || 8]}
-																	onValueChange={(value) =>
-																		field.onChange(value[0])
-																	}
-																	min={0}
-																	max={50}
-																	step={2}
-																	className="w-full"
-																/>
-															</FormControl>
-															<FormMessage />
-														</FormItem>
+															</FieldLabel>
+															<Slider
+																value={[field.state.value || 8]}
+																onValueChange={(value: any) =>
+																	field.handleChange(value[0])
+																}
+																min={0}
+																max={50}
+																step={2}
+																className="w-full"
+															/>
+															<FieldError
+																errors={field.state.meta.errors.map(
+																	(e: any) => ({
+																		message: String(e?.message ?? e),
+																	}),
+																)}
+															/>
+														</Field>
 													)}
-												/>
+												</form.Field>
 
-												<FormField
-													control={form.control}
-													name="cellAppearance.icon.offsetY"
-													render={({ field }) => (
-														<FormItem>
-															<FormLabel className="text-sm">
+												<form.Field name="cellAppearance.icon.offsetY">
+													{(field: any) => (
+														<Field>
+															<FieldLabel className="text-sm">
 																Vertical Distance{" "}
 																<span className="text-muted-foreground">
-																	({field.value || 8}px)
+																	({field.state.value || 8}px)
 																</span>
-															</FormLabel>
-															<FormControl>
-																<Slider
-																	value={[field.value || 8]}
-																	onValueChange={(value) =>
-																		field.onChange(value[0])
-																	}
-																	min={0}
-																	max={50}
-																	step={2}
-																	className="w-full"
-																/>
-															</FormControl>
-															<FormMessage />
-														</FormItem>
+															</FieldLabel>
+															<Slider
+																value={[field.state.value || 8]}
+																onValueChange={(value: any) =>
+																	field.handleChange(value[0])
+																}
+																min={0}
+																max={50}
+																step={2}
+																className="w-full"
+															/>
+															<FieldError
+																errors={field.state.meta.errors.map(
+																	(e: any) => ({
+																		message: String(e?.message ?? e),
+																	}),
+																)}
+															/>
+														</Field>
 													)}
-												/>
+												</form.Field>
 											</div>
 										</CardContent>
 									</Card>

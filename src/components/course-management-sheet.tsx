@@ -110,9 +110,12 @@ function CourseCard({ course }: { course: Course }) {
 							.filter((c) => c.id !== course.id);
 
 						if (conflicts.length > 0) {
-							form.setError("meetingTimes", {
-								message: `There are time conflicts with ${conflicts.map((c) => c.code).join(", ")}.`,
-							});
+							form.setFieldMeta("meetingTimes", (prev: any) => ({
+								...prev,
+								errorMap: {
+									onSubmit: `There are time conflicts with ${conflicts.map((c) => c.code).join(", ")}.`,
+								},
+							}));
 							return;
 						}
 

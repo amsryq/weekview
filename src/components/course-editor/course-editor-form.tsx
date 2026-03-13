@@ -1,8 +1,12 @@
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "@tanstack/react-form";
+import { zodValidator } from "@tanstack/zod-form-adapter";
 import { toMerged } from "es-toolkit";
-import { type UseFormReturn, useForm } from "react-hook-form";
 import type { PartialDeep } from "type-fest";
 import { useStore } from "zustand";
+import {
+	CourseEditorFormContext,
+	type CourseFormApi,
+} from "~/lib/contexts/course-editor";
 import { Course } from "~/lib/models/course";
 import { MeetingTime } from "~/lib/models/meeting-time";
 import { CourseStore } from "~/lib/stores/course-store";
@@ -13,14 +17,13 @@ import {
 } from "~/lib/utils/timetable-styles";
 import { Button } from "../ui/button";
 import { DialogClose } from "../ui/dialog";
-import { Form, FormMessage } from "../ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { AppearanceTab } from "./appearance-tab";
 import { CourseDetailsTab } from "./course-details-tab";
 import { CoursePreview } from "./course-preview";
 
 interface CourseEditorFormProps {
-	onSubmit: (data: Course.Schema, form: UseFormReturn<Course.Schema>) => void;
+	onSubmit: (data: Course.Schema, form: CourseFormApi) => void;
 	defaultValues?: PartialDeep<Course.Schema>;
 }
 
@@ -41,8 +44,12 @@ export function CourseEditorForm({
 	const defaultThemeColorIndex =
 		courseCount % style.variants[timetableColorMode].gridColors.length;
 
-	const form = useForm<Course.Schema>({
-		resolver: zodResolver(Course.schema),
+	const form = useForm({
+		// @ts-ignore
+		validatorAdapter: zodValidator(),
+		validators: {
+			onSubmit: Course.schema,
+		},
 		defaultValues: toMerged(
 			{
 				code: "",
@@ -76,33 +83,39 @@ export function CourseEditorForm({
 				},
 			} satisfies Course.Schema,
 			defaultValues ?? {},
-		),
-	});
+		) as Course.Schema,
+		onSubmit: async ({ value, formApi }) => {
+			const meetingObjs = value.meetingTimes.map((mt) =>
+				MeetingTime.createFromSchema(mt),
+			);
 
-	const handleSubmit = (data: Course.Schema) => {
-		const meetingObjs = data.meetingTimes.map((mt) =>
-			MeetingTime.createFromSchema(mt),
-		);
-
-		// Check clashes between its own meetings
-		for (let i = 0; i < meetingObjs.length; i++) {
-			for (let j = i + 1; j < meetingObjs.length; j++) {
-				if (meetingObjs[i].overlaps(meetingObjs[j])) {
-					form.setError(`meetingTimes.${i}`, {
-						message: `This meeting time conflicts with meeting #${j + 1}.`,
-					});
-					return;
+			// Check clashes between its own meetings
+			for (let i = 0; i < meetingObjs.length; i++) {
+				for (let j = i + 1; j < meetingObjs.length; j++) {
+					if (meetingObjs[i].overlaps(meetingObjs[j])) {
+						formApi.setFieldMeta(`meetingTimes[${i}]`, (prev) => ({
+							...prev,
+							errorMap: {
+								onSubmit: `This meeting time conflicts with meeting #${j + 1}.`,
+							},
+						}));
+						return;
+					}
 				}
 			}
-		}
 
-		onSubmit(data, form);
-	};
+			onSubmit(value, formApi);
+		},
+	});
 
 	return (
-		<Form {...form}>
+		<CourseEditorFormContext.Provider value={form}>
 			<form
-				onSubmit={form.handleSubmit(handleSubmit)}
+				onSubmit={(e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					form.handleSubmit();
+				}}
 				className="flex flex-col h-full min-h-0 shrink"
 			>
 				<div className="flex-1 min-h-0 max-lg:overflow-y-scroll max-lg:pr-4 max-lg:pl-2 max-lg:-ml-2">
@@ -162,13 +175,21 @@ export function CourseEditorForm({
 							</Button>
 						</DialogClose>
 					</div>
-					<Button type="submit" className="flex-1 sm:flex-none">
-						Save Course
-					</Button>
+					<form.Subscribe
+						selector={(state) => [state.canSubmit, state.isSubmitting]}
+					>
+						{([canSubmit, isSubmitting]) => (
+							<Button
+								type="submit"
+								disabled={!canSubmit || (isSubmitting as boolean)}
+								className="flex-1 sm:flex-none"
+							>
+								Save Course
+							</Button>
+						)}
+					</form.Subscribe>
 				</div>
-
-				<FormMessage />
 			</form>
-		</Form>
+		</CourseEditorFormContext.Provider>
 	);
 }

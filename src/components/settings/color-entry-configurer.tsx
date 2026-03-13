@@ -1,5 +1,5 @@
 import { Plus, XIcon } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback } from "react";
 import { ColorEntry, GradientDirection } from "~/lib/models/color-entry";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -35,116 +35,108 @@ export function ColorEntryConfigurer({
 	onChange,
 	showTabs = true,
 }: ColorEntryConfigurerProps) {
-	const [type, setType] = useState<"solid" | "gradient">(value.type);
-	const [solidColor, setSolidColor] = useState(
-		value.type === "solid" ? value.color : "#000000",
-	);
-	const [gradientColors, setGradientColors] = useState<string[]>(
-		value.type === "gradient" ? value.gradientColors : ["#000000", "#ffffff"],
-	);
-	const [gradientDirection, setGradientDirection] = useState<GradientDirection>(
-		value.type === "gradient" ? value.gradientDirection : "to-r",
-	);
-
-	const lastEmittedRef = useRef<ColorEntry.Schema>(value);
-
-	// Build the current color entry from state
-	const currentEntry = useMemo((): ColorEntry.Schema => {
-		if (type === "solid") {
-			return {
-				type: "solid",
-				color: solidColor,
-				...(value.predefined !== undefined
-					? { predefined: value.predefined }
-					: {}),
-			};
-		}
-		return {
-			type: "gradient",
-			gradientColors:
-				gradientColors.length >= 2 ? gradientColors : ["#000000", "#ffffff"],
-			gradientDirection,
-			...(value.predefined !== undefined
-				? { predefined: value.predefined }
-				: {}),
-		};
-	}, [type, solidColor, gradientColors, gradientDirection, value.predefined]);
-
-	// Sync internal state when external value changes
-	useEffect(() => {
-		const prev = lastEmittedRef.current;
-		if (value.type !== prev.type) {
-			setType(value.type);
-		}
-		if (
-			value.type === "solid" &&
-			(prev.type !== "solid" || value.color !== prev.color)
-		) {
-			setSolidColor(value.color);
-		}
-		if (value.type === "gradient") {
-			if (
-				prev.type !== "gradient" ||
-				JSON.stringify(value.gradientColors) !==
-					JSON.stringify(prev.gradientColors)
-			) {
-				setGradientColors(value.gradientColors);
-			}
-			if (
-				prev.type !== "gradient" ||
-				value.gradientDirection !== prev.gradientDirection
-			) {
-				setGradientDirection(value.gradientDirection);
-			}
-		}
-		lastEmittedRef.current = value;
-	}, [value]);
-
-	// Emit changes to parent
-	useEffect(() => {
-		if (
-			JSON.stringify(currentEntry) !== JSON.stringify(lastEmittedRef.current)
-		) {
-			lastEmittedRef.current = currentEntry;
-			onChange(currentEntry);
-		}
-	}, [currentEntry, onChange]);
-
 	const handleTypeChange = useCallback(
 		(newType: "solid" | "gradient") => {
-			setType(newType);
-			if (newType === "gradient" && gradientColors.length < 2) {
-				setGradientColors(["#000000", "#ffffff"]);
+			if (newType === value.type) return;
+
+			if (newType === "solid") {
+				onChange({
+					type: "solid",
+					color:
+						value.type === "gradient"
+							? value.gradientColors[0] || "#000000"
+							: "#000000",
+					...(value.predefined !== undefined
+						? { predefined: value.predefined }
+						: {}),
+				});
+			} else {
+				onChange({
+					type: "gradient",
+					gradientColors:
+						value.type === "solid"
+							? [value.color, "#ffffff"]
+							: ["#000000", "#ffffff"],
+					gradientDirection: "to-r",
+					...(value.predefined !== undefined
+						? { predefined: value.predefined }
+						: {}),
+				});
 			}
 		},
-		[gradientColors.length],
+		[value, onChange],
+	);
+
+	const handleSolidColorChange = useCallback(
+		(color: string) => {
+			onChange({
+				...value,
+				type: "solid",
+				color,
+			} as ColorEntry.Schema);
+		},
+		[value, onChange],
+	);
+
+	const handleGradientDirectionChange = useCallback(
+		(dir: GradientDirection) => {
+			if (value.type !== "gradient") return;
+			onChange({
+				...value,
+				type: "gradient",
+				gradientDirection: dir,
+			} as ColorEntry.Schema);
+		},
+		[value, onChange],
 	);
 
 	const handleGradientColorChange = useCallback(
 		(index: number, color: string) => {
-			setGradientColors((prev) => {
-				const newColors = [...prev];
-				newColors[index] = color;
-				return newColors;
-			});
+			if (value.type !== "gradient") return;
+			const newColors = [...value.gradientColors];
+			newColors[index] = color;
+			onChange({
+				...value,
+				type: "gradient",
+				gradientColors: newColors,
+			} as ColorEntry.Schema);
 		},
-		[],
+		[value, onChange],
 	);
 
 	const handleAddGradientColor = useCallback(() => {
-		setGradientColors((prev) => [...prev, "#888888"]);
-	}, []);
+		if (value.type !== "gradient") return;
+		onChange({
+			...value,
+			type: "gradient",
+			gradientColors: [...value.gradientColors, "#888888"],
+		} as ColorEntry.Schema);
+	}, [value, onChange]);
 
-	const handleRemoveGradientColor = useCallback((index: number) => {
-		setGradientColors((prev) => prev.filter((_, i) => i !== index));
-	}, []);
+	const handleRemoveGradientColor = useCallback(
+		(index: number) => {
+			if (value.type !== "gradient") return;
+			onChange({
+				...value,
+				type: "gradient",
+				gradientColors: value.gradientColors.filter((_, i) => i !== index),
+			} as ColorEntry.Schema);
+		},
+		[value, onChange],
+	);
 
-	const previewStyle = ColorEntry.getBackgroundStyle(currentEntry);
+	const previewStyle = ColorEntry.getBackgroundStyle(value);
+
+	const solidColor = value.type === "solid" ? value.color : "#000000";
+	const gradientColors =
+		value.type === "gradient" ? value.gradientColors : ["#000000", "#ffffff"];
+	const gradientDirection =
+		value.type === "gradient" ? value.gradientDirection : "to-r";
 
 	return (
 		<div className="space-y-4">
 			<Tabs
-				value={type}
+				value={value.type}
 				onValueChange={(v) => handleTypeChange(v as "solid" | "gradient")}
 			>
 				{showTabs && (
@@ -164,7 +156,7 @@ export function ColorEntryConfigurer({
 				<TabsContent value="solid" className="space-y-4 mt-4">
 					<div className="space-y-2">
 						<Label>Color</Label>
-						<ColorInput value={solidColor} onChange={setSolidColor} />
+						<ColorInput value={solidColor} onChange={handleSolidColorChange} />
 					</div>
 				</TabsContent>
 
@@ -175,7 +167,7 @@ export function ColorEntryConfigurer({
 						<Select
 							value={gradientDirection}
 							onValueChange={(v) =>
-								setGradientDirection(v as GradientDirection)
+								handleGradientDirectionChange(v as GradientDirection)
 							}
 						>
 							<SelectTrigger>
