@@ -1,12 +1,6 @@
 import { getCampuses } from "../server/functions";
 import { Campus } from "./campus";
 
-interface ServerFaculty {
-	code: string;
-	name: string;
-	campusCode: string;
-}
-
 export class Faculty {
 	code: string;
 	name: string;
@@ -20,6 +14,6 @@ export class Faculty {
 
 	static async fetch(campus: Campus): Promise<Faculty[]> {
 		const data = await getCampuses({ data: "faculty" });
-		return data.map((f: any) => new Faculty(f.code, f.name, campus));
+		return data.map((f) => new Faculty(f.code, f.name, campus));
 	}
 }

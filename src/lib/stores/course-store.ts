@@ -1,6 +1,7 @@
 import { createStore } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { Course } from "../models/course";
+import type { CourseProvider } from "../models/course-provider";
 import { MeetingTime } from "../models/meeting-time";
 import {
 	resolveTimetableStyle,
@@ -20,7 +21,7 @@ interface Actions {
 	updateCourse: (courseId: string, data: Course.Schema) => void;
 	removeCourse: (courseId: string) => void;
 	getConflictingCourses: (meetingTimes: MeetingTime[]) => Course[];
-	getCoursesByProvider: (provider: any) => Course[];
+	getCoursesByProvider: (provider: CourseProvider) => Course[];
 	resetAllToStyle: (styleId: string) => void;
 }
 

@@ -59,7 +59,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			<head>
 				<script
 					suppressHydrationWarning
-					// biome-ignore lint/security/noDangerouslySetInnerHtml: inline theme script must run before paint to prevent flash
 					dangerouslySetInnerHTML={{
 						__html: `(function(){try{var t=localStorage.getItem('weekview-ui-theme');if(!t||t==='system'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.classList.add(t);}catch(e){}})();`,
 					}}

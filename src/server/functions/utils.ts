@@ -2,10 +2,10 @@ import { Storage } from "../platform/types";
 
 // TODO: Wire up Cloudflare KV binding when ready (see src/server/platform/cloudflare.ts)
 export function getStorage(): Storage {
-	const storage = new Map<string, any>();
+	const storage = new Map<string, string>();
 	return {
 		get: async (key: string) => storage.get(key) ?? null,
-		put: async (key: string, value: any) => {
+		put: async (key: string, value: string) => {
 			storage.set(key, value);
 		},
 		delete: async (key: string) => {

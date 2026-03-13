@@ -154,10 +154,12 @@ export function IconsTab() {
 					name="cellAppearance.icon.opacity"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Opacity: {(field.value * 100).toFixed(0)}%</FormLabel>
+							<FormLabel>
+								Opacity: {((field.value ?? 0) * 100).toFixed(0)}%
+							</FormLabel>
 							<FormControl>
 								<Slider
-									value={[field.value]}
+									value={[field.value ?? 0]}
 									onValueChange={(value) => field.onChange(value[0])}
 									min={0}
 									max={1}
@@ -176,10 +178,10 @@ export function IconsTab() {
 					name="cellAppearance.icon.size"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Size: {field.value.toFixed(1)}x</FormLabel>
+							<FormLabel>Size: {(field.value ?? 1).toFixed(1)}x</FormLabel>
 							<FormControl>
 								<Slider
-									value={[field.value]}
+									value={[field.value ?? 1]}
 									onValueChange={(value) => field.onChange(value[0])}
 									min={1}
 									max={5}
@@ -198,10 +200,10 @@ export function IconsTab() {
 					name="cellAppearance.icon.rotation"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Rotation: {field.value}°</FormLabel>
+							<FormLabel>Rotation: {field.value ?? 0}°</FormLabel>
 							<FormControl>
 								<Slider
-									value={[field.value]}
+									value={[field.value ?? 0]}
 									onValueChange={(value) => field.onChange(value[0])}
 									min={-180}
 									max={180}

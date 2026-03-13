@@ -1,7 +1,7 @@
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
-import { CourseStore } from "../stores/course-store";
 import type { CourseProvider } from "../models/course-provider";
+import { CourseStore } from "../stores/course-store";
 
 export function useProviderCourses(provider: CourseProvider) {
 	return useStore(

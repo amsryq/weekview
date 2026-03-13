@@ -2,14 +2,6 @@ import { getCourses } from "../server/functions";
 import { Campus } from "./campus";
 import { Faculty } from "./faculty";
 
-interface ServerCourse {
-	code: string;
-	facultyCode: string;
-	__internal: {
-		path: string;
-	};
-}
-
 export class Course {
 	code: string;
 	campus: Campus;

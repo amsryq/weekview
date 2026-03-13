@@ -1,6 +1,6 @@
 import axios from "axios";
 import { parse } from "node-html-parser";
-import { CacheKeys } from "~/server/services/cache";
+import { CacheKeys, type CacheService } from "~/server/services/cache";
 import { type CookieJarService } from "~/server/services/cookie-jar";
 
 export interface Clock {
@@ -123,7 +123,7 @@ export function extractAjaxUrl(scriptContent: string): string | null {
 }
 
 export async function fetchScrapsFromRootPage(
-	cacheService: any,
+	cacheService: CacheService,
 	cookieJarService: CookieJarService,
 ): Promise<RootScrapsSet> {
 	const cacheKey = CacheKeys.uitm.tokens(`index.htm`);

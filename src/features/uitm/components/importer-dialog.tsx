@@ -96,7 +96,10 @@ export function ManualImporterDialogRenderer() {
 			onOpenChange={closeManualImporter}
 			title="Add Course"
 			onSubmit={(data, form) => {
-				const course = Course.createFromSchema(data, ManualCourseProvider.instance);
+				const course = Course.createFromSchema(
+					data,
+					ManualCourseProvider.instance,
+				);
 				const conflicts = CourseStore.getState().getConflictingCourses(
 					course.meetingTimes,
 				);

@@ -17,10 +17,11 @@ export function createAuth(cf?: IncomingRequestCfProperties) {
 		throw new Error("Auth and paywall are disabled");
 	}
 
+	let req: Request;
 	try {
-		const _req = getRequest();
+		req = getRequest();
 	} catch {
-		const _req = new Request("http://localhost");
+		req = new Request("http://localhost");
 	}
 
 	const db = createDb({
@@ -107,7 +108,11 @@ export function createAuth(cf?: IncomingRequestCfProperties) {
 					const ctx = await auth.$context;
 					switch (event.type) {
 						case "checkout.session.completed": {
-							await handleCheckoutCompleted(event.data.object, ctx);
+							await handleCheckoutCompleted(
+								event.data.object,
+								// biome-ignore lint/suspicious/noExplicitAny: complex BetterAuth context type
+								ctx as unknown as any,
+							);
 							break;
 						}
 					}

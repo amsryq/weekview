@@ -387,12 +387,12 @@ export function AppearanceTab() {
 															<FormLabel className="text-sm">
 																Opacity{" "}
 																<span className="text-muted-foreground">
-																	({(field.value * 100).toFixed(0)}%)
+																	({((field.value ?? 0) * 100).toFixed(0)}%)
 																</span>
 															</FormLabel>
 															<FormControl>
 																<Slider
-																	value={[field.value]}
+																	value={[field.value ?? 0]}
 																	onValueChange={(value) =>
 																		field.onChange(value[0])
 																	}
@@ -415,12 +415,12 @@ export function AppearanceTab() {
 															<FormLabel className="text-sm">
 																Size{" "}
 																<span className="text-muted-foreground">
-																	({field.value.toFixed(1)}x)
+																	({(field.value ?? 1).toFixed(1)}x)
 																</span>
 															</FormLabel>
 															<FormControl>
 																<Slider
-																	value={[field.value]}
+																	value={[field.value ?? 1]}
 																	onValueChange={(value) =>
 																		field.onChange(value[0])
 																	}
@@ -443,12 +443,12 @@ export function AppearanceTab() {
 															<FormLabel className="text-sm">
 																Rotation{" "}
 																<span className="text-muted-foreground">
-																	({field.value}°)
+																	({field.value ?? 0}°)
 																</span>
 															</FormLabel>
 															<FormControl>
 																<Slider
-																	value={[field.value]}
+																	value={[field.value ?? 0]}
 																	onValueChange={(value) =>
 																		field.onChange(value[0])
 																	}

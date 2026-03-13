@@ -54,7 +54,10 @@ export class Course {
 		this.provider = data.provider;
 	}
 
-	public static createFromSchema(data: Course.Schema, provider: CourseProvider): Course {
+	public static createFromSchema(
+		data: Course.Schema,
+		provider: CourseProvider,
+	): Course {
 		return new Course({
 			code: data.code,
 			name: data.name,
