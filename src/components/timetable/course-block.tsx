@@ -3,17 +3,17 @@ import type React from "react";
 import { RequiredDeep } from "type-fest";
 import { useCourseEditor } from "~/lib/contexts/course-editor";
 import {
-	DEFAULT_BLUR_OPTIONS,
-	DEFAULT_GLASS_OPTIONS,
 	type CellAppearance,
 	type CellMaterial,
+	DEFAULT_BLUR_OPTIONS,
+	DEFAULT_GLASS_OPTIONS,
 	type MaterialOptions,
 } from "~/lib/models/cell-appearance";
-import { cn } from "~/lib/utils/styles";
 import { ColorEntry } from "~/lib/models/color-entry";
 import type { Course } from "~/lib/models/course";
 import type { MeetingTime } from "~/lib/models/meeting-time";
 import { CourseStore } from "~/lib/stores/course-store";
+import { cn } from "~/lib/utils/styles";
 import { CustomIcon } from "../ui/custom-icon";
 import { FitText } from "../ui/fit-text";
 import GlassSurface from "../ui/glass-surface";

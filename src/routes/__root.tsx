@@ -6,7 +6,9 @@ import {
 	HeadContent,
 	Outlet,
 	Scripts,
+	useBlocker,
 } from "@tanstack/react-router";
+import { useStore } from "zustand";
 import { CourseManagementSheetRenderer } from "~/components/course-management-sheet";
 import { SupportDialog } from "~/components/support-dialog";
 import { Toaster } from "~/components/ui/sonner";
@@ -24,6 +26,7 @@ import { ImporterDialogsProvider } from "~/lib/contexts/importer-dialogs";
 import { getQueryClient } from "~/lib/contexts/react-query";
 import { SupportDialogProvider } from "~/lib/contexts/support-dialog";
 import { ThemeProvider } from "~/lib/contexts/themes";
+import { CourseStore } from "~/lib/stores/course-store";
 import { buildGoogleFontsUrl, PREDEFINED_FONTS } from "~/lib/utils/fonts";
 
 export const Route = createRootRoute({
@@ -73,6 +76,22 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 	);
 }
 
+function GlobalNavigationBlocker() {
+	const hasCourses = useStore(CourseStore, (s) => s.courses.length > 0);
+
+	useBlocker({
+		shouldBlockFn: () => {
+			if (!hasCourses) return false;
+			return !window.confirm(
+				"You have courses that will be lost. Are you sure you want to leave?",
+			);
+		},
+		enableBeforeUnload: () => hasCourses,
+	});
+
+	return null;
+}
+
 function RootComponent() {
 	const queryClient = getQueryClient();
 
@@ -86,6 +105,7 @@ function RootComponent() {
 								<div className="root">
 									<Outlet />
 								</div>
+								<GlobalNavigationBlocker />
 								<SupportDialog />
 								<CourseEditorDialogRenderer />
 								<CourseManagementSheetRenderer />

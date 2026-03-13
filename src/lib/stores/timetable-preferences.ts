@@ -4,10 +4,10 @@ import { createStore } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import {
-	DEFAULT_BLUR_OPTIONS,
-	DEFAULT_GLASS_OPTIONS,
 	type CellAppearance,
 	type CellElements,
+	DEFAULT_BLUR_OPTIONS,
+	DEFAULT_GLASS_OPTIONS,
 	type FontWeight,
 } from "../models/cell-appearance";
 import { ColorEntry } from "../models/color-entry";

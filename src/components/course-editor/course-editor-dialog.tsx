@@ -31,18 +31,37 @@ export function CourseEditorDialog({
 }) {
 	const isSupporter = useIsUserSupporter();
 	const [internalOpen, setInternalOpen] = useState(false);
+	const [isDirty, setIsDirty] = useState(false);
 
 	// Use controlled state if provided, otherwise use internal state
 	const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
-	const setOpen =
-		controlledOnOpenChange !== undefined
-			? controlledOnOpenChange
-			: setInternalOpen;
+	const setOpen = (newOpen: boolean) => {
+		if (!newOpen && isDirty) {
+			const confirmClose = window.confirm(
+				"You have unsaved changes. Are you sure you want to discard them?",
+			);
+			if (!confirmClose) return;
+		}
+
+		if (controlledOnOpenChange !== undefined) {
+			controlledOnOpenChange(newOpen);
+		} else {
+			setInternalOpen(newOpen);
+		}
+	};
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			{children && <DialogTrigger asChild>{children}</DialogTrigger>}
-			<DialogContent className="flex flex-col w-5xl sm:max-w-[90vw] h-[90vh]">
+			<DialogContent
+				className="flex flex-col w-5xl sm:max-w-[90vw] h-[90vh]"
+				onPointerDownOutside={(e) => {
+					if (isDirty) e.preventDefault();
+				}}
+				onEscapeKeyDown={(e) => {
+					if (isDirty) e.preventDefault();
+				}}
+			>
 				<DialogHeader>
 					<DialogTitle>{title}</DialogTitle>
 					<DialogDescription>
@@ -73,9 +92,13 @@ export function CourseEditorDialog({
 									(meta?.errors?.length ?? 0) > 0,
 							);
 
-						if (!hasError) setOpen(false);
+						if (!hasError) {
+							setIsDirty(false);
+							setOpen(false);
+						}
 					}}
 					defaultValues={defaultValues}
+					onDirtyChange={setIsDirty}
 				/>
 			</DialogContent>
 		</Dialog>

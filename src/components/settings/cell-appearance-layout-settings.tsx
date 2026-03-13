@@ -12,13 +12,12 @@ import {
 import type { PartialDeep } from "type-fest";
 import type { CourseFormApi } from "~/lib/contexts/course-editor";
 import {
-	DEFAULT_BLUR_OPTIONS,
-	DEFAULT_GLASS_OPTIONS,
 	type CellAppearance,
 	type CellElements,
 	type CellMaterial,
+	DEFAULT_BLUR_OPTIONS,
+	DEFAULT_GLASS_OPTIONS,
 	type FontWeight,
-	type MaterialOptions,
 	type TextAlign,
 } from "~/lib/models/cell-appearance";
 import { PREDEFINED_FONTS } from "~/lib/utils/fonts";

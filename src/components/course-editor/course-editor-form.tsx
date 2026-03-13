@@ -1,5 +1,7 @@
-import { useForm } from "@tanstack/react-form";
+import { useForm, useStore as useFormStore } from "@tanstack/react-form";
+import { useBlocker } from "@tanstack/react-router";
 import { toMerged } from "es-toolkit";
+import { useEffect } from "react";
 import type { PartialDeep } from "type-fest";
 import { useStore } from "zustand";
 import {
@@ -25,11 +27,13 @@ import { LayoutTab } from "./layout-tab";
 interface CourseEditorFormProps {
 	onSubmit: (data: Course.Schema, form: CourseFormApi) => void;
 	defaultValues?: PartialDeep<Course.Schema>;
+	onDirtyChange?: (isDirty: boolean) => void;
 }
 
 export function CourseEditorForm({
 	onSubmit,
 	defaultValues,
+	onDirtyChange,
 }: CourseEditorFormProps) {
 	const activeStyleId = useStore(
 		TimetablePreferencesStore,
@@ -104,6 +108,22 @@ export function CourseEditorForm({
 
 			onSubmit(value, form);
 		},
+	});
+
+	const isDirty = useFormStore(form.store, (s) => s.isDirty);
+
+	useEffect(() => {
+		onDirtyChange?.(isDirty);
+	}, [isDirty, onDirtyChange]);
+
+	useBlocker({
+		shouldBlockFn: () => {
+			if (!isDirty) return false;
+			return !window.confirm(
+				"You have unsaved changes in the editor. Are you sure you want to leave?",
+			);
+		},
+		enableBeforeUnload: () => isDirty,
 	});
 
 	return (
