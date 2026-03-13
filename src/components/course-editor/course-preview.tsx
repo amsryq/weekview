@@ -10,6 +10,7 @@ import {
 	type TimetablePreferences,
 	TimetablePreferencesStore,
 } from "~/lib/stores/timetable-preferences";
+import { cn } from "~/lib/utils/styles";
 import { resolveTimetableStyleColorByIndex } from "~/lib/utils/timetable-styles";
 import { CourseBlock } from "../timetable/course-block";
 
@@ -56,7 +57,7 @@ export function CoursePreview() {
 			: appearance;
 
 	return (
-		<div className="flex flex-col items-center space-y-4">
+		<div className="flex flex-col items-center space-y-4 w-full">
 			<div className="text-center">
 				<h4 className="text-sm font-medium">Preview</h4>
 				<p className="text-xs text-muted-foreground">
@@ -64,13 +65,16 @@ export function CoursePreview() {
 				</p>
 			</div>
 
-			<div className="border rounded-lg w-64 p-4 h-32">
-				<CourseBlock
-					course={mockCourse}
-					meetingTime={mockMeetingTime}
-					appearance={resolvedAppearance}
-					layoutType="rows"
-				/>
+			<div className="border rounded-xl w-full max-w-[280px] p-6 h-40 bg-background/50 shadow-sm overflow-hidden flex items-center justify-center">
+				<div className="w-full h-full max-w-[200px] max-h-[120px] pointer-events-none selection:none">
+					<CourseBlock
+						course={mockCourse}
+						meetingTime={mockMeetingTime}
+						appearance={resolvedAppearance}
+						layoutType="rows"
+						className="relative overflow-hidden select-none cursor-default"
+					/>
+				</div>
 			</div>
 		</div>
 	);

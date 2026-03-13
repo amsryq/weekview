@@ -116,11 +116,12 @@ export function ColorSelectorGrid({ value, onChange }: ColorSelectorGridProps) {
 	);
 
 	return (
-		<div className="space-y-4">
+		<div className="space-y-4 flex flex-col items-end">
 			{/* Type Toggle */}
 			<Tabs
 				value={colorType}
 				onValueChange={(v) => handleTypeChange(v as ColorType)}
+				className="gap-0"
 			>
 				<TabsList>
 					<TabsTrigger value="solid">Solid</TabsTrigger>
@@ -129,7 +130,7 @@ export function ColorSelectorGrid({ value, onChange }: ColorSelectorGridProps) {
 			</Tabs>
 
 			{/* Color Grid */}
-			<div className="flex flex-wrap items-center gap-2">
+			<div className="flex flex-wrap items-center justify-end gap-2">
 				{filteredColors.map((color) => (
 					<ColorSwatch
 						key={color.id}

@@ -9,15 +9,9 @@ import {
 } from "lucide-react";
 import { useCourseEditorForm } from "~/lib/contexts/course-editor";
 import { Button } from "../ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "../ui/card";
-import { Field, FieldError, FieldLabel } from "../ui/field";
+import { FieldError } from "../ui/field";
 import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 import {
 	Select,
 	SelectContent,
@@ -43,38 +37,18 @@ export function CourseDetailsTab() {
 	const form = useCourseEditorForm();
 	return (
 		<div className="space-y-6">
-			{/* Header */}
-			<div className="space-y-2">
-				<h3 className="text-lg font-semibold flex items-center gap-2">
-					<BookOpen className="w-5 h-5" />
-					Course Details
-				</h3>
-				<p className="text-sm text-muted-foreground">
-					Basic information and schedule for your course
-				</p>
-			</div>
-
 			{/* Basic Information Section */}
-			<Card>
-				<CardHeader>
-					<CardTitle className="text-base">Basic Information</CardTitle>
-					<CardDescription>
-						Enter the course code and name that will appear in your timetable
-					</CardDescription>
-				</CardHeader>
-				<CardContent className="space-y-4">
-					<form.Field name="code">
-						{(field) => {
-							const isInvalid =
-								field.state.meta.isTouched && !field.state.meta.isValid;
-							return (
-								<Field data-invalid={isInvalid}>
-									<FieldLabel className="text-sm font-medium">
-										Course Code
-									</FieldLabel>
+			<Section title="Basic Information">
+				<form.Field name="code">
+					{(field) => {
+						const isInvalid =
+							field.state.meta.isTouched && !field.state.meta.isValid;
+						return (
+							<Field label="Course Code">
+								<div className="flex flex-col gap-1.5 flex-1 max-w-sm">
 									<Input
 										placeholder="CS110"
-										className="font-mono"
+										className="font-mono h-8 text-xs"
 										value={field.state.value}
 										onBlur={field.handleBlur}
 										onChange={(e) => field.handleChange(e.target.value)}
@@ -87,22 +61,22 @@ export function CourseDetailsTab() {
 											}))}
 										/>
 									)}
-								</Field>
-							);
-						}}
-					</form.Field>
+								</div>
+							</Field>
+						);
+					}}
+				</form.Field>
 
-					<form.Field name="name">
-						{(field) => {
-							const isInvalid =
-								field.state.meta.isTouched && !field.state.meta.isValid;
-							return (
-								<Field data-invalid={isInvalid}>
-									<FieldLabel className="text-sm font-medium">
-										Course Name
-									</FieldLabel>
+				<form.Field name="name">
+					{(field) => {
+						const isInvalid =
+							field.state.meta.isTouched && !field.state.meta.isValid;
+						return (
+							<Field label="Course Name">
+								<div className="flex flex-col gap-1.5 flex-1 max-w-sm">
 									<Input
 										placeholder="Introduction to Computer Science"
+										className="h-8 text-xs"
 										value={field.state.value}
 										onBlur={field.handleBlur}
 										onChange={(e) => field.handleChange(e.target.value)}
@@ -115,274 +89,218 @@ export function CourseDetailsTab() {
 											}))}
 										/>
 									)}
-								</Field>
-							);
-						}}
-					</form.Field>
-				</CardContent>
-			</Card>
+								</div>
+							</Field>
+						);
+					}}
+				</form.Field>
+			</Section>
 
 			{/* Meeting Times Section */}
-			<Card>
-				<CardHeader>
-					<CardTitle className="text-base">Meeting Times</CardTitle>
-					<CardDescription>
-						Add weekly meeting times for this course
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
+			<Section
+				title="Schedule"
+				action={
 					<form.Field name="meetingTimes" mode="array">
 						{(field) => (
-							<div className="space-y-5">
-								<div className="flex items-center justify-between gap-3">
-									<div className="inline-flex items-center rounded-full border border-muted-foreground/20 bg-muted/40 px-3 py-1 text-xs font-medium text-muted-foreground">
-										{field.state.value.length}{" "}
-										{field.state.value.length === 1 ? "meeting" : "meetings"}
-									</div>
-									<Button
-										type="button"
-										variant="outline"
-										onClick={() =>
-											field.pushValue({
-												day: 1,
-												location: "",
-												startTime: "09:00",
-												endTime: "10:30",
-											})
-										}
-										className="h-9 px-3"
-									>
-										<Plus className="w-4 h-4 mr-2" />
-										Add
-									</Button>
-								</div>
-
-								{field.state.value.length === 0 && (
-									<div className="rounded-xl border border-dashed border-muted-foreground/30 bg-linear-to-br from-muted/35 to-transparent px-4 py-10 text-center text-muted-foreground">
-										<Clock className="mx-auto mb-3 h-8 w-8 opacity-50" />
-										<p className="text-sm font-medium text-foreground/80">
-											No meeting times added yet
-										</p>
-										<p className="text-xs mt-1">
-											Use the Add button above to create your first slot
-										</p>
-									</div>
-								)}
-
-								<div className="space-y-4">
-									{field.state.value.map((_, index) => {
-										// We need to check if there are top level array errors for this specific index
-										// But usually TanStack form returns errors on the subfields or the array field itself
-										return (
-											<Card key={index} className="border-muted/70 shadow-sm">
-												<CardHeader className="pb-4">
-													<div className="flex items-start justify-between gap-3">
-														<div className="min-w-0 space-y-1">
-															<CardTitle className="flex items-center gap-2 text-sm font-semibold">
-																<Clock className="h-4 w-4" />
-																Meeting #{index + 1}
-															</CardTitle>
-															<form.Field name={`meetingTimes[${index}].day`}>
-																{(dayField) => (
-																	<p className="inline-flex items-center gap-1 rounded-full border border-border/80 bg-background/70 px-2 py-0.5 text-xs text-muted-foreground">
-																		<CalendarDays className="h-3 w-3" />
-																		{getDayLabel(
-																			dayField.state.value as number,
-																		)}
-																	</p>
-																)}
-															</form.Field>
-														</div>
-														<Button
-															type="button"
-															variant="ghost"
-															size="sm"
-															onClick={() => field.removeValue(index)}
-															className="h-8 w-8 shrink-0 p-0 text-muted-foreground hover:text-destructive"
-														>
-															<Trash2 className="h-4 w-4" />
-															<span className="sr-only">
-																Remove meeting {index + 1}
-															</span>
-														</Button>
-													</div>
-												</CardHeader>
-												<CardContent className="pt-0">
-													<div className="space-y-4">
-														<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-															<form.Field name={`meetingTimes[${index}].day`}>
-																{(subField) => {
-																	const isInvalid =
-																		subField.state.meta.isTouched &&
-																		!subField.state.meta.isValid;
-																	return (
-																		<Field data-invalid={isInvalid}>
-																			<FieldLabel className="flex items-center gap-1.5 text-sm font-medium">
-																				<CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
-																				Day
-																			</FieldLabel>
-																			<Select
-																				onValueChange={(value) =>
-																					subField.handleChange(Number(value))
-																				}
-																				value={subField.state.value?.toString()}
-																			>
-																				<SelectTrigger aria-invalid={isInvalid}>
-																					<SelectValue placeholder="Select day" />
-																				</SelectTrigger>
-																				<SelectContent>
-																					{DAYS_OF_WEEK.map((day) => (
-																						<SelectItem
-																							key={day.value}
-																							value={day.value.toString()}
-																						>
-																							{day.label}
-																						</SelectItem>
-																					))}
-																				</SelectContent>
-																			</Select>
-																			{isInvalid && (
-																				<FieldError
-																					errors={subField.state.meta.errors.map(
-																						(e) => ({
-																							message: String(e?.message ?? e),
-																						}),
-																					)}
-																				/>
-																			)}
-																		</Field>
-																	);
-																}}
-															</form.Field>
-
-															<form.Field
-																name={`meetingTimes[${index}].location`}
-															>
-																{(subField) => {
-																	const isInvalid =
-																		subField.state.meta.isTouched &&
-																		!subField.state.meta.isValid;
-																	return (
-																		<Field data-invalid={isInvalid}>
-																			<FieldLabel className="flex items-center gap-1.5 text-sm font-medium">
-																				<MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-																				Location
-																			</FieldLabel>
-																			<Input
-																				placeholder="Room 101, Building A"
-																				value={subField.state.value}
-																				onBlur={subField.handleBlur}
-																				onChange={(e) =>
-																					subField.handleChange(e.target.value)
-																				}
-																				aria-invalid={isInvalid}
-																			/>
-																			{isInvalid && (
-																				<FieldError
-																					errors={subField.state.meta.errors.map(
-																						(e) => ({
-																							message: String(e?.message ?? e),
-																						}),
-																					)}
-																				/>
-																			)}
-																		</Field>
-																	);
-																}}
-															</form.Field>
-														</div>
-
-														<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-															<form.Field
-																name={`meetingTimes[${index}].startTime`}
-															>
-																{(subField) => {
-																	const isInvalid =
-																		subField.state.meta.isTouched &&
-																		!subField.state.meta.isValid;
-																	return (
-																		<Field data-invalid={isInvalid}>
-																			<FieldLabel className="flex items-center gap-1.5 text-sm font-medium">
-																				<Timer className="h-3.5 w-3.5 text-muted-foreground" />
-																				Start Time
-																			</FieldLabel>
-																			<Input
-																				type="time"
-																				value={subField.state.value}
-																				onBlur={subField.handleBlur}
-																				onChange={(e) =>
-																					subField.handleChange(e.target.value)
-																				}
-																				aria-invalid={isInvalid}
-																			/>
-																			{isInvalid && (
-																				<FieldError
-																					errors={subField.state.meta.errors.map(
-																						(e) => ({
-																							message: String(e?.message ?? e),
-																						}),
-																					)}
-																				/>
-																			)}
-																		</Field>
-																	);
-																}}
-															</form.Field>
-
-															<form.Field
-																name={`meetingTimes[${index}].endTime`}
-															>
-																{(subField) => {
-																	const isInvalid =
-																		subField.state.meta.isTouched &&
-																		!subField.state.meta.isValid;
-																	return (
-																		<Field data-invalid={isInvalid}>
-																			<FieldLabel className="flex items-center gap-1.5 text-sm font-medium">
-																				<Timer className="h-3.5 w-3.5 text-muted-foreground" />
-																				End Time
-																			</FieldLabel>
-																			<Input
-																				type="time"
-																				value={subField.state.value}
-																				onBlur={subField.handleBlur}
-																				onChange={(e) =>
-																					subField.handleChange(e.target.value)
-																				}
-																				aria-invalid={isInvalid}
-																			/>
-																			{isInvalid && (
-																				<FieldError
-																					errors={subField.state.meta.errors.map(
-																						(e) => ({
-																							message: String(e?.message ?? e),
-																						}),
-																					)}
-																				/>
-																			)}
-																		</Field>
-																	);
-																}}
-															</form.Field>
-														</div>
-														{field.state.meta.errors.length > 0 && (
-															<FieldError
-																errors={field.state.meta.errors.map((e) => ({
-																	message: String(e?.message ?? e),
-																}))}
-															/>
-														)}
-													</div>
-												</CardContent>
-											</Card>
-										);
-									})}
-								</div>
-							</div>
+							<Button
+								type="button"
+								variant="outline"
+								size="sm"
+								onClick={() =>
+									field.pushValue({
+										day: 1,
+										location: "",
+										startTime: "09:00",
+										endTime: "10:30",
+									})
+								}
+								className="h-7 px-2 text-xs"
+							>
+								<Plus className="w-3 h-3 mr-1" />
+								Add Meeting
+							</Button>
 						)}
 					</form.Field>
-				</CardContent>
-			</Card>
+				}
+			>
+				<form.Field name="meetingTimes" mode="array">
+					{(field) => (
+						<div className="space-y-4">
+							{field.state.value.length === 0 && (
+								<div className="rounded-xl border border-dashed p-8 text-center bg-muted/5">
+									<Clock className="mx-auto mb-2 h-5 w-5 text-muted-foreground/30" />
+									<p className="text-xs font-medium text-muted-foreground">
+										No meetings scheduled
+									</p>
+								</div>
+							)}
+
+							<div className="space-y-3">
+								{field.state.value.map((_, index) => (
+									<div
+										key={index}
+										className="group relative flex flex-col gap-4 p-4 rounded-xl border bg-card shadow-sm transition-all"
+									>
+										<div className="flex items-center justify-between">
+											<div className="flex items-center gap-2">
+												<span className="text-xs font-bold text-muted-foreground/40">
+													#{index + 1}
+												</span>
+												<form.Field name={`meetingTimes[${index}].day`}>
+													{(dayField) => (
+														<span className="text-sm font-semibold">
+															{getDayLabel(dayField.state.value as number)}
+														</span>
+													)}
+												</form.Field>
+											</div>
+											<Button
+												type="button"
+												variant="ghost"
+												size="sm"
+												onClick={() => field.removeValue(index)}
+												className="h-6 w-6 p-0 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive"
+											>
+												<Trash2 className="h-3 w-3" />
+											</Button>
+										</div>
+
+										<div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
+											<form.Field name={`meetingTimes[${index}].day`}>
+												{(subField) => (
+													<Field label="Day">
+														<Select
+															onValueChange={(value) =>
+																subField.handleChange(Number(value))
+															}
+															value={subField.state.value?.toString()}
+														>
+															<SelectTrigger className="h-8 text-xs w-32">
+																<SelectValue placeholder="Day" />
+															</SelectTrigger>
+															<SelectContent>
+																{DAYS_OF_WEEK.map((day) => (
+																	<SelectItem
+																		key={day.value}
+																		value={day.value.toString()}
+																		className="text-xs"
+																	>
+																		{day.label}
+																	</SelectItem>
+																))}
+															</SelectContent>
+														</Select>
+													</Field>
+												)}
+											</form.Field>
+
+											<form.Field name={`meetingTimes[${index}].location`}>
+												{(subField) => (
+													<Field label="Location">
+														<div className="relative flex-1 max-w-[160px]">
+															<MapPin className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/50" />
+															<Input
+																placeholder="Room..."
+																className="h-8 pl-7 text-xs w-full"
+																value={subField.state.value}
+																onBlur={subField.handleBlur}
+																onChange={(e) =>
+																	subField.handleChange(e.target.value)
+																}
+															/>
+														</div>
+													</Field>
+												)}
+											</form.Field>
+
+											<form.Field name={`meetingTimes[${index}].startTime`}>
+												{(subField) => (
+													<Field label="Starts">
+														<div className="relative flex-1 max-w-[160px]">
+															<Timer className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/50" />
+															<Input
+																type="time"
+																className="h-8 pl-7 text-xs w-full"
+																value={subField.state.value}
+																onBlur={subField.handleBlur}
+																onChange={(e) =>
+																	subField.handleChange(e.target.value)
+																}
+															/>
+														</div>
+													</Field>
+												)}
+											</form.Field>
+
+											<form.Field name={`meetingTimes[${index}].endTime`}>
+												{(subField) => (
+													<Field label="Ends">
+														<div className="relative flex-1 max-w-[160px]">
+															<Timer className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/50" />
+															<Input
+																type="time"
+																className="h-8 pl-7 text-xs w-full"
+																value={subField.state.value}
+																onBlur={subField.handleBlur}
+																onChange={(e) =>
+																	subField.handleChange(e.target.value)
+																}
+															/>
+														</div>
+													</Field>
+												)}
+											</form.Field>
+										</div>
+										{field.state.meta.errors.length > 0 && (
+											<FieldError
+												className="mt-1"
+												errors={field.state.meta.errors.map((e) => ({
+													message: String(e?.message ?? e),
+												}))}
+											/>
+										)}
+									</div>
+								))}
+							</div>
+						</div>
+					)}
+				</form.Field>
+			</Section>
+		</div>
+	);
+}
+
+function Section({
+	title,
+	action,
+	children,
+}: {
+	title: string;
+	action?: React.ReactNode;
+	children: React.ReactNode;
+}) {
+	return (
+		<section className="space-y-3">
+			<div className="flex items-center justify-between">
+				<h4 className="text-sm font-medium">{title}</h4>
+				{action}
+			</div>
+			<div className="space-y-3">{children}</div>
+		</section>
+	);
+}
+
+function Field({
+	label,
+	children,
+}: {
+	label: string;
+	children: React.ReactNode;
+}) {
+	return (
+		<div className="flex items-center justify-between">
+			<Label className="text-sm text-muted-foreground">{label}</Label>
+			{children}
 		</div>
 	);
 }

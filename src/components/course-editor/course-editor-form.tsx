@@ -1,7 +1,8 @@
 import { useForm, useStore as useFormStore } from "@tanstack/react-form";
 import { useBlocker } from "@tanstack/react-router";
 import { toMerged } from "es-toolkit";
-import { useEffect } from "react";
+import { BookOpen, Eye, Palette, Smile } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { PartialDeep } from "type-fest";
 import { useStore } from "zustand";
 import {
@@ -17,7 +18,14 @@ import {
 	resolveTimetableStyleColorByIndex,
 } from "~/lib/utils/timetable-styles";
 import { Button } from "../ui/button";
-import { DialogClose } from "../ui/dialog";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+	DialogClose,
+} from "../ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { AppearanceTab } from "./appearance-tab";
 import { CourseDetailsTab } from "./course-details-tab";
@@ -29,6 +37,8 @@ interface CourseEditorFormProps {
 	defaultValues?: PartialDeep<Course.Schema>;
 	onDirtyChange?: (isDirty: boolean) => void;
 }
+
+type TabValue = "basics" | "style" | "icon";
 
 export function CourseEditorForm({
 	onSubmit,
@@ -47,6 +57,8 @@ export function CourseEditorForm({
 	const style = resolveTimetableStyle(activeStyleId);
 	const defaultThemeColorIndex =
 		courseCount % style.variants[timetableColorMode].gridColors.length;
+
+	const [activeTab, setActiveTab] = useState<TabValue>("basics");
 
 	const form = useForm({
 		validators: {
@@ -134,79 +146,114 @@ export function CourseEditorForm({
 					e.stopPropagation();
 					form.handleSubmit();
 				}}
-				className="flex flex-col h-full min-h-0 shrink"
+				className="flex flex-col h-full min-h-0"
 			>
-				<div className="flex-1 min-h-0 max-lg:overflow-y-scroll max-lg:pr-4 max-lg:pl-2 max-lg:-ml-2">
-					<div className="flex flex-col-reverse min-h-0 h-full lg:flex-row gap-6">
-						<Tabs className="w-full min-h-0" defaultValue="details">
-							<TabsList>
-								<TabsTrigger value="details">Details</TabsTrigger>
-								<TabsTrigger value="appearance">Appearance</TabsTrigger>
-								<TabsTrigger value="layout">Layout</TabsTrigger>
-								{/*<TabsTrigger value="icons">Icons</TabsTrigger>*/}
-							</TabsList>
+				<Tabs
+					value={activeTab}
+					onValueChange={(v) => setActiveTab(v as TabValue)}
+					className="flex-1 flex flex-col min-h-0 gap-0"
+				>
+					<div className="px-4 sm:px-6 pt-2 pb-4">
+						<TabsList className="w-full max-w-2xl mx-auto grid grid-cols-3">
+							<TabsTrigger value="basics" className="gap-2">
+								<BookOpen className="size-4" />
+								<span className="hidden sm:inline">Basics</span>
+							</TabsTrigger>
+							<TabsTrigger value="style" className="gap-2">
+								<Palette className="size-4" />
+								<span className="hidden sm:inline">Style</span>
+							</TabsTrigger>
+							<TabsTrigger value="icon" className="gap-2">
+								<Smile className="size-4" />
+								<span className="hidden sm:inline">Icon</span>
+							</TabsTrigger>
+						</TabsList>
+					</div>
 
-							<div className="pt-2 pb-4 lg:overflow-y-scroll lg:pr-4 lg:pl-2 lg:-ml-2">
-								<TabsContent value="details" className="m-0">
+					<div className="flex-1 flex min-h-0 overflow-hidden">
+						<div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 min-h-0">
+							<div className="max-w-2xl mx-auto">
+								<TabsContent value="basics" className="mt-0">
 									<CourseDetailsTab />
 								</TabsContent>
-
-								<TabsContent value="appearance" className="m-0">
-									<AppearanceTab />
-								</TabsContent>
-
-								<TabsContent value="layout" className="m-0">
+								<TabsContent value="style" className="mt-0 space-y-6">
+									<AppearanceTab showIcon={false} />
 									<LayoutTab />
 								</TabsContent>
-
-								{/*<TabsContent value="icons" className="m-0">
-									<IconsTab />
-								</TabsContent>*/}
+								<TabsContent value="icon" className="mt-0">
+									<AppearanceTab showOnlyIcon={true} />
+								</TabsContent>
 							</div>
-						</Tabs>
-
-						{/* Preview Sidebar */}
-						<div className="w-full lg:w-80 lg:border-l lg:pl-6 max-lg:border-b max-lg:pb-6">
-							<CoursePreview />
 						</div>
-					</div>
-				</div>
 
-				{/* Form Actions */}
-				<div className="flex flex-1 flex-col-reverse grow-0 sm:flex-row justify-end gap-3 pt-6 border-t">
-					<div className="flex gap-3">
+						{/* Preview Sidebar - Only visible on desktop if it fits */}
+						<aside className="hidden xl:flex w-80 border-l bg-muted/5 p-6 flex-col items-center shrink-0">
+							<div className="sticky top-0 w-full">
+								<CoursePreview />
+							</div>
+						</aside>
+					</div>
+				</Tabs>
+
+				{/* Footer Actions */}
+				<footer className="flex items-center justify-between gap-3 px-4 sm:px-6 pt-4 pb-4 border-t shrink-0">
+					<div className="xl:hidden">
+						<Dialog>
+							<DialogTrigger asChild>
+								<Button
+									type="button"
+									variant="outline"
+									size="sm"
+									className="gap-2"
+								>
+									<Eye className="size-4" />
+									Preview
+								</Button>
+							</DialogTrigger>
+							<DialogContent className="max-w-md">
+								<DialogHeader>
+									<DialogTitle>Course Preview</DialogTitle>
+								</DialogHeader>
+								<div className="py-4">
+									<CoursePreview />
+								</div>
+							</DialogContent>
+						</Dialog>
+					</div>
+
+					<div className="flex gap-2 ml-auto">
 						<Button
 							type="button"
-							variant="outline"
+							variant="ghost"
+							size="sm"
 							onClick={() => form.reset()}
-							className="flex-1 sm:flex-none"
 						>
 							Reset
 						</Button>
 						<DialogClose asChild>
 							<Button
 								type="button"
-								variant="secondary"
-								className="flex-1 sm:flex-none"
+								variant="outline"
+								size="sm"
 							>
 								Cancel
 							</Button>
 						</DialogClose>
+						<form.Subscribe
+							selector={(state) => [state.canSubmit, state.isSubmitting]}
+						>
+							{([canSubmit, isSubmitting]) => (
+								<Button
+									type="submit"
+									disabled={!canSubmit || (isSubmitting as boolean)}
+									size="sm"
+								>
+									Save Course
+								</Button>
+							)}
+						</form.Subscribe>
 					</div>
-					<form.Subscribe
-						selector={(state) => [state.canSubmit, state.isSubmitting]}
-					>
-						{([canSubmit, isSubmitting]) => (
-							<Button
-								type="submit"
-								disabled={!canSubmit || (isSubmitting as boolean)}
-								className="flex-1 sm:flex-none"
-							>
-								Save Course
-							</Button>
-						)}
-					</form.Subscribe>
-				</div>
+				</footer>
 			</form>
 		</CourseEditorFormContext.Provider>
 	);
