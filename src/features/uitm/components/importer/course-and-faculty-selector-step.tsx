@@ -4,13 +4,12 @@ import { useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "~/components/ui/button";
 import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "~/components/ui/dialog";
+	ResponsiveDialog,
+	ResponsiveDialogContent,
+	ResponsiveDialogDescription,
+	ResponsiveDialogHeader,
+	ResponsiveDialogTitle,
+} from "~/components/ui/responsive-dialog";
 import {
 	Combobox,
 	ComboboxContent,
@@ -86,22 +85,25 @@ export function CourseAndFacultySelectorDialog({
 	};
 
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="flex min-w-0 flex-col gap-6 sm:max-w-xl">
-				<DialogHeader className="gap-1 text-left">
-					<DialogTitle className="flex items-center gap-2 text-lg">
+		<ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+			<ResponsiveDialogContent
+				desktopClassName="sm:max-w-xl h-[600px] max-h-[85vh]"
+				mobileClassName="max-h-[95vh]"
+			>
+				<ResponsiveDialogHeader className="gap-1">
+					<ResponsiveDialogTitle className="flex items-center gap-2 text-lg">
 						<span className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
 							<Compass className="size-4" />
 						</span>
 						Choose your campus & faculty
-					</DialogTitle>
-					<DialogDescription>
+					</ResponsiveDialogTitle>
+					<ResponsiveDialogDescription>
 						Select where you study so we can show the exact courses available to
 						you.
-					</DialogDescription>
-				</DialogHeader>
+					</ResponsiveDialogDescription>
+				</ResponsiveDialogHeader>
 
-				<div className="space-y-5">
+				<div className="flex-1 space-y-5 px-6 overflow-y-auto min-h-0">
 					<section className="space-y-2">
 						<div className="flex items-center justify-between">
 							<h3 className="text-sm font-medium text-muted-foreground">
@@ -216,13 +218,13 @@ export function CourseAndFacultySelectorDialog({
 						</section>
 					) : null}
 
-					<p className="text-xs text-muted-foreground">
+					<p className="text-xs text-muted-foreground pb-6">
 						Your selections help narrow down the exact course catalogue. You can
 						change them later if needed.
 					</p>
 				</div>
 
-				<DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-between">
+				<div className="flex flex-col gap-2 sm:flex-row sm:justify-between border-t p-6 mt-auto">
 					<Button
 						variant="ghost"
 						className="w-full sm:w-auto"
@@ -239,9 +241,9 @@ export function CourseAndFacultySelectorDialog({
 					>
 						Continue to groups
 					</Button>
-				</DialogFooter>
-			</DialogContent>
-		</Dialog>
+				</div>
+			</ResponsiveDialogContent>
+		</ResponsiveDialog>
 	);
 }
 

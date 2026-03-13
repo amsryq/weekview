@@ -11,13 +11,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "~/components/ui/dialog";
+	ResponsiveDialog,
+	ResponsiveDialogContent,
+	ResponsiveDialogDescription,
+	ResponsiveDialogHeader,
+	ResponsiveDialogTitle,
+} from "~/components/ui/responsive-dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
@@ -285,20 +284,20 @@ function MyStudentImportContent() {
 
 	return (
 		<>
-			<DialogHeader className="gap-1 text-left">
-				<DialogTitle className="flex items-center gap-2 text-lg">
+			<ResponsiveDialogHeader className="gap-1">
+				<ResponsiveDialogTitle className="flex items-center gap-2 text-lg">
 					<span className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
 						<GraduationCap className="size-4" />
 					</span>
 					Import from MyStudent
-				</DialogTitle>
-				<DialogDescription>
+				</ResponsiveDialogTitle>
+				<ResponsiveDialogDescription>
 					Enter your UiTM student ID and we will fetch the timetable directly
 					from the MyStudent portal.
-				</DialogDescription>
-			</DialogHeader>
+				</ResponsiveDialogDescription>
+			</ResponsiveDialogHeader>
 
-			<div className="flex flex-col gap-4">
+			<div className="flex-1 flex flex-col gap-4 px-6 overflow-y-auto min-h-0">
 				<Input
 					type="text"
 					value={studentId}
@@ -334,7 +333,7 @@ function MyStudentImportContent() {
 				)}
 			</div>
 
-			<DialogFooter className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+			<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-t p-6 mt-auto">
 				<Button
 					variant="outline"
 					onClick={() => setCurrentStep("source")}
@@ -353,9 +352,9 @@ function MyStudentImportContent() {
 					)}
 					Import timetable
 				</Button>
-			</DialogFooter>
+			</div>
 
-			<Dialog
+			<ResponsiveDialog
 				open={progressDialogOpen}
 				onOpenChange={(open) => {
 					if (!isImporting) {
@@ -363,9 +362,12 @@ function MyStudentImportContent() {
 					}
 				}}
 			>
-				<DialogContent className="sm:max-w-2xl">
-					<DialogHeader>
-						<DialogTitle className="flex items-center gap-2">
+				<ResponsiveDialogContent
+					desktopClassName="sm:max-w-2xl h-[600px] max-h-[85vh]"
+					mobileClassName="max-h-[90vh]"
+				>
+					<ResponsiveDialogHeader>
+						<ResponsiveDialogTitle className="flex items-center gap-2">
 							{isImporting ? (
 								<Loader2 className="size-5 animate-spin text-primary" />
 							) : errorCount > 0 ? (
@@ -374,11 +376,11 @@ function MyStudentImportContent() {
 								<CheckIcon className="size-5 text-emerald-500" />
 							)}
 							<span>{progressTitle}</span>
-						</DialogTitle>
-						<DialogDescription>{progressSubtitle}</DialogDescription>
-					</DialogHeader>
+						</ResponsiveDialogTitle>
+						<ResponsiveDialogDescription>{progressSubtitle}</ResponsiveDialogDescription>
+					</ResponsiveDialogHeader>
 
-					<div className="space-y-4 py-4 overflow-y-auto">
+					<div className="flex-1 space-y-4 py-4 px-6 overflow-y-auto min-h-0">
 						{courseProgress.length > 0 ? (
 							<div className="rounded-lg border bg-background">
 								<div className="border-b bg-muted/30 px-4 py-3">
@@ -413,7 +415,7 @@ function MyStudentImportContent() {
 														)}
 													</div>
 												</div>
-												<div className="flex-shrink-0 ml-3">
+												<div className="shrink-0 ml-3">
 													{item.status === "pending" ? (
 														<div className="size-5 rounded-full border-2 border-muted-foreground/30" />
 													) : item.status === "running" ? (
@@ -440,7 +442,7 @@ function MyStudentImportContent() {
 						)}
 					</div>
 
-					<DialogFooter className="flex w-full flex-col gap-2 sm:flex-row sm:justify-between">
+					<div className="flex w-full flex-col gap-2 sm:flex-row sm:justify-between border-t p-6 mt-auto">
 						<Button
 							variant="ghost"
 							onClick={requestCancel}
@@ -458,9 +460,9 @@ function MyStudentImportContent() {
 						>
 							Close
 						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
+					</div>
+				</ResponsiveDialogContent>
+			</ResponsiveDialog>
 		</>
 	);
 }
@@ -470,10 +472,13 @@ export function MyStudentImportDialog({
 	onOpenChange,
 }: MyStudentImportDialogProps) {
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="flex min-w-0 flex-col gap-6 sm:max-w-xl">
+		<ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+			<ResponsiveDialogContent
+				desktopClassName="sm:max-w-xl h-[600px] max-h-[85vh]"
+				mobileClassName="max-h-[95vh]"
+			>
 				<MyStudentImportContent />
-			</DialogContent>
-		</Dialog>
+			</ResponsiveDialogContent>
+		</ResponsiveDialog>
 	);
 }

@@ -76,8 +76,8 @@ export function CourseEditorDialog({
 				<ResponsiveDialogTrigger asChild>{children}</ResponsiveDialogTrigger>
 			)}
 			<ResponsiveDialogContent
-				desktopClassName="flex flex-col w-full max-w-5xl h-[90vh] p-0 overflow-hidden"
-				mobileClassName="h-[95vh] p-0 flex flex-col overflow-hidden rounded-t-2xl"
+				desktopClassName="w-full max-w-5xl h-[90vh]"
+				mobileClassName="h-[75vh]"
 				sheetSide="bottom"
 				onPointerDownOutside={(e) => {
 					if (isDirty) e.preventDefault();
@@ -86,7 +86,7 @@ export function CourseEditorDialog({
 					if (isDirty) e.preventDefault();
 				}}
 			>
-				<ResponsiveDialogHeader className="px-6 pt-6">
+				<ResponsiveDialogHeader>
 					<div className="flex items-center gap-2">
 						<ResponsiveDialogTitle>{title}</ResponsiveDialogTitle>
 						{process.env.NODE_ENV === "development" && isSupporter && (
@@ -99,7 +99,7 @@ export function CourseEditorDialog({
 						Configure your course details, appearance, and schedule.
 					</ResponsiveDialogDescription>
 				</ResponsiveDialogHeader>
-				<div className="flex-1 overflow-hidden">
+				<div className="flex-1 flex flex-col min-h-0 overflow-hidden">
 					<CourseEditorForm
 						onSubmit={handleFormSubmit}
 						defaultValues={defaultValues}

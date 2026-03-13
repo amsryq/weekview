@@ -1,6 +1,8 @@
 import * as React from "react";
+import { cn } from "~/lib/utils/styles";
 import {
 	Dialog,
+	DialogClose,
 	DialogContent,
 	DialogDescription,
 	DialogHeader,
@@ -9,6 +11,7 @@ import {
 } from "./dialog";
 import {
 	Sheet,
+	SheetClose,
 	SheetContent,
 	SheetDescription,
 	SheetHeader,
@@ -118,7 +121,14 @@ function ResponsiveDialogContent({
 
 	if (isDesktop) {
 		return (
-			<DialogContent className={`${className ?? ""} ${desktopClassName ?? ""}`.trim()} {...props}>
+			<DialogContent
+				className={cn(
+					"p-0 gap-0 flex flex-col overflow-hidden",
+					className,
+					desktopClassName,
+				)}
+				{...props}
+			>
 				{children}
 			</DialogContent>
 		);
@@ -127,7 +137,11 @@ function ResponsiveDialogContent({
 	return (
 		<SheetContent
 			side={sheetSide}
-			className={`${className ?? ""} ${mobileClassName ?? ""}`.trim()}
+			className={cn(
+				"p-0 flex flex-col overflow-hidden rounded-t-2xl",
+				className,
+				mobileClassName,
+			)}
 			{...props}
 		>
 			{children}
@@ -140,10 +154,17 @@ function ResponsiveDialogContent({
 // ---------------------------------------------------------------------------
 
 function ResponsiveDialogHeader({
+	className,
 	...props
 }: React.ComponentProps<typeof DialogHeader>) {
 	const { isDesktop } = useResponsiveDialog();
-	return isDesktop ? <DialogHeader {...props} /> : <SheetHeader {...props} />;
+	const combinedClassName = cn("px-6 pt-6 pb-4 text-left", className);
+
+	return isDesktop ? (
+		<DialogHeader className={combinedClassName} {...props} />
+	) : (
+		<SheetHeader className={combinedClassName} {...props} />
+	);
 }
 
 // ---------------------------------------------------------------------------
@@ -173,11 +194,28 @@ function ResponsiveDialogDescription({
 }
 
 // ---------------------------------------------------------------------------
+// Close
+// ---------------------------------------------------------------------------
+
+function ResponsiveDialogClose({
+	children,
+	...props
+}: React.ComponentProps<typeof DialogClose>) {
+	const { isDesktop } = useResponsiveDialog();
+	return isDesktop ? (
+		<DialogClose {...props}>{children}</DialogClose>
+	) : (
+		<SheetClose {...props}>{children}</SheetClose>
+	);
+}
+
+// ---------------------------------------------------------------------------
 // Exports
 // ---------------------------------------------------------------------------
 
 export {
 	ResponsiveDialog,
+	ResponsiveDialogClose,
 	ResponsiveDialogContent,
 	ResponsiveDialogDescription,
 	ResponsiveDialogHeader,

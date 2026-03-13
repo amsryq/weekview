@@ -8,14 +8,14 @@ import { ReactNode } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "~/components/ui/button";
 import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "~/components/ui/dialog";
+	ResponsiveDialog,
+	ResponsiveDialogClose,
+	ResponsiveDialogContent,
+	ResponsiveDialogDescription,
+	ResponsiveDialogHeader,
+	ResponsiveDialogTitle,
+	ResponsiveDialogTrigger,
+} from "~/components/ui/responsive-dialog";
 import { cn } from "~/lib/utils/styles";
 import { ImporterStep, useImporterSelectionStore } from "./shared";
 import { UnaffiliationNotice } from "./unaffiliation-notice";
@@ -87,19 +87,22 @@ export function SourceSelectionDialog({
 	};
 
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogTrigger asChild>{trigger}</DialogTrigger>
-			<DialogContent className="flex min-w-0 flex-col gap-6 sm:max-w-xl">
-				<DialogHeader className="gap-1 text-left">
-					<DialogTitle>Import from UiTM</DialogTitle>
-					<DialogDescription>
+		<ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+			<ResponsiveDialogTrigger asChild>{trigger}</ResponsiveDialogTrigger>
+			<ResponsiveDialogContent
+				desktopClassName="sm:max-w-xl h-[600px] max-h-[85vh]"
+				mobileClassName="max-h-[95vh]"
+			>
+				<ResponsiveDialogHeader className="gap-1">
+					<ResponsiveDialogTitle>Import from UiTM</ResponsiveDialogTitle>
+					<ResponsiveDialogDescription>
 						Choose the starting point that fits what you already have on hand.
-					</DialogDescription>
-				</DialogHeader>
+					</ResponsiveDialogDescription>
+				</ResponsiveDialogHeader>
 
-				<UnaffiliationNotice />
+				<div className="flex-1 space-y-6 overflow-y-auto px-6 min-h-0">
+					<UnaffiliationNotice />
 
-				<div className="space-y-6 overflow-y-auto">
 					<section className="space-y-4">
 						<div className="space-y-1">
 							<h3 className="text-lg font-semibold text-foreground">
@@ -119,7 +122,7 @@ export function SourceSelectionDialog({
 						/>
 					</section>
 
-					<section className="space-y-4">
+					<section className="space-y-4 pb-6">
 						<div className="space-y-1">
 							<h3 className="text-lg font-semibold text-foreground">
 								UiTM iCress
@@ -146,19 +149,15 @@ export function SourceSelectionDialog({
 					</section>
 				</div>
 
-				<DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-between">
-					<Button
-						variant="secondary"
-						className="w-full sm:w-auto"
-						onClick={() => {
-							setOpen(false);
-						}}
-					>
-						Close
-					</Button>
-				</DialogFooter>
-			</DialogContent>
-		</Dialog>
+				<div className="flex flex-col gap-2 sm:flex-row sm:justify-end border-t p-6 mt-auto">
+					<ResponsiveDialogClose asChild>
+						<Button variant="secondary" className="w-full sm:w-auto">
+							Close
+						</Button>
+					</ResponsiveDialogClose>
+				</div>
+			</ResponsiveDialogContent>
+		</ResponsiveDialog>
 	);
 }
 

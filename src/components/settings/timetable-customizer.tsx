@@ -16,14 +16,14 @@ import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { PaywallOverlay } from "../paywall-overlay";
 import { Button } from "../ui/button";
 import {
-	Dialog,
-	DialogClose,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "../ui/dialog";
+	ResponsiveDialog,
+	ResponsiveDialogClose,
+	ResponsiveDialogContent,
+	ResponsiveDialogDescription,
+	ResponsiveDialogHeader,
+	ResponsiveDialogTitle,
+	ResponsiveDialogTrigger,
+} from "../ui/responsive-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { BackgroundImageUpload } from "./background-image-upload";
 import { CellAppearanceLayoutSettings } from "./cell-appearance-layout-settings";
@@ -51,89 +51,96 @@ export function TimetableCustomizer({ children }: TimetableCustomizerProps) {
 	};
 
 	return (
-		<Dialog>
-			<DialogTrigger asChild>{children}</DialogTrigger>
-			<DialogContent className="flex flex-col sm:max-w-2xl min-h-[600px] max-h-[85vh] h-[600px]">
-				<DialogHeader>
-					<DialogTitle>Customize Timetable</DialogTitle>
-					<DialogDescription>
+		<ResponsiveDialog>
+			<ResponsiveDialogTrigger asChild>{children}</ResponsiveDialogTrigger>
+			<ResponsiveDialogContent
+				desktopClassName="sm:max-w-2xl h-[600px] max-h-[85vh]"
+				mobileClassName="h-[75vh]"
+			>
+				<ResponsiveDialogHeader>
+					<ResponsiveDialogTitle>Customize Timetable</ResponsiveDialogTitle>
+					<ResponsiveDialogDescription>
 						Customize the appearance and layout of your timetable
-					</DialogDescription>
-				</DialogHeader>
+					</ResponsiveDialogDescription>
+				</ResponsiveDialogHeader>
 
-				<Tabs
-					value={activeTab}
-					onValueChange={(v) => setActiveTab(v as TabValue)}
-					className="flex-1 flex flex-col min-h-0"
-				>
-					<TabsList className="w-full grid grid-cols-4">
-						<TabsTrigger value="styles" className="gap-2">
-							<SwatchBook className="size-4" />
-							<span className="hidden sm:inline">Styles</span>
-						</TabsTrigger>
-						<TabsTrigger value="layout" className="gap-2">
-							<LayoutGridIcon className="size-4" />
-							<span className="hidden sm:inline">Layout</span>
-						</TabsTrigger>
-						<TabsTrigger value="background" className="gap-2">
-							<ImageIcon className="size-4" />
-							<span className="hidden sm:inline">Background</span>
-						</TabsTrigger>
-						<TabsTrigger value="cells" className="gap-2">
-							<Palette className="size-4" />
-							<span className="hidden sm:inline">Cell Styles</span>
-						</TabsTrigger>
-					</TabsList>
+				<div className="flex-1 flex flex-col min-h-0">
+					<Tabs
+						value={activeTab}
+						onValueChange={(v) => setActiveTab(v as TabValue)}
+						className="flex-1 flex flex-col min-h-0"
+					>
+						<div className="px-6 pt-2 pb-4">
+							<TabsList className="w-full grid grid-cols-4 shrink-0">
+								<TabsTrigger value="styles" className="gap-2">
+									<SwatchBook className="size-4" />
+									<span className="hidden sm:inline">Styles</span>
+								</TabsTrigger>
+								<TabsTrigger value="layout" className="gap-2">
+									<LayoutGridIcon className="size-4" />
+									<span className="hidden sm:inline">Layout</span>
+								</TabsTrigger>
+								<TabsTrigger value="background" className="gap-2">
+									<ImageIcon className="size-4" />
+									<span className="hidden sm:inline">Background</span>
+								</TabsTrigger>
+								<TabsTrigger value="cells" className="gap-2">
+									<Palette className="size-4" />
+									<span className="hidden sm:inline">Cell Styles</span>
+								</TabsTrigger>
+							</TabsList>
+						</div>
 
-					<div className="flex-1 overflow-y-auto py-4 min-h-0 max-h-[calc(100vh-270px)]">
-						<TabsContent value="styles" className="mt-0">
-							<StyleSelector />
-						</TabsContent>
+						<div className="flex-1 overflow-y-auto px-6 py-4 min-h-0">
+							<TabsContent value="styles" className="mt-0">
+								<StyleSelector />
+							</TabsContent>
 
-						<TabsContent value="layout" className="mt-0 space-y-6">
-							<LayoutSettings
-								layout={prefs.layout}
-								onLayoutChange={(layout) => prefs.setValue("layout", layout)}
-							/>
-						</TabsContent>
-
-						<TabsContent value="background" className="mt-0">
-							<PaywallOverlay
-								title="Premium Feature"
-								description="Background images are available for supporters only."
-								className="rounded-lg"
-							>
-								<BackgroundSettings
-									backgroundImage={prefs.backgroundImage}
-									backgroundImageOptions={prefs.backgroundImageOptions}
-									onBackgroundImageChange={prefs.setBackgroundImage}
-									onBackgroundImageOptionsChange={
-										prefs.setBackgroundImageOptions
-									}
+							<TabsContent value="layout" className="mt-0 space-y-6">
+								<LayoutSettings
+									layout={prefs.layout}
+									onLayoutChange={(layout) => prefs.setValue("layout", layout)}
 								/>
-							</PaywallOverlay>
-						</TabsContent>
+							</TabsContent>
 
-						<TabsContent value="cells" className="mt-0">
-							<CellAppearanceLayoutSettings
-								value={prefs.cellAppearance}
-								onChange={handleCellAppearanceChange}
-							/>
-						</TabsContent>
-					</div>
-				</Tabs>
+							<TabsContent value="background" className="mt-0">
+								<PaywallOverlay
+									title="Premium Feature"
+									description="Background images are available for supporters only."
+									className="rounded-lg"
+								>
+									<BackgroundSettings
+										backgroundImage={prefs.backgroundImage}
+										backgroundImageOptions={prefs.backgroundImageOptions}
+										onBackgroundImageChange={prefs.setBackgroundImage}
+										onBackgroundImageOptionsChange={
+											prefs.setBackgroundImageOptions
+										}
+									/>
+								</PaywallOverlay>
+							</TabsContent>
 
-				<div className="flex justify-between gap-2 pt-4 border-t">
+							<TabsContent value="cells" className="mt-0">
+								<CellAppearanceLayoutSettings
+									value={prefs.cellAppearance}
+									onChange={handleCellAppearanceChange}
+								/>
+							</TabsContent>
+						</div>
+					</Tabs>
+				</div>
+
+				<div className="flex justify-between gap-2 p-6 border-t mt-auto">
 					<Button variant="ghost" size="sm" onClick={handleReset}>
 						<RotateCcwIcon className="size-4 mr-2" />
 						Reset to defaults
 					</Button>
-					<DialogClose asChild>
+					<ResponsiveDialogClose asChild>
 						<Button>Done</Button>
-					</DialogClose>
+					</ResponsiveDialogClose>
 				</div>
-			</DialogContent>
-		</Dialog>
+			</ResponsiveDialogContent>
+		</ResponsiveDialog>
 	);
 }
 
@@ -193,10 +200,9 @@ function LayoutOption({
 			onClick={onClick}
 			className={`
 				flex flex-col items-center gap-3 p-4 rounded-lg border-2 transition-all
-				${
-					isSelected
-						? "border-primary bg-primary/5"
-						: "border-muted hover:border-muted-foreground/30"
+				${isSelected
+					? "border-primary bg-primary/5"
+					: "border-muted hover:border-muted-foreground/30"
 				}
 			`}
 		>

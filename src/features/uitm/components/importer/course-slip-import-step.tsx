@@ -13,13 +13,12 @@ import { useShallow } from "zustand/react/shallow";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "~/components/ui/dialog";
+	ResponsiveDialog,
+	ResponsiveDialogContent,
+	ResponsiveDialogDescription,
+	ResponsiveDialogHeader,
+	ResponsiveDialogTitle,
+} from "~/components/ui/responsive-dialog";
 import {
 	Select,
 	SelectContent,
@@ -626,20 +625,20 @@ function CourseSlipImportStepBody() {
 
 	return (
 		<>
-			<DialogHeader className="gap-1 text-left">
-				<DialogTitle className="flex items-center gap-2 text-lg">
+			<ResponsiveDialogHeader className="gap-1">
+				<ResponsiveDialogTitle className="flex items-center gap-2 text-lg">
 					<span className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
 						<ScrollText className="size-4" />
 					</span>
 					Import from registration slip
-				</DialogTitle>
-				<DialogDescription>
+				</ResponsiveDialogTitle>
+				<ResponsiveDialogDescription>
 					Paste the text from your UiTM registration/course slip. Weekview will
 					match the courses and groups automatically.
-				</DialogDescription>
-			</DialogHeader>
+				</ResponsiveDialogDescription>
+			</ResponsiveDialogHeader>
 
-			<div className="flex flex-col gap-4 overflow-y-auto">
+			<div className="flex-1 flex flex-col gap-4 overflow-y-auto px-6 min-h-0">
 				<Textarea
 					value={rawText}
 					onChange={(event) => setRawText(event.target.value)}
@@ -816,21 +815,9 @@ function CourseSlipImportStepBody() {
 						</div>
 					</div>
 				)}
-				<div className="text-sm text-muted-foreground">
-					Only essential details (campus, faculty, course codes, and groups) are
-					sent to our server. No personal information from your slip will be
-					sent or stored.
-				</div>
-
-				{showImportError && (
-					<Alert variant="destructive">
-						<AlertTitle>Import failed</AlertTitle>
-						<AlertDescription>{importMutation.error?.message}</AlertDescription>
-					</Alert>
-				)}
 			</div>
 
-			<DialogFooter className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+			<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-t p-6 mt-auto">
 				<div className="flex w-full flex-col-reverse gap-2 sm:flex-row sm:w-auto">
 					<Button
 						variant="outline"
@@ -858,17 +845,20 @@ function CourseSlipImportStepBody() {
 					)}
 					Import courses
 				</Button>
-			</DialogFooter>
+			</div>
 
-			<Dialog open={howToOpen} onOpenChange={(open) => setHowToOpen(open)}>
-				<DialogContent className="sm:max-w-2xl">
-					<DialogHeader>
-						<DialogTitle>Importing your course slip</DialogTitle>
-						<DialogDescription className="sr-only">
+			<ResponsiveDialog open={howToOpen} onOpenChange={(open) => setHowToOpen(open)}>
+				<ResponsiveDialogContent
+					desktopClassName="flex flex-col sm:max-w-2xl h-[600px] max-h-[85vh]"
+					mobileClassName="max-h-[90vh] rounded-t-2xl p-0 flex flex-col overflow-hidden"
+				>
+					<ResponsiveDialogHeader className="px-6 pt-6">
+						<ResponsiveDialogTitle>Importing your course slip</ResponsiveDialogTitle>
+						<ResponsiveDialogDescription className="sr-only">
 							A short guide on how to import your UiTM course slip.
-						</DialogDescription>
-					</DialogHeader>
-					<div className="py-2 overflow-y-auto">
+						</ResponsiveDialogDescription>
+					</ResponsiveDialogHeader>
+					<div className="flex-1 py-2 px-6 overflow-y-auto min-h-0">
 						<p className="text-sm text-foreground">
 							You can import your course slip by copying your course
 							registration details from the{" "}
@@ -886,15 +876,15 @@ function CourseSlipImportStepBody() {
 							alt="What to select on the course slip"
 						/>
 					</div>
-					<DialogFooter>
+					<div className="flex justify-end p-6 border-t mt-auto">
 						<Button variant="secondary" onClick={() => setHowToOpen(false)}>
 							Close
 						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
+					</div>
+				</ResponsiveDialogContent>
+			</ResponsiveDialog>
 
-			<Dialog
+			<ResponsiveDialog
 				open={progressDialogOpen}
 				onOpenChange={(open) => {
 					if (!isImporting) {
@@ -902,9 +892,12 @@ function CourseSlipImportStepBody() {
 					}
 				}}
 			>
-				<DialogContent className="sm:max-w-2xl">
-					<DialogHeader>
-						<DialogTitle className="flex items-center gap-2">
+				<ResponsiveDialogContent
+					desktopClassName="sm:max-w-2xl h-[600px] max-h-[85vh]"
+					mobileClassName="max-h-[90vh]"
+				>
+					<ResponsiveDialogHeader>
+						<ResponsiveDialogTitle className="flex items-center gap-2">
 							{isImporting ? (
 								<Loader2 className="size-5 animate-spin text-primary" />
 							) : errorCount > 0 ? (
@@ -913,11 +906,11 @@ function CourseSlipImportStepBody() {
 								<CheckIcon className="size-5 text-emerald-500" />
 							)}
 							<span>{progressTitle}</span>
-						</DialogTitle>
-						<DialogDescription>{progressSubtitle}</DialogDescription>
-					</DialogHeader>
+						</ResponsiveDialogTitle>
+						<ResponsiveDialogDescription>{progressSubtitle}</ResponsiveDialogDescription>
+					</ResponsiveDialogHeader>
 
-					<div className="space-y-4 py-4 overflow-y-auto">
+					<div className="flex-1 space-y-4 py-4 px-6 overflow-y-auto min-h-0">
 						{/* Campus & Faculty Status */}
 						<div className="rounded-lg border bg-muted/30 p-4">
 							<h3 className="text-sm font-semibold mb-3">Import Status</h3>
@@ -997,7 +990,7 @@ function CourseSlipImportStepBody() {
 														)}
 													</div>
 												</div>
-												<div className="flex-shrink-0 ml-3">
+												<div className="shrink-0 ml-3">
 													{item.status === "pending" ? (
 														<div className="size-5 rounded-full border-2 border-muted-foreground/30" />
 													) : item.status === "running" ? (
@@ -1020,7 +1013,7 @@ function CourseSlipImportStepBody() {
 						)}
 					</div>
 
-					<DialogFooter className="flex w-full flex-col gap-2 sm:flex-row sm:justify-between">
+					<div className="flex w-full flex-col gap-2 sm:flex-row sm:justify-between border-t p-6 mt-auto">
 						<Button
 							variant="ghost"
 							onClick={requestCancel}
@@ -1038,9 +1031,9 @@ function CourseSlipImportStepBody() {
 						>
 							Close
 						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
+					</div>
+				</ResponsiveDialogContent>
+			</ResponsiveDialog>
 		</>
 	);
 }
@@ -1050,10 +1043,13 @@ export function CourseSlipImportDialog({
 	onOpenChange,
 }: CourseSlipImportDialogProps) {
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="flex min-w-0 flex-col gap-6 sm:max-w-2xl">
+		<ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+			<ResponsiveDialogContent
+				desktopClassName="sm:max-w-2xl h-[700px] max-h-[90vh]"
+				mobileClassName="max-h-[95vh]"
+			>
 				<CourseSlipImportStepBody />
-			</DialogContent>
-		</Dialog>
+			</ResponsiveDialogContent>
+		</ResponsiveDialog>
 	);
 }

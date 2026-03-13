@@ -11,13 +11,12 @@ import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "~/components/ui/button";
 import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "~/components/ui/dialog";
+	ResponsiveDialog,
+	ResponsiveDialogContent,
+	ResponsiveDialogDescription,
+	ResponsiveDialogHeader,
+	ResponsiveDialogTitle,
+} from "~/components/ui/responsive-dialog";
 import { Input } from "~/components/ui/input";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import {
@@ -148,29 +147,32 @@ export function GroupSelectorDialog({
 	const selectionCount = selectedGroups.length;
 
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="flex min-w-0 flex-col gap-6 sm:max-w-4xl">
-				<DialogHeader className="gap-1 text-left">
-					<DialogTitle className="flex items-center gap-2 text-lg">
+		<ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+			<ResponsiveDialogContent
+				desktopClassName="sm:max-w-4xl h-[700px] max-h-[90vh]"
+				mobileClassName="max-h-[95vh]"
+			>
+				<ResponsiveDialogHeader className="gap-1">
+					<ResponsiveDialogTitle className="flex items-center gap-2 text-lg">
 						<span className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
 							<Layers className="size-4" />
 						</span>
 						Choose your groups
-					</DialogTitle>
-					<DialogDescription>
+					</ResponsiveDialogTitle>
+					<ResponsiveDialogDescription>
 						Pick a course, explore the available groups, and add the ones that
 						fit your timetable.
-					</DialogDescription>
-				</DialogHeader>
+					</ResponsiveDialogDescription>
+				</ResponsiveDialogHeader>
 
-				<div className="space-y-6">
+				<div className="flex-1 space-y-6 px-6 overflow-y-auto min-h-0">
 					<section className="space-y-2">
 						<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 							<h3 className="text-sm font-medium text-muted-foreground">
 								Course
 							</h3>
 							{selectedCampus ? (
-								<span className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
+								<span className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground w-fit">
 									{selectedCampus.name}
 									{selectedFaculty ? ` • ${selectedFaculty.name}` : ""}
 								</span>
@@ -246,15 +248,15 @@ export function GroupSelectorDialog({
 									</SheetTrigger>
 									<SheetContent
 										side="bottom"
-										className="max-h-[80vh] pb-4 overflow-hidden border border-border/60 rounded-lg sm:max-w-xl"
+										className="max-h-[80vh] pb-4 overflow-hidden border border-border/60 rounded-t-2xl sm:max-w-xl"
 									>
-										<SheetHeader>
+										<SheetHeader className="px-6 pt-6 text-left">
 											<SheetTitle>Selected groups</SheetTitle>
 											<SheetDescription>
 												Organise the groups you&apos;ve added to your timetable.
 											</SheetDescription>
 										</SheetHeader>
-										<ScrollArea className="mx-4 h-[260px] rounded-lg border border-border/50 bg-background">
+										<ScrollArea className="mx-6 h-[40vh] sm:h-[260px] rounded-lg border border-border/50 bg-background my-4">
 											<div className="space-y-2 p-3">
 												{selectionCount ? (
 													selectedGroups.map(({ internal }) => (
@@ -293,7 +295,7 @@ export function GroupSelectorDialog({
 												)}
 											</div>
 										</ScrollArea>
-										<div className="mx-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+										<div className="mx-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
 											<SheetClose asChild>
 												<Button
 													variant="secondary"
@@ -319,7 +321,7 @@ export function GroupSelectorDialog({
 						</div>
 
 						<ScrollArea className="h-[320px] rounded-lg border bg-background">
-							<div className="divide-y">
+							<div className="divide-y text-left">
 								{groupsError ? (
 									<div className="p-4 text-sm text-destructive">
 										{(groupsError as Error).message}
@@ -403,7 +405,7 @@ export function GroupSelectorDialog({
 					</section>
 				</div>
 
-				<DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-between">
+				<div className="flex flex-col gap-2 sm:flex-row sm:justify-between border-t p-6 mt-auto">
 					<Button
 						variant="ghost"
 						className="w-full sm:w-auto"
@@ -419,9 +421,9 @@ export function GroupSelectorDialog({
 					>
 						Done adding groups
 					</Button>
-				</DialogFooter>
-			</DialogContent>
-		</Dialog>
+				</div>
+			</ResponsiveDialogContent>
+		</ResponsiveDialog>
 	);
 }
 
