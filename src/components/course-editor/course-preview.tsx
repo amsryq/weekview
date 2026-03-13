@@ -13,6 +13,10 @@ export function CoursePreview() {
 	const form = useFormContext<Course.Schema>();
 	const formData = form.watch();
 	const activeStyleId = useStore(TimetablePreferencesStore, (s) => s.activeStyleId);
+	const timetableColorMode = useStore(
+		TimetablePreferencesStore,
+		(s) => s.timetableColorMode,
+	);
 
 	const mockMeetingTime = new MeetingTime({
 		day: 1,
@@ -36,7 +40,11 @@ export function CoursePreview() {
 	const resolvedAppearance =
 		formData.themeColorIndex !== null && formData.themeColorIndex !== undefined
 			? toMerged(appearance, {
-					background: getStyleColorByIndex(activeStyleId, formData.themeColorIndex),
+					background: getStyleColorByIndex(
+						activeStyleId,
+						formData.themeColorIndex,
+						timetableColorMode,
+					),
 				})
 			: appearance;
 

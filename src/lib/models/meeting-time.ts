@@ -4,17 +4,32 @@ import { randomUUID } from "../utils/random";
 import { type CellAppearance, CellAppearanceSchema } from "./cell-appearance";
 import { Clock, TimeRange } from "./clock";
 
+const timeStringSchema = z
+	.string()
+	.regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format");
+
 const meetingTimeSchema = z.object({
-	day: z.number().min(1).max(7),
+	day: z.number().int().min(1).max(7),
 	location: z.string().optional(),
-	startTime: z
-		.string()
-		.regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format"),
-	endTime: z
-		.string()
-		.regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format"),
+	description: z.string().optional(),
+	startTime: timeStringSchema,
+	endTime: timeStringSchema,
 	cellAppearance: CellAppearanceSchema.partial().optional(),
-});
+}).refine(
+	(data) => Clock.fromString(data.startTime).isBefore(Clock.fromString(data.endTime)),
+	{
+		message: "End time must be after start time",
+		path: ["endTime"],
+	},
+);
+
+type MeetingTimeConstructorData = {
+	day: number;
+	time: TimeRange;
+	location?: string;
+	description?: string;
+	cellAppearance?: Partial<CellAppearance>;
+};
 
 export namespace MeetingTime {
 	export type Schema = z.infer<typeof meetingTimeSchema>;
@@ -32,13 +47,7 @@ export class MeetingTime {
 	public description?: string;
 	public cellAppearance?: Partial<CellAppearance>;
 
-	constructor(data: {
-		day: number;
-		time: TimeRange;
-		location?: string;
-		description?: string;
-		cellAppearance?: Partial<CellAppearance>;
-	}) {
+	constructor(data: MeetingTimeConstructorData) {
 		this.id = randomUUID();
 		this.day = data.day;
 		this.time = data.time;
@@ -55,6 +64,8 @@ export class MeetingTime {
 				Clock.fromString(data.endTime),
 			),
 			location: data.location,
+			description: data.description,
+			cellAppearance: data.cellAppearance,
 		});
 	}
 
@@ -64,6 +75,7 @@ export class MeetingTime {
 			startTime: this.time.start.toString(),
 			endTime: this.time.end.toString(),
 			location: this.location,
+			description: this.description,
 			cellAppearance: this.cellAppearance,
 		};
 	}

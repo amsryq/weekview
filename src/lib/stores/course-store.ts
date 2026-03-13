@@ -31,13 +31,14 @@ const CourseStore = createStore<State & Actions>()(
 					course.themeColorIndex === null ||
 					course.themeColorIndex === undefined
 				) {
-					const activeStyleId =
-						TimetablePreferencesStore.getState().activeStyleId;
+					const { activeStyleId, timetableColorMode } =
+						TimetablePreferencesStore.getState();
 					const colorIndex = state.courses.length;
 					course.themeColorIndex = colorIndex;
 					course.cellAppearance.background = getStyleColorByIndex(
 						activeStyleId,
 						colorIndex,
+						timetableColorMode,
 					);
 				}
 
@@ -83,7 +84,9 @@ const CourseStore = createStore<State & Actions>()(
 
 		resetAllToStyle: (styleId) =>
 			set((state) => {
-				const paletteSize = getStyleById(styleId).gridColors.length;
+				const { timetableColorMode } = TimetablePreferencesStore.getState();
+				const paletteSize = getStyleById(styleId).variants[timetableColorMode]
+					.gridColors.length;
 
 				state.courses.forEach((course, index) => {
 					const colorIndex = index % paletteSize;
@@ -91,6 +94,7 @@ const CourseStore = createStore<State & Actions>()(
 					course.cellAppearance.background = getStyleColorByIndex(
 						styleId,
 						colorIndex,
+						timetableColorMode,
 					);
 					course.cellAppearance.fontFamily = undefined;
 				});

@@ -1,4 +1,4 @@
-import { BookOpen, Clock, Plus, Trash2 } from "lucide-react";
+import { BookOpen, CalendarDays, Clock, MapPin, Plus, Timer, Trash2 } from "lucide-react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import type { Course } from "~/lib/models/course";
 import { Button } from "../ui/button";
@@ -34,6 +34,9 @@ const DAYS_OF_WEEK = [
 	{ value: 6, label: "Saturday" },
 	{ value: 7, label: "Sunday" },
 ];
+
+const getDayLabel = (dayValue?: number) =>
+	DAYS_OF_WEEK.find((day) => day.value === dayValue)?.label ?? "Select day";
 
 export function CourseDetailsTab() {
 	const form = useFormContext<Course.Schema>();
@@ -122,38 +125,63 @@ export function CourseDetailsTab() {
 						control={form.control}
 						name="meetingTimes"
 						render={() => (
-							<div className="space-y-4">
+							<div className="space-y-5">
 								<FormMessage />
 
+								<div className="flex items-center justify-between gap-3">
+									<div className="inline-flex items-center rounded-full border border-muted-foreground/20 bg-muted/40 px-3 py-1 text-xs font-medium text-muted-foreground">
+										{fields.length} {fields.length === 1 ? "meeting" : "meetings"}
+									</div>
+									<Button
+										type="button"
+										variant="outline"
+										onClick={addMeetingTime}
+										className="h-9 px-3"
+									>
+										<Plus className="w-4 h-4 mr-2" />
+										Add
+									</Button>
+								</div>
+
 								{fields.length === 0 && (
-									<div className="text-center py-12 text-muted-foreground border-2 border-dashed border-muted rounded-lg">
-										<Clock className="w-8 h-8 mx-auto mb-3 opacity-50" />
-										<p className="text-sm font-medium">
+									<div className="rounded-xl border border-dashed border-muted-foreground/30 bg-linear-to-br from-muted/35 to-transparent px-4 py-10 text-center text-muted-foreground">
+										<Clock className="mx-auto mb-3 h-8 w-8 opacity-50" />
+										<p className="text-sm font-medium text-foreground/80">
 											No meeting times added yet
 										</p>
 										<p className="text-xs mt-1">
-											Click the button below to add your first meeting time
+											Use the Add button above to create your first slot
 										</p>
 									</div>
 								)}
 
-								<div className="space-y-3">
+								<div className="space-y-4">
 									{fields.map((field, index) => (
-										<Card key={field.id} className="border-muted bg-muted/20">
-											<CardHeader>
-												<div className="flex justify-between items-center">
-													<CardTitle className="text-sm font-medium flex items-center gap-2">
-														<Clock className="w-4 h-4" />
-														Meeting #{index + 1}
-													</CardTitle>
+										<Card
+											key={field.id}
+											className="border-muted/70 shadow-sm"
+										>
+											<CardHeader className="pb-4">
+												<div className="flex items-start justify-between gap-3">
+													<div className="min-w-0 space-y-1">
+														<CardTitle className="flex items-center gap-2 text-sm font-semibold">
+															<Clock className="h-4 w-4" />
+															Meeting #{index + 1}
+														</CardTitle>
+														<p className="inline-flex items-center gap-1 rounded-full border border-border/80 bg-background/70 px-2 py-0.5 text-xs text-muted-foreground">
+															<CalendarDays className="h-3 w-3" />
+															{getDayLabel(form.watch(`meetingTimes.${index}.day`))}
+														</p>
+													</div>
 													<Button
 														type="button"
 														variant="ghost"
 														size="sm"
 														onClick={() => remove(index)}
-														className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+														className="h-8 w-8 shrink-0 p-0 text-muted-foreground hover:text-destructive"
 													>
-														<Trash2 className="w-4 h-4" />
+														<Trash2 className="h-4 w-4" />
+														<span className="sr-only">Remove meeting {index + 1}</span>
 													</Button>
 												</div>
 											</CardHeader>
@@ -163,20 +191,21 @@ export function CourseDetailsTab() {
 													name={`meetingTimes.${index}`}
 													render={() => (
 														<div className="space-y-4">
-															<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+															<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 																<FormField
 																	control={form.control}
 																	name={`meetingTimes.${index}.day`}
 																	render={({ field }) => (
 																		<FormItem>
-																			<FormLabel className="text-sm font-medium">
+																			<FormLabel className="flex items-center gap-1.5 text-sm font-medium">
+																				<CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
 																				Day
 																			</FormLabel>
 																			<Select
 																				onValueChange={(value) =>
 																					field.onChange(Number(value))
 																				}
-																				defaultValue={field.value?.toString()}
+																				value={field.value?.toString()}
 																			>
 																				<FormControl>
 																					<SelectTrigger>
@@ -204,7 +233,8 @@ export function CourseDetailsTab() {
 																	name={`meetingTimes.${index}.location`}
 																	render={({ field }) => (
 																		<FormItem>
-																			<FormLabel className="text-sm font-medium flex items-center gap-1">
+																			<FormLabel className="flex items-center gap-1.5 text-sm font-medium">
+																				<MapPin className="h-3.5 w-3.5 text-muted-foreground" />
 																				Location
 																			</FormLabel>
 																			<FormControl>
@@ -219,13 +249,14 @@ export function CourseDetailsTab() {
 																/>
 															</div>
 
-															<div className="grid grid-cols-2 gap-4">
+																<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 																<FormField
 																	control={form.control}
 																	name={`meetingTimes.${index}.startTime`}
 																	render={({ field }) => (
 																		<FormItem>
-																			<FormLabel className="text-sm font-medium">
+																				<FormLabel className="flex items-center gap-1.5 text-sm font-medium">
+																					<Timer className="h-3.5 w-3.5 text-muted-foreground" />
 																				Start Time
 																			</FormLabel>
 																			<FormControl>
@@ -241,7 +272,8 @@ export function CourseDetailsTab() {
 																	name={`meetingTimes.${index}.endTime`}
 																	render={({ field }) => (
 																		<FormItem>
-																			<FormLabel className="text-sm font-medium">
+																			<FormLabel className="flex items-center gap-1.5 text-sm font-medium">
+																				<Timer className="h-3.5 w-3.5 text-muted-foreground" />
 																				End Time
 																			</FormLabel>
 																			<FormControl>
@@ -259,16 +291,6 @@ export function CourseDetailsTab() {
 										</Card>
 									))}
 								</div>
-
-								<Button
-									type="button"
-									variant="outline"
-									onClick={addMeetingTime}
-									className="w-full border-dashed hover:border-solid"
-								>
-									<Plus className="w-4 h-4 mr-2" />
-									Add Meeting Time
-								</Button>
 							</div>
 						)}
 					/>

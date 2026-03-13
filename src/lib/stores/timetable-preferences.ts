@@ -13,6 +13,8 @@ import { Course } from "../models/course";
 import { MeetingTime } from "../models/meeting-time";
 import {
 	DEFAULT_TIMETABLE_STYLE_ID,
+	type TimetableColorMode,
+	type TimetableThemePreference,
 	getStyleById,
 	getStyleColorByIndex,
 } from "../models/style";
@@ -22,6 +24,8 @@ export type TimetableLayout = "rows" | "columns";
 const defaultState = {
 	layout: "rows" as TimetableLayout,
 	activeStyleId: DEFAULT_TIMETABLE_STYLE_ID,
+	timetableThemePreference: "follow-app" as TimetableThemePreference,
+	timetableColorMode: "light" as TimetableColorMode,
 	backgroundImage: null as string | null,
 	backgroundImageOptions: {
 		opacity: 0.3,
@@ -107,6 +111,12 @@ interface Actions {
 		options: Partial<State["backgroundImageOptions"]>,
 	) => void;
 
+	setTimetableThemePreference: (
+		preference: TimetableThemePreference,
+	) => void;
+
+	setAppThemeMode: (themeMode: TimetableColorMode) => void;
+
 	applyStyle: (styleId: string) => void;
 
 	reset: () => void;
@@ -131,6 +141,7 @@ export const TimetablePreferencesStore = createStore<State & Actions>()(
 						background: getStyleColorByIndex(
 							get().activeStyleId,
 							course.themeColorIndex,
+							get().timetableColorMode,
 						),
 					});
 				}
@@ -179,6 +190,21 @@ export const TimetablePreferencesStore = createStore<State & Actions>()(
 						...s.backgroundImageOptions,
 						...options,
 					};
+				}),
+
+			setTimetableThemePreference: (preference) =>
+				set((s) => {
+					s.timetableThemePreference = preference;
+					if (preference !== "follow-app") {
+						s.timetableColorMode = preference;
+					}
+				}),
+
+			setAppThemeMode: (themeMode) =>
+				set((s) => {
+					if (s.timetableThemePreference === "follow-app") {
+						s.timetableColorMode = themeMode;
+					}
 				}),
 
 			applyStyle: (styleId) =>

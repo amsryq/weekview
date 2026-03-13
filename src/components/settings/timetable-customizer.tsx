@@ -53,7 +53,7 @@ export function TimetableCustomizer({ children }: TimetableCustomizerProps) {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>{children}</DialogTrigger>
-			<DialogContent className="flex flex-col sm:max-w-2xl max-h-[85vh]">
+			<DialogContent className="flex flex-col sm:max-w-2xl min-h-[600px] max-h-[85vh] h-[600px]">
 				<DialogHeader>
 					<DialogTitle>Customize Timetable</DialogTitle>
 					<DialogDescription>
@@ -85,7 +85,7 @@ export function TimetableCustomizer({ children }: TimetableCustomizerProps) {
 						</TabsTrigger>
 					</TabsList>
 
-					<div className="flex-1 overflow-y-auto py-4 min-h-0">
+					<div className="flex-1 overflow-y-auto py-4 min-h-0 max-h-[calc(100vh-270px)]">
 						<TabsContent value="styles" className="mt-0">
 							<StyleSelector />
 						</TabsContent>

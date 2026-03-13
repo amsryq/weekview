@@ -1,19 +1,42 @@
+import { Monitor, Moon, Sun } from "lucide-react";
 import { useStore } from "zustand";
+import { useTheme } from "~/lib/contexts/themes";
 import { ColorEntry } from "~/lib/models/color-entry";
 import { TIMETABLE_STYLES } from "~/lib/models/style";
 import { CourseStore } from "~/lib/stores/course-store";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
+import { Button } from "../ui/button";
 import { cn } from "~/lib/utils/styles";
 
 export function StyleSelector() {
+	const { applyingTheme } = useTheme();
 	const activeStyleId = useStore(
 		TimetablePreferencesStore,
 		(s) => s.activeStyleId,
+	);
+	const timetableThemePreference = useStore(
+		TimetablePreferencesStore,
+		(s) => s.timetableThemePreference,
+	);
+	const timetableColorMode = useStore(
+		TimetablePreferencesStore,
+		(s) => s.timetableColorMode,
 	);
 
 	const applyStyle = (styleId: string) => {
 		TimetablePreferencesStore.getState().applyStyle(styleId);
 		CourseStore.getState().resetAllToStyle(styleId);
+	};
+
+	const setThemePreference = (
+		preference: "follow-app" | "light" | "dark",
+	) => {
+		const store = TimetablePreferencesStore.getState();
+		store.setTimetableThemePreference(preference);
+		if (preference === "follow-app") {
+			store.setAppThemeMode(applyingTheme);
+		}
+		CourseStore.getState().resetAllToStyle(store.activeStyleId);
 	};
 
 	return (
@@ -25,10 +48,60 @@ export function StyleSelector() {
 				</p>
 			</div>
 
+			<div className="flex items-center gap-2 justify-between">
+				<span className="text-sm font-semibold text-foreground mr-2">Timetable theme</span>
+				<div className="flex items-center gap-3">
+					<div className="inline-flex rounded-md bg-muted p-1 border border-muted-foreground/10">
+						<button
+							type="button"
+							aria-label="Follow app theme"
+							className={cn(
+								"px-2 py-1 rounded-md transition-colors",
+								timetableThemePreference === "follow-app"
+									? "bg-primary/90 text-primary-foreground shadow"
+									: "hover:bg-muted-foreground/10 text-muted-foreground"
+							)}
+							onClick={() => setThemePreference("follow-app")}
+						>
+							<Monitor className="size-4" />
+						</button>
+						<button
+							type="button"
+							aria-label="Light mode"
+							className={cn(
+								"px-2 py-1 rounded-md transition-colors",
+								timetableThemePreference === "light"
+									? "bg-primary/90 text-primary-foreground shadow"
+									: "hover:bg-muted-foreground/10 text-muted-foreground"
+							)}
+							onClick={() => setThemePreference("light")}
+						>
+							<Sun className="size-4" />
+						</button>
+						<button
+							type="button"
+							aria-label="Dark mode"
+							className={cn(
+								"px-2 py-1 rounded-md transition-colors",
+								timetableThemePreference === "dark"
+									? "bg-primary/90 text-primary-foreground shadow"
+									: "hover:bg-muted-foreground/10 text-muted-foreground"
+							)}
+							onClick={() => setThemePreference("dark")}
+						>
+							<Moon className="size-4" />
+						</button>
+					</div>
+				</div>
+			</div>
+
 			<div className="grid gap-3 sm:grid-cols-2">
 				{TIMETABLE_STYLES.map((style) => {
 					const isActive = style.id === activeStyleId;
-					const previewColors = style.gridColors.slice(0, 6);
+					const previewColors = style.variants[timetableColorMode].gridColors.slice(
+						0,
+						6,
+					);
 
 					return (
 						<button

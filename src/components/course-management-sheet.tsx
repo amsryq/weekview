@@ -172,7 +172,7 @@ function AddCourseButton({ provider }: { provider: CourseProvider }) {
 function ProviderEmptyState({ provider }: { provider: CourseProvider }) {
 	return (
 		<div className="flex flex-col items-center gap-3 px-4 py-8 text-center">
-			<p className="max-w-[22ch] text-sm text-muted-foreground">
+			<p className="max-w-sm text-pretty text-sm text-muted-foreground">
 				{provider.emptyStateText ?? "No courses added yet."}
 			</p>
 			<AddCourseButton provider={provider} />

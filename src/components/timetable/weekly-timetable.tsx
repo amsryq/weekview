@@ -4,7 +4,7 @@ import { useStore } from "zustand";
 import type { CellAppearance } from "~/lib/models/cell-appearance";
 import type { Course } from "~/lib/models/course";
 import type { MeetingTime } from "~/lib/models/meeting-time";
-import { getStyleById } from "~/lib/models/style";
+import { getStyleById, getStyleVariantById } from "~/lib/models/style";
 import { CourseStore } from "~/lib/stores/course-store";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { Card, CardContent } from "../ui/card";
@@ -98,7 +98,11 @@ function DayColumn({ day, dayIndex }: { day: string; dayIndex: number }) {
     TimetablePreferencesStore,
     (s) => s.activeStyleId,
   );
-  const activeStyle = getStyleById(activeStyleId);
+  const timetableColorMode = useStore(
+    TimetablePreferencesStore,
+    (s) => s.timetableColorMode,
+  );
+  const activeStyle = getStyleVariantById(activeStyleId, timetableColorMode);
   const meetingDay = dayIndex + 1;
 
   const dayMeetings = courses.flatMap((course) =>
@@ -127,7 +131,7 @@ function DayColumn({ day, dayIndex }: { day: string; dayIndex: number }) {
       <div
         className={
           layout === "rows"
-            ? "w-16 flex-shrink-0 flex items-center justify-end pr-6"
+            ? "w-16 shrink-0 flex items-center justify-end pr-6"
             : "h-8 flex items-center justify-center"
         }
       >
@@ -178,7 +182,11 @@ function RowLayout({
     TimetablePreferencesStore,
     (s) => s.activeStyleId,
   );
-  const activeStyle = getStyleById(activeStyleId);
+  const timetableColorMode = useStore(
+    TimetablePreferencesStore,
+    (s) => s.timetableColorMode,
+  );
+  const activeStyle = getStyleVariantById(activeStyleId, timetableColorMode);
 
   return (
     <div className="overflow-x-auto">
@@ -195,12 +203,12 @@ function RowLayout({
         )}
         <div className="relative z-10">
           <div className="flex pb-2">
-            <div className="w-16 flex-shrink-0" />
+            <div className="w-16 shrink-0" />
             <div className="flex">
               {timeSlots.map((time: string) => (
                 <div
                   key={time}
-                  className="text-sm text-center -translate-x-4 flex flex-shrink-0"
+                  className="text-sm text-center -translate-x-4 flex shrink-0"
                   style={{
                     width: `${ROW_BLOCK_WIDTH_PX}px`,
                     color: activeStyle.chrome.timeColor,
@@ -233,7 +241,11 @@ function ColumnLayout({
     TimetablePreferencesStore,
     (s) => s.activeStyleId,
   );
-  const activeStyle = getStyleById(activeStyleId);
+  const timetableColorMode = useStore(
+    TimetablePreferencesStore,
+    (s) => s.timetableColorMode,
+  );
+  const activeStyle = getStyleVariantById(activeStyleId, timetableColorMode);
   return (
     <div className="overflow-y-auto">
       <div
@@ -301,6 +313,10 @@ export function WeeklyTimetable({
     TimetablePreferencesStore,
     (s) => s.activeStyleId,
   );
+  const timetableColorMode = useStore(
+    TimetablePreferencesStore,
+    (s) => s.timetableColorMode,
+  );
   const globalFontFamily = useStore(
     TimetablePreferencesStore,
     (s) => s.cellAppearance.fontFamily,
@@ -309,7 +325,8 @@ export function WeeklyTimetable({
     TimetablePreferencesStore,
     (s) => s.backgroundImageOptions,
   );
-  const activeStyle = getStyleById(activeStyleId);
+  const activeStyleMeta = getStyleById(activeStyleId);
+  const activeStyle = activeStyleMeta.variants[timetableColorMode];
   // Allow prop override; default to preferences
   const effectiveLayout = layout ?? prefsLayout;
 
@@ -366,12 +383,12 @@ export function WeeklyTimetable({
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
         backgroundColor: activeStyle.background.color,
-        fontFamily: `'${globalFontFamily ?? activeStyle.fontFamily}', sans-serif`,
+        fontFamily: `'${globalFontFamily ?? activeStyleMeta.fontFamily}', sans-serif`,
         borderRadius: "8px",
       }
     : {
         backgroundColor: activeStyle.background.color,
-        fontFamily: `'${globalFontFamily ?? activeStyle.fontFamily}', sans-serif`,
+        fontFamily: `'${globalFontFamily ?? activeStyleMeta.fontFamily}', sans-serif`,
       };
 
   const overlayStyle = backgroundImage

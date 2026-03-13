@@ -26,9 +26,14 @@ export function CourseEditorForm({
 	defaultValues,
 }: CourseEditorFormProps) {
 	const activeStyleId = useStore(TimetablePreferencesStore, (s) => s.activeStyleId);
+	const timetableColorMode = useStore(
+		TimetablePreferencesStore,
+		(s) => s.timetableColorMode,
+	);
 	const courseCount = useStore(CourseStore, (s) => s.courses.length);
 	const style = getStyleById(activeStyleId);
-	const defaultThemeColorIndex = courseCount % style.gridColors.length;
+	const defaultThemeColorIndex =
+		courseCount % style.variants[timetableColorMode].gridColors.length;
 
 	const form = useForm<Course.Schema>({
 		resolver: zodResolver(Course.schema),
@@ -46,7 +51,11 @@ export function CourseEditorForm({
 					},
 				],
 				cellAppearance: {
-					background: getStyleColorByIndex(activeStyleId, defaultThemeColorIndex),
+					background: getStyleColorByIndex(
+						activeStyleId,
+						defaultThemeColorIndex,
+						timetableColorMode,
+					),
 					fgColor: "#ffffff",
 					icon: {
 						type: "emoji",
