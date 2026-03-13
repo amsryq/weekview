@@ -18,7 +18,7 @@ export function IconsTab() {
 	const form = useCourseEditorForm();
 	const iconType = useFormStore(
 		form.store,
-		(s: any) => s.values.cellAppearance?.icon?.type,
+		(s) => s.values.cellAppearance?.icon?.type,
 	);
 
 	return (
@@ -31,7 +31,7 @@ export function IconsTab() {
 			</div>
 
 			<form.Field name="cellAppearance.icon.type">
-				{(field: any) => (
+				{(field) => (
 					<Field>
 						<FieldLabel>Icon Type</FieldLabel>
 						<Select
@@ -50,7 +50,7 @@ export function IconsTab() {
 							Choose between emoji or custom SVG
 						</FieldDescription>
 						<FieldError
-							errors={field.state.meta.errors.map((e: any) => ({
+							errors={field.state.meta.errors.map((e) => ({
 								message: String(e?.message ?? e),
 							}))}
 						/>
@@ -75,7 +75,7 @@ export function IconsTab() {
 
 				<TabsContent value="emoji" className="space-y-6">
 					<form.Field name="cellAppearance.icon.emoji">
-						{(field: any) => (
+						{(field) => (
 							<Field>
 								<FieldLabel>Emoji</FieldLabel>
 								<div className="flex items-center gap-3">
@@ -100,7 +100,7 @@ export function IconsTab() {
 									Choose an emoji to display as a background icon
 								</FieldDescription>
 								<FieldError
-									errors={field.state.meta.errors.map((e: any) => ({
+									errors={field.state.meta.errors.map((e) => ({
 										message: String(e?.message ?? e),
 									}))}
 								/>
@@ -111,7 +111,7 @@ export function IconsTab() {
 
 				<TabsContent value="svg" className="space-y-6">
 					<form.Field name="cellAppearance.icon.svg">
-						{(field: any) => (
+						{(field) => (
 							<Field>
 								<FieldLabel>SVG Code</FieldLabel>
 								<div className="space-y-3">
@@ -142,7 +142,7 @@ export function IconsTab() {
 									colors.
 								</FieldDescription>
 								<FieldError
-									errors={field.state.meta.errors.map((e: any) => ({
+									errors={field.state.meta.errors.map((e) => ({
 										message: String(e?.message ?? e),
 									}))}
 								/>
@@ -157,7 +157,7 @@ export function IconsTab() {
 				<h4 className="text-sm font-medium">Icon Settings</h4>
 
 				<form.Field name="cellAppearance.icon.opacity">
-					{(field: any) => (
+					{(field) => (
 						<Field>
 							<FieldLabel>
 								Opacity: {((field.state.value ?? 0) * 100).toFixed(0)}%
@@ -172,7 +172,7 @@ export function IconsTab() {
 							/>
 							<FieldDescription>Adjust the icon transparency</FieldDescription>
 							<FieldError
-								errors={field.state.meta.errors.map((e: any) => ({
+								errors={field.state.meta.errors.map((e) => ({
 									message: String(e?.message ?? e),
 								}))}
 							/>
@@ -181,7 +181,7 @@ export function IconsTab() {
 				</form.Field>
 
 				<form.Field name="cellAppearance.icon.size">
-					{(field: any) => (
+					{(field) => (
 						<Field>
 							<FieldLabel>
 								Size: {(field.state.value ?? 1).toFixed(1)}x
@@ -196,7 +196,7 @@ export function IconsTab() {
 							/>
 							<FieldDescription>Adjust the icon size</FieldDescription>
 							<FieldError
-								errors={field.state.meta.errors.map((e: any) => ({
+								errors={field.state.meta.errors.map((e) => ({
 									message: String(e?.message ?? e),
 								}))}
 							/>
@@ -205,7 +205,7 @@ export function IconsTab() {
 				</form.Field>
 
 				<form.Field name="cellAppearance.icon.rotation">
-					{(field: any) => (
+					{(field) => (
 						<Field>
 							<FieldLabel>Rotation: {field.state.value ?? 0}°</FieldLabel>
 							<Slider
@@ -218,7 +218,7 @@ export function IconsTab() {
 							/>
 							<FieldDescription>Rotate the icon</FieldDescription>
 							<FieldError
-								errors={field.state.meta.errors.map((e: any) => ({
+								errors={field.state.meta.errors.map((e) => ({
 									message: String(e?.message ?? e),
 								}))}
 							/>
@@ -228,7 +228,7 @@ export function IconsTab() {
 
 				<div className="grid grid-cols-2 gap-4">
 					<form.Field name="cellAppearance.icon.offsetX">
-						{(field: any) => (
+						{(field) => (
 							<Field>
 								<FieldLabel>
 									Distance from Corner: {field.state.value || 8}px
@@ -243,7 +243,7 @@ export function IconsTab() {
 								/>
 								<FieldDescription>Horizontal distance</FieldDescription>
 								<FieldError
-									errors={field.state.meta.errors.map((e: any) => ({
+									errors={field.state.meta.errors.map((e) => ({
 										message: String(e?.message ?? e),
 									}))}
 								/>
@@ -252,7 +252,7 @@ export function IconsTab() {
 					</form.Field>
 
 					<form.Field name="cellAppearance.icon.offsetY">
-						{(field: any) => (
+						{(field) => (
 							<Field>
 								<FieldLabel>
 									Vertical Distance: {field.state.value || 8}px
@@ -267,7 +267,7 @@ export function IconsTab() {
 								/>
 								<FieldDescription>Vertical distance from top</FieldDescription>
 								<FieldError
-									errors={field.state.meta.errors.map((e: any) => ({
+									errors={field.state.meta.errors.map((e) => ({
 										message: String(e?.message ?? e),
 									}))}
 								/>

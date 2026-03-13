@@ -104,7 +104,7 @@ export function ManualImporterDialogRenderer() {
 					course.meetingTimes,
 				);
 				if (conflicts.length > 0) {
-					form.setFieldMeta("meetingTimes", (prev: any) => ({
+					form.setFieldMeta("meetingTimes", (prev) => ({
 						...prev,
 						errorMap: {
 							onSubmit: `There are time conflicts with ${conflicts.map((c) => c.code).join(", ")}.`,

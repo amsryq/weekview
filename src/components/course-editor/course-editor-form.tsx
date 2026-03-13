@@ -1,5 +1,4 @@
 import { useForm } from "@tanstack/react-form";
-import { zodValidator } from "@tanstack/zod-form-adapter";
 import { toMerged } from "es-toolkit";
 import type { PartialDeep } from "type-fest";
 import { useStore } from "zustand";
@@ -45,8 +44,6 @@ export function CourseEditorForm({
 		courseCount % style.variants[timetableColorMode].gridColors.length;
 
 	const form = useForm({
-		// @ts-ignore
-		validatorAdapter: zodValidator(),
 		validators: {
 			onSubmit: Course.schema,
 		},
@@ -104,7 +101,7 @@ export function CourseEditorForm({
 				}
 			}
 
-			onSubmit(value, formApi);
+			onSubmit(value, form);
 		},
 	});
 

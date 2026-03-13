@@ -54,19 +54,19 @@ export function AppearanceTab() {
 	// Watch all icon-related fields at the top level to avoid conditional hook usage
 	const iconType = useFormStore(
 		form.store,
-		(s: any) => s.values.cellAppearance?.icon?.type,
+		(s) => s.values.cellAppearance?.icon?.type,
 	);
 	const iconEmoji = useFormStore(
 		form.store,
-		(s: any) => s.values.cellAppearance?.icon?.emoji,
+		(s) => s.values.cellAppearance?.icon?.emoji,
 	);
 	const iconSvg = useFormStore(
 		form.store,
-		(s: any) => s.values.cellAppearance?.icon?.svg,
+		(s) => s.values.cellAppearance?.icon?.svg,
 	);
 	const activeStyleId = useStore(
 		TimetablePreferencesStore,
-		(s: any) => s.activeStyleId,
+		(s) => s.activeStyleId,
 	);
 	const style = resolveTimetableStyle(activeStyleId);
 
@@ -98,7 +98,7 @@ export function AppearanceTab() {
 				</CardHeader>
 				<CardContent className="space-y-6">
 					<form.Field name="cellAppearance.background">
-						{(field: any) => (
+						{(field) => (
 							<Field>
 								<FieldLabel className="text-sm font-medium">
 									Background
@@ -117,7 +117,7 @@ export function AppearanceTab() {
 									Choose a solid color or gradient for your course background
 								</FieldDescription>
 								<FieldError
-									errors={field.state.meta.errors.map((e: any) => ({
+									errors={field.state.meta.errors.map((e) => ({
 										message: String(e?.message ?? e),
 									}))}
 								/>
@@ -126,7 +126,7 @@ export function AppearanceTab() {
 					</form.Field>
 
 					<form.Field name="cellAppearance.fgColor">
-						{(field: any) => (
+						{(field) => (
 							<Field>
 								<FieldLabel className="text-sm font-medium">
 									Text Color
@@ -137,7 +137,7 @@ export function AppearanceTab() {
 											type="color"
 											className="w-14 h-10 p-1 rounded-md border cursor-pointer"
 											value={field.state.value}
-											onChange={(e: any) => field.handleChange(e.target.value)}
+											onChange={(e) => field.handleChange(e.target.value)}
 											onBlur={field.handleBlur}
 										/>
 									</div>
@@ -145,7 +145,7 @@ export function AppearanceTab() {
 										placeholder="#ffffff"
 										className="flex-1 font-mono text-sm"
 										value={field.state.value}
-										onChange={(e: any) => field.handleChange(e.target.value)}
+										onChange={(e) => field.handleChange(e.target.value)}
 										onBlur={field.handleBlur}
 									/>
 								</div>
@@ -153,7 +153,7 @@ export function AppearanceTab() {
 									Select the text color that contrasts well with your background
 								</FieldDescription>
 								<FieldError
-									errors={field.state.meta.errors.map((e: any) => ({
+									errors={field.state.meta.errors.map((e) => ({
 										message: String(e?.message ?? e),
 									}))}
 								/>
@@ -173,7 +173,7 @@ export function AppearanceTab() {
 				</CardHeader>
 				<CardContent>
 					<form.Field name="cellAppearance.fontFamily">
-						{(field: any) => (
+						{(field) => (
 							<Field>
 								<FieldLabel className="text-sm font-medium">Font</FieldLabel>
 								<Select
@@ -197,7 +197,7 @@ export function AppearanceTab() {
 									Style font: {style.fontFamily}
 								</FieldDescription>
 								<FieldError
-									errors={field.state.meta.errors.map((e: any) => ({
+									errors={field.state.meta.errors.map((e) => ({
 										message: String(e?.message ?? e),
 									}))}
 								/>
@@ -222,13 +222,13 @@ export function AppearanceTab() {
 					</CardHeader>
 					<CardContent className="space-y-6">
 						<form.Field name="cellAppearance.icon.type">
-							{(field: any) => (
+							{(field) => (
 								<Field>
 									<FieldLabel className="text-sm font-medium">
 										Icon Type
 									</FieldLabel>
 									<Select
-										onValueChange={(v: any) =>
+										onValueChange={(v) =>
 											field.handleChange(v as "emoji" | "svg")
 										}
 										value={field.state.value}
@@ -245,7 +245,7 @@ export function AppearanceTab() {
 										Choose between an emoji or custom SVG icon
 									</FieldDescription>
 									<FieldError
-										errors={field.state.meta.errors.map((e: any) => ({
+										errors={field.state.meta.errors.map((e) => ({
 											message: String(e?.message ?? e),
 										}))}
 									/>
@@ -256,7 +256,7 @@ export function AppearanceTab() {
 						{/* Emoji Input */}
 						{iconType === "emoji" && (
 							<form.Field name="cellAppearance.icon.emoji">
-								{(field: any) => (
+								{(field) => (
 									<Field>
 										<FieldLabel className="text-sm font-medium">
 											Emoji
@@ -307,7 +307,7 @@ export function AppearanceTab() {
 											Click to select an emoji for your course icon
 										</FieldDescription>
 										<FieldError
-											errors={field.state.meta.errors.map((e: any) => ({
+											errors={field.state.meta.errors.map((e) => ({
 												message: String(e?.message ?? e),
 											}))}
 										/>
@@ -319,7 +319,7 @@ export function AppearanceTab() {
 						{/* SVG Input */}
 						{iconType === "svg" && (
 							<form.Field name="cellAppearance.icon.svg">
-								{(field: any) => (
+								{(field) => (
 									<Field>
 										<FieldLabel className="text-sm font-medium">
 											SVG Code
@@ -332,9 +332,7 @@ export function AppearanceTab() {
 												rows={6}
 												className="font-mono text-xs resize-none"
 												value={field.state.value}
-												onChange={(e: any) =>
-													field.handleChange(e.target.value)
-												}
+												onChange={(e) => field.handleChange(e.target.value)}
 												onBlur={field.handleBlur}
 											/>
 											{field.state.value && (
@@ -347,7 +345,7 @@ export function AppearanceTab() {
 															src={`data:image/svg+xml;utf8,${encodeURIComponent(field.state.value)}`}
 															alt="SVG preview"
 															className="w-full h-full object-contain"
-															onError={(e: any) => {
+															onError={(e) => {
 																(e.target as HTMLImageElement).style.display =
 																	"none";
 															}}
@@ -361,7 +359,7 @@ export function AppearanceTab() {
 											inherit text color.
 										</FieldDescription>
 										<FieldError
-											errors={field.state.meta.errors.map((e: any) => ({
+											errors={field.state.meta.errors.map((e) => ({
 												message: String(e?.message ?? e),
 											}))}
 										/>
@@ -398,7 +396,7 @@ export function AppearanceTab() {
 										<CardContent>
 											<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 												<form.Field name="cellAppearance.icon.opacity">
-													{(field: any) => (
+													{(field) => (
 														<Field>
 															<FieldLabel className="text-sm">
 																Opacity{" "}
@@ -409,7 +407,7 @@ export function AppearanceTab() {
 															</FieldLabel>
 															<Slider
 																value={[field.state.value ?? 0]}
-																onValueChange={(value: any) =>
+																onValueChange={(value) =>
 																	field.handleChange(value[0])
 																}
 																min={0}
@@ -418,18 +416,16 @@ export function AppearanceTab() {
 																className="w-full"
 															/>
 															<FieldError
-																errors={field.state.meta.errors.map(
-																	(e: any) => ({
-																		message: String(e?.message ?? e),
-																	}),
-																)}
+																errors={field.state.meta.errors.map((e) => ({
+																	message: String(e?.message ?? e),
+																}))}
 															/>
 														</Field>
 													)}
 												</form.Field>
 
 												<form.Field name="cellAppearance.icon.size">
-													{(field: any) => (
+													{(field) => (
 														<Field>
 															<FieldLabel className="text-sm">
 																Size{" "}
@@ -439,7 +435,7 @@ export function AppearanceTab() {
 															</FieldLabel>
 															<Slider
 																value={[field.state.value ?? 1]}
-																onValueChange={(value: any) =>
+																onValueChange={(value) =>
 																	field.handleChange(value[0])
 																}
 																min={1}
@@ -448,18 +444,16 @@ export function AppearanceTab() {
 																className="w-full"
 															/>
 															<FieldError
-																errors={field.state.meta.errors.map(
-																	(e: any) => ({
-																		message: String(e?.message ?? e),
-																	}),
-																)}
+																errors={field.state.meta.errors.map((e) => ({
+																	message: String(e?.message ?? e),
+																}))}
 															/>
 														</Field>
 													)}
 												</form.Field>
 
 												<form.Field name="cellAppearance.icon.rotation">
-													{(field: any) => (
+													{(field) => (
 														<Field>
 															<FieldLabel className="text-sm">
 																Rotation{" "}
@@ -469,7 +463,7 @@ export function AppearanceTab() {
 															</FieldLabel>
 															<Slider
 																value={[field.state.value ?? 0]}
-																onValueChange={(value: any) =>
+																onValueChange={(value) =>
 																	field.handleChange(value[0])
 																}
 																min={-180}
@@ -478,18 +472,16 @@ export function AppearanceTab() {
 																className="w-full"
 															/>
 															<FieldError
-																errors={field.state.meta.errors.map(
-																	(e: any) => ({
-																		message: String(e?.message ?? e),
-																	}),
-																)}
+																errors={field.state.meta.errors.map((e) => ({
+																	message: String(e?.message ?? e),
+																}))}
 															/>
 														</Field>
 													)}
 												</form.Field>
 
 												<form.Field name="cellAppearance.icon.offsetX">
-													{(field: any) => (
+													{(field) => (
 														<Field>
 															<FieldLabel className="text-sm">
 																Horizontal Distance{" "}
@@ -499,7 +491,7 @@ export function AppearanceTab() {
 															</FieldLabel>
 															<Slider
 																value={[field.state.value || 8]}
-																onValueChange={(value: any) =>
+																onValueChange={(value) =>
 																	field.handleChange(value[0])
 																}
 																min={0}
@@ -508,18 +500,16 @@ export function AppearanceTab() {
 																className="w-full"
 															/>
 															<FieldError
-																errors={field.state.meta.errors.map(
-																	(e: any) => ({
-																		message: String(e?.message ?? e),
-																	}),
-																)}
+																errors={field.state.meta.errors.map((e) => ({
+																	message: String(e?.message ?? e),
+																}))}
 															/>
 														</Field>
 													)}
 												</form.Field>
 
 												<form.Field name="cellAppearance.icon.offsetY">
-													{(field: any) => (
+													{(field) => (
 														<Field>
 															<FieldLabel className="text-sm">
 																Vertical Distance{" "}
@@ -529,7 +519,7 @@ export function AppearanceTab() {
 															</FieldLabel>
 															<Slider
 																value={[field.state.value || 8]}
-																onValueChange={(value: any) =>
+																onValueChange={(value) =>
 																	field.handleChange(value[0])
 																}
 																min={0}
@@ -538,11 +528,9 @@ export function AppearanceTab() {
 																className="w-full"
 															/>
 															<FieldError
-																errors={field.state.meta.errors.map(
-																	(e: any) => ({
-																		message: String(e?.message ?? e),
-																	}),
-																)}
+																errors={field.state.meta.errors.map((e) => ({
+																	message: String(e?.message ?? e),
+																}))}
 															/>
 														</Field>
 													)}

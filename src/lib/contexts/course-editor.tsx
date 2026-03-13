@@ -1,9 +1,15 @@
+import {
+	type AnyFieldMeta,
+	type ReactFormExtendedApi,
+} from "@tanstack/react-form";
 import { createContext, type ReactNode, useContext, useState } from "react";
 import type { PartialDeep } from "type-fest";
 import { CourseEditorDialog } from "~/components/course-editor/course-editor-dialog";
-import type { Course } from "../models/course";
+import { Course } from "../models/course";
 
-export type CourseFormApi = any;
+// biome-ignore format: keep on one line to avoid multiple any ignores
+// biome-ignore lint/suspicious/noExplicitAny: TanStack Form API requires 12 generics, using any here to avoid extreme complexity while maintaining type safety for form values.
+export type CourseFormApi = ReactFormExtendedApi<Course.Schema, any, any, any, any, any, any, any, any, any, any, any>;
 
 type EditorProps = {
 	title?: string;
@@ -120,7 +126,7 @@ export function CourseEditorDialogRenderer() {
 							form.state.errorMap.onBlur !== undefined ||
 							form.state.errorMap.onSubmit !== undefined)) ||
 					Object.values(form.state.fieldMeta).some(
-						(meta: any) => meta.errors.length > 0,
+						(meta: AnyFieldMeta | undefined) => (meta?.errors?.length ?? 0) > 0,
 					);
 
 				if (!hasError) closeCourseEditor();

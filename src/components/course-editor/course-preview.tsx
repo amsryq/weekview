@@ -6,20 +6,23 @@ import { Clock, TimeRange } from "~/lib/models/clock";
 import { Course } from "~/lib/models/course";
 import { MeetingTime } from "~/lib/models/meeting-time";
 import { ManualCourseProvider } from "~/lib/providers/manual-course-provider";
-import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
+import {
+	type TimetablePreferences,
+	TimetablePreferencesStore,
+} from "~/lib/stores/timetable-preferences";
 import { resolveTimetableStyleColorByIndex } from "~/lib/utils/timetable-styles";
 import { CourseBlock } from "../timetable/course-block";
 
 export function CoursePreview() {
 	const form = useCourseEditorForm();
-	const formData = useFormStore(form.store, (s: any) => s.values);
+	const formData = useFormStore(form.store, (s) => s.values);
 	const activeStyleId = useStore(
 		TimetablePreferencesStore,
-		(s: any) => s.activeStyleId,
+		(s: TimetablePreferences) => s.activeStyleId,
 	);
 	const timetableColorMode = useStore(
 		TimetablePreferencesStore,
-		(s: any) => s.timetableColorMode,
+		(s: TimetablePreferences) => s.timetableColorMode,
 	);
 
 	const mockMeetingTime = new MeetingTime({

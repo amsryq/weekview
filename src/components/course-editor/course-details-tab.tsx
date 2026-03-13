@@ -37,8 +37,7 @@ const DAYS_OF_WEEK = [
 ];
 
 const getDayLabel = (dayValue?: number) =>
-	DAYS_OF_WEEK.find((day: any) => day.value === dayValue)?.label ??
-	"Select day";
+	DAYS_OF_WEEK.find((day) => day.value === dayValue)?.label ?? "Select day";
 
 export function CourseDetailsTab() {
 	const form = useCourseEditorForm();
@@ -65,7 +64,7 @@ export function CourseDetailsTab() {
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<form.Field name="code">
-						{(field: any) => {
+						{(field) => {
 							const isInvalid =
 								field.state.meta.isTouched && !field.state.meta.isValid;
 							return (
@@ -78,13 +77,13 @@ export function CourseDetailsTab() {
 										className="font-mono"
 										value={field.state.value}
 										onBlur={field.handleBlur}
-										onChange={(e: any) => field.handleChange(e.target.value)}
+										onChange={(e) => field.handleChange(e.target.value)}
 										aria-invalid={isInvalid}
 									/>
 									{isInvalid && (
 										<FieldError
-											errors={field.state.meta.errors.map((e: any) => ({
-												message: String((e as any)?.message ?? e),
+											errors={field.state.meta.errors.map((e) => ({
+												message: String(e),
 											}))}
 										/>
 									)}
@@ -94,7 +93,7 @@ export function CourseDetailsTab() {
 					</form.Field>
 
 					<form.Field name="name">
-						{(field: any) => {
+						{(field) => {
 							const isInvalid =
 								field.state.meta.isTouched && !field.state.meta.isValid;
 							return (
@@ -106,13 +105,13 @@ export function CourseDetailsTab() {
 										placeholder="Introduction to Computer Science"
 										value={field.state.value}
 										onBlur={field.handleBlur}
-										onChange={(e: any) => field.handleChange(e.target.value)}
+										onChange={(e) => field.handleChange(e.target.value)}
 										aria-invalid={isInvalid}
 									/>
 									{isInvalid && (
 										<FieldError
-											errors={field.state.meta.errors.map((e: any) => ({
-												message: String((e as any)?.message ?? e),
+											errors={field.state.meta.errors.map((e) => ({
+												message: String(e),
 											}))}
 										/>
 									)}
@@ -133,7 +132,7 @@ export function CourseDetailsTab() {
 				</CardHeader>
 				<CardContent>
 					<form.Field name="meetingTimes" mode="array">
-						{(field: any) => (
+						{(field) => (
 							<div className="space-y-5">
 								<div className="flex items-center justify-between gap-3">
 									<div className="inline-flex items-center rounded-full border border-muted-foreground/20 bg-muted/40 px-3 py-1 text-xs font-medium text-muted-foreground">
@@ -171,7 +170,7 @@ export function CourseDetailsTab() {
 								)}
 
 								<div className="space-y-4">
-									{field.state.value.map((_: any, index: any) => {
+									{field.state.value.map((_, index) => {
 										// We need to check if there are top level array errors for this specific index
 										// But usually TanStack form returns errors on the subfields or the array field itself
 										return (
@@ -184,7 +183,7 @@ export function CourseDetailsTab() {
 																Meeting #{index + 1}
 															</CardTitle>
 															<form.Field name={`meetingTimes[${index}].day`}>
-																{(dayField: any) => (
+																{(dayField) => (
 																	<p className="inline-flex items-center gap-1 rounded-full border border-border/80 bg-background/70 px-2 py-0.5 text-xs text-muted-foreground">
 																		<CalendarDays className="h-3 w-3" />
 																		{getDayLabel(
@@ -212,7 +211,7 @@ export function CourseDetailsTab() {
 													<div className="space-y-4">
 														<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 															<form.Field name={`meetingTimes[${index}].day`}>
-																{(subField: any) => {
+																{(subField) => {
 																	const isInvalid =
 																		subField.state.meta.isTouched &&
 																		!subField.state.meta.isValid;
@@ -232,7 +231,7 @@ export function CourseDetailsTab() {
 																					<SelectValue placeholder="Select day" />
 																				</SelectTrigger>
 																				<SelectContent>
-																					{DAYS_OF_WEEK.map((day: any) => (
+																					{DAYS_OF_WEEK.map((day) => (
 																						<SelectItem
 																							key={day.value}
 																							value={day.value.toString()}
@@ -245,7 +244,7 @@ export function CourseDetailsTab() {
 																			{isInvalid && (
 																				<FieldError
 																					errors={subField.state.meta.errors.map(
-																						(e: any) => ({
+																						(e) => ({
 																							message: String(e?.message ?? e),
 																						}),
 																					)}
@@ -259,7 +258,7 @@ export function CourseDetailsTab() {
 															<form.Field
 																name={`meetingTimes[${index}].location`}
 															>
-																{(subField: any) => {
+																{(subField) => {
 																	const isInvalid =
 																		subField.state.meta.isTouched &&
 																		!subField.state.meta.isValid;
@@ -273,7 +272,7 @@ export function CourseDetailsTab() {
 																				placeholder="Room 101, Building A"
 																				value={subField.state.value}
 																				onBlur={subField.handleBlur}
-																				onChange={(e: any) =>
+																				onChange={(e) =>
 																					subField.handleChange(e.target.value)
 																				}
 																				aria-invalid={isInvalid}
@@ -281,7 +280,7 @@ export function CourseDetailsTab() {
 																			{isInvalid && (
 																				<FieldError
 																					errors={subField.state.meta.errors.map(
-																						(e: any) => ({
+																						(e) => ({
 																							message: String(e?.message ?? e),
 																						}),
 																					)}
@@ -297,7 +296,7 @@ export function CourseDetailsTab() {
 															<form.Field
 																name={`meetingTimes[${index}].startTime`}
 															>
-																{(subField: any) => {
+																{(subField) => {
 																	const isInvalid =
 																		subField.state.meta.isTouched &&
 																		!subField.state.meta.isValid;
@@ -311,7 +310,7 @@ export function CourseDetailsTab() {
 																				type="time"
 																				value={subField.state.value}
 																				onBlur={subField.handleBlur}
-																				onChange={(e: any) =>
+																				onChange={(e) =>
 																					subField.handleChange(e.target.value)
 																				}
 																				aria-invalid={isInvalid}
@@ -319,7 +318,7 @@ export function CourseDetailsTab() {
 																			{isInvalid && (
 																				<FieldError
 																					errors={subField.state.meta.errors.map(
-																						(e: any) => ({
+																						(e) => ({
 																							message: String(e?.message ?? e),
 																						}),
 																					)}
@@ -333,7 +332,7 @@ export function CourseDetailsTab() {
 															<form.Field
 																name={`meetingTimes[${index}].endTime`}
 															>
-																{(subField: any) => {
+																{(subField) => {
 																	const isInvalid =
 																		subField.state.meta.isTouched &&
 																		!subField.state.meta.isValid;
@@ -347,7 +346,7 @@ export function CourseDetailsTab() {
 																				type="time"
 																				value={subField.state.value}
 																				onBlur={subField.handleBlur}
-																				onChange={(e: any) =>
+																				onChange={(e) =>
 																					subField.handleChange(e.target.value)
 																				}
 																				aria-invalid={isInvalid}
@@ -355,7 +354,7 @@ export function CourseDetailsTab() {
 																			{isInvalid && (
 																				<FieldError
 																					errors={subField.state.meta.errors.map(
-																						(e: any) => ({
+																						(e) => ({
 																							message: String(e?.message ?? e),
 																						}),
 																					)}
@@ -368,11 +367,9 @@ export function CourseDetailsTab() {
 														</div>
 														{field.state.meta.errors.length > 0 && (
 															<FieldError
-																errors={field.state.meta.errors.map(
-																	(e: any) => ({
-																		message: String(e?.message ?? e),
-																	}),
-																)}
+																errors={field.state.meta.errors.map((e) => ({
+																	message: String(e?.message ?? e),
+																}))}
 															/>
 														)}
 													</div>

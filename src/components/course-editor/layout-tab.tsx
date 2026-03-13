@@ -9,7 +9,7 @@ export function LayoutTab() {
 	const form = useCourseEditorForm();
 	const currentCellAppearance = useFormStore(
 		form.store,
-		(s: any) => s.values.cellAppearance,
+		(s) => s.values.cellAppearance,
 	);
 
 	const handleCellAppearanceChange = (values: PartialDeep<CellAppearance>) => {

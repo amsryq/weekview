@@ -234,21 +234,6 @@
 			"linter": {
 				"enabled": false
 			}
-		},
-		{
-			"includes": [
-				"src/components/course-editor/**",
-				"src/components/course-management-sheet.tsx",
-				"src/features/uitm/components/importer-dialog.tsx",
-				"src/lib/contexts/course-editor.tsx"
-			],
-			"linter": {
-				"rules": {
-					"suspicious": {
-						"noExplicitAny": "off"
-					}
-				}
-			}
 		}
 	],
 	"assist": {

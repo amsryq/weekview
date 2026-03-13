@@ -1,3 +1,4 @@
+import type { AnyFieldMeta } from "@tanstack/react-form";
 import { type JSX, useState } from "react";
 import type { PartialDeep } from "type-fest";
 import type { CourseFormApi } from "~/lib/contexts/course-editor";
@@ -68,7 +69,8 @@ export function CourseEditorDialog({
 									form.state.errorMap.onBlur !== undefined ||
 									form.state.errorMap.onSubmit !== undefined)) ||
 							Object.values(form.state.fieldMeta).some(
-								(meta: any) => (meta?.errors?.length ?? 0) > 0,
+								(meta: AnyFieldMeta | undefined) =>
+									(meta?.errors?.length ?? 0) > 0,
 							);
 
 						if (!hasError) setOpen(false);
