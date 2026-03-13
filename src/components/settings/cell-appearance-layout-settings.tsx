@@ -7,6 +7,7 @@ import {
 	Type,
 } from "lucide-react";
 import type { PartialDeep } from "type-fest";
+import type { CourseFormApi } from "~/lib/contexts/course-editor";
 import type {
 	CellAppearance,
 	CellElements,
@@ -28,9 +29,11 @@ import { Slider } from "../ui/slider";
 import { Switch } from "../ui/switch";
 
 interface Props {
-	value: CellAppearance;
+	value?: CellAppearance;
 	baseValues?: Partial<CellAppearance>;
-	onChange: (changes: PartialDeep<CellAppearance>) => void;
+	onChange?: (changes: PartialDeep<CellAppearance>) => void;
+	form?: CourseFormApi;
+	namePrefix?: string;
 }
 
 type ElementKey = CellElements;
@@ -53,143 +56,238 @@ export function CellAppearanceLayoutSettings({
 	value,
 	baseValues,
 	onChange,
+	form,
+	namePrefix = "cellAppearance",
 }: Props) {
 	const base = baseValues ?? {};
-
-	const get = <K extends keyof CellAppearance>(
-		key: K,
-		fallback: NonNullable<CellAppearance[K]>,
-	): NonNullable<CellAppearance[K]> => value[key] ?? base[key] ?? fallback;
-
-	const borderRadius = get("borderRadius", 8);
-	const textAlign = get("textAlign", "center");
-	const autoSize = get("autoSizeFont", true);
-	const fontFamily = get("fontFamily", "Inter");
-
-	const getElementProp = <T,>(
-		prop: "visibility" | "fontSize" | "weight",
-		element: ElementKey,
-		fallback: T,
-	): T => {
-		const fromValue = value[prop]?.[element];
-		const fromBase = base[prop]?.[element as keyof (typeof base)[typeof prop]];
-		return (fromValue ?? fromBase ?? fallback) as T;
-	};
 
 	return (
 		<div className="space-y-6">
 			{/* Shape */}
 			<Section title="Shape">
-				<Field label="Corner radius">
-					<div className="flex items-center gap-3">
-						<Slider
-							className="w-32"
-							min={0}
-							max={24}
-							step={1}
-							value={[borderRadius]}
-							onValueChange={([r]) => onChange({ borderRadius: r })}
-						/>
-						<span className="w-8 text-right text-xs tabular-nums text-muted-foreground">
-							{borderRadius}px
-						</span>
-					</div>
-				</Field>
+				<SmartField<number>
+					form={form}
+					name={`${namePrefix}.borderRadius`}
+					value={value?.borderRadius}
+					baseValue={base.borderRadius}
+					fallback={8}
+					onChange={(v) => onChange?.({ borderRadius: v })}
+				>
+					{(val, set) => (
+						<Field label="Corner radius">
+							<div className="flex items-center gap-3">
+								<Slider
+									className="w-32"
+									min={0}
+									max={24}
+									step={1}
+									value={[val]}
+									onValueChange={([r]) => set(r)}
+								/>
+								<span className="w-8 text-right text-xs tabular-nums text-muted-foreground">
+									{val}px
+								</span>
+							</div>
+						</Field>
+					)}
+				</SmartField>
 
-				<Field label="Text alignment">
-					<AlignmentPicker
-						value={textAlign}
-						onChange={(v) => onChange({ textAlign: v })}
-					/>
-				</Field>
+				<SmartField<TextAlign>
+					form={form}
+					name={`${namePrefix}.textAlign`}
+					value={value?.textAlign}
+					baseValue={base.textAlign}
+					fallback="center"
+					onChange={(v) => onChange?.({ textAlign: v })}
+				>
+					{(val, set) => (
+						<Field label="Text alignment">
+							<AlignmentPicker value={val} onChange={set} />
+						</Field>
+					)}
+				</SmartField>
 			</Section>
 
 			{/* Material */}
 			{process.env.NODE_ENV === "development" && (
 				<PaywallOverlay compact bypass className="rounded-lg">
 					<Section title="Material">
-						<Field label="Surface style">
-							<MaterialPicker
-								value={get("material", "basic")}
-								onChange={(v) => onChange({ material: v })}
-							/>
-						</Field>
+						<SmartField<"basic" | "glass">
+							form={form}
+							name={`${namePrefix}.material`}
+							value={value?.material}
+							baseValue={base.material}
+							fallback="basic"
+							onChange={(v) => onChange?.({ material: v })}
+						>
+							{(val, set) => (
+								<Field label="Surface style">
+									<MaterialPicker value={val} onChange={set} />
+								</Field>
+							)}
+						</SmartField>
 					</Section>
 				</PaywallOverlay>
 			)}
 
 			{/* Typography */}
-			<Section
-				title="Typography"
-				action={
-					<div className="flex items-center gap-2">
-						<Label
-							htmlFor="auto-size"
-							className="text-xs text-muted-foreground"
-						>
-							Auto-size
-						</Label>
-						<Switch
-							id="auto-size"
-							checked={autoSize}
-							onCheckedChange={(v) => onChange({ autoSizeFont: v })}
-						/>
-					</div>
-				}
+			<SmartField<boolean>
+				form={form}
+				name={`${namePrefix}.autoSizeFont`}
+				value={value?.autoSizeFont}
+				baseValue={base.autoSizeFont}
+				fallback={true}
+				onChange={(v) => onChange?.({ autoSizeFont: v })}
 			>
-				<Field label="Font family">
-					<Select
-						value={fontFamily}
-						onValueChange={(v) => onChange({ fontFamily: v })}
+				{(autoSize, setAutoSize) => (
+					<Section
+						title="Typography"
+						action={
+							<div className="flex items-center gap-2">
+								<Label
+									htmlFor="auto-size"
+									className="text-xs text-muted-foreground"
+								>
+									Auto-size
+								</Label>
+								<Switch
+									id="auto-size"
+									checked={autoSize}
+									onCheckedChange={setAutoSize}
+								/>
+							</div>
+						}
 					>
-						<SelectTrigger className="w-52">
-							<SelectValue placeholder="Select font" />
-						</SelectTrigger>
-						<SelectContent>
-							{PREDEFINED_FONTS.map((font) => (
-								<SelectItem key={font} value={font}>
-									<span style={{ fontFamily: `'${font}', sans-serif` }}>
-										{font}
-									</span>
-								</SelectItem>
+						<SmartField<string>
+							form={form}
+							name={`${namePrefix}.fontFamily`}
+							value={value?.fontFamily}
+							baseValue={base.fontFamily}
+							fallback="Inter"
+							onChange={(v) => onChange?.({ fontFamily: v })}
+						>
+							{(fontFamily, setFontFamily) => (
+								<Field label="Font family">
+									<Select value={fontFamily} onValueChange={setFontFamily}>
+										<SelectTrigger className="w-52">
+											<SelectValue placeholder="Select font" />
+										</SelectTrigger>
+										<SelectContent>
+											{PREDEFINED_FONTS.map((font) => (
+												<SelectItem key={font} value={font}>
+													<span style={{ fontFamily: `'${font}', sans-serif` }}>
+														{font}
+													</span>
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+								</Field>
+							)}
+						</SmartField>
+
+						<div className="grid gap-3">
+							{CELL_ELEMENTS.map((element) => (
+								<div key={element} className="contents">
+									<SmartField<boolean>
+										form={form}
+										name={`${namePrefix}.visibility.${element}`}
+										value={value?.visibility?.[element]}
+										baseValue={base.visibility?.[element]}
+										fallback={true}
+										onChange={(v) =>
+											onChange?.({ visibility: { [element]: v } })
+										}
+									>
+										{(visible, setVisible) => (
+											<SmartField<number>
+												form={form}
+												name={`${namePrefix}.fontSize.${element}`}
+												value={value?.fontSize?.[element]}
+												baseValue={base.fontSize?.[element]}
+												fallback={12}
+												onChange={(v) =>
+													onChange?.({ fontSize: { [element]: v } })
+												}
+											>
+												{(size, setSize) => (
+													<SmartField<FontWeight>
+														form={form}
+														name={`${namePrefix}.weight.${element}`}
+														value={value?.weight?.[element]}
+														baseValue={base.weight?.[element]}
+														fallback="normal"
+														onChange={(v) =>
+															onChange?.({ weight: { [element]: v } })
+														}
+													>
+														{(weight, setWeight) => (
+															<ElementRow
+																label={ELEMENT_LABELS[element]}
+																visible={visible}
+																fontSize={size}
+																fontWeight={weight}
+																showSizeControl={!autoSize}
+																onToggleVisibility={() => setVisible(!visible)}
+																onFontSizeChange={setSize}
+																onFontWeightChange={setWeight}
+															/>
+														)}
+													</SmartField>
+												)}
+											</SmartField>
+										)}
+									</SmartField>
+								</div>
 							))}
-						</SelectContent>
-					</Select>
-				</Field>
-
-				<div className="grid gap-3">
-					{CELL_ELEMENTS.map((element) => {
-						const visible = getElementProp("visibility", element, true);
-						const size = getElementProp("fontSize", element, 12);
-						const weight = getElementProp(
-							"weight",
-							element,
-							"normal" as FontWeight,
-						);
-
-						return (
-							<ElementRow
-								key={element}
-								label={ELEMENT_LABELS[element]}
-								visible={visible}
-								fontSize={size}
-								fontWeight={weight}
-								showSizeControl={!autoSize}
-								onToggleVisibility={() =>
-									onChange({ visibility: { [element]: !visible } })
-								}
-								onFontSizeChange={(s) =>
-									onChange({ fontSize: { [element]: s } })
-								}
-								onFontWeightChange={(w) =>
-									onChange({ weight: { [element]: w } })
-								}
-							/>
-						);
-					})}
-				</div>
-			</Section>
+						</div>
+					</Section>
+				)}
+			</SmartField>
 		</div>
+	);
+}
+
+function SmartField<T>({
+	form,
+	name,
+	value,
+	baseValue,
+	fallback,
+	onChange,
+	children,
+}: {
+	form?: CourseFormApi;
+	name: string;
+	value?: T;
+	baseValue?: T;
+	fallback: T;
+	onChange?: (v: T) => void;
+	children: (val: T, set: (v: T) => void) => React.ReactNode;
+}) {
+	if (form) {
+		return (
+			<form.Field
+				// biome-ignore lint/suspicious/noExplicitAny: TanStack Form path types are extremely complex to map dynamically
+				name={name as any}
+			>
+				{(field) =>
+					children(
+						(field.state.value ?? baseValue ?? fallback) as T,
+						// biome-ignore lint/suspicious/noExplicitAny: Internal bridge for generic form updates
+						(v: T) => field.handleChange(v as any),
+					)
+				}
+			</form.Field>
+		);
+	}
+
+	return children(
+		(value ?? baseValue ?? fallback) as T,
+		onChange ??
+			(() => {
+				/* no-op */
+			}),
 	);
 }
 

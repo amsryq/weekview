@@ -1,20 +1,9 @@
-import { useStore as useFormStore } from "@tanstack/react-form";
-import { PartialDeep } from "type-fest";
 import { useCourseEditorForm } from "~/lib/contexts/course-editor";
-import type { CellAppearance } from "~/lib/models/cell-appearance";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { CellAppearanceLayoutSettings } from "../settings/cell-appearance-layout-settings";
 
 export function LayoutTab() {
 	const form = useCourseEditorForm();
-	const currentCellAppearance = useFormStore(
-		form.store,
-		(s) => s.values.cellAppearance,
-	);
-
-	const handleCellAppearanceChange = (values: PartialDeep<CellAppearance>) => {
-		form.setFieldValue("cellAppearance", values as CellAppearance);
-	};
 
 	return (
 		<div className="space-y-6">
@@ -26,9 +15,8 @@ export function LayoutTab() {
 			</div>
 
 			<CellAppearanceLayoutSettings
-				value={currentCellAppearance}
+				form={form}
 				baseValues={TimetablePreferencesStore.getState().cellAppearance}
-				onChange={handleCellAppearanceChange}
 			/>
 		</div>
 	);

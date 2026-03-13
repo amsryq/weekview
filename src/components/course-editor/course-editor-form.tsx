@@ -20,6 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { AppearanceTab } from "./appearance-tab";
 import { CourseDetailsTab } from "./course-details-tab";
 import { CoursePreview } from "./course-preview";
+import { LayoutTab } from "./layout-tab";
 
 interface CourseEditorFormProps {
 	onSubmit: (data: Course.Schema, form: CourseFormApi) => void;
@@ -121,8 +122,8 @@ export function CourseEditorForm({
 							<TabsList>
 								<TabsTrigger value="details">Details</TabsTrigger>
 								<TabsTrigger value="appearance">Appearance</TabsTrigger>
-								{/*<TabsTrigger value="layout">Layout</TabsTrigger>
-								<TabsTrigger value="icons">Icons</TabsTrigger>*/}
+								<TabsTrigger value="layout">Layout</TabsTrigger>
+								{/*<TabsTrigger value="icons">Icons</TabsTrigger>*/}
 							</TabsList>
 
 							<div className="pt-2 pb-4 lg:overflow-y-scroll lg:pr-4 lg:pl-2 lg:-ml-2">
@@ -134,13 +135,13 @@ export function CourseEditorForm({
 									<AppearanceTab />
 								</TabsContent>
 
-								{/*<TabsContent value="layout" className="m-0">
-										<LayoutTab />
-									</TabsContent>
+								<TabsContent value="layout" className="m-0">
+									<LayoutTab />
+								</TabsContent>
 
-									<TabsContent value="icons" className="m-0">
-										<IconsTab />
-									</TabsContent>*/}
+								{/*<TabsContent value="icons" className="m-0">
+									<IconsTab />
+								</TabsContent>*/}
 							</div>
 						</Tabs>
 
