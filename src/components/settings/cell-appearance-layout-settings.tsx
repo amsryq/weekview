@@ -2,22 +2,34 @@ import {
 	AlignCenter,
 	AlignLeft,
 	AlignRight,
+	Cloud,
 	Eye,
 	EyeOff,
+	Layers,
+	Square,
 	Type,
 } from "lucide-react";
 import type { PartialDeep } from "type-fest";
 import type { CourseFormApi } from "~/lib/contexts/course-editor";
-import type {
-	CellAppearance,
-	CellElements,
-	FontWeight,
-	TextAlign,
+import {
+	DEFAULT_BLUR_OPTIONS,
+	DEFAULT_GLASS_OPTIONS,
+	type CellAppearance,
+	type CellElements,
+	type CellMaterial,
+	type FontWeight,
+	type MaterialOptions,
+	type TextAlign,
 } from "~/lib/models/cell-appearance";
 import { PREDEFINED_FONTS } from "~/lib/utils/fonts";
 import { cn } from "~/lib/utils/styles";
-import { PaywallOverlay } from "../paywall-overlay";
+import {
+	HoverCard,
+	HoverCardContent,
+	HoverCardTrigger,
+} from "../ui/hover-card";
 import { Label } from "../ui/label";
+
 import {
 	Select,
 	SelectContent,
@@ -27,6 +39,9 @@ import {
 } from "../ui/select";
 import { Slider } from "../ui/slider";
 import { Switch } from "../ui/switch";
+
+const IS_FIREFOX =
+	typeof window !== "undefined" && /Firefox/.test(navigator.userAgent);
 
 interface Props {
 	value?: CellAppearance;
@@ -109,26 +124,128 @@ export function CellAppearanceLayoutSettings({
 			</Section>
 
 			{/* Material */}
-			{process.env.NODE_ENV === "development" && (
-				<PaywallOverlay compact bypass className="rounded-lg">
-					<Section title="Material">
-						<SmartField<"basic" | "glass">
-							form={form}
-							name={`${namePrefix}.material`}
-							value={value?.material}
-							baseValue={base.material}
-							fallback="basic"
-							onChange={(v) => onChange?.({ material: v })}
-						>
-							{(val, set) => (
-								<Field label="Surface style">
-									<MaterialPicker value={val} onChange={set} />
-								</Field>
+			<Section title="Material">
+				<SmartField<CellMaterial>
+					form={form}
+					name={`${namePrefix}.material`}
+					value={value?.material}
+					baseValue={base.material}
+					fallback="basic"
+					onChange={(v) => onChange?.({ material: v })}
+				>
+					{(val, set) => (
+						<div className="space-y-4">
+							<Field label="Surface style">
+								<MaterialPicker value={val} onChange={set} />
+							</Field>
+
+							{val !== "basic" && (
+								<div className="space-y-4 pt-1">
+									<SmartField<number>
+										form={form}
+										name={
+											val === "glass"
+												? `${namePrefix}.glassOptions.opacity`
+												: `${namePrefix}.blurOptions.opacity`
+										}
+										value={
+											val === "glass"
+												? value?.glassOptions?.opacity
+												: value?.blurOptions?.opacity
+										}
+										baseValue={
+											val === "glass"
+												? base.glassOptions?.opacity
+												: base.blurOptions?.opacity
+										}
+										fallback={
+											val === "glass"
+												? DEFAULT_GLASS_OPTIONS.opacity
+												: DEFAULT_BLUR_OPTIONS.opacity
+										}
+										onChange={(v) =>
+											onChange?.(
+												val === "glass"
+													? { glassOptions: { opacity: v } }
+													: { blurOptions: { opacity: v } },
+											)
+										}
+									>
+										{(opacityVal, setOpacity) => (
+											<Field label="Opacity">
+												<div className="flex items-center gap-3">
+													<Slider
+														className="w-32"
+														min={0}
+														max={1}
+														step={0.01}
+														value={[opacityVal]}
+														onValueChange={([v]) => setOpacity(v)}
+														disabled={val === "glass" && IS_FIREFOX}
+													/>
+													<span className="w-8 text-right text-xs tabular-nums text-muted-foreground">
+														{Math.round(opacityVal * 100)}%
+													</span>
+												</div>
+											</Field>
+										)}
+									</SmartField>
+
+									<SmartField<number>
+										form={form}
+										name={
+											val === "glass"
+												? `${namePrefix}.glassOptions.blur`
+												: `${namePrefix}.blurOptions.blur`
+										}
+										value={
+											val === "glass"
+												? value?.glassOptions?.blur
+												: value?.blurOptions?.blur
+										}
+										baseValue={
+											val === "glass"
+												? base.glassOptions?.blur
+												: base.blurOptions?.blur
+										}
+										fallback={
+											val === "glass"
+												? DEFAULT_GLASS_OPTIONS.blur
+												: DEFAULT_BLUR_OPTIONS.blur
+										}
+										onChange={(v) =>
+											onChange?.(
+												val === "glass"
+													? { glassOptions: { blur: v } }
+													: { blurOptions: { blur: v } },
+											)
+										}
+									>
+										{(blurVal, setBlur) => (
+											<Field label="Blur">
+												<div className="flex items-center gap-3">
+													<Slider
+														className="w-32"
+														min={0}
+														max={40}
+														step={1}
+														value={[blurVal]}
+														onValueChange={([v]) => setBlur(v)}
+														disabled={val === "glass" && IS_FIREFOX}
+													/>
+													<span className="w-8 text-right text-xs tabular-nums text-muted-foreground">
+														{blurVal}px
+													</span>
+												</div>
+											</Field>
+										)}
+									</SmartField>
+								</div>
 							)}
-						</SmartField>
-					</Section>
-				</PaywallOverlay>
-			)}
+						</div>
+					)}
+				</SmartField>
+			</Section>
 
 			{/* Typography */}
 			<SmartField<boolean>
@@ -364,26 +481,53 @@ function MaterialPicker({
 	value,
 	onChange,
 }: {
-	value: "basic" | "glass";
-	onChange: (v: "basic" | "glass") => void;
+	value: CellMaterial;
+	onChange: (v: CellMaterial) => void;
 }) {
+	const options: { value: CellMaterial; icon: typeof Square; label: string }[] =
+		[
+			{ value: "basic", icon: Square, label: "Basic" },
+			{ value: "blur", icon: Cloud, label: "Blur" },
+			{ value: "glass", icon: Layers, label: "Glass" },
+		];
+
 	return (
 		<div className="inline-flex rounded-md border p-0.5 gap-0.5">
-			{(["basic", "glass"] as const).map((v) => (
-				<button
-					key={v}
-					type="button"
-					onClick={() => onChange(v)}
-					className={cn(
-						"px-3 py-1 text-xs rounded capitalize transition-colors",
-						value === v
-							? "bg-primary text-primary-foreground"
-							: "text-muted-foreground hover:text-foreground hover:bg-muted",
-					)}
-				>
-					{v}
-				</button>
-			))}
+			{options.map(({ value: v, icon: Icon, label }) => {
+				const isDisabled = v === "glass" && IS_FIREFOX;
+				const button = (
+					<button
+						key={v}
+						type="button"
+						disabled={isDisabled}
+						onClick={() => onChange(v)}
+						className={cn(
+							"flex items-center gap-1.5 px-2.5 py-1 rounded transition-colors",
+							value === v
+								? "bg-primary text-primary-foreground shadow-sm"
+								: "text-muted-foreground hover:text-foreground hover:bg-muted",
+							isDisabled && "opacity-40 cursor-not-allowed",
+						)}
+					>
+						<Icon className="size-3.5" />
+						<span className="text-xs font-medium">{label}</span>
+					</button>
+				);
+
+				if (isDisabled) {
+					return (
+						<HoverCard key={v} openDelay={200}>
+							<HoverCardTrigger asChild>{button}</HoverCardTrigger>
+							<HoverCardContent className="w-48 p-3 text-xs">
+								Glass material is currently unavailable on Firefox as it doesn't
+								support some required filter features.
+							</HoverCardContent>
+						</HoverCard>
+					);
+				}
+
+				return button;
+			})}
 		</div>
 	);
 }

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { ColorEntry } from "./color-entry";
 
-export const CellMaterialSchema = z.enum(["basic", "glass"]);
+export const CellMaterialSchema = z.enum(["basic", "glass", "blur"]);
 export type CellMaterial = z.infer<typeof CellMaterialSchema>;
 
 export const CellElementsSchema = z.enum(["time", "location", "code", "name"]);
@@ -29,11 +29,30 @@ export const IconAppearanceSchema = z.object({
 
 export type IconAppearance = z.infer<typeof IconAppearanceSchema>;
 
+export const MaterialOptionsSchema = z.object({
+	opacity: z.number().min(0).max(1).optional(),
+	blur: z.number().min(0).max(40).optional(),
+});
+
+export type MaterialOptions = z.infer<typeof MaterialOptionsSchema>;
+
+export const DEFAULT_GLASS_OPTIONS: Required<MaterialOptions> = {
+	opacity: 0.4,
+	blur: 11,
+};
+
+export const DEFAULT_BLUR_OPTIONS: Required<MaterialOptions> = {
+	opacity: 0.4,
+	blur: 8,
+};
+
 export const CellAppearanceSchema = z.object({
 	background: ColorEntry.schema.optional(),
 	fgColor: z.string().optional(),
 	fontFamily: z.string().optional(),
 	material: CellMaterialSchema.optional(),
+	glassOptions: MaterialOptionsSchema.optional(),
+	blurOptions: MaterialOptionsSchema.optional(),
 	borderRadius: z.number().optional(),
 	autoSizeFont: z.boolean().optional(),
 	visibility: z

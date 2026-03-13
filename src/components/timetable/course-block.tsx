@@ -2,10 +2,14 @@ import { Clock, MapPin } from "lucide-react";
 import type React from "react";
 import { RequiredDeep } from "type-fest";
 import { useCourseEditor } from "~/lib/contexts/course-editor";
-import type {
-	CellAppearance,
-	CellMaterial,
+import {
+	DEFAULT_BLUR_OPTIONS,
+	DEFAULT_GLASS_OPTIONS,
+	type CellAppearance,
+	type CellMaterial,
+	type MaterialOptions,
 } from "~/lib/models/cell-appearance";
+import { cn } from "~/lib/utils/styles";
 import { ColorEntry } from "~/lib/models/color-entry";
 import type { Course } from "~/lib/models/course";
 import type { MeetingTime } from "~/lib/models/meeting-time";
@@ -84,12 +88,16 @@ function FieldInfoRow({
 
 function Container({
 	material = "basic",
+	glassOptions,
+	blurOptions,
 	children,
 	style,
 	className,
 	onClick,
 }: {
 	material?: CellMaterial;
+	glassOptions?: MaterialOptions;
+	blurOptions?: MaterialOptions;
 	children: React.ReactNode;
 	style?: React.CSSProperties;
 	className?: string;
@@ -101,10 +109,46 @@ function Container({
 				className={className}
 				style={style}
 				displace={1}
-				backgroundOpacity={0.7}
+				backgroundOpacity={
+					glassOptions?.opacity ?? DEFAULT_GLASS_OPTIONS.opacity
+				}
+				blur={glassOptions?.blur ?? DEFAULT_GLASS_OPTIONS.blur}
 			>
 				<span onClick={onClick}>{children}</span>
 			</GlassSurface>
+		);
+	}
+
+	if (material === "blur") {
+		const opacity = blurOptions?.opacity ?? DEFAULT_BLUR_OPTIONS.opacity;
+		const blur = blurOptions?.blur ?? DEFAULT_BLUR_OPTIONS.blur;
+
+		// We extract the background from style to apply it to an overlay with opacity.
+		// This fixes blur for both solid colors and gradients.
+		const { background, backgroundColor, ...restStyle } = style ?? {};
+
+		return (
+			<div
+				className={cn(className, "backdrop-blur-md")}
+				style={{
+					...restStyle,
+					backdropFilter: `blur(${blur}px)`,
+					WebkitBackdropFilter: `blur(${blur}px)`,
+				}}
+				onClick={onClick}
+			>
+				{/* Background Overlay */}
+				<div
+					className="absolute inset-0 z-0 pointer-events-none rounded-[inherit]"
+					style={{
+						background: background as string,
+						backgroundColor: backgroundColor as string,
+						opacity,
+					}}
+				/>
+				{/* Content */}
+				<div className="relative z-10 h-full">{children}</div>
+			</div>
 		);
 	}
 
@@ -162,6 +206,8 @@ export function CourseBlock({
 			<HoverCardTrigger>
 				<Container
 					material={appearance.material}
+					glassOptions={appearance.glassOptions}
+					blurOptions={appearance.blurOptions}
 					className={className}
 					style={containerStyle}
 					onClick={(e) => {

@@ -4,6 +4,8 @@ import { createStore } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import {
+	DEFAULT_BLUR_OPTIONS,
+	DEFAULT_GLASS_OPTIONS,
 	type CellAppearance,
 	type CellElements,
 	type FontWeight,
@@ -36,6 +38,8 @@ const defaultState = {
 	cellAppearance: {
 		textAlign: "center",
 		material: "basic",
+		glassOptions: DEFAULT_GLASS_OPTIONS,
+		blurOptions: DEFAULT_BLUR_OPTIONS,
 		borderRadius: 8,
 		autoSizeFont: true,
 
