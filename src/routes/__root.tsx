@@ -15,9 +15,13 @@ import {
   CourseEditorProvider,
 } from "~/lib/contexts/course-editor";
 import { getQueryClient } from "~/lib/contexts/react-query";
+import { CourseManagementSheetProvider } from "~/lib/contexts/course-management-sheet";
 import { SupportDialogProvider } from "~/lib/contexts/support-dialog";
 import { ThemeProvider } from "~/lib/contexts/themes";
 import { buildGoogleFontsUrl, PREDEFINED_FONTS } from "~/lib/utils/fonts";
+import { CourseManagementSheetRenderer } from "~/components/course-management-sheet";
+import { UiTMImporterDialogRenderer, ManualImporterDialogRenderer } from "~/features/uitm/components/importer-dialog";
+import { ImporterDialogsProvider } from "~/lib/contexts/importer-dialogs";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -74,13 +78,20 @@ function RootComponent() {
     <ThemeProvider defaultTheme="system" storageKey="weekview-ui-theme">
       <QueryClientProvider client={queryClient}>
         <SupportDialogProvider>
+          <CourseManagementSheetProvider>
+          <ImporterDialogsProvider>
           <CourseEditorProvider>
             <div className="root">
               <Outlet />
             </div>
             <SupportDialog />
             <CourseEditorDialogRenderer />
+            <CourseManagementSheetRenderer />
+            <UiTMImporterDialogRenderer />
+            <ManualImporterDialogRenderer />
           </CourseEditorProvider>
+          </ImporterDialogsProvider>
+          </CourseManagementSheetProvider>
         </SupportDialogProvider>
       </QueryClientProvider>
       <Toaster />

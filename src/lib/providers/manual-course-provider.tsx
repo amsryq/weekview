@@ -1,9 +1,7 @@
 import { PlusIcon } from "lucide-react";
-import { CourseEditorDialog } from "~/components/course-editor/course-editor-dialog";
+import { useImporterDialogs } from "~/lib/contexts/importer-dialogs";
 import { Button } from "~/components/ui/button";
-import { Course } from "../models/course";
 import { CourseProvider } from "../models/course-provider";
-import { CourseStore } from "../stores/course-store";
 
 let singletonCache: ManualCourseProvider | null = null;
 
@@ -27,28 +25,11 @@ export class ManualCourseProvider extends CourseProvider {
 }
 
 export function ManualAddCourseButton({ className }: { className?: string }) {
+	const { openManualImporter } = useImporterDialogs();
 	return (
-		<CourseEditorDialog
-			title="Add Course"
-			onSubmit={(data, form) => {
-				const course = Course.createFromSchema(data);
-				const conflicts = CourseStore.getState().getConflictingCourses(
-					course.meetingTimes,
-				);
-				if (conflicts.length > 0) {
-					form.setError("meetingTimes", {
-						message: `There are time conflicts with ${conflicts.map((c) => c.code).join(", ")}.`,
-					});
-					return;
-				}
-
-				CourseStore.getState().addCourse(course);
-			}}
-		>
-			<Button className={className}>
-				<PlusIcon className="w-4 h-4" />
-				Add Course
-			</Button>
-		</CourseEditorDialog>
+		<Button className={className} onClick={openManualImporter}>
+			<PlusIcon className="w-4 h-4" />
+			Add Course
+		</Button>
 	);
 }

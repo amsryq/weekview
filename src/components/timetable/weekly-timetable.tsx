@@ -7,9 +7,13 @@ import type { MeetingTime } from "~/lib/models/meeting-time";
 import { getStyleById, getStyleVariantById } from "~/lib/models/style";
 import { CourseStore } from "~/lib/stores/course-store";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
+import { useImporterDialogs } from "~/lib/contexts/importer-dialogs";
+import { Button } from "../ui/button";
+import { PlusIcon, ImportIcon } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { CourseBlock } from "./course-block";
 import { useMounted } from "~/lib/hooks/useMounted";
+import { UiTMAddCourseButton } from "~/features/uitm/provider";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const ROW_BLOCK_WIDTH_PX = 84;
@@ -395,6 +399,9 @@ export function WeeklyTimetable({
     ? { opacity: 1 - backgroundImageOptions.opacity }
     : undefined;
 
+  const isEmpty = courses.length === 0;
+  const { openManualImporter } = useImporterDialogs();
+
   return (
     <Card
       className="py-0 overflow-hidden"
@@ -403,23 +410,40 @@ export function WeeklyTimetable({
       }}
     >
       <CardContent className="max-w-[95vw] px-0">
-        <TimetableContext.Provider
-          value={{
-            courses,
-            timeSlots,
-            columnHeight,
-            rowWidth,
-            layout: effectiveLayout,
-            backgroundStyle,
-            overlayStyle,
-          }}
-        >
-          {effectiveLayout === "rows" ? (
-            <RowLayout visibleDays={visibleDays} containerId={containerId} />
-          ) : (
-            <ColumnLayout visibleDays={visibleDays} containerId={containerId} />
+        <div className="relative">
+          <TimetableContext.Provider
+            value={{
+              courses,
+              timeSlots,
+              columnHeight,
+              rowWidth,
+              layout: effectiveLayout,
+              backgroundStyle,
+              overlayStyle,
+            }}
+          >
+            <div className={isEmpty ? "blur-sm pointer-events-none select-none" : ""}>
+              {effectiveLayout === "rows" ? (
+                <RowLayout visibleDays={visibleDays} containerId={containerId} />
+              ) : (
+                <ColumnLayout visibleDays={visibleDays} containerId={containerId} />
+              )}
+            </div>
+          </TimetableContext.Provider>
+
+          {isEmpty && (
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4">
+              <p className="text-sm font-medium text-muted-foreground">Your timetable is empty. Let's get started:</p>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <Button onClick={openManualImporter}>
+                  <PlusIcon className="w-4 h-4" />
+                  Add Course
+                </Button>
+                <UiTMAddCourseButton />
+              </div>
+            </div>
           )}
-        </TimetableContext.Provider>
+        </div>
       </CardContent>
     </Card>
   );

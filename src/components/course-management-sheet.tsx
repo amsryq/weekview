@@ -1,5 +1,4 @@
 import { ClockIcon, MapPinIcon, PencilIcon, Trash2Icon } from "lucide-react";
-import type { ReactElement } from "react";
 import { useStore } from "zustand";
 import { UiTMAddCourseButton, UiTMProvider } from "~/features/uitm/provider";
 import { ColorEntry } from "~/lib/models/color-entry";
@@ -10,6 +9,7 @@ import {
 	ManualAddCourseButton,
 	ManualCourseProvider,
 } from "~/lib/providers/manual-course-provider";
+import { useCourseManagementSheet } from "~/lib/contexts/course-management-sheet";
 import { CourseStore } from "~/lib/stores/course-store";
 import { ProviderStore } from "~/lib/stores/provider-store";
 import { CourseEditorDialog } from "./course-editor/course-editor-dialog";
@@ -33,7 +33,6 @@ import {
 	SheetDescription,
 	SheetHeader,
 	SheetTitle,
-	SheetTrigger,
 } from "./ui/sheet";
 
 function dayName(day: number) {
@@ -222,14 +221,11 @@ function CourseList() {
 	);
 }
 
-export function CourseManagementSheet({
-	children,
-}: {
-	children: ReactElement;
-}) {
+export function CourseManagementSheetRenderer() {
+	const { _internal: { isOpen, setIsOpen } } = useCourseManagementSheet();
+
 	return (
-		<Sheet>
-			<SheetTrigger asChild>{children}</SheetTrigger>
+		<Sheet open={isOpen} onOpenChange={setIsOpen}>
 			<SheetContent className="sm:max-w-lg max-sm:w-screen" side="left">
 				<SheetHeader>
 					<SheetTitle>Course Management</SheetTitle>
