@@ -1,9 +1,4 @@
 import { MeetingTime } from "~/lib/models/meeting-time";
-import {
-	DEFAULT_TIMETABLE_STYLE_ID,
-	getStableStyleIndex,
-	getStyleColorByIndex,
-} from "~/lib/models/style";
 import { UiTMCourseSection } from "../course-section";
 import { getStudentTimetable } from "../server/functions";
 import { Group } from "./group";
@@ -64,17 +59,14 @@ export function createUiTMCourseSectionFromMyStudentGroup(
 		return meeting;
 	});
 
-	const colorIndex = getStableStyleIndex(colorKey);
-
 	return new UiTMCourseSection({
 		code: group.courseCode,
 		name: includeCourseName ? group.courseName : undefined,
-		themeColorIndex: colorIndex,
+		themeColorIndex: null,
 		meetingTimes,
 		group: group.code,
 		campus: "mystudent",
 		cellAppearance: {
-			background: getStyleColorByIndex(DEFAULT_TIMETABLE_STYLE_ID, colorIndex),
 			fgColor: "#ffffff",
 		},
 	});

@@ -15,9 +15,11 @@ import {
 	DEFAULT_TIMETABLE_STYLE_ID,
 	type TimetableColorMode,
 	type TimetableThemePreference,
-	getStyleById,
-	getStyleColorByIndex,
 } from "../models/style";
+import {
+	resolveTimetableStyle,
+	resolveTimetableStyleColorByIndex,
+} from "../utils/timetable-styles";
 
 export type TimetableLayout = "rows" | "columns";
 
@@ -78,7 +80,7 @@ const defaultState = {
 		} satisfies ColorEntry.Schema,
 
 		fgColor: "#00FF00",
-		fontFamily: getStyleById(DEFAULT_TIMETABLE_STYLE_ID).fontFamily,
+		fontFamily: resolveTimetableStyle(DEFAULT_TIMETABLE_STYLE_ID).fontFamily,
 	} satisfies RequiredDeep<CellAppearance> as RequiredDeep<CellAppearance>,
 };
 
@@ -111,9 +113,7 @@ interface Actions {
 		options: Partial<State["backgroundImageOptions"]>,
 	) => void;
 
-	setTimetableThemePreference: (
-		preference: TimetableThemePreference,
-	) => void;
+	setTimetableThemePreference: (preference: TimetableThemePreference) => void;
 
 	setAppThemeMode: (themeMode: TimetableColorMode) => void;
 
@@ -138,7 +138,7 @@ export const TimetablePreferencesStore = createStore<State & Actions>()(
 					course.themeColorIndex !== undefined
 				) {
 					appearance = toMerged(appearance, {
-						background: getStyleColorByIndex(
+						background: resolveTimetableStyleColorByIndex(
 							get().activeStyleId,
 							course.themeColorIndex,
 							get().timetableColorMode,
@@ -209,7 +209,7 @@ export const TimetablePreferencesStore = createStore<State & Actions>()(
 
 			applyStyle: (styleId) =>
 				set((s) => {
-					const style = getStyleById(styleId);
+					const style = resolveTimetableStyle(styleId);
 					s.activeStyleId = style.id;
 					s.backgroundImage = null;
 					s.backgroundImageOptions = {
@@ -225,5 +225,15 @@ export const TimetablePreferencesStore = createStore<State & Actions>()(
 		},
 	),
 );
+
+export function resolveCurrentStyleColorByIndex(index: number) {
+	const { activeStyleId, timetableColorMode } =
+		TimetablePreferencesStore.getState();
+	return resolveTimetableStyleColorByIndex(
+		activeStyleId,
+		index,
+		timetableColorMode,
+	);
+}
 
 export type TimetablePreferences = State;

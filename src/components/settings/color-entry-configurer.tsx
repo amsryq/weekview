@@ -51,15 +51,24 @@ export function ColorEntryConfigurer({
 	// Build the current color entry from state
 	const currentEntry = useMemo((): ColorEntry.Schema => {
 		if (type === "solid") {
-			return { type: "solid", color: solidColor };
+			return {
+				type: "solid",
+				color: solidColor,
+				...(value.predefined !== undefined
+					? { predefined: value.predefined }
+					: {}),
+			};
 		}
 		return {
 			type: "gradient",
 			gradientColors:
 				gradientColors.length >= 2 ? gradientColors : ["#000000", "#ffffff"],
 			gradientDirection,
+			...(value.predefined !== undefined
+				? { predefined: value.predefined }
+				: {}),
 		};
-	}, [type, solidColor, gradientColors, gradientDirection]);
+	}, [type, solidColor, gradientColors, gradientDirection, value.predefined]);
 
 	// Sync internal state when external value changes
 	useEffect(() => {

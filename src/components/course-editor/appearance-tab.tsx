@@ -9,8 +9,9 @@ import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { useStore } from "zustand";
 import type { Course } from "~/lib/models/course";
-import { getStyleById } from "~/lib/models/style";
+import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { PREDEFINED_FONTS } from "~/lib/utils/fonts";
+import { resolveTimetableStyle } from "~/lib/utils/timetable-styles";
 import { PaywallOverlay } from "../paywall-overlay";
 import { ColorSelectorGrid } from "../settings/color-selector-grid";
 import { Button } from "../ui/button";
@@ -50,7 +51,6 @@ import {
 	SelectValue,
 } from "../ui/select";
 import { Slider } from "../ui/slider";
-import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { Textarea } from "../ui/textarea";
 import { Twemoji } from "../ui/twemoji";
 
@@ -62,8 +62,11 @@ export function AppearanceTab() {
 	const iconType = form.watch("cellAppearance.icon.type");
 	const iconEmoji = form.watch("cellAppearance.icon.emoji");
 	const iconSvg = form.watch("cellAppearance.icon.svg");
-	const activeStyleId = useStore(TimetablePreferencesStore, (s) => s.activeStyleId);
-	const style = getStyleById(activeStyleId);
+	const activeStyleId = useStore(
+		TimetablePreferencesStore,
+		(s) => s.activeStyleId,
+	);
+	const style = resolveTimetableStyle(activeStyleId);
 
 	const hasIcon =
 		iconType &&
@@ -157,7 +160,8 @@ export function AppearanceTab() {
 				<CardHeader>
 					<CardTitle className="text-base">Typography</CardTitle>
 					<CardDescription>
-						Choose a font for this course. This can override the active style font.
+						Choose a font for this course. This can override the active style
+						font.
 					</CardDescription>
 				</CardHeader>
 				<CardContent>

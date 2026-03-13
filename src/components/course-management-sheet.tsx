@@ -1,6 +1,8 @@
 import { ClockIcon, MapPinIcon, PencilIcon, Trash2Icon } from "lucide-react";
 import { useStore } from "zustand";
 import { UiTMAddCourseButton, UiTMProvider } from "~/features/uitm/provider";
+import { useCourseManagementSheet } from "~/lib/contexts/course-management-sheet";
+import { useProviderCourses } from "~/lib/hooks/use-courses";
 import { ColorEntry } from "~/lib/models/color-entry";
 import { Course } from "~/lib/models/course";
 import type { CourseProvider } from "~/lib/models/course-provider";
@@ -9,9 +11,9 @@ import {
 	ManualAddCourseButton,
 	ManualCourseProvider,
 } from "~/lib/providers/manual-course-provider";
-import { useCourseManagementSheet } from "~/lib/contexts/course-management-sheet";
 import { CourseStore } from "~/lib/stores/course-store";
 import { ProviderStore } from "~/lib/stores/provider-store";
+import { resolveCurrentStyleColorByIndex } from "~/lib/stores/timetable-preferences";
 import { CourseEditorDialog } from "./course-editor/course-editor-dialog";
 import {
 	AlertDialog,
@@ -55,7 +57,8 @@ function CourseCard({ course }: { course: Course }) {
 				<div
 					className="mt-1 size-2.5 shrink-0 rounded-full"
 					style={ColorEntry.getBackgroundStyle(
-						course.cellAppearance.background,
+						course.cellAppearance.background ??
+							resolveCurrentStyleColorByIndex(course.themeColorIndex ?? 0),
 					)}
 				/>
 				<div className="min-w-0 space-y-1.5">
@@ -180,7 +183,7 @@ function ProviderEmptyState({ provider }: { provider: CourseProvider }) {
 }
 
 function ProviderSection({ provider }: { provider: CourseProvider }) {
-	const courses = provider.useCourses();
+	const courses = useProviderCourses(provider);
 	const hasCourses = courses.length > 0;
 
 	return (
@@ -222,7 +225,9 @@ function CourseList() {
 }
 
 export function CourseManagementSheetRenderer() {
-	const { _internal: { isOpen, setIsOpen } } = useCourseManagementSheet();
+	const {
+		_internal: { isOpen, setIsOpen },
+	} = useCourseManagementSheet();
 
 	return (
 		<Sheet open={isOpen} onOpenChange={setIsOpen}>

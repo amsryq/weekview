@@ -8,20 +8,23 @@ const timeStringSchema = z
 	.string()
 	.regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format");
 
-const meetingTimeSchema = z.object({
-	day: z.number().int().min(1).max(7),
-	location: z.string().optional(),
-	description: z.string().optional(),
-	startTime: timeStringSchema,
-	endTime: timeStringSchema,
-	cellAppearance: CellAppearanceSchema.partial().optional(),
-}).refine(
-	(data) => Clock.fromString(data.startTime).isBefore(Clock.fromString(data.endTime)),
-	{
-		message: "End time must be after start time",
-		path: ["endTime"],
-	},
-);
+const meetingTimeSchema = z
+	.object({
+		day: z.number().int().min(1).max(7),
+		location: z.string().optional(),
+		description: z.string().optional(),
+		startTime: timeStringSchema,
+		endTime: timeStringSchema,
+		cellAppearance: CellAppearanceSchema.partial().optional(),
+	})
+	.refine(
+		(data) =>
+			Clock.fromString(data.startTime).isBefore(Clock.fromString(data.endTime)),
+		{
+			message: "End time must be after start time",
+			path: ["endTime"],
+		},
+	);
 
 type MeetingTimeConstructorData = {
 	day: number;

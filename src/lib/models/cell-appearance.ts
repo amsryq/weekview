@@ -30,8 +30,8 @@ export const IconAppearanceSchema = z.object({
 export type IconAppearance = z.infer<typeof IconAppearanceSchema>;
 
 export const CellAppearanceSchema = z.object({
-	background: ColorEntry.schema,
-	fgColor: z.string(),
+	background: ColorEntry.schema.optional(),
+	fgColor: z.string().optional(),
 	fontFamily: z.string().optional(),
 	material: CellMaterialSchema.optional(),
 	borderRadius: z.number().optional(),

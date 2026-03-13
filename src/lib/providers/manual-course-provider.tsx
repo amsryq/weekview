@@ -1,6 +1,6 @@
 import { PlusIcon } from "lucide-react";
-import { useImporterDialogs } from "~/lib/contexts/importer-dialogs";
 import { Button } from "~/components/ui/button";
+import { useImporterDialogs } from "~/lib/contexts/importer-dialogs";
 import { CourseProvider } from "../models/course-provider";
 
 let singletonCache: ManualCourseProvider | null = null;

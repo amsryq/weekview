@@ -2,8 +2,14 @@ import { createStore } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { Course } from "../models/course";
 import { MeetingTime } from "../models/meeting-time";
-import { getStyleById, getStyleColorByIndex } from "../models/style";
-import { TimetablePreferencesStore } from "./timetable-preferences";
+import {
+	resolveTimetableStyle,
+	resolveTimetableStyleColorByIndex,
+} from "../utils/timetable-styles";
+import {
+	resolveCurrentStyleColorByIndex,
+	TimetablePreferencesStore,
+} from "./timetable-preferences";
 
 interface State {
 	courses: Course[];
@@ -14,6 +20,7 @@ interface Actions {
 	updateCourse: (courseId: string, data: Course.Schema) => void;
 	removeCourse: (courseId: string) => void;
 	getConflictingCourses: (meetingTimes: MeetingTime[]) => Course[];
+	getCoursesByProvider: (provider: any) => Course[];
 	resetAllToStyle: (styleId: string) => void;
 }
 
@@ -31,15 +38,14 @@ const CourseStore = createStore<State & Actions>()(
 					course.themeColorIndex === null ||
 					course.themeColorIndex === undefined
 				) {
-					const { activeStyleId, timetableColorMode } =
-						TimetablePreferencesStore.getState();
 					const colorIndex = state.courses.length;
 					course.themeColorIndex = colorIndex;
-					course.cellAppearance.background = getStyleColorByIndex(
-						activeStyleId,
-						colorIndex,
-						timetableColorMode,
-					);
+					course.cellAppearance.background =
+						resolveCurrentStyleColorByIndex(colorIndex);
+				}
+
+				if (!course.cellAppearance.fgColor) {
+					course.cellAppearance.fgColor = "#ffffff";
 				}
 
 				state.courses.push(course);
@@ -82,16 +88,21 @@ const CourseStore = createStore<State & Actions>()(
 			);
 		},
 
+		getCoursesByProvider: (provider) => {
+			return get().courses.filter((course) => course.provider === provider);
+		},
+
 		resetAllToStyle: (styleId) =>
 			set((state) => {
 				const { timetableColorMode } = TimetablePreferencesStore.getState();
-				const paletteSize = getStyleById(styleId).variants[timetableColorMode]
-					.gridColors.length;
+				const paletteSize =
+					resolveTimetableStyle(styleId).variants[timetableColorMode].gridColors
+						.length;
 
 				state.courses.forEach((course, index) => {
 					const colorIndex = index % paletteSize;
 					course.themeColorIndex = colorIndex;
-					course.cellAppearance.background = getStyleColorByIndex(
+					course.cellAppearance.background = resolveTimetableStyleColorByIndex(
 						styleId,
 						colorIndex,
 						timetableColorMode,

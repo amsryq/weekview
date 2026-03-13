@@ -5,9 +5,12 @@ import type { PartialDeep } from "type-fest";
 import { useStore } from "zustand";
 import { Course } from "~/lib/models/course";
 import { MeetingTime } from "~/lib/models/meeting-time";
-import { getStyleById, getStyleColorByIndex } from "~/lib/models/style";
 import { CourseStore } from "~/lib/stores/course-store";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
+import {
+	resolveTimetableStyle,
+	resolveTimetableStyleColorByIndex,
+} from "~/lib/utils/timetable-styles";
 import { Button } from "../ui/button";
 import { DialogClose } from "../ui/dialog";
 import { Form, FormMessage } from "../ui/form";
@@ -25,13 +28,16 @@ export function CourseEditorForm({
 	onSubmit,
 	defaultValues,
 }: CourseEditorFormProps) {
-	const activeStyleId = useStore(TimetablePreferencesStore, (s) => s.activeStyleId);
+	const activeStyleId = useStore(
+		TimetablePreferencesStore,
+		(s) => s.activeStyleId,
+	);
 	const timetableColorMode = useStore(
 		TimetablePreferencesStore,
 		(s) => s.timetableColorMode,
 	);
 	const courseCount = useStore(CourseStore, (s) => s.courses.length);
-	const style = getStyleById(activeStyleId);
+	const style = resolveTimetableStyle(activeStyleId);
 	const defaultThemeColorIndex =
 		courseCount % style.variants[timetableColorMode].gridColors.length;
 
@@ -51,7 +57,7 @@ export function CourseEditorForm({
 					},
 				],
 				cellAppearance: {
-					background: getStyleColorByIndex(
+					background: resolveTimetableStyleColorByIndex(
 						activeStyleId,
 						defaultThemeColorIndex,
 						timetableColorMode,

@@ -1,6 +1,5 @@
 import { immerable } from "immer";
 import z from "zod";
-import { ManualCourseProvider } from "../providers/manual-course-provider";
 import { randomUUID } from "../utils/random";
 import { type CellAppearance, CellAppearanceSchema } from "./cell-appearance";
 import type { CourseProvider } from "./course-provider";
@@ -10,7 +9,7 @@ type CourseConstructorProps = {
 	code: string;
 	meetingTimes: MeetingTime[];
 	name?: string;
-	provider?: CourseProvider;
+	provider: CourseProvider;
 	cellAppearance: CellAppearance;
 	themeColorIndex?: number | null;
 };
@@ -52,16 +51,17 @@ export class Course {
 		this.meetingTimes = data.meetingTimes || [];
 		this.cellAppearance = data.cellAppearance;
 		this.themeColorIndex = data.themeColorIndex ?? null;
-		this.provider = data.provider ?? ManualCourseProvider.instance;
+		this.provider = data.provider;
 	}
 
-	public static createFromSchema(data: Course.Schema): Course {
+	public static createFromSchema(data: Course.Schema, provider: CourseProvider): Course {
 		return new Course({
 			code: data.code,
 			name: data.name,
 			meetingTimes: data.meetingTimes.map(MeetingTime.createFromSchema),
 			cellAppearance: data.cellAppearance,
 			themeColorIndex: data.themeColorIndex,
+			provider,
 		});
 	}
 

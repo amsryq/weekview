@@ -1,4 +1,12 @@
-import { BookOpen, CalendarDays, Clock, MapPin, Plus, Timer, Trash2 } from "lucide-react";
+import {
+	BookOpen,
+	CalendarDays,
+	Clock,
+	MapPin,
+	Plus,
+	Timer,
+	Trash2,
+} from "lucide-react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import type { Course } from "~/lib/models/course";
 import { Button } from "../ui/button";
@@ -130,7 +138,8 @@ export function CourseDetailsTab() {
 
 								<div className="flex items-center justify-between gap-3">
 									<div className="inline-flex items-center rounded-full border border-muted-foreground/20 bg-muted/40 px-3 py-1 text-xs font-medium text-muted-foreground">
-										{fields.length} {fields.length === 1 ? "meeting" : "meetings"}
+										{fields.length}{" "}
+										{fields.length === 1 ? "meeting" : "meetings"}
 									</div>
 									<Button
 										type="button"
@@ -157,10 +166,7 @@ export function CourseDetailsTab() {
 
 								<div className="space-y-4">
 									{fields.map((field, index) => (
-										<Card
-											key={field.id}
-											className="border-muted/70 shadow-sm"
-										>
+										<Card key={field.id} className="border-muted/70 shadow-sm">
 											<CardHeader className="pb-4">
 												<div className="flex items-start justify-between gap-3">
 													<div className="min-w-0 space-y-1">
@@ -170,7 +176,9 @@ export function CourseDetailsTab() {
 														</CardTitle>
 														<p className="inline-flex items-center gap-1 rounded-full border border-border/80 bg-background/70 px-2 py-0.5 text-xs text-muted-foreground">
 															<CalendarDays className="h-3 w-3" />
-															{getDayLabel(form.watch(`meetingTimes.${index}.day`))}
+															{getDayLabel(
+																form.watch(`meetingTimes.${index}.day`),
+															)}
 														</p>
 													</div>
 													<Button
@@ -181,7 +189,9 @@ export function CourseDetailsTab() {
 														className="h-8 w-8 shrink-0 p-0 text-muted-foreground hover:text-destructive"
 													>
 														<Trash2 className="h-4 w-4" />
-														<span className="sr-only">Remove meeting {index + 1}</span>
+														<span className="sr-only">
+															Remove meeting {index + 1}
+														</span>
 													</Button>
 												</div>
 											</CardHeader>
@@ -249,14 +259,14 @@ export function CourseDetailsTab() {
 																/>
 															</div>
 
-																<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+															<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 																<FormField
 																	control={form.control}
 																	name={`meetingTimes.${index}.startTime`}
 																	render={({ field }) => (
 																		<FormItem>
-																				<FormLabel className="flex items-center gap-1.5 text-sm font-medium">
-																					<Timer className="h-3.5 w-3.5 text-muted-foreground" />
+																			<FormLabel className="flex items-center gap-1.5 text-sm font-medium">
+																				<Timer className="h-3.5 w-3.5 text-muted-foreground" />
 																				Start Time
 																			</FormLabel>
 																			<FormControl>

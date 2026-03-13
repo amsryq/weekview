@@ -4,15 +4,18 @@ import { useStore } from "zustand";
 import { Clock, TimeRange } from "~/lib/models/clock";
 import { Course } from "~/lib/models/course";
 import { MeetingTime } from "~/lib/models/meeting-time";
-import { getStyleColorByIndex } from "~/lib/models/style";
 import { ManualCourseProvider } from "~/lib/providers/manual-course-provider";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
+import { resolveTimetableStyleColorByIndex } from "~/lib/utils/timetable-styles";
 import { CourseBlock } from "../timetable/course-block";
 
 export function CoursePreview() {
 	const form = useFormContext<Course.Schema>();
 	const formData = form.watch();
-	const activeStyleId = useStore(TimetablePreferencesStore, (s) => s.activeStyleId);
+	const activeStyleId = useStore(
+		TimetablePreferencesStore,
+		(s) => s.activeStyleId,
+	);
 	const timetableColorMode = useStore(
 		TimetablePreferencesStore,
 		(s) => s.timetableColorMode,
@@ -40,7 +43,7 @@ export function CoursePreview() {
 	const resolvedAppearance =
 		formData.themeColorIndex !== null && formData.themeColorIndex !== undefined
 			? toMerged(appearance, {
-					background: getStyleColorByIndex(
+					background: resolveTimetableStyleColorByIndex(
 						activeStyleId,
 						formData.themeColorIndex,
 						timetableColorMode,

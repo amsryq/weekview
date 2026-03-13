@@ -2,7 +2,7 @@ import { stripe } from "@better-auth/stripe";
 import { getRequest } from "@tanstack/react-start/server";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { createAuthMiddleware } from "better-auth/plugins";
+import { createAuthMiddleware } from "better-auth/api";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { cloudflare } from "better-auth-cloudflare";
 import { ENABLE_AUTH_PAYWALL_SERVER } from "./config/feature-flags";
