@@ -1,43 +1,18 @@
 import type { AnyFieldMeta } from "@tanstack/react-form";
-import { type JSX, useEffect, useState } from "react";
+import { type JSX, useState } from "react";
 import type { PartialDeep } from "type-fest";
 import { type CourseFormApi } from "~/lib/contexts/course-editor";
 import { useIsUserSupporter } from "~/lib/hooks/user";
 import { Course } from "~/lib/models/course";
-import { cn } from "~/lib/utils/styles";
 import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "../ui/dialog";
-import {
-	Sheet,
-	SheetContent,
-	SheetDescription,
-	SheetHeader,
-	SheetTitle,
-	SheetTrigger,
-} from "../ui/sheet";
+	ResponsiveDialog,
+	ResponsiveDialogContent,
+	ResponsiveDialogDescription,
+	ResponsiveDialogHeader,
+	ResponsiveDialogTitle,
+	ResponsiveDialogTrigger,
+} from "../ui/responsive-dialog";
 import { CourseEditorForm } from "./course-editor-form";
-
-function useMediaQuery(query: string) {
-	const [matches, setMatches] = useState(false);
-
-	useEffect(() => {
-		const media = window.matchMedia(query);
-		if (media.matches !== matches) {
-			setMatches(media.matches);
-		}
-		const listener = () => setMatches(media.matches);
-		media.addEventListener("change", listener);
-		return () => media.removeEventListener("change", listener);
-	}, [matches, query]);
-
-	return matches;
-}
 
 export function CourseEditorDialog({
 	children,
@@ -57,7 +32,6 @@ export function CourseEditorDialog({
 	const isSupporter = useIsUserSupporter();
 	const [internalOpen, setInternalOpen] = useState(false);
 	const [isDirty, setIsDirty] = useState(false);
-	const isDesktop = useMediaQuery("(min-width: 768px)");
 
 	// Use controlled state if provided, otherwise use internal state
 	const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
@@ -96,64 +70,15 @@ export function CourseEditorDialog({
 		}
 	};
 
-	const header = (
-		<>
-			<div className="flex items-center gap-2">
-				{isDesktop ? <DialogTitle>{title}</DialogTitle> : <SheetTitle>{title}</SheetTitle>}
-				{process.env.NODE_ENV === "development" && isSupporter && (
-					<span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">
-						Supporter
-					</span>
-				)}
-			</div>
-			{isDesktop ? (
-				<DialogDescription>
-					Configure your course details, appearance, and schedule.
-				</DialogDescription>
-			) : (
-				<SheetDescription>
-					Configure your course details, appearance, and schedule.
-				</SheetDescription>
-			)}
-		</>
-	);
-
-	const content = (
-		<CourseEditorForm
-			onSubmit={handleFormSubmit}
-			defaultValues={defaultValues}
-			onDirtyChange={setIsDirty}
-		/>
-	);
-
-	if (isDesktop) {
-		return (
-			<Dialog open={open} onOpenChange={setOpen}>
-				{children && <DialogTrigger asChild>{children}</DialogTrigger>}
-				<DialogContent
-					className="flex flex-col w-full max-w-5xl h-[90vh] p-0 overflow-hidden"
-					onPointerDownOutside={(e) => {
-						if (isDirty) e.preventDefault();
-					}}
-					onEscapeKeyDown={(e) => {
-						if (isDirty) e.preventDefault();
-					}}
-				>
-					<DialogHeader className="px-6 pt-6">
-						{header}
-					</DialogHeader>
-					<div className="flex-1 overflow-hidden">{content}</div>
-				</DialogContent>
-			</Dialog>
-		);
-	}
-
 	return (
-		<Sheet open={open} onOpenChange={setOpen}>
-			{children && <SheetTrigger asChild>{children}</SheetTrigger>}
-			<SheetContent
-				side="bottom"
-				className="h-[95vh] p-0 flex flex-col overflow-hidden rounded-t-2xl"
+		<ResponsiveDialog open={open} onOpenChange={setOpen}>
+			{children && (
+				<ResponsiveDialogTrigger asChild>{children}</ResponsiveDialogTrigger>
+			)}
+			<ResponsiveDialogContent
+				desktopClassName="flex flex-col w-full max-w-5xl h-[90vh] p-0 overflow-hidden"
+				mobileClassName="h-[95vh] p-0 flex flex-col overflow-hidden rounded-t-2xl"
+				sheetSide="bottom"
 				onPointerDownOutside={(e) => {
 					if (isDirty) e.preventDefault();
 				}}
@@ -161,11 +86,27 @@ export function CourseEditorDialog({
 					if (isDirty) e.preventDefault();
 				}}
 			>
-				<SheetHeader className="px-6 pt-6">
-					{header}
-				</SheetHeader>
-				<div className="flex-1 overflow-hidden">{content}</div>
-			</SheetContent>
-		</Sheet>
+				<ResponsiveDialogHeader className="px-6 pt-6">
+					<div className="flex items-center gap-2">
+						<ResponsiveDialogTitle>{title}</ResponsiveDialogTitle>
+						{process.env.NODE_ENV === "development" && isSupporter && (
+							<span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">
+								Supporter
+							</span>
+						)}
+					</div>
+					<ResponsiveDialogDescription>
+						Configure your course details, appearance, and schedule.
+					</ResponsiveDialogDescription>
+				</ResponsiveDialogHeader>
+				<div className="flex-1 overflow-hidden">
+					<CourseEditorForm
+						onSubmit={handleFormSubmit}
+						defaultValues={defaultValues}
+						onDirtyChange={setIsDirty}
+					/>
+				</div>
+			</ResponsiveDialogContent>
+		</ResponsiveDialog>
 	);
 }
