@@ -401,9 +401,11 @@ function Field({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className="flex items-center justify-between gap-2">
-			<Label className="text-sm text-muted-foreground">{label}</Label>
-			{children}
+		<div className="flex sm:items-center justify-between gap-4 max-sm:flex-col">
+			<Label className="text-sm text-muted-foreground shrink-0">{label}</Label>
+			<div className="min-w-0 flex sm:justify-end w-full sm:w-auto">
+				{children}
+			</div>
 		</div>
 	);
 }

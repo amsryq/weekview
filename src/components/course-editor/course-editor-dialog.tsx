@@ -66,7 +66,11 @@ export function CourseEditorDialog({
 
 		if (!hasError) {
 			setIsDirty(false);
-			setOpen(false);
+			if (controlledOnOpenChange !== undefined) {
+				controlledOnOpenChange(false);
+			} else {
+				setInternalOpen(false);
+			}
 		}
 	};
 

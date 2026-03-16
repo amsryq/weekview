@@ -164,7 +164,7 @@ export function CourseDetailsTab() {
 												variant="ghost"
 												size="sm"
 												onClick={() => field.removeValue(index)}
-												className="h-6 w-6 p-0 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive"
+												className="h-6 w-6 p-0 text-muted-foreground sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:text-destructive"
 											>
 												<Trash2 className="h-3 w-3" />
 											</Button>
@@ -256,17 +256,19 @@ export function CourseDetailsTab() {
 												)}
 											</form.Field>
 										</div>
-										{field.state.meta.errors.length > 0 && (
-											<FieldError
-												className="mt-1"
-												errors={field.state.meta.errors.map((e) => ({
-													message: String(e?.message ?? e),
-												}))}
-											/>
-										)}
 									</div>
 								))}
 							</div>
+							<form.Subscribe selector={(state) => state.errorMap?.onChange}>
+								{(error) =>
+									error ? (
+										<FieldError
+											className="mt-2"
+											errors={[{ message: String(error) }]}
+										/>
+									) : null
+								}
+							</form.Subscribe>
 						</div>
 					)}
 				</form.Field>

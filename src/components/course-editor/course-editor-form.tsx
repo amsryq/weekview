@@ -71,6 +71,19 @@ export function CourseEditorForm({
 
 	const form = useForm({
 		validators: {
+			onChange: ({ value }) => {
+				const meetingObjs = value.meetingTimes.map((mt) =>
+					MeetingTime.createFromSchema(mt),
+				);
+				for (let i = 0; i < meetingObjs.length; i++) {
+					for (let j = i + 1; j < meetingObjs.length; j++) {
+						if (meetingObjs[i].overlaps(meetingObjs[j])) {
+							return `Meeting #${i + 1} conflicts with meeting #${j + 1}.`;
+						}
+					}
+				}
+				return undefined;
+			},
 			onSubmit: Course.schema,
 		},
 		defaultValues: toMerged(
@@ -108,25 +121,6 @@ export function CourseEditorForm({
 			defaultValues ?? {},
 		) as Course.Schema,
 		onSubmit: async ({ value, formApi }) => {
-			const meetingObjs = value.meetingTimes.map((mt) =>
-				MeetingTime.createFromSchema(mt),
-			);
-
-			// Check clashes between its own meetings
-			for (let i = 0; i < meetingObjs.length; i++) {
-				for (let j = i + 1; j < meetingObjs.length; j++) {
-					if (meetingObjs[i].overlaps(meetingObjs[j])) {
-						formApi.setFieldMeta(`meetingTimes[${i}]`, (prev) => ({
-							...prev,
-							errorMap: {
-								onSubmit: `This meeting time conflicts with meeting #${j + 1}.`,
-							},
-						}));
-						return;
-					}
-				}
-			}
-
 			onSubmit(value, form);
 		},
 	});
@@ -139,12 +133,12 @@ export function CourseEditorForm({
 
 	useBlocker({
 		shouldBlockFn: () => {
-			if (!isDirty) return false;
+			if (!isDirty || form.state.isSubmitSuccessful) return false;
 			return !window.confirm(
 				"You have unsaved changes in the editor. Are you sure you want to leave?",
 			);
 		},
-		enableBeforeUnload: () => isDirty,
+		enableBeforeUnload: () => isDirty && !form.state.isSubmitSuccessful,
 	});
 
 	const hasErrorMapErrors = (errorMap: Record<string, unknown> | undefined) =>
