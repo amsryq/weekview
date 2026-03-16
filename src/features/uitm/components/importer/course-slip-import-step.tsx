@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import {
 	ResponsiveDialog,
@@ -598,9 +597,6 @@ function CourseSlipImportStepBody() {
 	const isImporting = importPhase === "setup" || importPhase === "importing";
 	const isCancelled = importPhase === "cancelled";
 	const isComplete = importPhase === "complete";
-	const showImportError =
-		Boolean(importMutation.error) &&
-		importMutation.error?.message !== CANCELLED_MESSAGE;
 
 	const progressTitle = isImporting
 		? importPhase === "setup"
@@ -847,13 +843,18 @@ function CourseSlipImportStepBody() {
 				</Button>
 			</div>
 
-			<ResponsiveDialog open={howToOpen} onOpenChange={(open) => setHowToOpen(open)}>
+			<ResponsiveDialog
+				open={howToOpen}
+				onOpenChange={(open) => setHowToOpen(open)}
+			>
 				<ResponsiveDialogContent
 					desktopClassName="flex flex-col sm:max-w-2xl h-[600px] max-h-[85vh]"
 					mobileClassName="max-h-[90vh] rounded-t-2xl p-0 flex flex-col overflow-hidden"
 				>
 					<ResponsiveDialogHeader className="px-6 pt-6">
-						<ResponsiveDialogTitle>Importing your course slip</ResponsiveDialogTitle>
+						<ResponsiveDialogTitle>
+							Importing your course slip
+						</ResponsiveDialogTitle>
 						<ResponsiveDialogDescription className="sr-only">
 							A short guide on how to import your UiTM course slip.
 						</ResponsiveDialogDescription>
@@ -907,7 +908,9 @@ function CourseSlipImportStepBody() {
 							)}
 							<span>{progressTitle}</span>
 						</ResponsiveDialogTitle>
-						<ResponsiveDialogDescription>{progressSubtitle}</ResponsiveDialogDescription>
+						<ResponsiveDialogDescription>
+							{progressSubtitle}
+						</ResponsiveDialogDescription>
 					</ResponsiveDialogHeader>
 
 					<div className="flex-1 space-y-4 py-4 px-6 overflow-y-auto min-h-0">

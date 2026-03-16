@@ -78,7 +78,7 @@ export function SourceSelectionDialog({
 	open,
 	onOpenChange,
 }: SourceSelectionDialogProps) {
-	const { setCurrentStep, setOpen } = useImporterSelectionStore(
+	const { setCurrentStep } = useImporterSelectionStore(
 		useShallow((state) => pickNavigationFns(state)),
 	);
 

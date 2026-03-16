@@ -10,7 +10,6 @@ import {
 	type TimetablePreferences,
 	TimetablePreferencesStore,
 } from "~/lib/stores/timetable-preferences";
-import { cn } from "~/lib/utils/styles";
 import { resolveTimetableStyleColorByIndex } from "~/lib/utils/timetable-styles";
 import { CourseBlock } from "../timetable/course-block";
 

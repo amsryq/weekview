@@ -154,7 +154,7 @@ export function ColorSelectorGrid({ value, onChange }: ColorSelectorGridProps) {
 							<PlusIcon className="size-4" />
 						</Button>
 					</DialogTrigger>
-					<DialogContent>
+					<DialogContent className="sm:max-w-lg">
 						<DialogHeader>
 							<DialogTitle>
 								Add Custom {colorType === "solid" ? "Color" : "Gradient"}

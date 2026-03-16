@@ -3,6 +3,7 @@ import { useBlocker } from "@tanstack/react-router";
 import { toMerged } from "es-toolkit";
 import { BookOpen, Eye, Palette, Smile } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import type { PartialDeep } from "type-fest";
 import { useStore } from "zustand";
 import {
@@ -17,17 +18,19 @@ import {
 	resolveTimetableStyle,
 	resolveTimetableStyleColorByIndex,
 } from "~/lib/utils/timetable-styles";
+import { TimetableCustomizer } from "../settings/timetable-customizer";
 import { Button } from "../ui/button";
 import {
 	Dialog,
+	DialogClose,
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-	DialogClose,
 } from "../ui/dialog";
+import { Separator } from "../ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { AppearanceTab } from "./appearance-tab";
+import { AppearanceTab, IconSection } from "./appearance-tab";
 import { CourseDetailsTab } from "./course-details-tab";
 import { CoursePreview } from "./course-preview";
 import { LayoutTab } from "./layout-tab";
@@ -138,13 +141,37 @@ export function CourseEditorForm({
 		enableBeforeUnload: () => isDirty,
 	});
 
+	const hasErrorMapErrors = (errorMap: Record<string, unknown> | undefined) =>
+		Object.values(errorMap ?? {}).some((error) => {
+			if (Array.isArray(error)) return error.length > 0;
+			return error !== undefined && error !== null && error !== "";
+		});
+
+	const hasFieldErrors = (
+		fieldMeta: Record<string, { errors?: unknown[] } | undefined>,
+		predicate?: (name: string) => boolean,
+	) =>
+		Object.entries(fieldMeta ?? {}).some(
+			([name, meta]) =>
+				(!predicate || predicate(name)) && (meta?.errors?.length ?? 0) > 0,
+		);
+
 	return (
 		<CourseEditorFormContext.Provider value={form}>
 			<form
-				onSubmit={(e) => {
+				onSubmit={async (e) => {
 					e.preventDefault();
 					e.stopPropagation();
-					form.handleSubmit();
+					await form.handleSubmit();
+
+					if (
+						hasFieldErrors(form.state.fieldMeta) ||
+						hasErrorMapErrors(form.state.errorMap)
+					) {
+						toast.error("Could not save course", {
+							description: "Please fix the errors in the form and try again.",
+						});
+					}
 				}}
 				className="flex flex-col h-full min-h-0"
 			>
@@ -154,20 +181,63 @@ export function CourseEditorForm({
 					className="flex-1 flex flex-col min-h-0 gap-0"
 				>
 					<div className="px-4 sm:px-6 pt-2 pb-4">
-						<TabsList className="w-full max-w-2xl mx-auto grid grid-cols-3">
-							<TabsTrigger value="basics" className="gap-2">
-								<BookOpen className="size-4" />
-								<span className="hidden sm:inline">Basics</span>
-							</TabsTrigger>
-							<TabsTrigger value="style" className="gap-2">
-								<Palette className="size-4" />
-								<span className="hidden sm:inline">Style</span>
-							</TabsTrigger>
-							<TabsTrigger value="icon" className="gap-2">
-								<Smile className="size-4" />
-								<span className="hidden sm:inline">Icon</span>
-							</TabsTrigger>
-						</TabsList>
+						<form.Subscribe
+							selector={(state) => [state.fieldMeta, state.errorMap]}
+						>
+							{([fieldMeta, errorMap]) => {
+								const meta = (fieldMeta ?? {}) as Record<
+									string,
+									{ errors?: unknown[] } | undefined
+								>;
+
+								const basicsHasErrors =
+									hasErrorMapErrors(
+										errorMap as Record<string, unknown> | undefined,
+									) ||
+									hasFieldErrors(
+										meta,
+										(name) =>
+											name.startsWith("code") ||
+											name.startsWith("name") ||
+											name.startsWith("meetingTimes"),
+									);
+								const styleHasErrors = hasFieldErrors(
+									meta,
+									(name) =>
+										name.startsWith("cellAppearance") &&
+										!name.startsWith("cellAppearance.icon"),
+								);
+								const iconHasErrors = hasFieldErrors(meta, (name) =>
+									name.startsWith("cellAppearance.icon"),
+								);
+
+								return (
+									<TabsList className="w-full max-w-2xl mx-auto grid grid-cols-3">
+										<TabsTrigger value="basics" className="gap-2">
+											<BookOpen className="size-4" />
+											<span className="hidden sm:inline">Basics</span>
+											{basicsHasErrors && (
+												<span className="bg-destructive rounded-full size-1.5" />
+											)}
+										</TabsTrigger>
+										<TabsTrigger value="style" className="gap-2">
+											<Palette className="size-4" />
+											<span className="hidden sm:inline">Look</span>
+											{styleHasErrors && (
+												<span className="bg-destructive rounded-full size-1.5" />
+											)}
+										</TabsTrigger>
+										<TabsTrigger value="icon" className="gap-2">
+											<Smile className="size-4" />
+											<span className="hidden sm:inline">Icon</span>
+											{iconHasErrors && (
+												<span className="bg-destructive rounded-full size-1.5" />
+											)}
+										</TabsTrigger>
+									</TabsList>
+								);
+							}}
+						</form.Subscribe>
 					</div>
 
 					<div className="flex-1 flex min-h-0 overflow-hidden">
@@ -177,11 +247,29 @@ export function CourseEditorForm({
 									<CourseDetailsTab />
 								</TabsContent>
 								<TabsContent value="style" className="mt-0 space-y-6">
-									<AppearanceTab showIcon={false} />
-									<LayoutTab />
+									<div>
+										<h3 className="text-sm font-medium mb-4">Appearance</h3>
+										<AppearanceTab />
+									</div>
+									<div className="space-y-3">
+										<Separator />
+										<h3 className="text-sm font-medium">Layout</h3>
+										<p className="text-xs text-muted-foreground">
+											These settings are better configured globally.{" "}
+											<TimetableCustomizer initialTab="cells">
+												<button
+													type="button"
+													className="underline underline-offset-2 hover:text-foreground transition-colors"
+												>
+													Open global settings
+												</button>
+											</TimetableCustomizer>
+										</p>
+										<LayoutTab />
+									</div>
 								</TabsContent>
 								<TabsContent value="icon" className="mt-0">
-									<AppearanceTab showOnlyIcon={true} />
+									<IconSection />
 								</TabsContent>
 							</div>
 						</div>
@@ -231,11 +319,7 @@ export function CourseEditorForm({
 							Reset
 						</Button>
 						<DialogClose asChild>
-							<Button
-								type="button"
-								variant="outline"
-								size="sm"
-							>
+							<Button type="button" variant="outline" size="sm">
 								Cancel
 							</Button>
 						</DialogClose>

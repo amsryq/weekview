@@ -10,6 +10,8 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import {
 	ResponsiveDialog,
 	ResponsiveDialogContent,
@@ -17,8 +19,6 @@ import {
 	ResponsiveDialogHeader,
 	ResponsiveDialogTitle,
 } from "~/components/ui/responsive-dialog";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import { CourseStore } from "~/lib/stores/course-store";
 import { UiTMCourseSection } from "../../course-section";
@@ -377,7 +377,9 @@ function MyStudentImportContent() {
 							)}
 							<span>{progressTitle}</span>
 						</ResponsiveDialogTitle>
-						<ResponsiveDialogDescription>{progressSubtitle}</ResponsiveDialogDescription>
+						<ResponsiveDialogDescription>
+							{progressSubtitle}
+						</ResponsiveDialogDescription>
 					</ResponsiveDialogHeader>
 
 					<div className="flex-1 space-y-4 py-4 px-6 overflow-y-auto min-h-0">

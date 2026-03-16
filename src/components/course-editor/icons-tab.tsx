@@ -14,6 +14,19 @@ import { Tabs, TabsContent } from "../ui/tabs";
 import { Textarea } from "../ui/textarea";
 import { Twemoji } from "../ui/twemoji";
 
+const getFieldErrorMessage = (error: unknown) => {
+	if (typeof error === "string") {
+		return error;
+	}
+
+	if (typeof error === "object" && error !== null && "message" in error) {
+		const message = (error as { message?: unknown }).message;
+		return typeof message === "string" ? message : String(message ?? error);
+	}
+
+	return String(error);
+};
+
 export function IconsTab() {
 	const form = useCourseEditorForm();
 	const iconType = useFormStore(
@@ -51,7 +64,7 @@ export function IconsTab() {
 						</FieldDescription>
 						<FieldError
 							errors={field.state.meta.errors.map((e) => ({
-								message: String(e?.message ?? e),
+								message: getFieldErrorMessage(e),
 							}))}
 						/>
 					</Field>
@@ -101,7 +114,7 @@ export function IconsTab() {
 								</FieldDescription>
 								<FieldError
 									errors={field.state.meta.errors.map((e) => ({
-										message: String(e?.message ?? e),
+										message: getFieldErrorMessage(e),
 									}))}
 								/>
 							</Field>
@@ -143,7 +156,7 @@ export function IconsTab() {
 								</FieldDescription>
 								<FieldError
 									errors={field.state.meta.errors.map((e) => ({
-										message: String(e?.message ?? e),
+										message: getFieldErrorMessage(e),
 									}))}
 								/>
 							</Field>
@@ -173,7 +186,7 @@ export function IconsTab() {
 							<FieldDescription>Adjust the icon transparency</FieldDescription>
 							<FieldError
 								errors={field.state.meta.errors.map((e) => ({
-									message: String(e?.message ?? e),
+									message: getFieldErrorMessage(e),
 								}))}
 							/>
 						</Field>
@@ -197,7 +210,7 @@ export function IconsTab() {
 							<FieldDescription>Adjust the icon size</FieldDescription>
 							<FieldError
 								errors={field.state.meta.errors.map((e) => ({
-									message: String(e?.message ?? e),
+									message: getFieldErrorMessage(e),
 								}))}
 							/>
 						</Field>
@@ -219,7 +232,7 @@ export function IconsTab() {
 							<FieldDescription>Rotate the icon</FieldDescription>
 							<FieldError
 								errors={field.state.meta.errors.map((e) => ({
-									message: String(e?.message ?? e),
+									message: getFieldErrorMessage(e),
 								}))}
 							/>
 						</Field>
@@ -244,7 +257,7 @@ export function IconsTab() {
 								<FieldDescription>Horizontal distance</FieldDescription>
 								<FieldError
 									errors={field.state.meta.errors.map((e) => ({
-										message: String(e?.message ?? e),
+										message: getFieldErrorMessage(e),
 									}))}
 								/>
 							</Field>
@@ -268,7 +281,7 @@ export function IconsTab() {
 								<FieldDescription>Vertical distance from top</FieldDescription>
 								<FieldError
 									errors={field.state.meta.errors.map((e) => ({
-										message: String(e?.message ?? e),
+										message: getFieldErrorMessage(e),
 									}))}
 								/>
 							</Field>

@@ -10,6 +10,7 @@ import { useMemo, useState } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import {
 	ResponsiveDialog,
 	ResponsiveDialogContent,
@@ -17,7 +18,6 @@ import {
 	ResponsiveDialogHeader,
 	ResponsiveDialogTitle,
 } from "~/components/ui/responsive-dialog";
-import { Input } from "~/components/ui/input";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import {
 	Combobox,

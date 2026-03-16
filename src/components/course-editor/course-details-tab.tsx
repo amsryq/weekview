@@ -1,12 +1,4 @@
-import {
-	BookOpen,
-	CalendarDays,
-	Clock,
-	MapPin,
-	Plus,
-	Timer,
-	Trash2,
-} from "lucide-react";
+import { Clock, MapPin, Plus, Timer, Trash2 } from "lucide-react";
 import { useCourseEditorForm } from "~/lib/contexts/course-editor";
 import { Button } from "../ui/button";
 import { FieldError } from "../ui/field";
@@ -33,6 +25,19 @@ const DAYS_OF_WEEK = [
 const getDayLabel = (dayValue?: number) =>
 	DAYS_OF_WEEK.find((day) => day.value === dayValue)?.label ?? "Select day";
 
+const getFieldErrorMessage = (error: unknown) => {
+	if (typeof error === "string") {
+		return error;
+	}
+
+	if (typeof error === "object" && error !== null && "message" in error) {
+		const message = (error as { message?: unknown }).message;
+		return typeof message === "string" ? message : String(message ?? error);
+	}
+
+	return String(error);
+};
+
 export function CourseDetailsTab() {
 	const form = useCourseEditorForm();
 	return (
@@ -57,7 +62,7 @@ export function CourseDetailsTab() {
 									{isInvalid && (
 										<FieldError
 											errors={field.state.meta.errors.map((e) => ({
-												message: String(e),
+												message: getFieldErrorMessage(e),
 											}))}
 										/>
 									)}
@@ -85,7 +90,7 @@ export function CourseDetailsTab() {
 									{isInvalid && (
 										<FieldError
 											errors={field.state.meta.errors.map((e) => ({
-												message: String(e),
+												message: getFieldErrorMessage(e),
 											}))}
 										/>
 									)}

@@ -1,17 +1,10 @@
 import { useStore as useFormStore } from "@tanstack/react-form";
-import {
-	ChevronDown,
-	ChevronRight,
-	Settings,
-	Smile,
-} from "lucide-react";
+import { ChevronDown, ChevronRight, Settings, Smile } from "lucide-react";
 import { useState } from "react";
 import { useStore } from "zustand";
 import { useCourseEditorForm } from "~/lib/contexts/course-editor";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
-import { PREDEFINED_FONTS } from "~/lib/utils/fonts";
 import { resolveTimetableStyle } from "~/lib/utils/timetable-styles";
-import { cn } from "~/lib/utils/styles";
 import { PaywallOverlay } from "../paywall-overlay";
 import { ColorSelectorGrid } from "../settings/color-selector-grid";
 import { Button } from "../ui/button";
@@ -26,8 +19,8 @@ import {
 	EmojiPickerFooter,
 	EmojiPickerSearch,
 } from "../ui/emoji-picker";
-import { Label } from "../ui/label";
 import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import {
 	Select,
@@ -40,52 +33,14 @@ import { Slider } from "../ui/slider";
 import { Textarea } from "../ui/textarea";
 import { Twemoji } from "../ui/twemoji";
 
-export function AppearanceTab({
-	showIcon = true,
-	showOnlyIcon = false,
-}: {
-	showIcon?: boolean;
-	showOnlyIcon?: boolean;
-}) {
+export function AppearanceTab() {
 	const form = useCourseEditorForm();
-	const [iconSettingsOpen, setIconSettingsOpen] = useState(false);
 
-	// Watch all icon-related fields at the top level to avoid conditional hook usage
-	const iconType = useFormStore(
-		form.store,
-		(s) => s.values.cellAppearance?.icon?.type,
-	);
-	const iconEmoji = useFormStore(
-		form.store,
-		(s) => s.values.cellAppearance?.icon?.emoji,
-	);
-	const iconSvg = useFormStore(
-		form.store,
-		(s) => s.values.cellAppearance?.icon?.svg,
-	);
 	const activeStyleId = useStore(
 		TimetablePreferencesStore,
 		(s) => s.activeStyleId,
 	);
-	const style = resolveTimetableStyle(activeStyleId);
-
-	const hasIcon =
-		iconType &&
-		((iconType === "emoji" && iconEmoji && iconEmoji.trim() !== "") ||
-			(iconType === "svg" && iconSvg && iconSvg.trim() !== ""));
-
-	if (showOnlyIcon) {
-		return (
-			<IconSection
-				form={form}
-				iconType={iconType}
-				iconEmoji={iconEmoji}
-				iconSettingsOpen={iconSettingsOpen}
-				setIconSettingsOpen={setIconSettingsOpen}
-				hasIcon={!!hasIcon}
-			/>
-		);
-	}
+	const _style = resolveTimetableStyle(activeStyleId);
 
 	return (
 		<div className="space-y-6">
@@ -133,64 +88,32 @@ export function AppearanceTab({
 					)}
 				</form.Field>
 			</Section>
-
-			<Section title="Typography">
-				<form.Field name="cellAppearance.fontFamily">
-					{(field) => (
-						<Field label="Font">
-							<Select
-								onValueChange={field.handleChange}
-								value={field.state.value ?? style.fontFamily}
-							>
-								<SelectTrigger className="h-8 text-xs w-48">
-									<SelectValue placeholder="Select font" />
-								</SelectTrigger>
-								<SelectContent>
-									{PREDEFINED_FONTS.map((font) => (
-										<SelectItem key={font} value={font} className="text-xs">
-											<span style={{ fontFamily: `'${font}', sans-serif` }}>
-												{font}
-											</span>
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</Field>
-					)}
-				</form.Field>
-			</Section>
-
-			{/* Icon Section */}
-			{showIcon && (
-				<IconSection
-					form={form}
-					iconType={iconType}
-					iconEmoji={iconEmoji}
-					iconSettingsOpen={iconSettingsOpen}
-					setIconSettingsOpen={setIconSettingsOpen}
-					hasIcon={!!hasIcon}
-				/>
-			)}
 		</div>
 	);
 }
 
-function IconSection({
-	form,
-	iconType,
-	iconEmoji,
-	iconSettingsOpen,
-	setIconSettingsOpen,
-	hasIcon,
-}: {
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-	form: any;
-	iconType: any;
-	iconEmoji: any;
-	iconSettingsOpen: boolean;
-	setIconSettingsOpen: (v: boolean) => void;
-	hasIcon: boolean;
-}) {
+export function IconSection() {
+	const form = useCourseEditorForm();
+
+	const [iconSettingsOpen, setIconSettingsOpen] = useState(false);
+
+	const iconType = useFormStore(
+		form.store,
+		(s) => s.values.cellAppearance?.icon?.type,
+	);
+	const iconEmoji = useFormStore(
+		form.store,
+		(s) => s.values.cellAppearance?.icon?.emoji,
+	);
+	const iconSvg = useFormStore(
+		form.store,
+		(s) => s.values.cellAppearance?.icon?.svg,
+	);
+	const hasIcon =
+		iconType &&
+		((iconType === "emoji" && iconEmoji && iconEmoji.trim() !== "") ||
+			(iconType === "svg" && iconSvg && iconSvg.trim() !== ""));
+
 	return (
 		<PaywallOverlay
 			title="Premium Feature"
@@ -199,7 +122,7 @@ function IconSection({
 		>
 			<Section title="Icon">
 				<form.Field name="cellAppearance.icon.type">
-					{(field: any) => (
+					{(field) => (
 						<Field label="Icon Type">
 							<Select
 								onValueChange={(v) => field.handleChange(v as "emoji" | "svg")}
@@ -224,7 +147,7 @@ function IconSection({
 				{/* Emoji Input */}
 				{iconType === "emoji" && (
 					<form.Field name="cellAppearance.icon.emoji">
-						{(field: any) => (
+						{(field) => (
 							<Field label="Emoji">
 								<div className="flex items-center gap-2">
 									<Popover modal={true}>
@@ -276,7 +199,7 @@ function IconSection({
 				{/* SVG Input */}
 				{iconType === "svg" && (
 					<form.Field name="cellAppearance.icon.svg">
-						{(field: any) => (
+						{(field) => (
 							<Field label="SVG Code">
 								<div className="space-y-4 w-full">
 									<Textarea
@@ -333,12 +256,14 @@ function IconSection({
 							</CollapsibleTrigger>
 							<CollapsibleContent className="space-y-3 pt-4 border-l pl-4 ml-1.5">
 								<form.Field name="cellAppearance.icon.opacity">
-									{(field: any) => (
+									{(field) => (
 										<Field label="Opacity">
 											<div className="flex items-center gap-3">
 												<Slider
 													value={[field.state.value ?? 0]}
-													onValueChange={(value) => field.handleChange(value[0])}
+													onValueChange={(value) =>
+														field.handleChange(value[0])
+													}
 													min={0}
 													max={1}
 													step={0.1}
@@ -353,12 +278,14 @@ function IconSection({
 								</form.Field>
 
 								<form.Field name="cellAppearance.icon.size">
-									{(field: any) => (
+									{(field) => (
 										<Field label="Size">
 											<div className="flex items-center gap-3">
 												<Slider
 													value={[field.state.value ?? 1]}
-													onValueChange={(value) => field.handleChange(value[0])}
+													onValueChange={(value) =>
+														field.handleChange(value[0])
+													}
 													min={1}
 													max={5}
 													step={0.1}
@@ -373,12 +300,14 @@ function IconSection({
 								</form.Field>
 
 								<form.Field name="cellAppearance.icon.rotation">
-									{(field: any) => (
+									{(field) => (
 										<Field label="Rotation">
 											<div className="flex items-center gap-3">
 												<Slider
 													value={[field.state.value ?? 0]}
-													onValueChange={(value) => field.handleChange(value[0])}
+													onValueChange={(value) =>
+														field.handleChange(value[0])
+													}
 													min={-180}
 													max={180}
 													step={15}
@@ -393,12 +322,14 @@ function IconSection({
 								</form.Field>
 
 								<form.Field name="cellAppearance.icon.offsetX">
-									{(field: any) => (
+									{(field) => (
 										<Field label="X Offset">
 											<div className="flex items-center gap-3">
 												<Slider
 													value={[field.state.value || 8]}
-													onValueChange={(value) => field.handleChange(value[0])}
+													onValueChange={(value) =>
+														field.handleChange(value[0])
+													}
 													min={0}
 													max={50}
 													step={2}
@@ -413,12 +344,14 @@ function IconSection({
 								</form.Field>
 
 								<form.Field name="cellAppearance.icon.offsetY">
-									{(field: any) => (
+									{(field) => (
 										<Field label="Y Offset">
 											<div className="flex items-center gap-3">
 												<Slider
 													value={[field.state.value || 8]}
-													onValueChange={(value) => field.handleChange(value[0])}
+													onValueChange={(value) =>
+														field.handleChange(value[0])
+													}
 													min={0}
 													max={50}
 													step={2}

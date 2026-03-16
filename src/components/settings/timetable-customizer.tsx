@@ -29,15 +29,19 @@ import { BackgroundImageUpload } from "./background-image-upload";
 import { CellAppearanceLayoutSettings } from "./cell-appearance-layout-settings";
 import { StyleSelector } from "./style-selector";
 
-type TabValue = "styles" | "layout" | "background" | "cells";
+export type TabValue = "styles" | "layout" | "background" | "cells";
 
 interface TimetableCustomizerProps {
 	children: React.ReactNode;
+	initialTab?: TabValue;
 }
 
-export function TimetableCustomizer({ children }: TimetableCustomizerProps) {
+export function TimetableCustomizer({
+	children,
+	initialTab,
+}: TimetableCustomizerProps) {
 	const prefs = useStore(TimetablePreferencesStore);
-	const [activeTab, setActiveTab] = useState<TabValue>("styles");
+	const [activeTab, setActiveTab] = useState<TabValue>(initialTab ?? "styles");
 
 	const handleCellAppearanceChange = (changes: PartialDeep<CellAppearance>) => {
 		TimetablePreferencesStore.setState((writable) => {
@@ -86,8 +90,8 @@ export function TimetableCustomizer({ children }: TimetableCustomizerProps) {
 								</TabsTrigger>
 								<TabsTrigger value="cells" className="gap-2">
 									<Palette className="size-4" />
-									<span className="hidden sm:inline">Cell Styles</span>
-								</TabsTrigger>
+									<span className="hidden sm:inline">Cell Layout</span>
+								</TabsTrigger>{" "}
 							</TabsList>
 						</div>
 
@@ -200,9 +204,10 @@ function LayoutOption({
 			onClick={onClick}
 			className={`
 				flex flex-col items-center gap-3 p-4 rounded-lg border-2 transition-all
-				${isSelected
-					? "border-primary bg-primary/5"
-					: "border-muted hover:border-muted-foreground/30"
+				${
+					isSelected
+						? "border-primary bg-primary/5"
+						: "border-muted hover:border-muted-foreground/30"
 				}
 			`}
 		>
