@@ -76,8 +76,8 @@ export function CourseEditorDialog({
 				<ResponsiveDialogTrigger asChild>{children}</ResponsiveDialogTrigger>
 			)}
 			<ResponsiveDialogContent
-				desktopClassName="w-full max-w-5xl h-[90vh]"
-				mobileClassName="h-[75vh]"
+				desktopClassName="w-full max-w-5xl h-[90dvh]"
+				mobileClassName="h-[75dvh]"
 				sheetSide="bottom"
 				onPointerDownOutside={(e) => {
 					if (isDirty) e.preventDefault();

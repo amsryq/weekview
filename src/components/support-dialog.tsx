@@ -28,7 +28,7 @@ export function SupportDialog() {
 
 	return (
 		<Dialog open={isOpen} onOpenChange={closeSupportDialog}>
-			<DialogContent className="sm:max-w-4xl max-h-[80vh] overflow-y-scroll sm:overflow-y-visible">
+			<DialogContent className="sm:max-w-4xl max-h-[80dvh] overflow-y-scroll sm:overflow-y-visible">
 				{/* Star sticker */}
 				<div className="hidden sm:inline-block absolute right-16 -top-2 rotate-6 select-none">
 					<Twemoji emoji="⭐" className="block scale-500 drop-shadow" />

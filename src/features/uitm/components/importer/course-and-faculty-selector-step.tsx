@@ -88,7 +88,7 @@ export function CourseAndFacultySelectorDialog({
 		<ResponsiveDialog open={open} onOpenChange={onOpenChange}>
 			<ResponsiveDialogContent
 				desktopClassName="sm:max-w-xl"
-				mobileClassName="max-h-[95vh]"
+				mobileClassName="max-h-[95dvh]"
 			>
 				<ResponsiveDialogHeader className="gap-1">
 					<ResponsiveDialogTitle className="flex items-center gap-2 text-lg">

@@ -138,8 +138,8 @@ export function CustomStyleEditorDialog({
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onOpenChange}>
-			<DialogContent className="max-w-5xl gap-0 overflow-hidden p-0 sm:max-h-[88vh]">
-				<div className="flex h-[88vh] max-h-[88vh] min-h-155 flex-col bg-background max-sm:h-[95vh] max-sm:max-h-[95vh] max-sm:min-h-0">
+			<DialogContent className="max-w-5xl gap-0 overflow-hidden p-0 sm:max-h-[88dvh]">
+				<div className="flex h-[88dvh] max-h-[88dvh] min-h-155 flex-col bg-background max-sm:h-[95dvh] max-sm:max-h-[95dvh] max-sm:min-h-0">
 					<DialogHeader className="border-b bg-linear-to-b from-muted/40 to-background px-4 pb-4 pt-5 sm:px-6 sm:pt-6">
 						<div className="space-y-1.5">
 							<DialogTitle>Edit Style</DialogTitle>

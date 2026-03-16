@@ -91,7 +91,7 @@ export function SourceSelectionDialog({
 			<ResponsiveDialogTrigger asChild>{trigger}</ResponsiveDialogTrigger>
 			<ResponsiveDialogContent
 				desktopClassName="sm:max-w-xl h-180"
-				mobileClassName="max-h-[95vh]"
+				mobileClassName="max-h-[95dvh]"
 			>
 				<ResponsiveDialogHeader className="gap-1">
 					<ResponsiveDialogTitle>Import from UiTM</ResponsiveDialogTitle>

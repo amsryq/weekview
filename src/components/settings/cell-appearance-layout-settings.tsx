@@ -302,60 +302,64 @@ export function CellAppearanceLayoutSettings({
 							)}
 						</SmartField>
 
-						<div className="grid gap-3">
-							{CELL_ELEMENTS.map((element) => (
-								<div key={element} className="contents">
-									<SmartField<boolean>
-										form={form}
-										name={`${namePrefix}.visibility.${element}`}
-										value={value?.visibility?.[element]}
-										baseValue={base.visibility?.[element]}
-										fallback={true}
-										onChange={(v) =>
-											onChange?.({ visibility: { [element]: v } })
-										}
-									>
-										{(visible, setVisible) => (
-											<SmartField<number>
-												form={form}
-												name={`${namePrefix}.fontSize.${element}`}
-												value={value?.fontSize?.[element]}
-												baseValue={base.fontSize?.[element]}
-												fallback={12}
-												onChange={(v) =>
-													onChange?.({ fontSize: { [element]: v } })
-												}
-											>
-												{(size, setSize) => (
-													<SmartField<FontWeight>
-														form={form}
-														name={`${namePrefix}.weight.${element}`}
-														value={value?.weight?.[element]}
-														baseValue={base.weight?.[element]}
-														fallback="normal"
-														onChange={(v) =>
-															onChange?.({ weight: { [element]: v } })
-														}
-													>
-														{(weight, setWeight) => (
-															<ElementRow
-																label={ELEMENT_LABELS[element]}
-																visible={visible}
-																fontSize={size}
-																fontWeight={weight}
-																showSizeControl={!autoSize}
-																onToggleVisibility={() => setVisible(!visible)}
-																onFontSizeChange={setSize}
-																onFontWeightChange={setWeight}
-															/>
-														)}
-													</SmartField>
-												)}
-											</SmartField>
-										)}
-									</SmartField>
-								</div>
-							))}
+						<div className="overflow-x-auto -mx-1 px-1 pb-1">
+							<div className="grid gap-3 w-max min-w-full">
+								{CELL_ELEMENTS.map((element) => (
+									<div key={element} className="contents">
+										<SmartField<boolean>
+											form={form}
+											name={`${namePrefix}.visibility.${element}`}
+											value={value?.visibility?.[element]}
+											baseValue={base.visibility?.[element]}
+											fallback={true}
+											onChange={(v) =>
+												onChange?.({ visibility: { [element]: v } })
+											}
+										>
+											{(visible, setVisible) => (
+												<SmartField<number>
+													form={form}
+													name={`${namePrefix}.fontSize.${element}`}
+													value={value?.fontSize?.[element]}
+													baseValue={base.fontSize?.[element]}
+													fallback={12}
+													onChange={(v) =>
+														onChange?.({ fontSize: { [element]: v } })
+													}
+												>
+													{(size, setSize) => (
+														<SmartField<FontWeight>
+															form={form}
+															name={`${namePrefix}.weight.${element}`}
+															value={value?.weight?.[element]}
+															baseValue={base.weight?.[element]}
+															fallback="normal"
+															onChange={(v) =>
+																onChange?.({ weight: { [element]: v } })
+															}
+														>
+															{(weight, setWeight) => (
+																<ElementRow
+																	label={ELEMENT_LABELS[element]}
+																	visible={visible}
+																	fontSize={size}
+																	fontWeight={weight}
+																	showSizeControl={!autoSize}
+																	onToggleVisibility={() =>
+																		setVisible(!visible)
+																	}
+																	onFontSizeChange={setSize}
+																	onFontWeightChange={setWeight}
+																/>
+															)}
+														</SmartField>
+													)}
+												</SmartField>
+											)}
+										</SmartField>
+									</div>
+								))}
+							</div>
 						</div>
 					</Section>
 				)}

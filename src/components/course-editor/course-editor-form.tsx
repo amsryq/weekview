@@ -1,7 +1,7 @@
 import { useForm, useStore as useFormStore } from "@tanstack/react-form";
 import { useBlocker } from "@tanstack/react-router";
 import { toMerged } from "es-toolkit";
-import { BookOpen, Eye, Palette, Smile } from "lucide-react";
+import { BookOpen, Eye, Info, Palette, Smile } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { PartialDeep } from "type-fest";
@@ -19,6 +19,7 @@ import {
 	resolveTimetableStyleColorByIndex,
 } from "~/lib/utils/timetable-styles";
 import { TimetableCustomizer } from "../settings/timetable-customizer";
+import { Alert, AlertDescription } from "../ui/alert";
 import { Button } from "../ui/button";
 import {
 	Dialog,
@@ -269,17 +270,21 @@ export function CourseEditorForm({
 								<div className="space-y-3">
 									<Separator />
 									<h3 className="text-sm font-medium">Layout</h3>
-									<p className="text-xs text-muted-foreground">
-										These settings are better configured globally.{" "}
-										<TimetableCustomizer initialTab="cells">
-											<button
-												type="button"
-												className="underline underline-offset-2 hover:text-foreground transition-colors"
-											>
-												Open global settings
-											</button>
-										</TimetableCustomizer>
-									</p>
+									<Alert className="flex items-center gap-2 border-none bg-muted/50 px-3 py-2">
+										<Info className="size-4 shrink-0" />
+										<AlertDescription className="inline text-xs">
+											Manage these settings in{" "}
+											<TimetableCustomizer initialTab="cells">
+												<button
+													type="button"
+													className="font-medium underline underline-offset-2 hover:text-foreground transition-colors text-foreground"
+												>
+													global preferences
+												</button>
+											</TimetableCustomizer>{" "}
+											for a consistent look.
+										</AlertDescription>
+									</Alert>
 									<LayoutTab />
 								</div>
 							</ResponsiveTabsContent>

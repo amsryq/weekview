@@ -158,7 +158,7 @@ function EmojiPickerFooter({
 
 export {
 	EmojiPicker,
-	EmojiPickerSearch,
 	EmojiPickerContent,
 	EmojiPickerFooter,
+	EmojiPickerSearch,
 };

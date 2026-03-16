@@ -63,8 +63,8 @@ export function TimetableCustomizer({
 		<ResponsiveDialog>
 			<ResponsiveDialogTrigger asChild>{children}</ResponsiveDialogTrigger>
 			<ResponsiveDialogContent
-				desktopClassName="sm:max-w-4xl h-160 max-h-[85vh]"
-				mobileClassName="h-[75vh]"
+				desktopClassName="sm:max-w-4xl h-160 max-h-[85dvh]"
+				mobileClassName="h-[75dvh]"
 			>
 				<ResponsiveDialogHeader>
 					<ResponsiveDialogTitle>Customize Timetable</ResponsiveDialogTitle>

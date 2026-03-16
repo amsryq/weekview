@@ -150,7 +150,7 @@ export function GroupSelectorDialog({
 		<ResponsiveDialog open={open} onOpenChange={onOpenChange}>
 			<ResponsiveDialogContent
 				desktopClassName="sm:max-w-4xl"
-				mobileClassName="max-h-[95vh]"
+				mobileClassName="max-h-[95dvh]"
 			>
 				<ResponsiveDialogHeader className="gap-1">
 					<ResponsiveDialogTitle className="flex items-center gap-2 text-lg">
@@ -248,7 +248,7 @@ export function GroupSelectorDialog({
 									</SheetTrigger>
 									<SheetContent
 										side="bottom"
-										className="max-h-[80vh] pb-4 overflow-hidden border border-border/60 rounded-t-2xl sm:max-w-xl"
+										className="max-h-[80dvh] pb-4 overflow-hidden border border-border/60 rounded-t-2xl sm:max-w-xl"
 									>
 										<SheetHeader className="px-6 pt-6 text-left">
 											<SheetTitle>Selected groups</SheetTitle>
@@ -256,7 +256,7 @@ export function GroupSelectorDialog({
 												Organise the groups you&apos;ve added to your timetable.
 											</SheetDescription>
 										</SheetHeader>
-										<ScrollArea className="mx-6 h-[40vh] sm:h-[260px] rounded-lg border border-border/50 bg-background my-4">
+										<ScrollArea className="mx-6 h-[40dvh] sm:h-[260px] rounded-lg border border-border/50 bg-background my-4">
 											<div className="space-y-2 p-3">
 												{selectionCount ? (
 													selectedGroups.map(({ internal }) => (

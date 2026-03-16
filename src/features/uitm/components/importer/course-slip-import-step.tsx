@@ -849,7 +849,7 @@ function CourseSlipImportStepBody() {
 			>
 				<ResponsiveDialogContent
 					desktopClassName="flex flex-col sm:max-w-2xl"
-					mobileClassName="max-h-[90vh] rounded-t-2xl p-0 flex flex-col overflow-hidden"
+					mobileClassName="max-h-[90dvh] rounded-t-2xl p-0 flex flex-col overflow-hidden"
 				>
 					<ResponsiveDialogHeader className="px-6 pt-6">
 						<ResponsiveDialogTitle>
@@ -895,7 +895,7 @@ function CourseSlipImportStepBody() {
 			>
 				<ResponsiveDialogContent
 					desktopClassName="sm:max-w-2xl"
-					mobileClassName="max-h-[90vh]"
+					mobileClassName="max-h-[90dvh]"
 				>
 					<ResponsiveDialogHeader>
 						<ResponsiveDialogTitle className="flex items-center gap-2">
@@ -1049,7 +1049,7 @@ export function CourseSlipImportDialog({
 		<ResponsiveDialog open={open} onOpenChange={onOpenChange}>
 			<ResponsiveDialogContent
 				desktopClassName="sm:max-w-2xl"
-				mobileClassName="max-h-[95vh]"
+				mobileClassName="max-h-[95dvh]"
 			>
 				<CourseSlipImportStepBody />
 			</ResponsiveDialogContent>

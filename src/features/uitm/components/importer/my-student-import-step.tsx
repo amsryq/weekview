@@ -364,7 +364,7 @@ function MyStudentImportContent() {
 			>
 				<ResponsiveDialogContent
 					desktopClassName="sm:max-w-2xl"
-					mobileClassName="max-h-[90vh]"
+					mobileClassName="max-h-[90dvh]"
 				>
 					<ResponsiveDialogHeader>
 						<ResponsiveDialogTitle className="flex items-center gap-2">
@@ -477,7 +477,7 @@ export function MyStudentImportDialog({
 		<ResponsiveDialog open={open} onOpenChange={onOpenChange}>
 			<ResponsiveDialogContent
 				desktopClassName="sm:max-w-xl"
-				mobileClassName="max-h-[95vh]"
+				mobileClassName="max-h-[95dvh]"
 			>
 				<MyStudentImportContent />
 			</ResponsiveDialogContent>
