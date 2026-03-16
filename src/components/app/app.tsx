@@ -7,6 +7,7 @@ import { Button } from "~/components/ui/button";
 import { useCourseManagementSheet } from "~/lib/contexts/course-management-sheet";
 import { useTheme } from "~/lib/contexts/themes";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
+import { ManageCoursesTooltip } from "./manage-courses-tooltip";
 
 function App() {
 	const { applyingTheme } = useTheme();
@@ -19,10 +20,12 @@ function App() {
 	return (
 		<div className="flex flex-col flex-1 items-center justify-center">
 			<div className="m-4 flex flex-wrap justify-center gap-2">
-				<Button variant="outline" onClick={openSheet}>
-					<Settings className="w-4 h-4" />
-					Manage Courses
-				</Button>
+				<ManageCoursesTooltip>
+					<Button variant="outline" onClick={openSheet}>
+						<Settings className="w-4 h-4" />
+						Manage Courses
+					</Button>
+				</ManageCoursesTooltip>
 				<TimetableCustomizer>
 					<Button variant="outline">
 						<Settings2Icon className="w-4 h-4" />
