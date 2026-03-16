@@ -24,7 +24,12 @@ import {
 	ResponsiveDialogTitle,
 	ResponsiveDialogTrigger,
 } from "../ui/responsive-dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import {
+	ResponsiveTabs,
+	ResponsiveTabsContent,
+	ResponsiveTabsList,
+	ResponsiveTabsTrigger,
+} from "../ui/responsive-tabs";
 import { BackgroundImageUpload } from "./background-image-upload";
 import { CellAppearanceLayoutSettings } from "./cell-appearance-layout-settings";
 import { StyleSelector } from "./style-selector";
@@ -58,7 +63,7 @@ export function TimetableCustomizer({
 		<ResponsiveDialog>
 			<ResponsiveDialogTrigger asChild>{children}</ResponsiveDialogTrigger>
 			<ResponsiveDialogContent
-				desktopClassName="sm:max-w-2xl h-160 max-h-[85vh]"
+				desktopClassName="sm:max-w-4xl h-160 max-h-[85vh]"
 				mobileClassName="h-[75vh]"
 			>
 				<ResponsiveDialogHeader>
@@ -68,70 +73,81 @@ export function TimetableCustomizer({
 					</ResponsiveDialogDescription>
 				</ResponsiveDialogHeader>
 
-				<div className="flex-1 flex flex-col min-h-0">
-					<Tabs
+				<div className="flex-1 flex flex-col min-h-0 sm:flex-row sm:overflow-hidden">
+					<ResponsiveTabs
 						value={activeTab}
 						onValueChange={(v) => setActiveTab(v as TabValue)}
-						className="flex-1 flex flex-col min-h-0"
+						className="flex-1 flex min-h-0"
+						mobileClassName="flex-col"
 					>
-						<div className="px-6 pt-2 pb-4">
-							<TabsList className="w-full grid grid-cols-4 shrink-0">
-								<TabsTrigger value="styles" className="gap-2">
-									<SwatchBook className="size-4" />
-									<span className="hidden sm:inline">Styles</span>
-								</TabsTrigger>
-								<TabsTrigger value="layout" className="gap-2">
-									<LayoutGridIcon className="size-4" />
-									<span className="hidden sm:inline">Layout</span>
-								</TabsTrigger>
-								<TabsTrigger value="background" className="gap-2">
-									<ImageIcon className="size-4" />
-									<span className="hidden sm:inline">Background</span>
-								</TabsTrigger>
-								<TabsTrigger value="cells" className="gap-2">
-									<Palette className="size-4" />
-									<span className="hidden sm:inline">Cell Layout</span>
-								</TabsTrigger>{" "}
-							</TabsList>
-						</div>
+						<ResponsiveTabsList
+							mobileWrapperClassName="px-6 pt-2 pb-4 shrink-0"
+							mobileClassName="w-full grid grid-cols-4 shrink-0"
+						>
+							<ResponsiveTabsTrigger value="styles" className="gap-2">
+								<SwatchBook className="size-4" />
+								<span>Styles</span>
+							</ResponsiveTabsTrigger>
+							<ResponsiveTabsTrigger value="layout" className="gap-2">
+								<LayoutGridIcon className="size-4" />
+								<span>Layout</span>
+							</ResponsiveTabsTrigger>
+							<ResponsiveTabsTrigger value="background" className="gap-2">
+								<ImageIcon className="size-4" />
+								<span className="sm:hidden">BG</span>
+								<span className="hidden sm:inline">Background</span>
+							</ResponsiveTabsTrigger>
+							<ResponsiveTabsTrigger value="cells" className="gap-2">
+								<Palette className="size-4" />
+								<span className="sm:hidden">Cells</span>
+								<span className="hidden sm:inline">Cell Layout</span>
+							</ResponsiveTabsTrigger>
+						</ResponsiveTabsList>
 
-						<div className="flex-1 overflow-y-auto px-6 py-4 min-h-0">
-							<TabsContent value="styles" className="mt-0">
-								<StyleSelector />
-							</TabsContent>
+						<div className="flex-1 min-h-0 sm:overflow-y-auto flex flex-col">
+							<div className="flex-1 sm:flex-none overflow-y-auto sm:overflow-visible px-6 py-4 sm:p-0 min-h-0">
+								<ResponsiveTabsContent value="styles" className="mt-0">
+									<StyleSelector />
+								</ResponsiveTabsContent>
 
-							<TabsContent value="layout" className="mt-0 space-y-6">
-								<LayoutSettings
-									layout={prefs.layout}
-									onLayoutChange={(layout) => prefs.setValue("layout", layout)}
-								/>
-							</TabsContent>
-
-							<TabsContent value="background" className="mt-0">
-								<PaywallOverlay
-									title="Premium Feature"
-									description="Background images are available for supporters only."
-									className="rounded-lg"
+								<ResponsiveTabsContent
+									value="layout"
+									className="mt-0 space-y-6"
 								>
-									<BackgroundSettings
-										backgroundImage={prefs.backgroundImage}
-										backgroundImageOptions={prefs.backgroundImageOptions}
-										onBackgroundImageChange={prefs.setBackgroundImage}
-										onBackgroundImageOptionsChange={
-											prefs.setBackgroundImageOptions
+									<LayoutSettings
+										layout={prefs.layout}
+										onLayoutChange={(layout) =>
+											prefs.setValue("layout", layout)
 										}
 									/>
-								</PaywallOverlay>
-							</TabsContent>
+								</ResponsiveTabsContent>
 
-							<TabsContent value="cells" className="mt-0">
-								<CellAppearanceLayoutSettings
-									value={prefs.cellAppearance}
-									onChange={handleCellAppearanceChange}
-								/>
-							</TabsContent>
+								<ResponsiveTabsContent value="background" className="mt-0">
+									<PaywallOverlay
+										title="Premium Feature"
+										description="Background images are available for supporters only."
+										className="rounded-lg"
+									>
+										<BackgroundSettings
+											backgroundImage={prefs.backgroundImage}
+											backgroundImageOptions={prefs.backgroundImageOptions}
+											onBackgroundImageChange={prefs.setBackgroundImage}
+											onBackgroundImageOptionsChange={
+												prefs.setBackgroundImageOptions
+											}
+										/>
+									</PaywallOverlay>
+								</ResponsiveTabsContent>
+
+								<ResponsiveTabsContent value="cells" className="mt-0">
+									<CellAppearanceLayoutSettings
+										value={prefs.cellAppearance}
+										onChange={handleCellAppearanceChange}
+									/>
+								</ResponsiveTabsContent>
+							</div>
 						</div>
-					</Tabs>
+					</ResponsiveTabs>
 				</div>
 
 				<div className="flex justify-between gap-2 p-6 border-t mt-auto">
