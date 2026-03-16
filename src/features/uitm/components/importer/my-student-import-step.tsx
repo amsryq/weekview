@@ -333,7 +333,7 @@ function MyStudentImportContent() {
 				)}
 			</div>
 
-			<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-t p-6 mt-auto">
+			<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between p-6 mt-auto">
 				<Button
 					variant="outline"
 					onClick={() => setCurrentStep("source")}
@@ -363,7 +363,7 @@ function MyStudentImportContent() {
 				}}
 			>
 				<ResponsiveDialogContent
-					desktopClassName="sm:max-w-2xl h-[600px] max-h-[85vh]"
+					desktopClassName="sm:max-w-2xl"
 					mobileClassName="max-h-[90vh]"
 				>
 					<ResponsiveDialogHeader>
@@ -444,7 +444,7 @@ function MyStudentImportContent() {
 						)}
 					</div>
 
-					<div className="flex w-full flex-col gap-2 sm:flex-row sm:justify-between border-t p-6 mt-auto">
+					<div className="flex w-full flex-col gap-2 sm:flex-row sm:justify-between p-6 mt-auto">
 						<Button
 							variant="ghost"
 							onClick={requestCancel}
@@ -476,7 +476,7 @@ export function MyStudentImportDialog({
 	return (
 		<ResponsiveDialog open={open} onOpenChange={onOpenChange}>
 			<ResponsiveDialogContent
-				desktopClassName="sm:max-w-xl h-[600px] max-h-[85vh]"
+				desktopClassName="sm:max-w-xl"
 				mobileClassName="max-h-[95vh]"
 			>
 				<MyStudentImportContent />

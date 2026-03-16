@@ -149,7 +149,7 @@ export function GroupSelectorDialog({
 	return (
 		<ResponsiveDialog open={open} onOpenChange={onOpenChange}>
 			<ResponsiveDialogContent
-				desktopClassName="sm:max-w-4xl h-[700px] max-h-[90vh]"
+				desktopClassName="sm:max-w-4xl"
 				mobileClassName="max-h-[95vh]"
 			>
 				<ResponsiveDialogHeader className="gap-1">

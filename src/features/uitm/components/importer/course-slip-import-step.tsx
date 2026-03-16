@@ -813,7 +813,7 @@ function CourseSlipImportStepBody() {
 				)}
 			</div>
 
-			<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-t p-6 mt-auto">
+			<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between p-6 mt-auto">
 				<div className="flex w-full flex-col-reverse gap-2 sm:flex-row sm:w-auto">
 					<Button
 						variant="outline"
@@ -848,7 +848,7 @@ function CourseSlipImportStepBody() {
 				onOpenChange={(open) => setHowToOpen(open)}
 			>
 				<ResponsiveDialogContent
-					desktopClassName="flex flex-col sm:max-w-2xl h-[600px] max-h-[85vh]"
+					desktopClassName="flex flex-col sm:max-w-2xl"
 					mobileClassName="max-h-[90vh] rounded-t-2xl p-0 flex flex-col overflow-hidden"
 				>
 					<ResponsiveDialogHeader className="px-6 pt-6">
@@ -894,7 +894,7 @@ function CourseSlipImportStepBody() {
 				}}
 			>
 				<ResponsiveDialogContent
-					desktopClassName="sm:max-w-2xl h-[600px] max-h-[85vh]"
+					desktopClassName="sm:max-w-2xl"
 					mobileClassName="max-h-[90vh]"
 				>
 					<ResponsiveDialogHeader>
@@ -1048,7 +1048,7 @@ export function CourseSlipImportDialog({
 	return (
 		<ResponsiveDialog open={open} onOpenChange={onOpenChange}>
 			<ResponsiveDialogContent
-				desktopClassName="sm:max-w-2xl h-[700px] max-h-[90vh]"
+				desktopClassName="sm:max-w-2xl"
 				mobileClassName="max-h-[95vh]"
 			>
 				<CourseSlipImportStepBody />

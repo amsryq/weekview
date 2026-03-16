@@ -90,7 +90,7 @@ export function SourceSelectionDialog({
 		<ResponsiveDialog open={open} onOpenChange={onOpenChange}>
 			<ResponsiveDialogTrigger asChild>{trigger}</ResponsiveDialogTrigger>
 			<ResponsiveDialogContent
-				desktopClassName="sm:max-w-xl h-[600px] max-h-[85vh]"
+				desktopClassName="sm:max-w-xl h-180"
 				mobileClassName="max-h-[95vh]"
 			>
 				<ResponsiveDialogHeader className="gap-1">
@@ -149,7 +149,7 @@ export function SourceSelectionDialog({
 					</section>
 				</div>
 
-				<div className="flex flex-col gap-2 sm:flex-row sm:justify-end border-t p-6 mt-auto">
+				<div className="flex flex-col gap-2 sm:flex-row sm:justify-end p-6 mt-auto">
 					<ResponsiveDialogClose asChild>
 						<Button variant="secondary" className="w-full sm:w-auto">
 							Close
