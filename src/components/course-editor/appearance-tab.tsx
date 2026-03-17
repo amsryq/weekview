@@ -49,7 +49,7 @@ export function AppearanceTab() {
 				<form.Field name="cellAppearance.background">
 					{(field) => (
 						<Field label="Background">
-							<div className="flex flex-col gap-2">
+							<div className="flex flex-col gap-2 grow">
 								<ColorSelectorGrid
 									value={field.state.value}
 									onChange={(value) => {

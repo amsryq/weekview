@@ -243,7 +243,7 @@ export function CourseEditorForm({
 					</form.Subscribe>
 
 					<div className="flex-1 flex min-h-0 sm:overflow-hidden">
-						<div className="flex-1 flex flex-col min-h-0 sm:overflow-y-auto">
+						<div className="flex-1 flex flex-col min-h-0 min-w-0 sm:overflow-y-auto">
 							<ResponsiveTabsContent
 								value="basics"
 								className="mt-0 max-w-2xl mx-auto w-full"
@@ -264,7 +264,7 @@ export function CourseEditorForm({
 								<div className="space-y-3">
 									<Separator />
 									<h3 className="text-sm font-medium">Layout</h3>
-									<Alert className="flex items-center gap-2 border-none bg-muted/50 px-3 py-2">
+									<Alert>
 										<Info className="size-4 shrink-0" />
 										<AlertDescription className="inline text-xs">
 											Manage these settings in{" "}
