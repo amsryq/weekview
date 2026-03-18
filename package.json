@@ -16,7 +16,8 @@
 		"db:migrate:dev": "drizzle-kit migrate",
 		"db:migrate:prod": "NODE_ENV=production drizzle-kit migrate",
 		"db:studio:dev": "drizzle-kit studio",
-		"db:studio:prod": "NODE_ENV=production drizzle-kit studio"
+		"db:studio:prod": "NODE_ENV=production drizzle-kit studio",
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@better-auth/client": "0.0.2-alpha.3",
