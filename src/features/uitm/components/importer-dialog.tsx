@@ -6,12 +6,15 @@ import { useImporterDialogs } from "~/lib/contexts/importer-dialogs";
 import { Course } from "~/lib/models/course";
 import { ManualCourseProvider } from "~/lib/providers/manual-course-provider";
 import { CourseStore } from "~/lib/stores/course-store";
-import { CourseAndFacultySelectorDialog } from "./importer/course-and-faculty-selector-step";
-import { CourseSlipImportDialog } from "./importer/course-slip-import-step";
-import { GroupSelectorDialog } from "./importer/group-selector-step";
-import { MyStudentImportDialog } from "./importer/my-student-import-step";
-import { ImporterStep, useImporterSelectionStore } from "./importer/shared";
-import { SourceSelectionDialog } from "./importer/source-selection-step";
+import { CourseAndFacultySelectorDialog } from "./importer/components/course-and-faculty-selector-step";
+import { CourseSlipImportDialog } from "./importer/components/course-slip-import-step";
+import { GroupSelectorDialog } from "./importer/components/group-selector-step";
+import { MyStudentImportDialog } from "./importer/components/my-student-import-step";
+import { SourceSelectionDialog } from "./importer/components/source-selection-step";
+import {
+	ImporterStep,
+	useImporterSelectionStore,
+} from "./importer/utils/shared";
 
 export function UiTMImporterDialog({
 	open,

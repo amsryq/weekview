@@ -9,6 +9,7 @@ import {
 	Square,
 	Type,
 } from "lucide-react";
+import { memo } from "react";
 import type { PartialDeep } from "type-fest";
 import type { CourseFormApi } from "~/lib/contexts/course-editor";
 import {
@@ -26,8 +27,8 @@ import {
 	HoverCard,
 	HoverCardContent,
 	HoverCardTrigger,
-} from "../ui/hover-card";
-import { Label } from "../ui/label";
+} from "../../ui/hover-card";
+import { Label } from "../../ui/label";
 
 import {
 	Select,
@@ -35,9 +36,9 @@ import {
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "../ui/select";
-import { Slider } from "../ui/slider";
-import { Switch } from "../ui/switch";
+} from "../../ui/select";
+import { Slider } from "../../ui/slider";
+import { Switch } from "../../ui/switch";
 
 const IS_FIREFOX =
 	typeof window !== "undefined" && /Firefox/.test(navigator.userAgent);
@@ -65,6 +66,21 @@ const ELEMENT_LABELS: Record<ElementKey, string> = {
 	time: "Time",
 	location: "Location",
 };
+
+// Helper to get material-specific options
+function _getMaterialOptions<T extends keyof typeof DEFAULT_BLUR_OPTIONS>(
+	material: CellMaterial,
+	property: T,
+): (typeof DEFAULT_BLUR_OPTIONS)[T] | (typeof DEFAULT_GLASS_OPTIONS)[T] {
+	if (material === "glass") {
+		return DEFAULT_GLASS_OPTIONS[property];
+	}
+	if (material === "blur") {
+		return DEFAULT_BLUR_OPTIONS[property];
+	}
+	// For "basic", return a reasonable default (won't be used but type-safe)
+	return DEFAULT_BLUR_OPTIONS[property];
+}
 
 export function CellAppearanceLayoutSettings({
 	value,
@@ -448,7 +464,7 @@ function Field({
 	);
 }
 
-function AlignmentPicker({
+const AlignmentPicker = memo(function AlignmentPicker({
 	value,
 	onChange,
 }: {
@@ -480,9 +496,9 @@ function AlignmentPicker({
 			))}
 		</div>
 	);
-}
+});
 
-function MaterialPicker({
+const MaterialPicker = memo(function MaterialPicker({
 	value,
 	onChange,
 }: {
@@ -535,7 +551,7 @@ function MaterialPicker({
 			})}
 		</div>
 	);
-}
+});
 
 function ElementRow({
 	label,

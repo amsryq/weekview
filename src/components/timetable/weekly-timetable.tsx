@@ -1,27 +1,28 @@
 import { PlusIcon } from "lucide-react";
-import { createContext, useContext, useMemo } from "react";
+import { createContext, memo, useContext, useMemo } from "react";
 import { RequiredDeep } from "type-fest";
 import { useStore } from "zustand";
+import { useShallow } from "zustand/react/shallow";
 import { UiTMAddCourseButton } from "~/features/uitm/provider";
 import { useImporterDialogs } from "~/lib/contexts/importer-dialogs";
-import { useMounted } from "~/lib/hooks/useMounted";
 import type { CellAppearance } from "~/lib/models/cell-appearance";
 import type { Course } from "~/lib/models/course";
 import type { MeetingTime } from "~/lib/models/meeting-time";
-import { CourseStore } from "~/lib/stores/course-store";
 import { CustomStylesStore } from "~/lib/stores/custom-styles-store";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
-import {
-	resolveTimetableStyle,
-	resolveTimetableStyleVariant,
-} from "~/lib/utils/timetable-styles";
+import { resolveTimetableStyleVariant } from "~/lib/utils/timetable-styles";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
+import {
+	COLUMN_BLOCK_HEIGHT_PX,
+	DAY_TO_INDEX,
+	ROW_BLOCK_WIDTH_PX,
+} from "./constants";
 import { CourseBlock } from "./course-block";
-
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const ROW_BLOCK_WIDTH_PX = 84;
-const COLUMN_BLOCK_HEIGHT_PX = 84;
+import { useTimetableAppearance } from "./hooks/use-timetable-appearance";
+import { useTimetableData } from "./hooks/use-timetable-data";
+import { useTimetableLayout } from "./hooks/use-timetable-layout";
+import { useTimetablePreferences } from "./hooks/use-timetable-preferences";
 
 interface TimetableContextProps {
 	courses: Course[];
@@ -50,7 +51,7 @@ interface PositionedCourseBlockProps {
 	timeSlots: string[];
 }
 
-function PositionedCourseBlock({
+const PositionedCourseBlock = memo(function PositionedCourseBlock({
 	course,
 	meetingTime,
 	appearance,
@@ -67,7 +68,7 @@ function PositionedCourseBlock({
 	const durationHours = endOffsetHours - startOffsetHours;
 	const earliestHour = Number.parseInt(timeSlots[0].split(":")[0]);
 
-	const positionStyle: React.CSSProperties = (() => {
+	const positionStyle = useMemo<React.CSSProperties>(() => {
 		if (layout === "rows") {
 			return {
 				position: "absolute",
@@ -76,16 +77,15 @@ function PositionedCourseBlock({
 				top: "2px",
 				bottom: "0px",
 			};
-		} else {
-			return {
-				position: "absolute",
-				top: `${(startOffsetHours - earliestHour) * COLUMN_BLOCK_HEIGHT_PX}px`,
-				height: `${durationHours * COLUMN_BLOCK_HEIGHT_PX}px`,
-				left: "2px",
-				right: "0px",
-			};
 		}
-	})();
+		return {
+			position: "absolute",
+			top: `${(startOffsetHours - earliestHour) * COLUMN_BLOCK_HEIGHT_PX}px`,
+			height: `${durationHours * COLUMN_BLOCK_HEIGHT_PX}px`,
+			left: "2px",
+			right: "0px",
+		};
+	}, [layout, startOffsetHours, earliestHour, durationHours]);
 
 	return (
 		<div style={positionStyle}>
@@ -97,19 +97,18 @@ function PositionedCourseBlock({
 			/>
 		</div>
 	);
-}
+});
 
 function DayColumn({ day, dayIndex }: { day: string; dayIndex: number }) {
 	const { courses, timeSlots, columnHeight, rowWidth, layout } = useTimetable();
 	const prefs = useStore(TimetablePreferencesStore);
 	useStore(CustomStylesStore);
-	const activeStyleId = useStore(
+	const { activeStyleId, timetableColorMode } = useStore(
 		TimetablePreferencesStore,
-		(s) => s.activeStyleId,
-	);
-	const timetableColorMode = useStore(
-		TimetablePreferencesStore,
-		(s) => s.timetableColorMode,
+		useShallow((s) => ({
+			activeStyleId: s.activeStyleId,
+			timetableColorMode: s.timetableColorMode,
+		})),
 	);
 	const activeStyle = resolveTimetableStyleVariant(
 		activeStyleId,
@@ -190,13 +189,12 @@ function RowLayout({
 	containerId: string;
 }) {
 	const { timeSlots, backgroundStyle, overlayStyle } = useTimetable();
-	const activeStyleId = useStore(
+	const { activeStyleId, timetableColorMode } = useStore(
 		TimetablePreferencesStore,
-		(s) => s.activeStyleId,
-	);
-	const timetableColorMode = useStore(
-		TimetablePreferencesStore,
-		(s) => s.timetableColorMode,
+		useShallow((s) => ({
+			activeStyleId: s.activeStyleId,
+			timetableColorMode: s.timetableColorMode,
+		})),
 	);
 	const activeStyle = resolveTimetableStyleVariant(
 		activeStyleId,
@@ -236,7 +234,11 @@ function RowLayout({
 					</div>
 
 					{visibleDays.map((day: string) => (
-						<DayColumn key={day} day={day} dayIndex={DAYS.indexOf(day)} />
+						<DayColumn
+							key={day}
+							day={day}
+							dayIndex={DAY_TO_INDEX.get(day) ?? 0}
+						/>
 					))}
 				</div>
 			</div>
@@ -252,13 +254,12 @@ function ColumnLayout({
 	containerId: string;
 }) {
 	const { timeSlots, backgroundStyle, overlayStyle } = useTimetable();
-	const activeStyleId = useStore(
+	const { activeStyleId, timetableColorMode } = useStore(
 		TimetablePreferencesStore,
-		(s) => s.activeStyleId,
-	);
-	const timetableColorMode = useStore(
-		TimetablePreferencesStore,
-		(s) => s.timetableColorMode,
+		(s) => ({
+			activeStyleId: s.activeStyleId,
+			timetableColorMode: s.timetableColorMode,
+		}),
 	);
 	const activeStyle = resolveTimetableStyleVariant(
 		activeStyleId,
@@ -298,7 +299,11 @@ function ColumnLayout({
 					</div>
 
 					{visibleDays.map((day: string) => (
-						<DayColumn key={day} day={day} dayIndex={DAYS.indexOf(day)} />
+						<DayColumn
+							key={day}
+							day={day}
+							dayIndex={DAY_TO_INDEX.get(day) ?? 0}
+						/>
 					))}
 				</div>
 			</div>
@@ -317,104 +322,29 @@ interface WeeklyTimetableProps {
 
 export function WeeklyTimetable({
 	layout,
-	courses: _courses,
+	courses: coursesProp,
 	containerId = "weekly-timetable",
 }: WeeklyTimetableProps) {
-	const mounted = useMounted();
-	const courses = useStore(CourseStore, (state) => _courses || state.courses);
-	useStore(CustomStylesStore);
-	const prefsLayout = useStore(TimetablePreferencesStore, (s) => s.layout);
-	const backgroundImage = useStore(
-		TimetablePreferencesStore,
-		(s) => s.backgroundImage,
+	const { mounted, courses } = useTimetableData(coursesProp);
+	const {
+		prefsLayout,
+		backgroundImage,
+		activeStyleId,
+		timetableColorMode,
+		globalFontFamily,
+		backgroundImageOptions,
+	} = useTimetablePreferences();
+	const { effectiveLayout, visibleDays, timeSlots, columnHeight, rowWidth } =
+		useTimetableLayout(courses, layout, prefsLayout);
+	const { backgroundStyle, overlayStyle } = useTimetableAppearance(
+		activeStyleId,
+		timetableColorMode,
+		globalFontFamily,
+		backgroundImage,
+		backgroundImageOptions,
 	);
-	const activeStyleId = useStore(
-		TimetablePreferencesStore,
-		(s) => s.activeStyleId,
-	);
-	const timetableColorMode = useStore(
-		TimetablePreferencesStore,
-		(s) => s.timetableColorMode,
-	);
-	const globalFontFamily = useStore(
-		TimetablePreferencesStore,
-		(s) => s.cellAppearance.fontFamily,
-	);
-	const backgroundImageOptions = useStore(
-		TimetablePreferencesStore,
-		(s) => s.backgroundImageOptions,
-	);
-	const activeStyleMeta = resolveTimetableStyle(activeStyleId);
-	const activeStyle = activeStyleMeta.variants[timetableColorMode];
-	// Allow prop override; default to preferences
-	const effectiveLayout = layout ?? prefsLayout;
-
-	const visibleDays = useMemo(() => {
-		const maxDay = Math.max(
-			5,
-			...courses.flatMap((c) => c.meetingTimes.map((mt) => mt.day)),
-		);
-		return DAYS.slice(0, maxDay);
-	}, [courses]);
-
-	const { timeSlots, columnHeight, rowWidth } = useMemo(() => {
-		if (courses.length === 0) {
-			const slots: string[] = [];
-			for (let hour = 8; hour <= 18; hour++) {
-				slots.push(`${hour.toString().padStart(2, "0")}:00`);
-			}
-			return {
-				timeSlots: slots,
-				columnHeight: slots.length * COLUMN_BLOCK_HEIGHT_PX,
-				rowWidth: slots.length * ROW_BLOCK_WIDTH_PX,
-			};
-		}
-
-		let earliestHour = 24;
-		let latestHour = 0;
-
-		courses.forEach((course) => {
-			course.meetingTimes.forEach((mt) => {
-				earliestHour = Math.min(earliestHour, mt.time.start.hour);
-				latestHour = Math.max(latestHour, mt.time.end.hour);
-			});
-		});
-
-		earliestHour = Math.min(8, Math.max(6, earliestHour));
-		latestHour = Math.max(Math.min(23, latestHour - 1), 18);
-
-		const slots: string[] = [];
-		for (let hour = earliestHour; hour <= latestHour; hour++) {
-			slots.push(`${hour.toString().padStart(2, "0")}:00`);
-		}
-
-		return {
-			timeSlots: slots,
-			columnHeight: slots.length * COLUMN_BLOCK_HEIGHT_PX,
-			rowWidth: slots.length * ROW_BLOCK_WIDTH_PX,
-		};
-	}, [courses]);
-
-	const backgroundStyle = backgroundImage
-		? {
-				backgroundImage: `url(${backgroundImage})`,
-				backgroundSize: "cover",
-				backgroundPosition: "center",
-				backgroundRepeat: "no-repeat",
-				backgroundColor: activeStyle.background.color,
-				fontFamily: `'${globalFontFamily ?? activeStyleMeta.fontFamily}', sans-serif`,
-				borderRadius: "8px",
-			}
-		: {
-				backgroundColor: activeStyle.background.color,
-				fontFamily: `'${globalFontFamily ?? activeStyleMeta.fontFamily}', sans-serif`,
-			};
-
-	const overlayStyle = backgroundImage
-		? { opacity: 1 - backgroundImageOptions.opacity }
-		: undefined;
-
 	const isEmpty = courses.length === 0;
+
 	const { openManualImporter } = useImporterDialogs();
 
 	return (

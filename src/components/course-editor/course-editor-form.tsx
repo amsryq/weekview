@@ -1,23 +1,11 @@
-import { useForm, useStore as useFormStore } from "@tanstack/react-form";
-import { useBlocker } from "@tanstack/react-router";
-import { toMerged } from "es-toolkit";
 import { BookOpen, Eye, Info, Palette, Smile } from "lucide-react";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { useState } from "react";
 import type { PartialDeep } from "type-fest";
-import { useStore } from "zustand";
 import {
 	CourseEditorFormContext,
 	type CourseFormApi,
 } from "~/lib/contexts/course-editor";
 import { Course } from "~/lib/models/course";
-import { MeetingTime } from "~/lib/models/meeting-time";
-import { CourseStore } from "~/lib/stores/course-store";
-import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
-import {
-	resolveTimetableStyle,
-	resolveTimetableStyleColorByIndex,
-} from "~/lib/utils/timetable-styles";
 import { TimetableCustomizer } from "../settings/timetable-customizer";
 import { Alert, AlertDescription } from "../ui/alert";
 import { Button } from "../ui/button";
@@ -39,7 +27,12 @@ import { Separator } from "../ui/separator";
 import { AppearanceTab, IconSection } from "./appearance-tab";
 import { CourseDetailsTab } from "./course-details-tab";
 import { CoursePreview } from "./course-preview";
+import { useCourseEditorNavigation } from "./hooks/use-course-editor-navigation";
+import { useCourseForm } from "./hooks/use-course-form";
+import { useCourseValidation } from "./hooks/use-course-validation";
 import { LayoutTab } from "./layout-tab";
+
+type TabValue = "basics" | "style" | "icon";
 
 interface CourseEditorFormProps {
 	onSubmit: (data: Course.Schema, form: CourseFormApi) => void;
@@ -47,134 +40,29 @@ interface CourseEditorFormProps {
 	onDirtyChange?: (isDirty: boolean) => void;
 }
 
-type TabValue = "basics" | "style" | "icon";
-
 export function CourseEditorForm({
 	onSubmit,
 	defaultValues,
 	onDirtyChange,
 }: CourseEditorFormProps) {
-	const activeStyleId = useStore(
-		TimetablePreferencesStore,
-		(s) => s.activeStyleId,
-	);
-	const timetableColorMode = useStore(
-		TimetablePreferencesStore,
-		(s) => s.timetableColorMode,
-	);
-	const courseCount = useStore(CourseStore, (s) => s.courses.length);
-	const style = resolveTimetableStyle(activeStyleId);
-	const defaultThemeColorIndex =
-		courseCount % style.variants[timetableColorMode].gridColors.length;
-
 	const [activeTab, setActiveTab] = useState<TabValue>("basics");
 
-	const form = useForm({
-		validators: {
-			onChange: ({ value }) => {
-				const meetingObjs = value.meetingTimes.map((mt) =>
-					MeetingTime.createFromSchema(mt),
-				);
-				for (let i = 0; i < meetingObjs.length; i++) {
-					for (let j = i + 1; j < meetingObjs.length; j++) {
-						if (meetingObjs[i].overlaps(meetingObjs[j])) {
-							return `Meeting #${i + 1} conflicts with meeting #${j + 1}.`;
-						}
-					}
-				}
-				return undefined;
-			},
-			onSubmit: Course.schema,
-		},
-		defaultValues: toMerged(
-			{
-				code: "",
-				name: "",
-				themeColorIndex: defaultThemeColorIndex,
-				meetingTimes: [
-					{
-						day: 1,
-						location: "",
-						startTime: "10:00",
-						endTime: "12:00",
-					},
-				],
-				cellAppearance: {
-					background: resolveTimetableStyleColorByIndex(
-						activeStyleId,
-						defaultThemeColorIndex,
-						timetableColorMode,
-					),
-					fgColor: "#ffffff",
-					icon: {
-						type: "emoji",
-						emoji: "",
-						svg: "",
-						opacity: 0.7,
-						rotation: 15,
-						offsetX: 12,
-						offsetY: 12,
-						size: 3,
-					},
-				},
-			} satisfies Course.Schema,
-			defaultValues ?? {},
-		) as Course.Schema,
-		onSubmit: async ({ value, formApi }) => {
-			onSubmit(value, form);
-		},
+	const { form, isDirty } = useCourseForm({
+		onSubmit,
+		defaultValues,
+		onDirtyChange,
 	});
 
-	const isDirty = useFormStore(form.store, (s) => s.isDirty);
+	const { validateForm, getTabErrors } = useCourseValidation(form);
 
-	useEffect(() => {
-		onDirtyChange?.(isDirty);
-	}, [isDirty, onDirtyChange]);
-
-	useBlocker({
-		shouldBlockFn: () => {
-			if (!isDirty || form.state.isSubmitSuccessful) return false;
-			return !window.confirm(
-				"You have unsaved changes in the editor. Are you sure you want to leave?",
-			);
-		},
-		enableBeforeUnload: () => isDirty && !form.state.isSubmitSuccessful,
+	useCourseEditorNavigation({
+		isDirty,
+		isSubmitSuccessful: form.state.isSubmitSuccessful,
 	});
-
-	const hasErrorMapErrors = (errorMap: Record<string, unknown> | undefined) =>
-		Object.values(errorMap ?? {}).some((error) => {
-			if (Array.isArray(error)) return error.length > 0;
-			return error !== undefined && error !== null && error !== "";
-		});
-
-	const hasFieldErrors = (
-		fieldMeta: Record<string, { errors?: unknown[] } | undefined>,
-		predicate?: (name: string) => boolean,
-	) =>
-		Object.entries(fieldMeta ?? {}).some(
-			([name, meta]) =>
-				(!predicate || predicate(name)) && (meta?.errors?.length ?? 0) > 0,
-		);
 
 	return (
 		<CourseEditorFormContext.Provider value={form}>
-			<form
-				onSubmit={async (e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					await form.handleSubmit();
-
-					if (
-						hasFieldErrors(form.state.fieldMeta) ||
-						hasErrorMapErrors(form.state.errorMap)
-					) {
-						toast.error("Could not save course", {
-							description: "Please fix the errors in the form and try again.",
-						});
-					}
-				}}
-				className="flex flex-col h-full min-h-0"
-			>
+			<form onSubmit={validateForm} className="flex flex-col h-full min-h-0">
 				<ResponsiveTabs
 					value={activeTab}
 					onValueChange={(v) => setActiveTab(v as TabValue)}
@@ -189,27 +77,11 @@ export function CourseEditorForm({
 								string,
 								{ errors?: unknown[] } | undefined
 							>;
-
-							const basicsHasErrors =
-								hasErrorMapErrors(
-									errorMap as Record<string, unknown> | undefined,
-								) ||
-								hasFieldErrors(
+							const { basicsHasErrors, styleHasErrors, iconHasErrors } =
+								getTabErrors(
 									meta,
-									(name) =>
-										name.startsWith("code") ||
-										name.startsWith("name") ||
-										name.startsWith("meetingTimes"),
+									errorMap as Record<string, unknown> | undefined,
 								);
-							const styleHasErrors = hasFieldErrors(
-								meta,
-								(name) =>
-									name.startsWith("cellAppearance") &&
-									!name.startsWith("cellAppearance.icon"),
-							);
-							const iconHasErrors = hasFieldErrors(meta, (name) =>
-								name.startsWith("cellAppearance.icon"),
-							);
 
 							return (
 								<ResponsiveTabsList

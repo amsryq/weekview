@@ -1,14 +1,14 @@
 import { Trash2Icon, UploadIcon } from "lucide-react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
-import { Button } from "../ui/button";
-import { Label } from "../ui/label";
+import { Button } from "../../ui/button";
+import { Label } from "../../ui/label";
 import {
 	Dropzone,
 	DropzoneContent,
 	DropzoneEmptyState,
-} from "../ui/shadcn-io/dropzone";
-import { Slider } from "../ui/slider";
+} from "../../ui/shadcn-io/dropzone";
+import { Slider } from "../../ui/slider";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_FORMATS = {

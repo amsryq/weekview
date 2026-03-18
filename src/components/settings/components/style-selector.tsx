@@ -1,14 +1,9 @@
 import { Monitor, Moon, Pencil, Plus, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useStore } from "zustand";
-import { useTheme } from "~/lib/contexts/themes";
+import { useState } from "react";
 import { ColorEntry } from "~/lib/models/color-entry";
 import { TIMETABLE_STYLES } from "~/lib/models/style";
-import { CourseStore } from "~/lib/stores/course-store";
-import { CustomStylesStore } from "~/lib/stores/custom-styles-store";
-import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { cn } from "~/lib/utils/styles";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import {
 	Dialog,
 	DialogContent,
@@ -16,76 +11,58 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from "../ui/dialog";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
+} from "../../ui/dialog";
+import { Input } from "../../ui/input";
+import { Label } from "../../ui/label";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "../ui/select";
+} from "../../ui/select";
+import {
+	getDefaultStyleName,
+	shouldReplaceAutoStyleName,
+	useStyleSelectorActions,
+	useStyleSelectorData,
+} from "../hooks/use-style-selector-logic";
 import { CustomStyleEditorDialog } from "./custom-style-editor";
 
 export function StyleSelector() {
-	const { applyingTheme } = useTheme();
-	const activeStyleId = useStore(
-		TimetablePreferencesStore,
-		(s) => s.activeStyleId,
-	);
-	const timetableThemePreference = useStore(
-		TimetablePreferencesStore,
-		(s) => s.timetableThemePreference,
-	);
-	const timetableColorMode = useStore(
-		TimetablePreferencesStore,
-		(s) => s.timetableColorMode,
-	);
-	const customStyles = useStore(CustomStylesStore, (s) => s.styles);
+	const {
+		activeStyleId,
+		timetableThemePreference,
+		timetableColorMode,
+		styles,
+		customStyleIds,
+	} = useStyleSelectorData();
+	const { applyStyle, setThemePreference, createStyleFromBuiltIn } =
+		useStyleSelectorActions();
+
 	const [editorStyleId, setEditorStyleId] = useState<string | null>(null);
 	const [createDialogOpen, setCreateDialogOpen] = useState(false);
 	const [createBaseStyleId, setCreateBaseStyleId] = useState(
 		TIMETABLE_STYLES[0].id,
 	);
 	const [createStyleName, setCreateStyleName] = useState(
-		`${TIMETABLE_STYLES[0].name} Custom`,
+		getDefaultStyleName(TIMETABLE_STYLES[0].id),
 	);
 
-	useEffect(() => {
-		const baseStyle = TIMETABLE_STYLES.find(
-			(style) => style.id === createBaseStyleId,
-		);
-		if (!baseStyle) return;
+	const handleBaseStyleChange = (nextBaseStyleId: string) => {
+		setCreateBaseStyleId(nextBaseStyleId);
 		setCreateStyleName((currentName) =>
-			currentName.trim().length === 0 || currentName.endsWith(" Custom")
-				? `${baseStyle.name} Custom`
+			shouldReplaceAutoStyleName(currentName)
+				? getDefaultStyleName(nextBaseStyleId)
 				: currentName,
 		);
-	}, [createBaseStyleId]);
-
-	const styles = [...TIMETABLE_STYLES, ...customStyles];
-
-	const applyStyle = (styleId: string) => {
-		TimetablePreferencesStore.getState().applyStyle(styleId);
-		CourseStore.getState().resetAllToStyle(styleId);
-	};
-
-	const setThemePreference = (preference: "follow-app" | "light" | "dark") => {
-		const store = TimetablePreferencesStore.getState();
-		store.setTimetableThemePreference(preference);
-		if (preference === "follow-app") {
-			store.setAppThemeMode(applyingTheme);
-		}
-		CourseStore.getState().resetAllToStyle(store.activeStyleId);
 	};
 
 	const handleCreateStyle = () => {
-		const createdStyleId = CustomStylesStore.getState().createFromBuiltIn(
+		const createdStyleId = createStyleFromBuiltIn(
 			createBaseStyleId,
 			createStyleName,
 		);
-		applyStyle(createdStyleId);
 		setCreateDialogOpen(false);
 		setEditorStyleId(createdStyleId);
 	};
@@ -155,9 +132,7 @@ export function StyleSelector() {
 						const previewColors = style.variants[
 							timetableColorMode
 						].gridColors.slice(0, 6);
-						const isCustom = customStyles.some(
-							(customStyle) => customStyle.id === style.id,
-						);
+						const isCustom = customStyleIds.has(style.id);
 
 						return (
 							<div key={style.id} className="relative">
@@ -265,7 +240,7 @@ export function StyleSelector() {
 							<Label>Base style</Label>
 							<Select
 								value={createBaseStyleId}
-								onValueChange={setCreateBaseStyleId}
+								onValueChange={handleBaseStyleChange}
 							>
 								<SelectTrigger className="w-full">
 									<SelectValue />

@@ -1,9 +1,9 @@
 import { create } from "zustand";
 import { MeetingTime } from "~/lib/models/meeting-time";
-import { Campus } from "../../models/campus";
-import { Course } from "../../models/course";
-import { Faculty } from "../../models/faculty";
-import { ScheduleInfo } from "../../utils/parse-schedule";
+import { Campus } from "../../../models/campus";
+import { Course } from "../../../models/course";
+import { Faculty } from "../../../models/faculty";
+import { ScheduleInfo } from "../../../utils/parse-schedule";
 
 export const SHORT_DAY_NAMES = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
@@ -15,6 +15,11 @@ export interface CourseImportProgress {
 	group: string;
 	status: ProgressStatus;
 	reason?: string;
+}
+
+export interface ProgressCounts {
+	successCount: number;
+	errorCount: number;
 }
 
 export interface ImportSuccess {
@@ -90,6 +95,48 @@ export const useImporterSelectionStore = create<{
 
 export const normalizeString = (value: string): string =>
 	value.replace(/\s+/g, "").trim().toLowerCase();
+
+export function markUnfinishedProgressAsError(
+	progress: CourseImportProgress[],
+	reason: string,
+): CourseImportProgress[] {
+	return progress.map((item) =>
+		item.status === "pending" || item.status === "running"
+			? { ...item, status: "error", reason }
+			: item,
+	);
+}
+
+export function updateProgressStatus(
+	progress: CourseImportProgress[],
+	courseCode: string,
+	group: string,
+	status: ProgressStatus,
+	reason?: string,
+): CourseImportProgress[] {
+	return progress.map((item) =>
+		item.courseCode === courseCode && item.group === group
+			? { ...item, status, reason }
+			: item,
+	);
+}
+
+export function getProgressCounts(
+	progress: CourseImportProgress[],
+): ProgressCounts {
+	let successCount = 0;
+	let errorCount = 0;
+
+	for (const item of progress) {
+		if (item.status === "success") {
+			successCount += 1;
+		} else if (item.status === "error") {
+			errorCount += 1;
+		}
+	}
+
+	return { successCount, errorCount };
+}
 
 export function summarizeMeetingTimes(meetingTimes: MeetingTime[]): string {
 	return meetingTimes

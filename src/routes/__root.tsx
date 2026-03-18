@@ -9,8 +9,8 @@ import {
 	useBlocker,
 } from "@tanstack/react-router";
 import { useStore } from "zustand";
-import { CourseManagementSheetRenderer } from "~/components/course-management-sheet";
-import { SupportDialog } from "~/components/support-dialog";
+import { SupportDialog } from "~/components/app/support-dialog";
+import { CourseManagementSheetRenderer } from "~/components/course-management/course-management-sheet";
 import { Toaster } from "~/components/ui/sonner";
 import {
 	ManualImporterDialogRenderer,

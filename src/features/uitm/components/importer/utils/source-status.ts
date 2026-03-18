@@ -12,9 +12,9 @@ export interface SourceStatus {
 }
 
 const STATIC_SOURCE_STATUS: Record<SourceKey, SourceStatus> = {
-	"my-student": { available: false },
-	"campus-faculty": { available: false },
-	"course-slip": { available: false },
+	"my-student": { available: true },
+	"campus-faculty": { available: true },
+	"course-slip": { available: true },
 };
 
 type SourceStatusProvider = () =>

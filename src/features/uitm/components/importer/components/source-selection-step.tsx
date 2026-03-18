@@ -17,8 +17,8 @@ import {
 	ResponsiveDialogTrigger,
 } from "~/components/ui/responsive-dialog";
 import { cn } from "~/lib/utils/styles";
-import { ImporterStep, useImporterSelectionStore } from "./shared";
-import { type SourceKey, useSourceStatuses } from "./source-status";
+import { ImporterStep, useImporterSelectionStore } from "../utils/shared";
+import { type SourceKey, useSourceStatuses } from "../utils/source-status";
 import { UnaffiliationNotice } from "./unaffiliation-notice";
 
 interface SourceOptionProps {

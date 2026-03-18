@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import {
 	ArrowLeft,
 	Layers,
@@ -6,7 +5,7 @@ import {
 	SearchIcon,
 	Trash2Icon,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "~/components/ui/button";
@@ -39,20 +38,35 @@ import {
 	SheetTrigger,
 } from "~/components/ui/sheet";
 import { CourseStore } from "~/lib/stores/course-store";
-import { UiTMCourseSection } from "../../course-section";
-import { Course } from "../../models/course";
-import { Group } from "../../models/group";
-import { summarizeMeetingTimes, useImporterSelectionStore } from "./shared";
+import { UiTMCourseSection } from "../../../course-section";
+import { useGroupFiltering } from "../hooks/use-group-filtering";
+import { useGroupQueries } from "../hooks/use-group-queries";
+import { useImporterSelectionStore } from "../utils/shared";
 
 interface GroupSelectorDialogProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 }
 
+function pickSelectorState(
+	state: ReturnType<typeof useImporterSelectionStore.getState>,
+) {
+	return {
+		selectedCampus: state.selectedCampus,
+		selectedFaculty: state.selectedFaculty,
+		selectedCourse: state.selectedCourse,
+		setSelectedCourse: state.setSelectedCourse,
+		setCurrentStep: state.setCurrentStep,
+	};
+}
+
 export function GroupSelectorDialog({
 	open,
 	onOpenChange,
 }: GroupSelectorDialogProps) {
+	const [searchQuery, setSearchQuery] = useState("");
+	const [selectionSheetOpen, setSelectionSheetOpen] = useState(false);
+
 	const {
 		selectedCampus,
 		selectedFaculty,
@@ -63,8 +77,14 @@ export function GroupSelectorDialog({
 		useShallow((state) => pickSelectorState(state)),
 	);
 
-	const [searchQuery, setSearchQuery] = useState("");
-	const [selectionSheetOpen, setSelectionSheetOpen] = useState(false);
+	const {
+		courses,
+		coursesLoading,
+		coursesError,
+		availableGroups,
+		groupsLoading,
+		groupsError,
+	} = useGroupQueries(selectedCampus, selectedFaculty, selectedCourse);
 
 	const selectedGroups = useStore(
 		CourseStore,
@@ -76,40 +96,20 @@ export function GroupSelectorDialog({
 		),
 	);
 
-	const {
-		data: courses,
-		isLoading: coursesLoading,
-		error: coursesError,
-	} = useQuery<Course[]>({
-		queryKey: ["uitm", "courses", selectedCampus?.code, selectedFaculty?.code],
-		queryFn: () => Course.fetch(selectedFaculty ?? selectedCampus!),
-		enabled: Boolean(selectedFaculty || selectedCampus),
-		staleTime: 5 * 60 * 1000,
-	});
+	const selectionCount = selectedGroups.length;
 
 	const {
-		data: availableGroups,
-		isLoading: groupsLoading,
-		error: groupsError,
-	} = useQuery<Group[], Error, UiTMCourseSection[]>({
-		queryKey: ["uitm", "groups", selectedCourse?.code],
-		queryFn: () => Group.fetch(selectedCourse!),
-		enabled: Boolean(selectedCourse),
-		select: (groups) => groups.map((group) => group.toUiTMCourse()),
+		filteredGroups,
+		groupSummaries,
+		selectedGroupKeys,
+		groupConflicts,
+		handleGroupSelect,
+		handleGroupRemove,
+	} = useGroupFiltering({
+		availableGroups,
+		selectedGroups,
+		searchQuery,
 	});
-
-	const filteredGroups = useMemo(() => {
-		if (!availableGroups) return [];
-		if (!searchQuery.trim()) return availableGroups;
-		const query = searchQuery.toLowerCase();
-		return availableGroups.filter((group) => {
-			const groupName = group.internal.group.toLowerCase();
-			const meetingSummary = summarizeMeetingTimes(
-				group.meetingTimes,
-			).toLowerCase();
-			return groupName.includes(query) || meetingSummary.includes(query);
-		});
-	}, [availableGroups, searchQuery]);
 
 	const handleCourseChange = (courseCode: string) => {
 		if (!courseCode) {
@@ -120,31 +120,7 @@ export function GroupSelectorDialog({
 		setSelectedCourse(nextCourse);
 	};
 
-	const handleGroupSelect = (uitmCourse: UiTMCourseSection) => {
-		const { internal } = uitmCourse;
-		const exists = selectedGroups.some(
-			(group) =>
-				group.internal.code === internal.code &&
-				group.internal.group === internal.group,
-		);
-		if (exists) return;
-		const store = CourseStore.getState();
-		if (store.getConflictingCourses(uitmCourse.meetingTimes).length > 0) return;
-		store.addCourse(uitmCourse);
-	};
-
-	const handleGroupRemove = (courseCode: string, groupCode: string) => {
-		const id = selectedGroups.find(
-			(group) =>
-				group.internal.code === courseCode &&
-				group.internal.group === groupCode,
-		)?.id;
-		if (!id) return;
-		CourseStore.getState().removeCourse(id);
-	};
-
 	const handleBack = () => setCurrentStep("campus-faculty");
-	const selectionCount = selectedGroups.length;
 
 	return (
 		<ResponsiveDialog open={open} onOpenChange={onOpenChange}>
@@ -324,7 +300,7 @@ export function GroupSelectorDialog({
 							<div className="divide-y text-left">
 								{groupsError ? (
 									<div className="p-4 text-sm text-destructive">
-										{(groupsError as Error).message}
+										{groupsError.message}
 									</div>
 								) : groupsLoading ? (
 									Array.from({ length: 6 }).map((_, index) => (
@@ -339,29 +315,19 @@ export function GroupSelectorDialog({
 								) : filteredGroups.length ? (
 									filteredGroups.map((uitmCourse) => {
 										const { internal } = uitmCourse;
-										const conflicts =
-											CourseStore.getState().getConflictingCourses(
-												uitmCourse.meetingTimes,
-											);
-										const alreadyAdded = selectedGroups.some(
-											(group) =>
-												group.internal.code === internal.code &&
-												group.internal.group === internal.group,
-										);
-										const disabled = alreadyAdded || conflicts.length > 0;
+										const key = `${internal.code}-${internal.group}`;
+										const conflictCodes = groupConflicts.get(key);
+										const alreadyAdded = selectedGroupKeys.has(key);
+										const disabled = alreadyAdded || Boolean(conflictCodes);
 										const reason = alreadyAdded
 											? "Already in timetable"
-											: conflicts.length > 0
-												? `Conflicts with ${conflicts
-														.map((conflict) => conflict.code)
-														.join(", ")}`
+											: conflictCodes
+												? `Conflicts with ${conflictCodes.join(", ")}`
 												: undefined;
-										const summary = summarizeMeetingTimes(
-											uitmCourse.meetingTimes,
-										);
+										const summary = groupSummaries.get(key) ?? "";
 										return (
 											<div
-												key={`${internal.code}-${internal.group}`}
+												key={key}
 												className="group flex items-center justify-between gap-4 overflow-hidden px-4 py-3 transition-colors hover:bg-muted/30"
 											>
 												<div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -425,16 +391,4 @@ export function GroupSelectorDialog({
 			</ResponsiveDialogContent>
 		</ResponsiveDialog>
 	);
-}
-
-function pickSelectorState(
-	state: ReturnType<typeof useImporterSelectionStore.getState>,
-) {
-	return {
-		selectedCampus: state.selectedCampus,
-		selectedFaculty: state.selectedFaculty,
-		selectedCourse: state.selectedCourse,
-		setSelectedCourse: state.setSelectedCourse,
-		setCurrentStep: state.setCurrentStep,
-	};
 }

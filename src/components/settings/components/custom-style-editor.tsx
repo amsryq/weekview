@@ -1,16 +1,9 @@
 import { Moon, Sun, Trash2 } from "lucide-react";
-import { memo, useCallback, useEffect, useId, useState } from "react";
+import { memo, useCallback, useId, useMemo, useState } from "react";
 import { useStore } from "zustand";
-import { useTheme } from "~/lib/contexts/themes";
-import {
-	DEFAULT_TIMETABLE_STYLE_ID,
-	isBuiltInStyle,
-	type TimetableColorMode,
-	type TimetableStyle,
-} from "~/lib/models/style";
-import { CourseStore } from "~/lib/stores/course-store";
+import type { ColorEntry } from "~/lib/models/color-entry";
+import { isBuiltInStyle, type TimetableColorMode } from "~/lib/models/style";
 import { CustomStylesStore } from "~/lib/stores/custom-styles-store";
-import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { PREDEFINED_FONTS } from "~/lib/utils/fonts";
 import { cn } from "~/lib/utils/styles";
 import {
@@ -23,8 +16,8 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 	AlertDialogTrigger,
-} from "../ui/alert-dialog";
-import { Button } from "../ui/button";
+} from "../../ui/alert-dialog";
+import { Button } from "../../ui/button";
 import {
 	Dialog,
 	DialogContent,
@@ -32,17 +25,20 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from "../ui/dialog";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
+} from "../../ui/dialog";
+import { Input } from "../../ui/input";
+import { Label } from "../../ui/label";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "../ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+} from "../../ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
+import { useVariantColorField } from "../hooks/use-style-color-editor";
+import { useStyleEditor } from "../hooks/use-style-editor";
+import { getCustomStyle, normalizeHexColor } from "../utils/style-utils";
 import { ColorEntryConfigurer } from "./color-entry-configurer";
 
 interface CustomStyleEditorDialogProps {
@@ -62,75 +58,22 @@ const CHROME_FIELDS = [
 	{ key: "gridLineColor", label: "Grid lines" },
 ] as const;
 
-const HEX_COLOR_REGEX = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
-
-function getCustomStyle(
-	state: {
-		styles: TimetableStyle[];
-	},
-	styleId: string | null,
-) {
-	if (!styleId) return null;
-	return state.styles.find((item) => item.id === styleId) ?? null;
-}
-
-function normalizeHexColor(value: string): string | null {
-	const trimmed = value.trim();
-	if (!HEX_COLOR_REGEX.test(trimmed)) {
-		return null;
-	}
-
-	if (trimmed.length === 4) {
-		const [r, g, b] = trimmed.slice(1);
-		return `#${r}${r}${g}${g}${b}${b}`.toLowerCase();
-	}
-
-	return trimmed.toLowerCase();
-}
-
 export function CustomStyleEditorDialog({
 	styleId,
 	open,
 	onOpenChange,
 }: CustomStyleEditorDialogProps) {
-	const styleExists = useStore(
-		CustomStylesStore,
-		useCallback((state) => getCustomStyle(state, styleId) !== null, [styleId]),
-	);
-	const styleName = useStore(
-		CustomStylesStore,
-		useCallback(
-			(state) => getCustomStyle(state, styleId)?.name ?? "",
-			[styleId],
-		),
-	);
-	const styleFontFamily = useStore(
-		CustomStylesStore,
-		useCallback(
-			(state) =>
-				getCustomStyle(state, styleId)?.fontFamily ?? PREDEFINED_FONTS[0],
-			[styleId],
-		),
-	);
-	const activeStyleId = useStore(
-		TimetablePreferencesStore,
-		(state) => state.activeStyleId,
-	);
-	const currentTheme = useTheme().applyingTheme;
+	const {
+		isOpen: isOpenFromLogic,
+		styleName,
+		styleFontFamily,
+		currentTheme,
+		handleDelete,
+		updateStyleName,
+		updateStyleFont,
+	} = useStyleEditor({ styleId, open, onOpenChange });
 
-	const isOpen = open && !!styleId && styleExists && !isBuiltInStyle(styleId);
-
-	const handleDelete = useCallback(() => {
-		if (!styleId) return;
-		if (activeStyleId === styleId) {
-			TimetablePreferencesStore.getState().applyStyle(
-				DEFAULT_TIMETABLE_STYLE_ID,
-			);
-			CourseStore.getState().resetAllToStyle(DEFAULT_TIMETABLE_STYLE_ID);
-		}
-		CustomStylesStore.getState().deleteStyle(styleId);
-		onOpenChange(false);
-	}, [activeStyleId, onOpenChange, styleId]);
+	const isOpen = isOpenFromLogic && !!styleId && !isBuiltInStyle(styleId ?? "");
 
 	if (!styleId) {
 		return null;
@@ -185,24 +128,13 @@ export function CustomStyleEditorDialog({
 								<Input
 									id="custom-style-name"
 									value={styleName}
-									onChange={(event) =>
-										CustomStylesStore.getState().updateStyleMeta(styleId, {
-											name: event.target.value,
-										})
-									}
+									onChange={(event) => updateStyleName(event.target.value)}
 									placeholder="My style"
 								/>
 							</div>
 							<div className="space-y-2">
 								<Label>Font family</Label>
-								<Select
-									value={styleFontFamily}
-									onValueChange={(value) =>
-										CustomStylesStore.getState().updateStyleMeta(styleId, {
-											fontFamily: value,
-										})
-									}
-								>
+								<Select value={styleFontFamily} onValueChange={updateStyleFont}>
 									<SelectTrigger className="h-11 w-full">
 										<SelectValue placeholder="Select font" />
 									</SelectTrigger>
@@ -322,26 +254,11 @@ const BackgroundColorField = memo(function BackgroundColorField({
 	mode,
 	styleId,
 }: BackgroundColorFieldProps) {
-	const value = useStore(
-		CustomStylesStore,
-		useCallback(
-			(state) =>
-				getCustomStyle(state, styleId)?.variants[mode].background.color ??
-				"#000000",
-			[mode, styleId],
-		),
-	);
-
-	const onChange = useCallback(
-		(nextValue: string) => {
-			CustomStylesStore.getState().updateVariantBackground(
-				styleId,
-				mode,
-				nextValue,
-			);
-		},
-		[mode, styleId],
-	);
+	const { value, onChange } = useVariantColorField({
+		styleId,
+		mode,
+		fieldType: "background",
+	});
 
 	return (
 		<div className="space-y-3">
@@ -351,7 +268,11 @@ const BackgroundColorField = memo(function BackgroundColorField({
 					Sets the canvas color behind your timetable grid.
 				</p>
 			</div>
-			<ColorField label="Canvas color" value={value} onChange={onChange} />
+			<ColorField
+				label="Canvas color"
+				value={value as string}
+				onChange={onChange as (value: string) => void}
+			/>
 		</div>
 	);
 });
@@ -369,29 +290,20 @@ const ChromeColorField = memo(function ChromeColorField({
 	fieldKey,
 	label,
 }: ChromeColorFieldProps) {
-	const value = useStore(
-		CustomStylesStore,
-		useCallback(
-			(state) =>
-				getCustomStyle(state, styleId)?.variants[mode].chrome[fieldKey] ??
-				"#000000",
-			[fieldKey, mode, styleId],
-		),
-	);
+	const { value, onChange } = useVariantColorField({
+		styleId,
+		mode,
+		fieldKey,
+		fieldType: "chrome",
+	});
 
-	const onChange = useCallback(
-		(nextValue: string) => {
-			CustomStylesStore.getState().updateVariantChrome(
-				styleId,
-				mode,
-				fieldKey,
-				nextValue,
-			);
-		},
-		[fieldKey, mode, styleId],
+	return (
+		<ColorField
+			label={label}
+			value={value as string}
+			onChange={onChange as (value: string) => void}
+		/>
 	);
-
-	return <ColorField label={label} value={value} onChange={onChange} />;
 });
 
 interface PaletteColorCardProps {
@@ -405,27 +317,12 @@ const PaletteColorCard = memo(function PaletteColorCard({
 	mode,
 	styleId,
 }: PaletteColorCardProps) {
-	const value = useStore(
-		CustomStylesStore,
-		useCallback(
-			(state) =>
-				getCustomStyle(state, styleId)?.variants[mode].gridColors[index] ??
-				null,
-			[index, mode, styleId],
-		),
-	);
-
-	const onChange = useCallback(
-		(nextValue: NonNullable<typeof value>) => {
-			CustomStylesStore.getState().updateVariantGridColor(
-				styleId,
-				mode,
-				index,
-				nextValue,
-			);
-		},
-		[index, mode, styleId],
-	);
+	const { value, onChange } = useVariantColorField({
+		styleId,
+		mode,
+		index,
+		fieldType: "gridColor",
+	});
 
 	if (!value) {
 		return null;
@@ -439,7 +336,10 @@ const PaletteColorCard = memo(function PaletteColorCard({
 					Used when assigning colors automatically.
 				</p>
 			</div>
-			<ColorEntryConfigurer value={value} onChange={onChange} />
+			<ColorEntryConfigurer
+				value={value as ColorEntry.Schema}
+				onChange={onChange as (value: ColorEntry.Schema) => void}
+			/>
 		</div>
 	);
 });
@@ -456,14 +356,24 @@ const ColorField = memo(function ColorField({
 	onChange,
 }: ColorFieldProps) {
 	const textInputId = useId();
+	// Use key-based reset pattern instead of useEffect sync
 	const [draftValue, setDraftValue] = useState(value);
+	const [lastExternalValue, setLastExternalValue] = useState(value);
 
-	useEffect(() => {
+	// If external value changes, reset draft
+	if (value !== lastExternalValue) {
 		setDraftValue(value);
-	}, [value]);
+		setLastExternalValue(value);
+	}
 
-	const safePickerValue = normalizeHexColor(value) ?? "#000000";
-	const isDraftValid = normalizeHexColor(draftValue) !== null;
+	const safePickerValue = useMemo(
+		() => normalizeHexColor(value) ?? "#000000",
+		[value],
+	);
+	const isDraftValid = useMemo(
+		() => normalizeHexColor(draftValue) !== null,
+		[draftValue],
+	);
 
 	const commitDraft = useCallback(() => {
 		const normalized = normalizeHexColor(draftValue);

@@ -5,8 +5,8 @@ import { useStore } from "zustand";
 import { useCourseEditorForm } from "~/lib/contexts/course-editor";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { resolveTimetableStyle } from "~/lib/utils/timetable-styles";
-import { PaywallOverlay } from "../paywall-overlay";
-import { ColorSelectorGrid } from "../settings/color-selector-grid";
+import { PaywallOverlay } from "../monetization/paywall-overlay";
+import { ColorSelectorGrid } from "../settings/components/color-selector-grid";
 import { Button } from "../ui/button";
 import {
 	Collapsible,
@@ -109,10 +109,7 @@ export function IconSection() {
 		form.store,
 		(s) => s.values.cellAppearance?.icon?.svg,
 	);
-	const hasIcon =
-		iconType &&
-		((iconType === "emoji" && iconEmoji && iconEmoji.trim() !== "") ||
-			(iconType === "svg" && iconSvg && iconSvg.trim() !== ""));
+	const hasIcon = validateIconPresence(iconType, iconEmoji, iconSvg);
 
 	return (
 		<PaywallOverlay
@@ -216,10 +213,11 @@ export function IconSection() {
 												Preview:
 											</span>
 											<div className="w-6 h-6 flex items-center justify-center">
-												<img
-													src={`data:image/svg+xml;utf8,${encodeURIComponent(field.state.value)}`}
-													alt="SVG preview"
-													className="w-full h-full object-contain"
+												<div
+													dangerouslySetInnerHTML={{
+														__html: sanitizeSvg(field.state.value),
+													}}
+													className="w-full h-full [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain"
 												/>
 											</div>
 										</div>
@@ -257,111 +255,71 @@ export function IconSection() {
 							<CollapsibleContent className="space-y-3 pt-4 border-l pl-4 ml-1.5">
 								<form.Field name="cellAppearance.icon.opacity">
 									{(field) => (
-										<Field label="Opacity">
-											<div className="flex items-center gap-3">
-												<Slider
-													value={[field.state.value ?? 0]}
-													onValueChange={(value) =>
-														field.handleChange(value[0])
-													}
-													min={0}
-													max={1}
-													step={0.1}
-													className="w-24"
-												/>
-												<span className="w-8 text-right text-[10px] tabular-nums text-muted-foreground">
-													{Math.round((field.state.value ?? 0) * 100)}%
-												</span>
-											</div>
-										</Field>
+										<IconSliderField
+											label="Opacity"
+											field={field}
+											min={0}
+											max={1}
+											step={0.1}
+											defaultValue={0}
+											formatValue={(v) => `${Math.round(v * 100)}%`}
+										/>
 									)}
 								</form.Field>
 
 								<form.Field name="cellAppearance.icon.size">
 									{(field) => (
-										<Field label="Size">
-											<div className="flex items-center gap-3">
-												<Slider
-													value={[field.state.value ?? 1]}
-													onValueChange={(value) =>
-														field.handleChange(value[0])
-													}
-													min={1}
-													max={5}
-													step={0.1}
-													className="w-24"
-												/>
-												<span className="w-8 text-right text-[10px] tabular-nums text-muted-foreground">
-													{(field.state.value ?? 1).toFixed(1)}x
-												</span>
-											</div>
-										</Field>
+										<IconSliderField
+											label="Size"
+											field={field}
+											min={1}
+											max={5}
+											step={0.1}
+											defaultValue={1}
+											formatValue={(v) => `${v.toFixed(1)}x`}
+										/>
 									)}
 								</form.Field>
 
 								<form.Field name="cellAppearance.icon.rotation">
 									{(field) => (
-										<Field label="Rotation">
-											<div className="flex items-center gap-3">
-												<Slider
-													value={[field.state.value ?? 0]}
-													onValueChange={(value) =>
-														field.handleChange(value[0])
-													}
-													min={-180}
-													max={180}
-													step={15}
-													className="w-24"
-												/>
-												<span className="w-8 text-right text-[10px] tabular-nums text-muted-foreground">
-													{field.state.value ?? 0}°
-												</span>
-											</div>
-										</Field>
+										<IconSliderField
+											label="Rotation"
+											field={field}
+											min={-180}
+											max={180}
+											step={15}
+											defaultValue={0}
+											formatValue={(v) => `${v}°`}
+										/>
 									)}
 								</form.Field>
 
 								<form.Field name="cellAppearance.icon.offsetX">
 									{(field) => (
-										<Field label="X Offset">
-											<div className="flex items-center gap-3">
-												<Slider
-													value={[field.state.value || 8]}
-													onValueChange={(value) =>
-														field.handleChange(value[0])
-													}
-													min={0}
-													max={50}
-													step={2}
-													className="w-24"
-												/>
-												<span className="w-8 text-right text-[10px] tabular-nums text-muted-foreground">
-													{field.state.value || 8}px
-												</span>
-											</div>
-										</Field>
+										<IconSliderField
+											label="X Offset"
+											field={field}
+											min={0}
+											max={50}
+											step={2}
+											defaultValue={8}
+											formatValue={(v) => `${v}px`}
+										/>
 									)}
 								</form.Field>
 
 								<form.Field name="cellAppearance.icon.offsetY">
 									{(field) => (
-										<Field label="Y Offset">
-											<div className="flex items-center gap-3">
-												<Slider
-													value={[field.state.value || 8]}
-													onValueChange={(value) =>
-														field.handleChange(value[0])
-													}
-													min={0}
-													max={50}
-													step={2}
-													className="w-24"
-												/>
-												<span className="w-8 text-right text-[10px] tabular-nums text-muted-foreground">
-													{field.state.value || 8}px
-												</span>
-											</div>
-										</Field>
+										<IconSliderField
+											label="Y Offset"
+											field={field}
+											min={0}
+											max={50}
+											step={2}
+											defaultValue={8}
+											formatValue={(v) => `${v}px`}
+										/>
 									)}
 								</form.Field>
 							</CollapsibleContent>
@@ -408,4 +366,69 @@ function Field({
 			</div>
 		</div>
 	);
+}
+
+function IconSliderField({
+	label,
+	field,
+	min,
+	max,
+	step,
+	defaultValue,
+	formatValue,
+}: {
+	label: string;
+	field: {
+		state: { value: number | undefined };
+		handleChange: (value: number) => void;
+	};
+	min: number;
+	max: number;
+	step: number;
+	defaultValue: number;
+	formatValue: (value: number) => string;
+}) {
+	const value = field.state.value ?? defaultValue;
+	return (
+		<Field label={label}>
+			<div className="flex items-center gap-3">
+				<Slider
+					value={[value]}
+					onValueChange={(values) => field.handleChange(values[0])}
+					min={min}
+					max={max}
+					step={step}
+					className="w-24"
+				/>
+				<span className="w-8 text-right text-[10px] tabular-nums text-muted-foreground">
+					{formatValue(value)}
+				</span>
+			</div>
+		</Field>
+	);
+}
+
+function validateIconPresence(
+	iconType: string | undefined,
+	iconEmoji: string | undefined,
+	iconSvg: string | undefined,
+): boolean {
+	if (!iconType) return false;
+	if (iconType === "emoji") return Boolean(iconEmoji?.trim());
+	if (iconType === "svg") return Boolean(iconSvg?.trim());
+	return false;
+}
+
+function sanitizeSvg(svg: string): string {
+	const temp = document.createElement("div");
+	temp.textContent = svg;
+	const sanitized = temp.innerHTML;
+
+	if (!sanitized.trim().startsWith("<svg")) {
+		return "";
+	}
+
+	return sanitized
+		.replace(/on\w+\s*=\s*["'][^"']*["']/gi, "")
+		.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
 }

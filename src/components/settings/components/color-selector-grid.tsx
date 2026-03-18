@@ -5,15 +5,15 @@ import { usePaywall } from "~/lib/hooks/paywall";
 import { ColorEntry } from "~/lib/models/color-entry";
 import { useColorStore } from "~/lib/stores/color-store";
 import { cn } from "~/lib/utils/styles";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import {
 	Dialog,
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "../ui/dialog";
-import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
+} from "../../ui/dialog";
+import { Tabs, TabsList, TabsTrigger } from "../../ui/tabs";
 import { ColorEntryConfigurer } from "./color-entry-configurer";
 
 interface ColorSelectorGridProps {

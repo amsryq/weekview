@@ -2,7 +2,7 @@ import { HeartIcon, Menu, UserIcon } from "lucide-react";
 import { AccountManagerDialog } from "~/components/auth/account-manager-dialog";
 import { SignIn } from "~/components/auth/sign-in";
 import { Logo } from "~/components/brand/logo";
-import { ThemeToggle } from "~/components/settings/theme-toggle";
+import { ThemeToggle } from "~/components/settings/components/theme-toggle";
 import { Button } from "~/components/ui/button";
 import {
 	DropdownMenu,

@@ -1,17 +1,17 @@
 import { Plus, XIcon } from "lucide-react";
 import { useCallback } from "react";
 import { ColorEntry, GradientDirection } from "~/lib/models/color-entry";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
+import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
+import { Label } from "../../ui/label";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "../ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+} from "../../ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 
 interface ColorEntryConfigurerProps {
 	value: ColorEntry.Schema;

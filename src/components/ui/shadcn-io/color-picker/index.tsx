@@ -81,27 +81,38 @@ export const ColorPicker = ({
 	);
 	const [mode, setMode] = useState("hex");
 
+	// Store onChange in a ref to avoid it being a dependency
+	const onChangeRef = useRef(onChange);
+	useEffect(() => {
+		onChangeRef.current = onChange;
+	});
+
 	// Update color when controlled value changes
 	useEffect(() => {
 		if (value) {
-			const color = Color.rgb(value).rgb().object();
+			const color = Color(value);
+			const [h, s, l] = color.hsl().array();
 
-			setHue(color.r);
-			setSaturation(color.g);
-			setLightness(color.b);
-			setAlpha(color.a);
+			setHue(h);
+			setSaturation(s);
+			setLightness(l);
+			setAlpha(color.alpha() * 100);
 		}
 	}, [value]);
 
+	// Memoize the current color to avoid recalculating on every render
+	const currentColor = useMemo(
+		() => Color.hsl(hue, saturation, lightness).alpha(alpha / 100),
+		[hue, saturation, lightness, alpha],
+	);
+
 	// Notify parent of changes
 	useEffect(() => {
-		if (onChange) {
-			const color = Color.hsl(hue, saturation, lightness).alpha(alpha / 100);
-			const rgba = color.rgb().array();
-
-			onChange([rgba[0], rgba[1], rgba[2], alpha / 100]);
+		if (onChangeRef.current) {
+			const rgba = currentColor.rgb().array();
+			onChangeRef.current([rgba[0], rgba[1], rgba[2], alpha / 100]);
 		}
-	}, [hue, saturation, lightness, alpha, onChange]);
+	}, [currentColor, alpha]);
 
 	return (
 		<ColorPickerContext.Provider
@@ -360,7 +371,10 @@ export const ColorPickerFormat = ({
 	...props
 }: ColorPickerFormatProps) => {
 	const { hue, saturation, lightness, alpha, mode } = useColorPicker();
-	const color = Color.hsl(hue, saturation, lightness, alpha / 100);
+	const color = useMemo(
+		() => Color.hsl(hue, saturation, lightness, alpha / 100),
+		[hue, saturation, lightness, alpha],
+	);
 
 	if (mode === "hex") {
 		const hex = color.hex();

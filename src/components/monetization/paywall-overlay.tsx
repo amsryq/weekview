@@ -2,7 +2,7 @@ import { Lock, LucideIcon } from "lucide-react";
 import { ENABLE_AUTH_PAYWALL } from "~/lib/config/feature-flags";
 import { usePaywall } from "~/lib/hooks/paywall";
 import { cn } from "~/lib/utils/styles";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 
 interface PaywallOverlayProps {
 	/**

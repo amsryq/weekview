@@ -14,7 +14,7 @@ import {
 import { CourseStore } from "~/lib/stores/course-store";
 import { ProviderStore } from "~/lib/stores/provider-store";
 import { resolveCurrentStyleColorByIndex } from "~/lib/stores/timetable-preferences";
-import { CourseEditorDialog } from "./course-editor/course-editor-dialog";
+import { CourseEditorDialog } from "../course-editor/course-editor-dialog";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -25,17 +25,17 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 	AlertDialogTrigger,
-} from "./ui/alert-dialog";
-import { Button } from "./ui/button";
-import { Card } from "./ui/card";
-import { ScrollArea } from "./ui/scroll-area";
+} from "../ui/alert-dialog";
+import { Button } from "../ui/button";
+import { Card } from "../ui/card";
+import { ScrollArea } from "../ui/scroll-area";
 import {
 	Sheet,
 	SheetContent,
 	SheetDescription,
 	SheetHeader,
 	SheetTitle,
-} from "./ui/sheet";
+} from "../ui/sheet";
 
 function dayName(day: number) {
 	const days = [

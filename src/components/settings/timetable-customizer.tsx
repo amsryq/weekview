@@ -13,7 +13,7 @@ import type { CellAppearance } from "~/lib/models/cell-appearance";
 import { DEFAULT_TIMETABLE_STYLE_ID } from "~/lib/models/style";
 import { CourseStore } from "~/lib/stores/course-store";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
-import { PaywallOverlay } from "../paywall-overlay";
+import { PaywallOverlay } from "../monetization/paywall-overlay";
 import { Button } from "../ui/button";
 import {
 	ResponsiveDialog,
@@ -30,9 +30,9 @@ import {
 	ResponsiveTabsList,
 	ResponsiveTabsTrigger,
 } from "../ui/responsive-tabs";
-import { BackgroundImageUpload } from "./background-image-upload";
-import { CellAppearanceLayoutSettings } from "./cell-appearance-layout-settings";
-import { StyleSelector } from "./style-selector";
+import { BackgroundImageUpload } from "./components/background-image-upload";
+import { CellAppearanceLayoutSettings } from "./components/cell-appearance-layout-settings";
+import { StyleSelector } from "./components/style-selector";
 
 export type TabValue = "styles" | "layout" | "background" | "cells";
 

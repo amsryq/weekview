@@ -20,9 +20,9 @@ import {
 	ComboboxList,
 	ComboboxTrigger,
 } from "~/components/ui/shadcn-io/combobox";
-import { Campus } from "../../models/campus";
-import { Faculty } from "../../models/faculty";
-import { useImporterSelectionStore } from "./shared";
+import { Campus } from "../../../models/campus";
+import { Faculty } from "../../../models/faculty";
+import { useImporterSelectionStore } from "../utils/shared";
 
 interface CourseAndFacultySelectorDialogProps {
 	open: boolean;
