@@ -18,6 +18,7 @@ import {
 } from "~/components/ui/responsive-dialog";
 import { cn } from "~/lib/utils/styles";
 import { ImporterStep, useImporterSelectionStore } from "./shared";
+import { type SourceKey, useSourceStatuses } from "./source-status";
 import { UnaffiliationNotice } from "./unaffiliation-notice";
 
 interface SourceOptionProps {
@@ -26,6 +27,8 @@ interface SourceOptionProps {
 	icon: LucideIcon;
 	eyebrow?: string;
 	onSelect: () => void;
+	disabled?: boolean;
+	unavailableReason?: string;
 }
 
 function SourceOption({
@@ -34,26 +37,43 @@ function SourceOption({
 	icon: Icon,
 	eyebrow,
 	onSelect,
+	disabled,
+	unavailableReason,
 }: SourceOptionProps) {
 	return (
 		<button
 			type="button"
-			onClick={onSelect}
+			onClick={disabled ? undefined : onSelect}
+			disabled={disabled}
+			title={unavailableReason}
 			className={cn(
 				"group relative flex w-full flex-col gap-2 rounded-2xl border border-border/70 bg-background px-5 py-4 text-left",
-				"transition hover:-translate-y-0.5 hover:border-primary/60 hover:bg-primary/5",
-				"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+				disabled
+					? "opacity-60 cursor-not-allowed"
+					: "transition hover:-translate-y-0.5 hover:border-primary/60 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
 			)}
 		>
 			<div className="flex items-start justify-between">
 				<div className="flex w-full items-center gap-3">
-					<span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+					<span
+						className={cn(
+							"flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary",
+							disabled && "bg-muted text-muted-foreground",
+						)}
+					>
 						<Icon className="size-5" />
 					</span>
 					<div className="w-full">
 						<span className="flex text-base justify-between font-medium text-foreground">
-							{title}
-							{eyebrow ? (
+							<span className="flex items-center gap-2">
+								{title}
+								{disabled ? (
+									<span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-widest text-destructive">
+										Unavailable
+									</span>
+								) : null}
+							</span>
+							{!disabled && eyebrow ? (
 								<span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium uppercase tracking-wide text-primary">
 									{eyebrow}
 								</span>
@@ -66,6 +86,60 @@ function SourceOption({
 		</button>
 	);
 }
+
+type SectionData = {
+	key: "mystudent" | "icress";
+	title: string;
+	description: string;
+	options: {
+		key: SourceKey;
+		title: string;
+		description: string;
+		icon: LucideIcon;
+		eyebrow?: string;
+	}[];
+};
+
+const SECTIONS: SectionData[] = [
+	{
+		key: "mystudent",
+		title: "UiTM MyStudent",
+		description:
+			"Fetch your timetable directly from UiTM MyStudent with just your Student ID.",
+		options: [
+			{
+				key: "my-student",
+				title: "Use Student ID",
+				description:
+					"Fastest way—pulls your current timetable straight from MyStudent.",
+				icon: GraduationCap,
+				eyebrow: "Recommended",
+			},
+		],
+	},
+	{
+		key: "icress",
+		title: "UiTM iCress",
+		description:
+			"Prefer to manage things manually? Choose specific groups or paste your course slip.",
+		options: [
+			{
+				key: "campus-faculty",
+				title: "Pick courses & groups",
+				description:
+					"Browse available courses for your campus and add the groups you need.",
+				icon: BookOpen,
+			},
+			{
+				key: "course-slip",
+				title: "Paste course slip",
+				description:
+					"Drop in the registration slip text and let Weekview match everything automatically.",
+				icon: ClipboardPlus,
+			},
+		],
+	},
+];
 
 interface SourceSelectionDialogProps {
 	trigger: ReactNode;
@@ -81,10 +155,26 @@ export function SourceSelectionDialog({
 	const { setCurrentStep } = useImporterSelectionStore(
 		useShallow((state) => pickNavigationFns(state)),
 	);
+	const sources = useSourceStatuses();
 
 	const navigate = (step: ImporterStep) => {
 		setCurrentStep(step);
 	};
+
+	const sortedSections = [...SECTIONS]
+		.map((section) => {
+			const sortedOptions = [...section.options].sort((a, b) => {
+				const aAvail = sources[a.key]?.available ?? true;
+				const bAvail = sources[b.key]?.available ?? true;
+				return aAvail === bAvail ? 0 : aAvail ? -1 : 1;
+			});
+			return { ...section, options: sortedOptions };
+		})
+		.sort((a, b) => {
+			const aAvail = a.options.some((o) => sources[o.key]?.available ?? true);
+			const bAvail = b.options.some((o) => sources[o.key]?.available ?? true);
+			return aAvail === bAvail ? 0 : aAvail ? -1 : 1;
+		});
 
 	return (
 		<ResponsiveDialog open={open} onOpenChange={onOpenChange}>
@@ -103,50 +193,41 @@ export function SourceSelectionDialog({
 				<div className="flex-1 space-y-6 overflow-y-auto px-6 min-h-0">
 					<UnaffiliationNotice />
 
-					<section className="space-y-4">
-						<div className="space-y-1">
-							<h3 className="text-lg font-semibold text-foreground">
-								UiTM MyStudent
-							</h3>
-							<p className="text-sm text-muted-foreground">
-								Fetch your timetable directly from UiTM MyStudent with just your
-								Student ID.
-							</p>
-						</div>
-						<SourceOption
-							title="Use Student ID"
-							description="Fastest way—pulls your current timetable straight from MyStudent."
-							icon={GraduationCap}
-							eyebrow="Recommended"
-							onSelect={() => navigate("my-student")}
-						/>
-					</section>
-
-					<section className="space-y-4 pb-6">
-						<div className="space-y-1">
-							<h3 className="text-lg font-semibold text-foreground">
-								UiTM iCress
-							</h3>
-							<p className="text-sm text-muted-foreground">
-								Prefer to manage things manually? Choose specific groups or
-								paste your course slip.
-							</p>
-						</div>
-						<div className="space-y-3">
-							<SourceOption
-								title="Pick courses & groups"
-								description="Browse available courses for your campus and add the groups you need."
-								icon={BookOpen}
-								onSelect={() => navigate("campus-faculty")}
-							/>
-							<SourceOption
-								title="Paste course slip"
-								description="Drop in the registration slip text and let Weekview match everything automatically."
-								icon={ClipboardPlus}
-								onSelect={() => navigate("course-slip")}
-							/>
-						</div>
-					</section>
+					{sortedSections.map((section, idx) => (
+						<section
+							key={section.key}
+							className={cn(
+								"space-y-4",
+								idx === sortedSections.length - 1 && "pb-6",
+							)}
+						>
+							<div className="space-y-1">
+								<h3 className="text-lg font-semibold text-foreground">
+									{section.title}
+								</h3>
+								<p className="text-sm text-muted-foreground">
+									{section.description}
+								</p>
+							</div>
+							<div className="space-y-3">
+								{section.options.map((option) => {
+									const status = sources[option.key] ?? { available: true };
+									return (
+										<SourceOption
+											key={option.key}
+											title={option.title}
+											description={option.description}
+											icon={option.icon}
+											eyebrow={option.eyebrow}
+											onSelect={() => navigate(option.key)}
+											disabled={!status.available}
+											unavailableReason={status.unavailableReason}
+										/>
+									);
+								})}
+							</div>
+						</section>
+					))}
 				</div>
 
 				<div className="flex flex-col gap-2 sm:flex-row sm:justify-end p-6 mt-auto">
