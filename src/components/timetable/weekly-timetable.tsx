@@ -311,6 +311,52 @@ function ColumnLayout({
 	);
 }
 
+function TimetableSkeleton() {
+	return (
+		<Card className="py-0 overflow-hidden">
+			<CardContent className="max-w-[95vw] px-0">
+				<div className="overflow-x-auto">
+					<div className="bg-card p-6 min-w-fit">
+						<div className="flex pb-2">
+							<div className="w-16 shrink-0" />
+							<div className="flex">
+								{Array.from({ length: 11 }).map((_, i) => (
+									<div
+										key={i}
+										className="flex shrink-0 -translate-x-4"
+										style={{ width: `${ROW_BLOCK_WIDTH_PX}px` }}
+									>
+										<div className="h-4 w-8 bg-muted rounded mx-auto animate-pulse" />
+									</div>
+								))}
+							</div>
+						</div>
+						{Array.from({ length: 5 }).map((_, i) => (
+							<div key={i} className="flex">
+								<div className="w-16 shrink-0 flex items-center justify-end pr-6 h-[96px]">
+									<div className="h-4 w-8 bg-muted rounded animate-pulse" />
+								</div>
+								<div
+									className="relative h-[96px]"
+									style={{ width: `${11 * ROW_BLOCK_WIDTH_PX}px` }}
+								>
+									{Array.from({ length: 11 }).map((_, j) => (
+										<div
+											key={j}
+											className="absolute top-0 bottom-0 border-l border-muted"
+											style={{ left: `${j * ROW_BLOCK_WIDTH_PX}px` }}
+										/>
+									))}
+								</div>
+							</div>
+						))}
+					</div>
+				</div>
+			</CardContent>
+		</Card>
+	);
+}
+
 interface WeeklyTimetableProps {
 	layout?: "rows" | "columns";
 	/**
@@ -347,13 +393,12 @@ export function WeeklyTimetable({
 
 	const { openManualImporter } = useImporterDialogs();
 
+	if (!mounted) {
+		return <TimetableSkeleton />;
+	}
+
 	return (
-		<Card
-			className="py-0 overflow-hidden"
-			style={{
-				visibility: mounted ? "visible" : "hidden",
-			}}
-		>
+		<Card className="py-0 overflow-hidden">
 			<CardContent className="max-w-[95vw] px-0">
 				<div className="relative">
 					<TimetableContext.Provider
