@@ -36,46 +36,46 @@ export const TIMETABLE_STYLES: TimetableStyle[] = [
 	{
 		id: "classic",
 		name: "Classic",
-		fontFamily: "Inter",
+		fontFamily: "Poppins",
 		variants: {
 			light: {
-				background: { color: "#f8fafc" },
+				background: { color: "oklch(0.99 0 0)" },
 				chrome: {
-					labelColor: "#334155",
-					timeColor: "#64748b",
-					gridLineColor: "#e2e8f0",
+					labelColor: "oklch(0.23 0 325.86)",
+					timeColor: "oklch(0.49 0 0)",
+					gridLineColor: "oklch(0.97 0 264.7)",
 				},
 				gridColors: [
-					solid("#2563eb"), // blue
-					solid("#059669"), // emerald
-					solid("#7c3aed"), // violet
-					solid("#dc2626"), // red
-					solid("#0891b2"), // cyan
-					solid("#c026d3"), // fuchsia
-					solid("#b45309"), // amber
-					solid("#4f46e5"), // indigo
-					solid("#0d9488"), // teal
-					solid("#be123c"), // rose
+					solid("#6d28d9"), // violet-700
+					solid("#0e7490"), // cyan-700
+					solid("#a21caf"), // fuchsia-700
+					solid("#047857"), // emerald-700
+					solid("#4338ca"), // indigo-700
+					solid("#b91c1c"), // red-700
+					solid("#0369a1"), // sky-700
+					solid("#b45309"), // amber-700
+					solid("#0f766e"), // teal-700
+					solid("#be185d"), // pink-700
 				],
 			},
 			dark: {
-				background: { color: "#0f172a" },
+				background: { color: "oklch(0.2435 0 0)" },
 				chrome: {
-					labelColor: "#cbd5e1",
-					timeColor: "#94a3b8",
-					gridLineColor: "#1e293b",
+					labelColor: "oklch(0.8853 0 0)",
+					timeColor: "oklch(0.5999 0 0)",
+					gridLineColor: "oklch(0.285 0 0)",
 				},
 				gridColors: [
-					solid("#3b82f6"), // blue
-					solid("#10b981"), // emerald
-					solid("#8b5cf6"), // violet
-					solid("#ef4444"), // red
-					solid("#06b6d4"), // cyan
-					solid("#d946ef"), // fuchsia
-					solid("#d97706"), // amber
-					solid("#6366f1"), // indigo
-					solid("#14b8a6"), // teal
-					solid("#f43f5e"), // rose
+					solid("#7c3aed"), // violet-600
+					solid("#0891b2"), // cyan-600
+					solid("#c026d3"), // fuchsia-600
+					solid("#059669"), // emerald-600
+					solid("#4f46e5"), // indigo-600
+					solid("#dc2626"), // red-600
+					solid("#0284c7"), // sky-600
+					solid("#d97706"), // amber-600
+					solid("#0d9488"), // teal-600
+					solid("#db2777"), // pink-600
 				],
 			},
 		},
