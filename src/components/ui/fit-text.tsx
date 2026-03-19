@@ -34,7 +34,7 @@ export function FitText({
 	fontSize,
 	className,
 	style = {},
-	minFontSize = 1,
+	minFontSize = 16,
 }: FitTextProps) {
 	const textElementRef = useRef<HTMLDivElement>(null);
 	const [currentFontSize, setCurrentFontSize] = useState(fontSize);

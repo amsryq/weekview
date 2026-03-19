@@ -100,6 +100,7 @@ const PositionedCourseBlock = memo(function PositionedCourseBlock({
 				meetingTime={meetingTime}
 				appearance={appearance}
 				layoutType={layout}
+				durationHours={durationHours}
 			/>
 		</div>
 	);

@@ -29,6 +29,10 @@ interface CourseBlockProps {
 	appearance: RequiredDeep<CellAppearance>;
 	layoutType: "rows" | "columns";
 	/**
+	 * Duration in hours, used for responsive layout in row mode.
+	 */
+	durationHours?: number;
+	/**
 	 * Optional style override for the container
 	 */
 	style?: React.CSSProperties;
@@ -46,18 +50,36 @@ const FontWeightMap = {
 	semibold: "font-semibold",
 } as const;
 
+type RowSizeTier = "normal" | "narrow" | "compact";
+
+/** Thresholds in hours for row layout size tiers */
+const COMPACT_THRESHOLD = 0.75;
+const NARROW_THRESHOLD = 1.25;
+
+function getRowSizeTier(durationHours: number | undefined): RowSizeTier {
+	if (durationHours == null) return "normal";
+	if (durationHours <= COMPACT_THRESHOLD) return "compact";
+	if (durationHours <= NARROW_THRESHOLD) return "narrow";
+	return "normal";
+}
+
 function FieldInfoRow({
 	appearance,
 	icon,
 	text,
 	fieldKey,
 	layoutType,
+	hideIcon,
+	maxLines,
 }: {
 	appearance: RequiredDeep<CellAppearance>;
 	icon?: React.ReactNode;
 	text: React.ReactNode;
 	fieldKey: keyof Required<typeof appearance.weight & {}>;
 	layoutType: CourseBlockProps["layoutType"];
+	hideIcon?: boolean;
+	/** Max visible lines for the text. If set, clamps via line-clamp. */
+	maxLines?: number;
 }) {
 	const justifyClass =
 		appearance.textAlign === "center"
@@ -76,8 +98,26 @@ function FieldInfoRow({
 						color: appearance.fgColor,
 					}}
 				>
-					{icon}
-					<span className={layoutType === "rows" ? "truncate" : "text-wrap"}>
+					{!hideIcon && icon}
+					<span
+						className={
+							maxLines != null
+								? "overflow-hidden"
+								: layoutType === "rows"
+									? "truncate"
+									: "text-wrap"
+						}
+						style={
+							maxLines != null
+								? {
+									display: "-webkit-box",
+									WebkitLineClamp: maxLines,
+									WebkitBoxOrient: "vertical" as const,
+									wordBreak: "break-all",
+								}
+								: undefined
+						}
+					>
 						{text}
 					</span>
 				</div>
@@ -159,6 +199,176 @@ function Container({
 	);
 }
 
+/**
+ * Compact vertical layout for very narrow blocks (e.g. ≤30min in row mode).
+ * Renders code and location as vertical text, similar to a license plate.
+ */
+function CompactVerticalContent({
+	course,
+	meetingTime,
+	appearance,
+}: {
+	course: Course;
+	meetingTime: MeetingTime;
+	appearance: RequiredDeep<CellAppearance>;
+}) {
+	return (
+		<div
+			className="h-full w-full flex flex-col items-center justify-center gap-0.5 overflow-hidden"
+			style={{
+				color: appearance.fgColor ?? "#ffffff",
+				fontFamily: appearance.fontFamily
+					? `'${appearance.fontFamily}', sans-serif`
+					: undefined,
+				writingMode: "vertical-rl",
+				textOrientation: "mixed",
+			}}
+		>
+			{/* Course code — fills available space */}
+			{appearance.visibility.code && (
+				<FitText
+					fontSize={appearance.fontSize.code}
+					className={`${FontWeightMap[appearance.weight.code]} leading-none`}
+				>
+					{course.code}
+				</FitText>
+			)}
+
+			{/* Location — smaller, secondary */}
+			{appearance.visibility.location && meetingTime.location && (
+				<span
+					className={`opacity-80 ${FontWeightMap[appearance.weight.location]} leading-none truncate`}
+					style={{
+						fontSize: Math.max(appearance.fontSize.location, 9),
+					}}
+				>
+					{meetingTime.location}
+				</span>
+			)}
+		</div>
+	);
+}
+
+/**
+ * Standard horizontal content for normal and narrow blocks.
+ */
+function StandardContent({
+	course,
+	meetingTime,
+	appearance,
+	layoutType,
+	sizeTier,
+}: {
+	course: Course;
+	meetingTime: MeetingTime;
+	appearance: RequiredDeep<CellAppearance>;
+	layoutType: CourseBlockProps["layoutType"];
+	sizeTier: RowSizeTier;
+}) {
+	const isNarrow = sizeTier === "narrow";
+
+	return (
+		<div
+			className="h-full p-2 flex flex-col justify-between text-xs relative"
+			style={{
+				textAlign: appearance.textAlign,
+				color: appearance.fgColor ?? "#ffffff",
+				fontFamily: appearance.fontFamily
+					? `'${appearance.fontFamily}', sans-serif`
+					: undefined,
+			}}
+		>
+			{/* Icon */}
+			{appearance.icon && (
+				<CustomIcon
+					icon={appearance.icon}
+					style={getIconPosition(appearance)}
+				/>
+			)}
+
+			{/* Time */}
+			<div>
+				<FieldInfoRow
+					fieldKey="time"
+					appearance={appearance}
+					layoutType={layoutType}
+					hideIcon={isNarrow}
+					icon={
+						<Clock
+							width={appearance.fontSize.time}
+							height={appearance.fontSize.time}
+						/>
+					}
+					text={`${meetingTime.time.toString()}`}
+				/>
+			</div>
+
+			{/* Code + Course Name */}
+			<div className="flex flex-col">
+				{appearance.visibility.code && (
+					<FitText
+						fontSize={
+							appearance.autoSizeFont !== false &&
+								(!appearance.visibility.name || !course.name)
+								? appearance.fontSize.code * 1.5
+								: appearance.fontSize.code
+						}
+						className={`${FontWeightMap[appearance.weight.code]} leading-none`}
+					>
+						{course.code}
+					</FitText>
+				)}
+				{appearance.visibility.name && course.name && (
+					<div
+						className={`opacity-90 ${FontWeightMap[appearance.weight.name]} ${layoutType === "rows" ? "truncate" : ""
+							}`}
+						style={{ fontSize: appearance.fontSize.name }}
+					>
+						{course.name}
+					</div>
+				)}
+			</div>
+
+			{/* Location — no icon in narrow mode, wrap up to 2 lines */}
+			<FieldInfoRow
+				fieldKey="location"
+				layoutType={layoutType}
+				appearance={appearance}
+				hideIcon={isNarrow}
+				maxLines={isNarrow ? 2 : undefined}
+				icon={
+					<MapPin
+						width={appearance.fontSize.location}
+						height={appearance.fontSize.location}
+					/>
+				}
+				text={meetingTime.location}
+			/>
+		</div>
+	);
+}
+
+function getIconPosition(
+	appearance: RequiredDeep<CellAppearance>,
+): React.CSSProperties | undefined {
+	if (!appearance.icon) return undefined;
+
+	const isRightAlign = appearance.textAlign === "right";
+	const side = isRightAlign ? "left" : "right";
+
+	return {
+		position: "absolute",
+		top: `${appearance.icon.offsetY}px`,
+		[side]: `${appearance.icon.offsetX}px`,
+		fontSize: `${appearance.icon.size * 10}px`,
+		opacity: appearance.icon.opacity,
+		transform: `rotate(${appearance.icon.rotation}deg)`,
+		pointerEvents: "none",
+		userSelect: "none",
+		zIndex: 0,
+	};
+}
+
 export function CourseBlock({
 	course,
 	meetingTime,
@@ -166,6 +376,7 @@ export function CourseBlock({
 	style,
 	className = "relative overflow-hidden select-none cursor-pointer",
 	layoutType,
+	durationHours,
 }: CourseBlockProps) {
 	const { openCourseEditor } = useCourseEditor();
 	const backgroundStyle = ColorEntry.getBackgroundStyle(appearance.background);
@@ -178,28 +389,18 @@ export function CourseBlock({
 		...style,
 	};
 
-	// Icon positioning logic
-	const iconPosition = appearance.icon
-		? (() => {
-				const isRightAlign = appearance.textAlign === "right";
+	const sizeTier =
+		layoutType === "rows" ? getRowSizeTier(durationHours) : "normal";
 
-				// If text is right-aligned, place icon on top-left
-				// If text is center or left-aligned, place icon on top-right
-				const side = isRightAlign ? "left" : "right";
-
-				return {
-					position: "absolute",
-					top: `${appearance.icon.offsetY}px`,
-					[side]: `${appearance.icon.offsetX}px`,
-					fontSize: `${appearance.icon.size * 10}px`,
-					opacity: appearance.icon.opacity,
-					transform: `rotate(${appearance.icon.rotation}deg)`,
-					pointerEvents: "none",
-					userSelect: "none",
-					zIndex: 0,
-				} as const;
-			})()
-		: null;
+	const handleClick = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		openCourseEditor({
+			course,
+			onSubmit: (data) => {
+				CourseStore.getState().updateCourse(course.id, data);
+			},
+		});
+	};
 
 	return (
 		<HoverCard>
@@ -210,86 +411,23 @@ export function CourseBlock({
 					blurOptions={appearance.blurOptions}
 					className={className}
 					style={containerStyle}
-					onClick={(e) => {
-						e.stopPropagation();
-						openCourseEditor({
-							course,
-							onSubmit: (data) => {
-								CourseStore.getState().updateCourse(course.id, data);
-							},
-						});
-					}}
+					onClick={handleClick}
 				>
-					<div
-						className="h-full p-2 flex flex-col justify-between text-xs relative"
-						style={{
-							textAlign: appearance.textAlign,
-							color: appearance.fgColor ?? "#ffffff",
-							fontFamily: appearance.fontFamily
-								? `'${appearance.fontFamily}', sans-serif`
-								: undefined,
-						}}
-					>
-						{/* Icon */}
-						{appearance.icon && iconPosition && (
-							<CustomIcon icon={appearance.icon} style={iconPosition} />
-						)}
-
-						{/* Time */}
-						<FieldInfoRow
-							fieldKey="time"
+					{sizeTier === "compact" ? (
+						<CompactVerticalContent
+							course={course}
+							meetingTime={meetingTime}
+							appearance={appearance}
+						/>
+					) : (
+						<StandardContent
+							course={course}
+							meetingTime={meetingTime}
 							appearance={appearance}
 							layoutType={layoutType}
-							icon={
-								<Clock
-									width={appearance.fontSize.time}
-									height={appearance.fontSize.time}
-								/>
-							}
-							text={`${meetingTime.time.toString()}`}
+							sizeTier={sizeTier}
 						/>
-
-						{/* Code + Course Name */}
-						<div className="flex flex-col">
-							{appearance.visibility.code && (
-								<FitText
-									fontSize={
-										appearance.autoSizeFont !== false &&
-										(!appearance.visibility.name || !course.name)
-											? appearance.fontSize.code * 1.5
-											: appearance.fontSize.code
-									}
-									className={`${FontWeightMap[appearance.weight.code]} leading-none`}
-								>
-									{course.code}
-								</FitText>
-							)}
-							{appearance.visibility.name && course.name && (
-								<div
-									className={`opacity-90 ${FontWeightMap[appearance.weight.name]} ${
-										layoutType === "rows" ? "truncate" : ""
-									}`}
-									style={{ fontSize: appearance.fontSize.name }}
-								>
-									{course.name}
-								</div>
-							)}
-						</div>
-
-						{/* Location */}
-						<FieldInfoRow
-							fieldKey="location"
-							layoutType={layoutType}
-							appearance={appearance}
-							icon={
-								<MapPin
-									width={appearance.fontSize.location}
-									height={appearance.fontSize.location}
-								/>
-							}
-							text={meetingTime.location}
-						/>
-					</div>
+					)}
 				</Container>
 			</HoverCardTrigger>
 			<HoverCardContent>
