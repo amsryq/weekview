@@ -1,16 +1,14 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { ENABLE_AUTH_PAYWALL } from "~/lib/config/feature-flags";
+import { seo } from "~/lib/utils/seo";
 
 export const Route = createFileRoute("/terms")({
 	head: () => ({
-		meta: [
-			{ title: "Terms of Service — Weekview" },
-			{
-				name: "description",
-				content:
-					"The legal terms governing use of Weekview, including accounts, subscriptions, refunds, and limitations of liability.",
-			},
-		],
+		meta: seo({
+			title: "Terms of Service | Weekview",
+			description:
+				"The legal terms governing use of Weekview, including accounts, subscriptions, refunds, and limitations of liability.",
+		}),
 	}),
 	beforeLoad: () => {
 		if (!ENABLE_AUTH_PAYWALL) {

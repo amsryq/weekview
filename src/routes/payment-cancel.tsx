@@ -9,10 +9,11 @@ import {
 	CardTitle,
 } from "~/components/ui/card";
 import { ENABLE_AUTH_PAYWALL } from "~/lib/config/feature-flags";
+import { seo } from "~/lib/utils/seo";
 
 export const Route = createFileRoute("/payment-cancel")({
 	head: () => ({
-		meta: [{ title: "Payment Cancelled — Weekview" }],
+		meta: seo({ title: "Payment Cancelled | Weekview" }),
 	}),
 	component: PaymentCancelPage,
 });

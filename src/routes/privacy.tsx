@@ -1,16 +1,14 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { ENABLE_AUTH_PAYWALL } from "~/lib/config/feature-flags";
+import { seo } from "~/lib/utils/seo";
 
 export const Route = createFileRoute("/privacy")({
 	head: () => ({
-		meta: [
-			{ title: "Privacy Policy — Weekview" },
-			{
-				name: "description",
-				content:
-					"How Weekview collects, uses, and protects your information. Learn about data collection, cookies, payments via Stripe, and your rights.",
-			},
-		],
+		meta: seo({
+			title: "Privacy Policy | Weekview",
+			description:
+				"How Weekview collects, uses, and protects your information. Learn about data collection, cookies, payments via Stripe, and your rights.",
+		}),
 	}),
 	beforeLoad: () => {
 		if (!ENABLE_AUTH_PAYWALL) {

@@ -28,6 +28,7 @@ import { SupportDialogProvider } from "~/lib/contexts/support-dialog";
 import { ThemeProvider } from "~/lib/contexts/themes";
 import { CourseStore } from "~/lib/stores/course-store";
 import { buildGoogleFontsUrl, PREDEFINED_FONTS } from "~/lib/utils/fonts";
+import { DEFAULT_SEO, seo } from "~/lib/utils/seo";
 
 export const Route = createRootRoute({
 	head: () => ({
@@ -38,19 +39,55 @@ export const Route = createRootRoute({
 				content:
 					"width=device-width, initial-scale=1, maximum-scale=1, interactive-widget=resizes-content",
 			},
-			{
-				title: "Weekview",
-			},
-			{
-				name: "description",
-				content:
-					"Generate stunning weekly schedules effortlessly for your classes.",
-			},
+			...seo({
+				title: "Weekview | UiTM Timetable Generator"
+			}),
 		],
 		links: [
 			{ rel: "stylesheet", href: globalsCss },
 			{ rel: "stylesheet", href: buildGoogleFontsUrl(PREDEFINED_FONTS) },
-			{ rel: "icon", href: "/icon.svg" },
+			{
+				rel: "icon",
+				type: "image/png",
+				sizes: "96x96",
+				href: "/images/favicon-96x96.png",
+			},
+			{
+				rel: "icon",
+				type: "image/svg+xml",
+				href: "/images/favicon.svg",
+			},
+			{ rel: "shortcut icon", href: "/images/favicon.ico" },
+			{
+				rel: "apple-touch-icon",
+				href: "/images/apple-touch-icon.png",
+			},
+			{ rel: "manifest", href: "/images/site.webmanifest" },
+			{ rel: "canonical", href: "https://weekview.my" },
+		],
+		scripts: [
+			{
+				type: "application/ld+json",
+				children: JSON.stringify({
+					"@context": "https://schema.org",
+					"@type": "WebApplication",
+					name: "Weekview",
+					description: DEFAULT_SEO.description,
+					url: "https://weekview.my",
+					applicationCategory: "ProductivityApplication",
+					operatingSystem: "Web Browser",
+					author: {
+						"@type": "Person",
+						name: "amsryq",
+						url: "https://github.com/amsryq",
+					},
+					publisher: {
+						"@type": "Person",
+						name: "amsryq",
+					},
+					datePublished: "2024-01-01", // Or some stable date
+				}),
+			},
 		],
 	}),
 	shellComponent: RootDocument,

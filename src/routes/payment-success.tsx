@@ -11,6 +11,7 @@ import {
 	CardTitle,
 } from "~/components/ui/card";
 import { ENABLE_AUTH_PAYWALL } from "~/lib/config/feature-flags";
+import { seo } from "~/lib/utils/seo";
 import { getStripeSession } from "~/server/functions/stripe";
 
 interface PaymentSessionData {
@@ -155,7 +156,7 @@ export const Route = createFileRoute("/payment-success")({
 		session_id: search.session_id as string | undefined,
 	}),
 	head: () => ({
-		meta: [{ title: "Payment Success — Weekview" }],
+		meta: seo({ title: "Payment Success | Weekview" }),
 	}),
 	component: PaymentSuccessPage,
 });
