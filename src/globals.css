@@ -297,3 +297,30 @@ img.twemoji {
 *::-webkit-scrollbar-track {
 	background: transparent;
 }
+
+/* react-colorful overrides */
+.react-colorful {
+	width: 100% !important;
+	height: auto !important;
+	gap: 12px;
+}
+
+.react-colorful__saturation {
+	border-radius: 8px !important;
+	border-bottom: none !important;
+	aspect-ratio: 1;
+}
+
+.react-colorful__hue,
+.react-colorful__alpha {
+	border-radius: 8px !important;
+	height: 14px !important;
+}
+
+.react-colorful__saturation-pointer,
+.react-colorful__hue-pointer,
+.react-colorful__alpha-pointer {
+	width: 18px !important;
+	height: 18px !important;
+	border-width: 2px !important;
+}

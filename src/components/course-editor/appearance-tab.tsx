@@ -13,13 +13,13 @@ import {
 	CollapsibleContent,
 	CollapsibleTrigger,
 } from "../ui/collapsible";
+import { ColorPicker } from "../ui/color-picker";
 import {
 	EmojiPicker,
 	EmojiPickerContent,
 	EmojiPickerFooter,
 	EmojiPickerSearch,
 } from "../ui/emoji-picker";
-import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import {
@@ -68,22 +68,11 @@ export function AppearanceTab() {
 				<form.Field name="cellAppearance.fgColor">
 					{(field) => (
 						<Field label="Text Color">
-							<div className="flex items-center gap-2">
-								<Input
-									type="color"
-									className="w-10 h-8 p-1 rounded border cursor-pointer shrink-0"
-									value={field.state.value}
-									onChange={(e) => field.handleChange(e.target.value)}
-									onBlur={field.handleBlur}
-								/>
-								<Input
-									placeholder="#ffffff"
-									className="flex-1 h-8 font-mono text-xs"
-									value={field.state.value}
-									onChange={(e) => field.handleChange(e.target.value)}
-									onBlur={field.handleBlur}
-								/>
-							</div>
+							<ColorPicker
+								value={field.state.value ?? "#ffffff"}
+								onChange={(hex) => field.handleChange(hex)}
+								size="sm"
+							/>
 						</Field>
 					)}
 				</form.Field>

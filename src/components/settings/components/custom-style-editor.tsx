@@ -1,11 +1,10 @@
 import { Moon, Sun, Trash2 } from "lucide-react";
-import { memo, useCallback, useId, useMemo, useState } from "react";
+import { memo, useCallback } from "react";
 import { useStore } from "zustand";
 import type { ColorEntry } from "~/lib/models/color-entry";
 import { isBuiltInStyle, type TimetableColorMode } from "~/lib/models/style";
 import { CustomStylesStore } from "~/lib/stores/custom-styles-store";
 import { PREDEFINED_FONTS } from "~/lib/utils/fonts";
-import { cn } from "~/lib/utils/styles";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -18,6 +17,7 @@ import {
 	AlertDialogTrigger,
 } from "../../ui/alert-dialog";
 import { Button } from "../../ui/button";
+import { ColorPicker } from "../../ui/color-picker";
 import {
 	Dialog,
 	DialogContent,
@@ -38,7 +38,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import { useVariantColorField } from "../hooks/use-style-color-editor";
 import { useStyleEditor } from "../hooks/use-style-editor";
-import { getCustomStyle, normalizeHexColor } from "../utils/style-utils";
+import { getCustomStyle } from "../utils/style-utils";
 import { ColorEntryConfigurer } from "./color-entry-configurer";
 
 interface CustomStyleEditorDialogProps {
@@ -355,75 +355,10 @@ const ColorField = memo(function ColorField({
 	value,
 	onChange,
 }: ColorFieldProps) {
-	const textInputId = useId();
-	// Use key-based reset pattern instead of useEffect sync
-	const [draftValue, setDraftValue] = useState(value);
-	const [lastExternalValue, setLastExternalValue] = useState(value);
-
-	// If external value changes, reset draft
-	if (value !== lastExternalValue) {
-		setDraftValue(value);
-		setLastExternalValue(value);
-	}
-
-	const safePickerValue = useMemo(
-		() => normalizeHexColor(value) ?? "#000000",
-		[value],
-	);
-	const isDraftValid = useMemo(
-		() => normalizeHexColor(draftValue) !== null,
-		[draftValue],
-	);
-
-	const commitDraft = useCallback(() => {
-		const normalized = normalizeHexColor(draftValue);
-		if (!normalized) {
-			setDraftValue(value);
-			return;
-		}
-
-		if (normalized !== value) {
-			onChange(normalized);
-		}
-		setDraftValue(normalized);
-	}, [draftValue, onChange, value]);
-
 	return (
 		<div className="space-y-2">
-			<Label htmlFor={textInputId}>{label}</Label>
-			<div className="flex items-center gap-2.5">
-				<Input
-					type="color"
-					value={safePickerValue}
-					onChange={(event) => {
-						setDraftValue(event.target.value);
-						onChange(event.target.value);
-					}}
-					className="h-11 w-14 cursor-pointer rounded-lg p-1"
-				/>
-				<div
-					className="size-4 shrink-0 rounded-full border border-border/80"
-					style={{ backgroundColor: safePickerValue }}
-				/>
-				<Input
-					id={textInputId}
-					type="text"
-					value={draftValue}
-					onChange={(event) => setDraftValue(event.target.value)}
-					onBlur={commitDraft}
-					onKeyDown={(event) => {
-						if (event.key === "Enter") {
-							event.preventDefault();
-							commitDraft();
-						}
-					}}
-					className={cn(
-						"font-mono uppercase",
-						!isDraftValid && "border-destructive/60",
-					)}
-					placeholder="#000000"
-				/>
-			</div>
+			<Label>{label}</Label>
+			<ColorPicker value={value} onChange={onChange} deferTextCommit />
 		</div>
 	);
 });
