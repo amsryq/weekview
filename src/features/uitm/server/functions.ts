@@ -5,12 +5,12 @@ import { CacheKeys, createCacheService } from "~/server/services/cache";
 import { createCookieJarService } from "~/server/services/cookie-jar";
 import type { Course, MyStudentGroup, Session } from "../types";
 import {
+	getMockCourses,
+	getMockGroups,
+	getMockStudentTimetable,
 	MOCK_CAMPUSES,
-	MOCK_COURSES,
 	MOCK_FACULTIES,
-	MOCK_GROUPS,
 	MOCK_MODE,
-	MOCK_STUDENT_TIMETABLE,
 } from "./mock-data";
 import {
 	DAY_MAP_ICRESS,
@@ -64,10 +64,7 @@ export const getCourses = createServerFn({ method: "GET" })
 	.inputValidator((d: { campus: string; faculty?: string | null }) => d)
 	.handler(async ({ data: { campus, faculty } }) => {
 		if (MOCK_MODE) {
-			return MOCK_COURSES.filter(
-				(c) =>
-					c.campusCode === campus && (!faculty || c.facultyCode === faculty),
-			);
+			return getMockCourses(campus, faculty);
 		}
 
 		const storage = getStorage();
@@ -130,7 +127,8 @@ export const getGroups = createServerFn({ method: "GET" })
 	.inputValidator((path: string) => path)
 	.handler(async ({ data: path }) => {
 		if (MOCK_MODE) {
-			return MOCK_GROUPS;
+			const courseCode = path.split("/").pop() || "UNKNOWN";
+			return getMockGroups(courseCode);
 		}
 
 		const storage = getStorage();
@@ -182,7 +180,7 @@ export const getStudentTimetable = createServerFn({ method: "GET" })
 	.inputValidator((studentId: string) => studentId)
 	.handler(async ({ data: studentId }) => {
 		if (MOCK_MODE) {
-			return MOCK_STUDENT_TIMETABLE;
+			return getMockStudentTimetable(studentId);
 		}
 
 		const response = await fetch(
