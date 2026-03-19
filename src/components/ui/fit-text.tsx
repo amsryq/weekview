@@ -34,7 +34,7 @@ export function FitText({
 	fontSize,
 	className,
 	style = {},
-	minFontSize = 16,
+	minFontSize = 1,
 }: FitTextProps) {
 	const textElementRef = useRef<HTMLDivElement>(null);
 	const [currentFontSize, setCurrentFontSize] = useState(fontSize);
@@ -48,13 +48,19 @@ export function FitText({
 			textElementRef.current.style.fontSize = `${testFontSize}px`;
 
 			// Check if text overflows and reduce font size if needed
+			// We use a small buffer to avoid subpixel rounding issues
+			const element = textElementRef.current;
+			if (!element) return;
+
 			while (testFontSize > minFontSize) {
-				const element = textElementRef.current;
-				const isOverflowing = element.scrollWidth > element.clientWidth;
+				// Safety check: if container has no width yet, we can't measure overflow accurately
+				if (element.clientWidth === 0) break;
+
+				const isOverflowing = element.scrollWidth > element.clientWidth + 1;
 
 				if (!isOverflowing) break;
 
-				testFontSize--;
+				testFontSize -= 0.5;
 				element.style.fontSize = `${testFontSize}px`;
 			}
 
@@ -68,11 +74,10 @@ export function FitText({
 		const element = textElementRef.current;
 		if (element) {
 			observer.observe(element);
-			// const parent = element.parentElement;
-			// if (parent) {
-			// 	observer.observe(parent);
-			// }
 		}
+
+		// Initial adjustment
+		adjustFontSize();
 
 		return () => {
 			observer.disconnect();
@@ -82,13 +87,12 @@ export function FitText({
 	return (
 		<div
 			ref={textElementRef}
-			className={cn("truncate", className)}
+			className={cn(className)}
 			style={{
 				...style,
 				fontSize: `${currentFontSize}px`,
 				whiteSpace: "nowrap",
 				overflow: "hidden",
-				textOverflow: "ellipsis",
 			}}
 		>
 			{children}

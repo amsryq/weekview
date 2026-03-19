@@ -256,10 +256,10 @@ function ColumnLayout({
 	const { timeSlots, backgroundStyle, overlayStyle } = useTimetable();
 	const { activeStyleId, timetableColorMode } = useStore(
 		TimetablePreferencesStore,
-		(s) => ({
+		useShallow((s) => ({
 			activeStyleId: s.activeStyleId,
 			timetableColorMode: s.timetableColorMode,
-		}),
+		})),
 	);
 	const activeStyle = resolveTimetableStyleVariant(
 		activeStyleId,
