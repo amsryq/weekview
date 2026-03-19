@@ -124,7 +124,7 @@ export function CourseSlipImportStep() {
 				{showParsedPanel && (
 					<div className="overflow-hidden rounded-xl border border-border/60 bg-muted/30">
 						<div className="border-b border-border/60 bg-muted/40 px-3 py-2">
-							<h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/80">
+							<h3 className="text-xs font-bold text-muted-foreground/80">
 								Detected Details
 							</h3>
 						</div>
@@ -151,7 +151,7 @@ export function CourseSlipImportStep() {
 							/>
 
 							<div className="space-y-2">
-								<h4 className="text-[11px] font-semibold text-foreground/70 uppercase tracking-wider">
+								<h4 className="text-[11px] font-semibold text-foreground/70">
 									Recognised Courses
 								</h4>
 								{coursePreview.length > 0 ? (

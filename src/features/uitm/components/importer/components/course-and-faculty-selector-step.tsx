@@ -86,7 +86,7 @@ export function CourseAndFacultySelectorStep() {
 			<div className="flex-1 space-y-4 px-6 py-2 overflow-y-auto min-h-0">
 				<section className="space-y-2 pt-2">
 					<div className="flex items-center justify-between px-1">
-						<h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/80">
+						<h3 className="text-xs font-bold text-muted-foreground/80">
 							Campus
 						</h3>
 						{campusesLoading && (
@@ -143,7 +143,7 @@ export function CourseAndFacultySelectorStep() {
 				{selectedCampus?.requireFaculty ? (
 					<section className="space-y-2">
 						<div className="flex items-center justify-between px-1">
-							<h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/80">
+							<h3 className="text-xs font-bold text-muted-foreground/80">
 								Faculty
 							</h3>
 							{facultiesLoading && (

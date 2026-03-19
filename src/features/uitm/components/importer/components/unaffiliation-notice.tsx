@@ -10,7 +10,7 @@ function UnaffiliationNotice() {
 	return (
 		<Alert className="relative rounded-xl border border-primary/20 bg-primary/5 shadow-none transition-colors dark:border-primary/30 dark:bg-primary/10">
 			<AlertTriangleIcon className="size-4 text-primary" />
-			<AlertTitle className="line-clamp-none text-xs font-bold uppercase tracking-wider text-primary">
+			<AlertTitle className="line-clamp-none text-xs font-bold text-primary">
 				Not affiliated with UiTM
 			</AlertTitle>
 			<AlertDescription className="text-[11px] leading-normal inline text-muted-foreground/90">

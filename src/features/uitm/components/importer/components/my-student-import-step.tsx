@@ -99,7 +99,7 @@ export function MyStudentImportStep() {
 				<div className="space-y-1.5 px-1">
 					<Label
 						htmlFor="student-id"
-						className="text-xs font-bold uppercase tracking-widest text-muted-foreground/80"
+						className="text-xs font-bold text-muted-foreground/80"
 					>
 						Student ID
 					</Label>
@@ -136,9 +136,7 @@ export function MyStudentImportStep() {
 
 				{showImportError && (
 					<Alert variant="destructive" className="py-2.5">
-						<AlertTitle className="text-xs font-bold uppercase tracking-wide">
-							Import failed
-						</AlertTitle>
+						<AlertTitle className="text-xs font-bold">Import failed</AlertTitle>
 						<AlertDescription className="text-xs opacity-90">
 							{importError?.message}
 						</AlertDescription>
@@ -199,7 +197,7 @@ export function MyStudentImportStep() {
 						{courseProgress.length > 0 ? (
 							<div className="overflow-hidden rounded-xl border border-border/60 bg-card">
 								<div className="border-b border-border/60 bg-muted/40 px-3 py-2">
-									<h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/80">
+									<h3 className="text-xs font-bold text-muted-foreground/80">
 										Courses
 									</h3>
 								</div>

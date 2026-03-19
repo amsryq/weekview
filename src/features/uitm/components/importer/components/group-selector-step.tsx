@@ -119,7 +119,7 @@ export function GroupSelectorStep() {
 			<div className="flex-1 space-y-4 px-6 py-2 overflow-y-auto min-h-0">
 				<section className="space-y-2">
 					<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between px-1">
-						<h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/80">
+						<h3 className="text-xs font-bold text-muted-foreground/80">
 							Course
 						</h3>
 						{selectedCampus ? (
@@ -177,7 +177,7 @@ export function GroupSelectorStep() {
 				<section className="flex flex-1 flex-col overflow-hidden rounded-xl border border-border/60 bg-card">
 					<div className="flex flex-col gap-3 border-b border-border/60 p-3 sm:flex-row sm:items-center sm:justify-between">
 						<div className="flex items-center gap-3">
-							<h3 className="px-1 text-xs font-bold uppercase tracking-widest text-muted-foreground/80">
+							<h3 className="px-1 text-xs font-bold text-muted-foreground/80">
 								Available groups
 							</h3>
 							<Sheet
@@ -188,7 +188,7 @@ export function GroupSelectorStep() {
 									<Button
 										variant="secondary"
 										size="sm"
-										className="h-7 gap-2 px-2 text-[10px] uppercase tracking-wider"
+										className="h-7 gap-2 px-2 text-[10px]"
 									>
 										Selected
 										<span className="flex size-4 items-center justify-center rounded-sm bg-primary text-[10px] font-bold text-primary-foreground">

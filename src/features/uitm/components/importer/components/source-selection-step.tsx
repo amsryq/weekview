@@ -61,12 +61,12 @@ function SourceOption({
 				<div className="flex items-center justify-between gap-2">
 					<span className="text-sm font-semibold text-foreground">{title}</span>
 					{!disabled && eyebrow ? (
-						<span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+						<span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
 							{eyebrow}
 						</span>
 					) : null}
 					{disabled ? (
-						<span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-destructive">
+						<span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive">
 							Unavailable
 						</span>
 					) : null}
@@ -167,7 +167,7 @@ export function SourceSelectionStep() {
 					{sortedSections.map((section) => (
 						<div key={section.key} className="space-y-2">
 							<div className="px-1">
-								<h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/80">
+								<h3 className="text-xs font-bold text-muted-foreground/80">
 									{section.title}
 								</h3>
 							</div>
