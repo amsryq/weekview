@@ -19,9 +19,9 @@ const SupportDialogContext = createContext<
 >(undefined);
 
 const DefaultConfig = {
-	title: "Premium Feature",
+	title: "Support the Project",
 	description:
-		"This feature is available for supporters only. Support the project to unlock gradient colors and other premium features!",
+		"Weekview is a side project I've been building with love. If it's been helpful to you, consider supporting its development—it helps keep the project alive and growing!",
 	showAlternatives: false,
 };
 

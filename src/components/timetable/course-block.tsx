@@ -110,11 +110,11 @@ function FieldInfoRow({
 						style={
 							maxLines != null
 								? {
-									display: "-webkit-box",
-									WebkitLineClamp: maxLines,
-									WebkitBoxOrient: "vertical" as const,
-									wordBreak: "break-all",
-								}
+										display: "-webkit-box",
+										WebkitLineClamp: maxLines,
+										WebkitBoxOrient: "vertical" as const,
+										wordBreak: "break-all",
+									}
 								: undefined
 						}
 					>
@@ -309,7 +309,7 @@ function StandardContent({
 					<FitText
 						fontSize={
 							appearance.autoSizeFont !== false &&
-								(!appearance.visibility.name || !course.name)
+							(!appearance.visibility.name || !course.name)
 								? appearance.fontSize.code * 1.5
 								: appearance.fontSize.code
 						}
@@ -320,8 +320,9 @@ function StandardContent({
 				)}
 				{appearance.visibility.name && course.name && (
 					<div
-						className={`opacity-90 ${FontWeightMap[appearance.weight.name]} ${layoutType === "rows" ? "truncate" : ""
-							}`}
+						className={`opacity-90 ${FontWeightMap[appearance.weight.name]} ${
+							layoutType === "rows" ? "truncate" : ""
+						}`}
 						style={{ fontSize: appearance.fontSize.name }}
 					>
 						{course.name}

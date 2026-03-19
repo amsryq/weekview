@@ -10,7 +10,7 @@ export function SupportDialog() {
 
 	return (
 		<Dialog open={isOpen} onOpenChange={closeSupportDialog}>
-			<DialogContent className="sm:max-w-4xl max-h-[80dvh] overflow-y-scroll sm:overflow-y-visible">
+			<DialogContent className="sm:max-w-2xl max-h-[80dvh]">
 				<Suspense
 					fallback={
 						<div className="flex-1 flex items-center justify-center min-h-0 py-12">

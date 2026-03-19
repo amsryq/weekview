@@ -36,38 +36,19 @@ function AccountButton() {
 }
 
 function SupportButton() {
-	// always call the hook to satisfy rules of hooks
 	const { openSupportDialog } = useSupportDialog();
-
-	if (!ENABLE_AUTH_PAYWALL) {
-		return (
-			<Button asChild variant="outline">
-				<a
-					href="https://github.com/sponsors/amsryq"
-					target="_blank"
-					rel="noopener noreferrer"
-				>
-					<HeartIcon className="w-4 h-4" />
-					Support
-				</a>
-			</Button>
-		);
-	}
 
 	return (
 		<Button
 			onClick={() =>
 				openSupportDialog({
-					title: "Support me!",
-					description:
-						"Thanks for checking out this project! Even though it started as a hobby, I've spent a lot of time (and some money) building it. Any support you give means a lot!",
 					showAlternatives: true,
 				})
 			}
 			variant="outline"
 		>
-			<HeartIcon className="w-4 h-4" />
-			Support
+			<HeartIcon fill="currentColor" className="w-4 h-4" />
+			Support me
 		</Button>
 	);
 }
@@ -109,14 +90,11 @@ function MobileMenu() {
 				<DropdownMenuItem
 					onClick={() =>
 						openSupportDialog({
-							title: "Support me!",
-							description:
-								"Thanks for checking out this project! Even though it started as a hobby, I've spent a lot of time (and some money) building it. Any support you give means a lot!",
 							showAlternatives: true,
 						})
 					}
 				>
-					<HeartIcon className="w-4 h-4" />
+					<HeartIcon fill="currentColor" className="w-4 h-4" />
 					Support
 				</DropdownMenuItem>
 				<DropdownMenuItem asChild>
