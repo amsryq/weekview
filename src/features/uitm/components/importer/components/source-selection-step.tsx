@@ -47,41 +47,35 @@ function SourceOption({
 			disabled={disabled}
 			title={unavailableReason}
 			className={cn(
-				"group relative flex w-full flex-col gap-2 rounded-2xl border border-border/70 bg-background px-5 py-4 text-left",
+				"group relative flex w-full items-center gap-3 px-4 py-3 text-left transition-colors",
 				disabled
 					? "opacity-60 cursor-not-allowed"
-					: "transition hover:-translate-y-0.5 hover:border-primary/60 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+					: "hover:bg-primary/5 focus-visible:outline-none focus-visible:bg-primary/10 focus-visible:z-10",
 			)}
 		>
-			<div className="flex items-start justify-between">
-				<div className="flex w-full items-center gap-3">
-					<span
-						className={cn(
-							"flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary",
-							disabled && "bg-muted text-muted-foreground",
-						)}
-					>
-						<Icon className="size-5" />
-					</span>
-					<div className="w-full">
-						<span className="flex text-base justify-between font-medium text-foreground">
-							<span className="flex items-center gap-2">
-								{title}
-								{disabled ? (
-									<span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-widest text-destructive">
-										Unavailable
-									</span>
-								) : null}
-							</span>
-							{!disabled && eyebrow ? (
-								<span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium uppercase tracking-wide text-primary">
-									{eyebrow}
-								</span>
-							) : null}
+			<span
+				className={cn(
+					"flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary",
+					disabled && "bg-muted text-muted-foreground",
+				)}
+			>
+				<Icon className="size-4" />
+			</span>
+			<div className="min-w-0 flex-1">
+				<div className="flex items-center justify-between gap-2">
+					<span className="text-sm font-semibold text-foreground">{title}</span>
+					{!disabled && eyebrow ? (
+						<span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+							{eyebrow}
 						</span>
-						<p className="mt-1 text-sm text-muted-foreground">{description}</p>
-					</div>
+					) : null}
+					{disabled ? (
+						<span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-destructive">
+							Unavailable
+						</span>
+					) : null}
 				</div>
+				<p className="text-xs text-muted-foreground">{description}</p>
 			</div>
 		</button>
 	);
@@ -104,14 +98,12 @@ const SECTIONS: SectionData[] = [
 	{
 		key: "mystudent",
 		title: "UiTM MyStudent",
-		description:
-			"Fetch your timetable directly from UiTM MyStudent with just your Student ID.",
+		description: "Fetch directly with your Student ID.",
 		options: [
 			{
 				key: "my-student",
 				title: "Use Student ID",
-				description:
-					"Fastest way—pulls your current timetable straight from MyStudent.",
+				description: "Fastest way—pulls from MyStudent.",
 				icon: GraduationCap,
 				eyebrow: "Recommended",
 			},
@@ -120,21 +112,18 @@ const SECTIONS: SectionData[] = [
 	{
 		key: "icress",
 		title: "UiTM iCress",
-		description:
-			"Prefer to manage things manually? Choose specific groups or paste your course slip.",
+		description: "Choose groups manually or paste a slip.",
 		options: [
 			{
 				key: "campus-faculty",
 				title: "Pick courses & groups",
-				description:
-					"Browse available courses for your campus and add the groups you need.",
+				description: "Browse available courses for your campus.",
 				icon: BookOpen,
 			},
 			{
 				key: "course-slip",
 				title: "Paste course slip",
-				description:
-					"Drop in the registration slip text and let Weekview match everything automatically.",
+				description: "Match registration slip text automatically.",
 				icon: ClipboardPlus,
 			},
 		],
@@ -180,54 +169,49 @@ export function SourceSelectionDialog({
 		<ResponsiveDialog open={open} onOpenChange={onOpenChange}>
 			<ResponsiveDialogTrigger asChild>{trigger}</ResponsiveDialogTrigger>
 			<ResponsiveDialogContent
-				desktopClassName="sm:max-w-xl h-180"
+				desktopClassName="sm:max-w-xl"
 				mobileClassName="max-h-[95dvh]"
 			>
 				<ResponsiveDialogHeader className="gap-1">
 					<ResponsiveDialogTitle>Import from UiTM</ResponsiveDialogTitle>
 					<ResponsiveDialogDescription>
-						Choose the starting point that fits what you already have on hand.
+						Choose the starting point that fits what you have.
 					</ResponsiveDialogDescription>
 				</ResponsiveDialogHeader>
 
-				<div className="flex-1 space-y-6 overflow-y-auto px-6 min-h-0">
+				<div className="flex-1 space-y-4 overflow-y-auto px-6 py-2">
 					<UnaffiliationNotice />
 
-					{sortedSections.map((section, idx) => (
-						<section
-							key={section.key}
-							className={cn(
-								"space-y-4",
-								idx === sortedSections.length - 1 && "pb-6",
-							)}
-						>
-							<div className="space-y-1">
-								<h3 className="text-lg font-semibold text-foreground">
-									{section.title}
-								</h3>
-								<p className="text-sm text-muted-foreground">
-									{section.description}
-								</p>
+					<div className="space-y-4">
+						{sortedSections.map((section) => (
+							<div key={section.key} className="space-y-2">
+								<div className="px-1">
+									<h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/80">
+										{section.title}
+									</h3>
+								</div>
+								<div className="overflow-hidden rounded-xl border border-border/60 bg-card divide-y divide-border/60">
+									{section.options.map((option) => {
+										const status = sources[option.key] ?? {
+											available: true,
+										};
+										return (
+											<SourceOption
+												key={option.key}
+												title={option.title}
+												description={option.description}
+												icon={option.icon}
+												eyebrow={option.eyebrow}
+												onSelect={() => navigate(option.key)}
+												disabled={!status.available}
+												unavailableReason={status.unavailableReason}
+											/>
+										);
+									})}
+								</div>
 							</div>
-							<div className="space-y-3">
-								{section.options.map((option) => {
-									const status = sources[option.key] ?? { available: true };
-									return (
-										<SourceOption
-											key={option.key}
-											title={option.title}
-											description={option.description}
-											icon={option.icon}
-											eyebrow={option.eyebrow}
-											onSelect={() => navigate(option.key)}
-											disabled={!status.available}
-											unavailableReason={status.unavailableReason}
-										/>
-									);
-								})}
-							</div>
-						</section>
-					))}
+						))}
+					</div>
 				</div>
 
 				<div className="flex flex-col gap-2 sm:flex-row sm:justify-end p-6 mt-auto">

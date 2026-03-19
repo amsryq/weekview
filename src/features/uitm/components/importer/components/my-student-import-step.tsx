@@ -2,7 +2,6 @@ import {
 	AlertCircle,
 	ArrowLeft,
 	CheckIcon,
-	GraduationCap,
 	Loader2,
 	XIcon,
 } from "lucide-react";
@@ -95,70 +94,81 @@ function MyStudentImportContent() {
 	return (
 		<>
 			<ResponsiveDialogHeader className="gap-1">
-				<ResponsiveDialogTitle className="flex items-center gap-2 text-lg">
-					<span className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
-						<GraduationCap className="size-4" />
-					</span>
-					Import from MyStudent
-				</ResponsiveDialogTitle>
+				<ResponsiveDialogTitle>Import from MyStudent</ResponsiveDialogTitle>
 				<ResponsiveDialogDescription>
-					Enter your UiTM student ID and we will fetch the timetable directly
-					from the MyStudent portal.
+					Enter your student ID to fetch from the portal.
 				</ResponsiveDialogDescription>
 			</ResponsiveDialogHeader>
 
-			<div className="flex-1 flex flex-col gap-4 px-6 overflow-y-auto min-h-0">
-				<Input
-					type="text"
-					value={studentId}
-					inputMode="numeric"
-					onChange={(event) => setStudentId(event.target.value)}
-					placeholder="Enter your student ID"
-				/>
+			<div className="flex-1 flex flex-col gap-4 px-6 py-2 overflow-y-auto min-h-0">
+				<div className="space-y-1.5 px-1">
+					<Label
+						htmlFor="student-id"
+						className="text-xs font-bold uppercase tracking-widest text-muted-foreground/80"
+					>
+						Student ID
+					</Label>
+					<Input
+						id="student-id"
+						type="text"
+						value={studentId}
+						inputMode="numeric"
+						onChange={(event) => setStudentId(event.target.value)}
+						placeholder="202X..."
+						className="h-9 text-sm"
+					/>
+				</div>
 
-				<div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3">
-					<div className="flex flex-col gap-1">
+				<div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/30 p-3">
+					<div className="flex flex-col">
 						<Label
 							htmlFor="include-course-name"
-							className="text-sm font-medium cursor-pointer"
+							className="text-xs font-semibold cursor-pointer"
 						>
 							Include course names
 						</Label>
-						<span className="text-xs text-muted-foreground">
-							Show full course names in timetable entries
+						<span className="text-[10px] text-muted-foreground">
+							Show full names in timetable entries
 						</span>
 					</div>
 					<Switch
 						id="include-course-name"
 						checked={includeCourseName}
 						onCheckedChange={setIncludeCourseName}
+						className="scale-90"
 					/>
 				</div>
 
 				{showImportError && (
-					<Alert variant="destructive">
-						<AlertTitle>Import failed</AlertTitle>
-						<AlertDescription>{importError?.message}</AlertDescription>
+					<Alert variant="destructive" className="py-2.5">
+						<AlertTitle className="text-xs font-bold uppercase tracking-wide">
+							Import failed
+						</AlertTitle>
+						<AlertDescription className="text-xs opacity-90">
+							{importError?.message}
+						</AlertDescription>
 					</Alert>
 				)}
 			</div>
 
 			<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between p-6 mt-auto">
 				<Button
-					variant="outline"
+					variant="ghost"
+					size="sm"
 					onClick={() => setCurrentStep("source")}
 					className="w-full sm:w-auto"
 				>
-					<ArrowLeft className="size-4" />
-					Back to selection
+					<ArrowLeft className="size-4 mr-2" />
+					Back
 				</Button>
 				<Button
 					onClick={onStartImport}
 					disabled={isPending || studentId.trim() === ""}
+					size="sm"
 					className="w-full sm:w-auto"
 				>
 					{isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-					Import timetable
+					Import
 				</Button>
 			</div>
 
@@ -171,55 +181,57 @@ function MyStudentImportContent() {
 				}}
 			>
 				<ResponsiveDialogContent
-					desktopClassName="sm:max-w-2xl"
-					mobileClassName="max-h-[90dvh]"
+					desktopClassName="sm:max-w-xl"
+					mobileClassName="max-h-[95dvh]"
 				>
-					<ResponsiveDialogHeader>
+					<ResponsiveDialogHeader className="gap-1">
 						<ResponsiveDialogTitle className="flex items-center gap-2">
 							{isImporting ? (
-								<Loader2 className="size-5 animate-spin text-primary" />
+								<Loader2 className="size-4 animate-spin text-primary" />
 							) : errorCount > 0 ? (
-								<AlertCircle className="size-5 text-amber-500" />
+								<AlertCircle className="size-4 text-amber-500" />
 							) : (
-								<CheckIcon className="size-5 text-emerald-500" />
+								<CheckIcon className="size-4 text-emerald-500" />
 							)}
-							<span>{progressTitle}</span>
+							<span className="text-base">{progressTitle}</span>
 						</ResponsiveDialogTitle>
-						<ResponsiveDialogDescription>
+						<ResponsiveDialogDescription className="text-xs">
 							{progressSubtitle}
 						</ResponsiveDialogDescription>
 					</ResponsiveDialogHeader>
 
-					<div className="flex-1 space-y-4 py-4 px-6 overflow-y-auto min-h-0">
+					<div className="flex-1 py-2 px-6 overflow-y-auto min-h-0">
 						{courseProgress.length > 0 ? (
-							<div className="rounded-lg border bg-background">
-								<div className="border-b bg-muted/30 px-4 py-3">
-									<h3 className="text-sm font-semibold">Courses</h3>
+							<div className="overflow-hidden rounded-xl border border-border/60 bg-card">
+								<div className="border-b border-border/60 bg-muted/40 px-3 py-2">
+									<h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/80">
+										Courses
+									</h3>
 								</div>
-								<div className="max-h-[400px] overflow-y-auto">
-									<div className="divide-y">
+								<div className="max-h-[300px] overflow-y-auto">
+									<div className="divide-y divide-border/60">
 										{courseProgress.map((item: CourseImportProgress) => (
 											<div
 												key={`${item.courseCode}-${item.group}`}
-												className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors"
+												className="flex items-center justify-between px-3 py-2.5 hover:bg-primary/5 transition-colors"
 											>
 												<div className="flex-1 min-w-0">
 													<div className="flex items-baseline gap-2">
-														<span className="font-medium text-sm">
+														<span className="font-semibold text-sm">
 															{item.courseCode}
 														</span>
 														{item.courseName && (
-															<span className="text-xs text-muted-foreground truncate">
+															<span className="text-[11px] text-muted-foreground">
 																{item.courseName}
 															</span>
 														)}
 													</div>
-													<div className="flex items-center gap-2 mt-0.5">
-														<span className="text-xs text-muted-foreground">
+													<div className="flex items-center gap-2">
+														<span className="text-[11px] font-medium text-muted-foreground/80">
 															{item.group}
 														</span>
 														{item.reason && item.status === "error" && (
-															<span className="text-xs text-destructive">
+															<span className="text-[10px] text-destructive font-medium">
 																• {item.reason}
 															</span>
 														)}
@@ -227,16 +239,16 @@ function MyStudentImportContent() {
 												</div>
 												<div className="shrink-0 ml-3">
 													{item.status === "pending" ? (
-														<div className="size-5 rounded-full border-2 border-muted-foreground/30" />
+														<div className="size-4 rounded-full border border-muted-foreground/30" />
 													) : item.status === "running" ? (
-														<Loader2 className="size-5 animate-spin text-primary" />
+														<Loader2 className="size-4 animate-spin text-primary" />
 													) : item.status === "success" ? (
-														<div className="size-5 rounded-full bg-emerald-500 flex items-center justify-center">
-															<CheckIcon className="size-3 text-white" />
+														<div className="size-4 rounded-full bg-emerald-500 flex items-center justify-center">
+															<CheckIcon className="size-2.5 text-white" />
 														</div>
 													) : (
-														<div className="size-5 rounded-full bg-destructive flex items-center justify-center">
-															<XIcon className="size-3 text-white" />
+														<div className="size-4 rounded-full bg-destructive flex items-center justify-center">
+															<XIcon className="size-2.5 text-white" />
 														</div>
 													)}
 												</div>
@@ -246,8 +258,8 @@ function MyStudentImportContent() {
 								</div>
 							</div>
 						) : (
-							<div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-								No courses loaded yet.
+							<div className="rounded-xl border border-dashed border-border/60 bg-muted/20 p-8 text-center text-xs text-muted-foreground">
+								Waiting for data...
 							</div>
 						)}
 					</div>
@@ -255,15 +267,17 @@ function MyStudentImportContent() {
 					<div className="flex w-full flex-col gap-2 sm:flex-row sm:justify-between p-6 mt-auto">
 						<Button
 							variant="ghost"
+							size="sm"
 							onClick={requestCancel}
 							className="w-full sm:w-auto"
 							disabled={!isImporting || cancelRequested}
 						>
-							Cancel import
+							Cancel
 						</Button>
 
 						<Button
 							variant="secondary"
+							size="sm"
 							onClick={() => setProgressDialogOpen(false)}
 							className="w-full sm:w-auto"
 							disabled={isImporting && !cancelRequested}

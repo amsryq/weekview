@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Compass } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "~/components/ui/button";
@@ -91,26 +91,22 @@ export function CourseAndFacultySelectorDialog({
 				mobileClassName="max-h-[95dvh]"
 			>
 				<ResponsiveDialogHeader className="gap-1">
-					<ResponsiveDialogTitle className="flex items-center gap-2 text-lg">
-						<span className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
-							<Compass className="size-4" />
-						</span>
-						Choose your campus & faculty
-					</ResponsiveDialogTitle>
+					<ResponsiveDialogTitle>Campus & Faculty</ResponsiveDialogTitle>
 					<ResponsiveDialogDescription>
-						Select where you study so we can show the exact courses available to
-						you.
+						Select where you study to see available courses.
 					</ResponsiveDialogDescription>
 				</ResponsiveDialogHeader>
 
-				<div className="flex-1 space-y-5 px-6 overflow-y-auto min-h-0">
-					<section className="space-y-2">
-						<div className="flex items-center justify-between">
-							<h3 className="text-sm font-medium text-muted-foreground">
+				<div className="flex-1 space-y-4 px-6 py-2 overflow-y-auto min-h-0">
+					<section className="space-y-2 pt-2">
+						<div className="flex items-center justify-between px-1">
+							<h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/80">
 								Campus
 							</h3>
 							{campusesLoading && (
-								<span className="text-xs text-muted-foreground">Loading…</span>
+								<span className="text-[10px] font-medium text-muted-foreground">
+									Loading…
+								</span>
 							)}
 						</div>
 						<Combobox
@@ -128,7 +124,7 @@ export function CourseAndFacultySelectorDialog({
 							onValueChange={handleCampusChange}
 						>
 							<ComboboxTrigger
-								className="w-full"
+								className="w-full flex-1"
 								disabled={campusesLoading || !campuses?.length}
 							/>
 							<ComboboxContent className="max-h-60">
@@ -152,7 +148,7 @@ export function CourseAndFacultySelectorDialog({
 							</ComboboxContent>
 						</Combobox>
 						{campusesError ? (
-							<p className="text-sm text-destructive">
+							<p className="text-sm text-destructive px-1">
 								{campusesError.message}
 							</p>
 						) : null}
@@ -160,12 +156,12 @@ export function CourseAndFacultySelectorDialog({
 
 					{selectedCampus?.requireFaculty ? (
 						<section className="space-y-2">
-							<div className="flex items-center justify-between">
-								<h3 className="text-sm font-medium text-muted-foreground">
+							<div className="flex items-center justify-between px-1">
+								<h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/80">
 									Faculty
 								</h3>
 								{facultiesLoading && (
-									<span className="text-xs text-muted-foreground">
+									<span className="text-[10px] font-medium text-muted-foreground">
 										Loading…
 									</span>
 								)}
@@ -211,35 +207,37 @@ export function CourseAndFacultySelectorDialog({
 								</ComboboxContent>
 							</Combobox>
 							{facultiesError ? (
-								<p className="text-sm text-destructive">
+								<p className="text-sm text-destructive px-1">
 									{(facultiesError as Error).message}
 								</p>
 							) : null}
 						</section>
 					) : null}
 
-					<p className="text-xs text-muted-foreground pb-6">
-						Your selections help narrow down the exact course catalogue. You can
-						change them later if needed.
+					<p className="text-[11px] text-muted-foreground pt-2 px-1">
+						Selections help narrow down the course catalogue. You can change
+						them later.
 					</p>
 				</div>
 
-				<div className="flex flex-col gap-2 sm:flex-row sm:justify-between border-t p-6 mt-auto">
+				<div className="flex flex-col gap-2 sm:flex-row sm:justify-between p-6 mt-auto">
 					<Button
 						variant="ghost"
+						size="sm"
 						className="w-full sm:w-auto"
 						onClick={handleBack}
 					>
-						<ArrowLeft className="size-4" />
+						<ArrowLeft className="size-4 mr-2" />
 						Back
 					</Button>
 					<Button
 						variant="default"
+						size="sm"
 						className="w-full sm:w-auto"
 						disabled={!canProceed}
 						onClick={handleNext}
 					>
-						Continue to groups
+						Continue
 					</Button>
 				</div>
 			</ResponsiveDialogContent>
