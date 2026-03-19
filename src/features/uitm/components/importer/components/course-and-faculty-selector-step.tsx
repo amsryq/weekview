@@ -1,11 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Compass } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "~/components/ui/button";
 import {
-	ResponsiveDialog,
-	ResponsiveDialogContent,
 	ResponsiveDialogDescription,
 	ResponsiveDialogHeader,
 	ResponsiveDialogTitle,
@@ -24,15 +22,7 @@ import { Campus } from "../../../models/campus";
 import { Faculty } from "../../../models/faculty";
 import { useImporterSelectionStore } from "../utils/shared";
 
-interface CourseAndFacultySelectorDialogProps {
-	open: boolean;
-	onOpenChange: (open: boolean) => void;
-}
-
-export function CourseAndFacultySelectorDialog({
-	open,
-	onOpenChange,
-}: CourseAndFacultySelectorDialogProps) {
+export function CourseAndFacultySelectorStep() {
 	const {
 		selectedCampus,
 		selectedFaculty,
@@ -85,165 +75,158 @@ export function CourseAndFacultySelectorDialog({
 	};
 
 	return (
-		<ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-			<ResponsiveDialogContent
-				desktopClassName="sm:max-w-xl"
-				mobileClassName="max-h-[95dvh]"
-			>
-				<ResponsiveDialogHeader className="gap-1">
-					<ResponsiveDialogTitle className="flex items-center gap-2 text-lg">
-						<span className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
-							<Compass className="size-4" />
-						</span>
-						Choose your campus & faculty
-					</ResponsiveDialogTitle>
-					<ResponsiveDialogDescription>
-						Select where you study so we can show the exact courses available to
-						you.
-					</ResponsiveDialogDescription>
-				</ResponsiveDialogHeader>
+		<>
+			<ResponsiveDialogHeader className="gap-1">
+				<ResponsiveDialogTitle>Campus & Faculty</ResponsiveDialogTitle>
+				<ResponsiveDialogDescription>
+					Select where you study to see available courses.
+				</ResponsiveDialogDescription>
+			</ResponsiveDialogHeader>
 
-				<div className="flex-1 space-y-5 px-6 overflow-y-auto min-h-0">
+			<div className="flex-1 space-y-4 px-6 py-2 overflow-y-auto min-h-0">
+				<section className="space-y-2 pt-2">
+					<div className="flex items-center justify-between px-1">
+						<h3 className="text-xs font-bold text-muted-foreground/80">
+							Campus
+						</h3>
+						{campusesLoading && (
+							<span className="text-[10px] font-medium text-muted-foreground">
+								Loading…
+							</span>
+						)}
+					</div>
+					<Combobox
+						type="campus"
+						modal
+						loading={campusesLoading}
+						loadingText="Loading campuses…"
+						data={
+							campuses?.map((campus) => ({
+								value: campus.code,
+								label: campus.name,
+							})) ?? []
+						}
+						value={selectedCampus?.code ?? ""}
+						onValueChange={handleCampusChange}
+					>
+						<ComboboxTrigger
+							className="w-full flex-1"
+							disabled={campusesLoading || !campuses?.length}
+						/>
+						<ComboboxContent className="max-h-60">
+							<ComboboxInput placeholder="Search campuses…" />
+							<ComboboxEmpty>
+								{campusesLoading ? "Loading campuses…" : "No campuses found"}
+							</ComboboxEmpty>
+							<ComboboxList>
+								<ComboboxGroup>
+									{campuses?.map((campus) => (
+										<ComboboxItem
+											key={campus.code}
+											value={campus.code}
+											keywords={[campus.name]}
+										>
+											{campus.name}
+										</ComboboxItem>
+									))}
+								</ComboboxGroup>
+							</ComboboxList>
+						</ComboboxContent>
+					</Combobox>
+					{campusesError ? (
+						<p className="text-sm text-destructive px-1">
+							{campusesError.message}
+						</p>
+					) : null}
+				</section>
+
+				{selectedCampus?.requireFaculty ? (
 					<section className="space-y-2">
-						<div className="flex items-center justify-between">
-							<h3 className="text-sm font-medium text-muted-foreground">
-								Campus
+						<div className="flex items-center justify-between px-1">
+							<h3 className="text-xs font-bold text-muted-foreground/80">
+								Faculty
 							</h3>
-							{campusesLoading && (
-								<span className="text-xs text-muted-foreground">Loading…</span>
+							{facultiesLoading && (
+								<span className="text-[10px] font-medium text-muted-foreground">
+									Loading…
+								</span>
 							)}
 						</div>
 						<Combobox
-							type="campus"
+							type="faculty"
 							modal
-							loading={campusesLoading}
-							loadingText="Loading campuses…"
+							loading={facultiesLoading}
+							loadingText="Loading faculties…"
 							data={
-								campuses?.map((campus) => ({
-									value: campus.code,
-									label: campus.name,
+								faculties?.map((faculty) => ({
+									value: faculty.code,
+									label: faculty.name,
 								})) ?? []
 							}
-							value={selectedCampus?.code ?? ""}
-							onValueChange={handleCampusChange}
+							value={selectedFaculty?.code ?? ""}
+							onValueChange={handleFacultyChange}
 						>
 							<ComboboxTrigger
 								className="w-full"
-								disabled={campusesLoading || !campuses?.length}
+								disabled={facultiesLoading || !faculties?.length}
 							/>
 							<ComboboxContent className="max-h-60">
-								<ComboboxInput placeholder="Search campuses…" />
+								<ComboboxInput placeholder="Search faculties…" />
 								<ComboboxEmpty>
-									{campusesLoading ? "Loading campuses…" : "No campuses found"}
+									{facultiesLoading
+										? "Loading faculties…"
+										: "No faculties for this campus"}
 								</ComboboxEmpty>
 								<ComboboxList>
 									<ComboboxGroup>
-										{campuses?.map((campus) => (
+										{faculties?.map((faculty) => (
 											<ComboboxItem
-												key={campus.code}
-												value={campus.code}
-												keywords={[campus.name]}
+												key={faculty.code}
+												value={faculty.code}
+												keywords={[faculty.name]}
 											>
-												{campus.name}
+												{faculty.name}
 											</ComboboxItem>
 										))}
 									</ComboboxGroup>
 								</ComboboxList>
 							</ComboboxContent>
 						</Combobox>
-						{campusesError ? (
-							<p className="text-sm text-destructive">
-								{campusesError.message}
+						{facultiesError ? (
+							<p className="text-sm text-destructive px-1">
+								{(facultiesError as Error).message}
 							</p>
 						) : null}
 					</section>
+				) : null}
 
-					{selectedCampus?.requireFaculty ? (
-						<section className="space-y-2">
-							<div className="flex items-center justify-between">
-								<h3 className="text-sm font-medium text-muted-foreground">
-									Faculty
-								</h3>
-								{facultiesLoading && (
-									<span className="text-xs text-muted-foreground">
-										Loading…
-									</span>
-								)}
-							</div>
-							<Combobox
-								type="faculty"
-								modal
-								loading={facultiesLoading}
-								loadingText="Loading faculties…"
-								data={
-									faculties?.map((faculty) => ({
-										value: faculty.code,
-										label: faculty.name,
-									})) ?? []
-								}
-								value={selectedFaculty?.code ?? ""}
-								onValueChange={handleFacultyChange}
-							>
-								<ComboboxTrigger
-									className="w-full"
-									disabled={facultiesLoading || !faculties?.length}
-								/>
-								<ComboboxContent className="max-h-60">
-									<ComboboxInput placeholder="Search faculties…" />
-									<ComboboxEmpty>
-										{facultiesLoading
-											? "Loading faculties…"
-											: "No faculties for this campus"}
-									</ComboboxEmpty>
-									<ComboboxList>
-										<ComboboxGroup>
-											{faculties?.map((faculty) => (
-												<ComboboxItem
-													key={faculty.code}
-													value={faculty.code}
-													keywords={[faculty.name]}
-												>
-													{faculty.name}
-												</ComboboxItem>
-											))}
-										</ComboboxGroup>
-									</ComboboxList>
-								</ComboboxContent>
-							</Combobox>
-							{facultiesError ? (
-								<p className="text-sm text-destructive">
-									{(facultiesError as Error).message}
-								</p>
-							) : null}
-						</section>
-					) : null}
+				<p className="text-[11px] text-muted-foreground pt-2 px-1">
+					Selections help narrow down the course catalogue. You can change them
+					later.
+				</p>
+			</div>
 
-					<p className="text-xs text-muted-foreground pb-6">
-						Your selections help narrow down the exact course catalogue. You can
-						change them later if needed.
-					</p>
-				</div>
-
-				<div className="flex flex-col gap-2 sm:flex-row sm:justify-between border-t p-6 mt-auto">
-					<Button
-						variant="ghost"
-						className="w-full sm:w-auto"
-						onClick={handleBack}
-					>
-						<ArrowLeft className="size-4" />
-						Back
-					</Button>
-					<Button
-						variant="default"
-						className="w-full sm:w-auto"
-						disabled={!canProceed}
-						onClick={handleNext}
-					>
-						Continue to groups
-					</Button>
-				</div>
-			</ResponsiveDialogContent>
-		</ResponsiveDialog>
+			<div className="flex flex-col gap-2 sm:flex-row sm:justify-between p-6 mt-auto">
+				<Button
+					variant="ghost"
+					size="sm"
+					className="w-full sm:w-auto"
+					onClick={handleBack}
+				>
+					<ArrowLeft className="size-4 mr-2" />
+					Back
+				</Button>
+				<Button
+					variant="default"
+					size="sm"
+					className="w-full sm:w-auto"
+					disabled={!canProceed}
+					onClick={handleNext}
+				>
+					Continue
+				</Button>
+			</div>
+		</>
 	);
 }
 

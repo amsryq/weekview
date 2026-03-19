@@ -83,10 +83,10 @@ export function CourseEditorDialog({
 				desktopClassName="w-full max-w-5xl h-[90dvh]"
 				mobileClassName="h-[75dvh]"
 				sheetSide="bottom"
-				onPointerDownOutside={(e) => {
+				onPointerDownOutside={(e: Event) => {
 					if (isDirty) e.preventDefault();
 				}}
-				onEscapeKeyDown={(e) => {
+				onEscapeKeyDown={(e: KeyboardEvent) => {
 					if (isDirty) e.preventDefault();
 				}}
 			>
