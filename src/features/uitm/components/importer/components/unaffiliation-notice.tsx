@@ -10,14 +10,14 @@ function UnaffiliationNotice() {
 	return (
 		<Alert className="relative rounded-xl border border-primary/20 bg-primary/5 shadow-none transition-colors dark:border-primary/30 dark:bg-primary/10">
 			<AlertTriangleIcon className="size-4 text-primary" />
-			<AlertTitle className="line-clamp-none text-xs font-bold text-primary">
+			<AlertTitle className="line-clamp-none text-sm font-bold text-primary">
 				Not affiliated with UiTM
 			</AlertTitle>
-			<AlertDescription className="text-[11px] leading-normal inline text-muted-foreground/90">
+			<AlertDescription className="text-xs leading-normal inline text-muted-foreground/90">
 				Always verify your timetable in official portals. If anything is wrong,
-				reach out via
+				reach out via{" "}
 				<a
-					className="ml-1 font-medium underline-offset-2 hover:underline text-primary"
+					className="font-medium underline-offset-2 hover:underline text-primary"
 					href="https://t.me/myweekview"
 					target="_blank"
 					rel="noreferrer"

@@ -45,7 +45,11 @@ export const Route = createRootRoute({
 		],
 		links: [
 			{ rel: "stylesheet", href: globalsCss },
-			{ rel: "stylesheet", href: buildGoogleFontsUrl(PREDEFINED_FONTS) },
+			{
+				rel: "stylesheet",
+				href: buildGoogleFontsUrl(PREDEFINED_FONTS),
+				crossOrigin: "anonymous",
+			},
 			{
 				rel: "icon",
 				type: "image/png",
