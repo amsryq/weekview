@@ -28,12 +28,7 @@ import {
 	useImporterSelectionStore,
 } from "../utils/shared";
 
-interface MyStudentImportDialogProps {
-	open: boolean;
-	onOpenChange: (open: boolean) => void;
-}
-
-function MyStudentImportContent() {
+export function MyStudentImportStep() {
 	const [studentId, setStudentId] = useState("");
 	const [includeCourseName, setIncludeCourseName] = useState(false);
 	const [progressDialogOpen, setProgressDialogOpen] = useState(false);
@@ -288,30 +283,5 @@ function MyStudentImportContent() {
 				</ResponsiveDialogContent>
 			</ResponsiveDialog>
 		</>
-	);
-}
-
-export function MyStudentImportDialog({
-	open,
-	onOpenChange,
-}: MyStudentImportDialogProps) {
-	const [contentKey, setContentKey] = useState(0);
-
-	const handleOpenChange = (nextOpen: boolean) => {
-		onOpenChange(nextOpen);
-		if (!nextOpen) {
-			setContentKey((prev) => prev + 1);
-		}
-	};
-
-	return (
-		<ResponsiveDialog open={open} onOpenChange={handleOpenChange}>
-			<ResponsiveDialogContent
-				desktopClassName="sm:max-w-xl"
-				mobileClassName="max-h-[95dvh]"
-			>
-				<MyStudentImportContent key={contentKey} />
-			</ResponsiveDialogContent>
-		</ResponsiveDialog>
 	);
 }

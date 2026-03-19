@@ -3,8 +3,6 @@ import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "~/components/ui/button";
 import {
-	ResponsiveDialog,
-	ResponsiveDialogContent,
 	ResponsiveDialogDescription,
 	ResponsiveDialogHeader,
 	ResponsiveDialogTitle,
@@ -24,12 +22,7 @@ function formatDetectedLabel(code?: string, name?: string): string {
 	return name ? `${code} - ${name}` : code;
 }
 
-interface CourseSlipImportDialogProps {
-	open: boolean;
-	onOpenChange: (open: boolean) => void;
-}
-
-function CourseSlipImportStepBody() {
+export function CourseSlipImportStep() {
 	const [rawText, setRawText] = useState("");
 	const [howToOpen, setHowToOpen] = useState(false);
 
@@ -238,21 +231,5 @@ function CourseSlipImportStepBody() {
 				onRequestCancel={requestCancel}
 			/>
 		</>
-	);
-}
-
-export function CourseSlipImportDialog({
-	open,
-	onOpenChange,
-}: CourseSlipImportDialogProps) {
-	return (
-		<ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-			<ResponsiveDialogContent
-				desktopClassName="sm:max-w-xl"
-				mobileClassName="max-h-[95dvh]"
-			>
-				<CourseSlipImportStepBody />
-			</ResponsiveDialogContent>
-		</ResponsiveDialog>
 	);
 }

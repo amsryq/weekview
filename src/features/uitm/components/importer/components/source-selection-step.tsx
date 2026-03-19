@@ -4,17 +4,13 @@ import {
 	GraduationCap,
 	LucideIcon,
 } from "lucide-react";
-import { ReactNode } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "~/components/ui/button";
 import {
-	ResponsiveDialog,
 	ResponsiveDialogClose,
-	ResponsiveDialogContent,
 	ResponsiveDialogDescription,
 	ResponsiveDialogHeader,
 	ResponsiveDialogTitle,
-	ResponsiveDialogTrigger,
 } from "~/components/ui/responsive-dialog";
 import { cn } from "~/lib/utils/styles";
 import { ImporterStep, useImporterSelectionStore } from "../utils/shared";
@@ -130,17 +126,7 @@ const SECTIONS: SectionData[] = [
 	},
 ];
 
-interface SourceSelectionDialogProps {
-	trigger: ReactNode;
-	open: boolean;
-	onOpenChange: (open: boolean) => void;
-}
-
-export function SourceSelectionDialog({
-	trigger,
-	open,
-	onOpenChange,
-}: SourceSelectionDialogProps) {
+export function SourceSelectionStep() {
 	const { setCurrentStep } = useImporterSelectionStore(
 		useShallow((state) => pickNavigationFns(state)),
 	);
@@ -166,63 +152,57 @@ export function SourceSelectionDialog({
 		});
 
 	return (
-		<ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-			<ResponsiveDialogTrigger asChild>{trigger}</ResponsiveDialogTrigger>
-			<ResponsiveDialogContent
-				desktopClassName="sm:max-w-xl"
-				mobileClassName="max-h-[95dvh]"
-			>
-				<ResponsiveDialogHeader className="gap-1">
-					<ResponsiveDialogTitle>Import from UiTM</ResponsiveDialogTitle>
-					<ResponsiveDialogDescription>
-						Choose the starting point that fits what you have.
-					</ResponsiveDialogDescription>
-				</ResponsiveDialogHeader>
+		<>
+			<ResponsiveDialogHeader className="gap-1">
+				<ResponsiveDialogTitle>Import from UiTM</ResponsiveDialogTitle>
+				<ResponsiveDialogDescription>
+					Choose the starting point that fits what you have.
+				</ResponsiveDialogDescription>
+			</ResponsiveDialogHeader>
 
-				<div className="flex-1 space-y-4 overflow-y-auto px-6 py-2">
-					<UnaffiliationNotice />
+			<div className="flex-1 space-y-4 overflow-y-auto px-6 py-2 min-h-0">
+				<UnaffiliationNotice />
 
-					<div className="space-y-4">
-						{sortedSections.map((section) => (
-							<div key={section.key} className="space-y-2">
-								<div className="px-1">
-									<h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/80">
-										{section.title}
-									</h3>
-								</div>
-								<div className="overflow-hidden rounded-xl border border-border/60 bg-card divide-y divide-border/60">
-									{section.options.map((option) => {
-										const status = sources[option.key] ?? {
-											available: true,
-										};
-										return (
-											<SourceOption
-												key={option.key}
-												title={option.title}
-												description={option.description}
-												icon={option.icon}
-												eyebrow={option.eyebrow}
-												onSelect={() => navigate(option.key)}
-												disabled={!status.available}
-												unavailableReason={status.unavailableReason}
-											/>
-										);
-									})}
-								</div>
+				<div className="space-y-4">
+					{sortedSections.map((section) => (
+						<div key={section.key} className="space-y-2">
+							<div className="px-1">
+								<h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/80">
+									{section.title}
+								</h3>
 							</div>
-						))}
-					</div>
+							<div className="overflow-hidden rounded-xl border border-border/60 bg-card divide-y divide-border/60">
+								{section.options.map((option) => {
+									const status = sources[option.key] ?? {
+										available: true,
+									};
+									return (
+										<SourceOption
+											key={option.key}
+											title={option.title}
+											description={option.description}
+											icon={option.icon}
+											eyebrow={option.eyebrow}
+											onSelect={() => navigate(option.key)}
+											disabled={!status.available}
+											unavailableReason={status.unavailableReason}
+										/>
+									);
+								})}
+							</div>
+						</div>
+					))}
 				</div>
+			</div>
 
-				<div className="flex flex-col gap-2 sm:flex-row sm:justify-end p-6 mt-auto">
-					<ResponsiveDialogClose asChild>
-						<Button variant="secondary" className="w-full sm:w-auto">
-							Close
-						</Button>
-					</ResponsiveDialogClose>
-				</div>
-			</ResponsiveDialogContent>
-		</ResponsiveDialog>
+			<div className="flex flex-col gap-2 sm:flex-row sm:justify-end p-6 mt-auto">
+				<ResponsiveDialogClose asChild>
+					<Button variant="secondary" className="w-full sm:w-auto">
+						Close
+					</Button>
+				</ResponsiveDialogClose>
+			</div>
+		</>
 	);
 }
 
