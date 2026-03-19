@@ -40,7 +40,7 @@ export const Route = createRootRoute({
 					"width=device-width, initial-scale=1, maximum-scale=1, interactive-widget=resizes-content",
 			},
 			...seo({
-				title: "Weekview | UiTM Timetable Generator"
+				title: "Weekview | UiTM Timetable Generator",
 			}),
 		],
 		links: [

@@ -12,7 +12,13 @@ import { CustomStylesStore } from "~/lib/stores/custom-styles-store";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { resolveTimetableStyleVariant } from "~/lib/utils/timetable-styles";
 import { Button } from "../ui/button";
-import { Card, CardContent } from "../ui/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "../ui/card";
 import {
 	COLUMN_BLOCK_HEIGHT_PX,
 	DAY_TO_INDEX,
@@ -414,7 +420,9 @@ export function WeeklyTimetable({
 					>
 						<div
 							className={
-								isEmpty ? "blur-sm pointer-events-none select-none" : ""
+								isEmpty
+									? "opacity-20 grayscale pointer-events-none select-none"
+									: ""
 							}
 						>
 							{effectiveLayout === "rows" ? (
@@ -432,17 +440,31 @@ export function WeeklyTimetable({
 					</TimetableContext.Provider>
 
 					{isEmpty && (
-						<div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4">
-							<p className="text-sm font-medium text-muted-foreground">
-								Your timetable is empty. Let's get started:
-							</p>
-							<div className="flex flex-wrap items-center justify-center gap-2">
-								<Button onClick={openManualImporter}>
-									<PlusIcon className="w-4 h-4" />
-									Add Course
-								</Button>
-								<UiTMAddCourseButton />
-							</div>
+						<div className="absolute inset-0 z-20 flex items-center justify-center p-4">
+							<Card className="max-w-[280px] w-full shadow-2xl border bg-card/80 backdrop-blur-xl border-primary/10 p-0 overflow-hidden">
+								<CardHeader className="text-center p-6 pb-0">
+									<div className="flex flex-col gap-2">
+										<CardTitle className="text-lg font-medium tracking-tight">
+											It's empty in here...
+										</CardTitle>
+										<CardDescription className="text-xs font-normal leading-relaxed">
+											Get started by importing your courses or adding them
+											manually:
+										</CardDescription>
+									</div>
+								</CardHeader>
+								<CardContent className="p-6 pt-0 flex flex-col gap-2">
+									<UiTMAddCourseButton className="w-full h-10 text-sm" />
+									<Button
+										size="sm"
+										className="w-full text-sm"
+										onClick={openManualImporter}
+									>
+										<PlusIcon className="w-4 h-4" />
+										Add Manually
+									</Button>
+								</CardContent>
+							</Card>
 						</div>
 					)}
 				</div>

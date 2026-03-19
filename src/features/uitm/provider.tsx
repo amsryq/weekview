@@ -23,12 +23,16 @@ export class UiTMProvider extends CourseProvider {
 	}
 }
 
-export function UiTMAddCourseButton({ className }: { className?: string }) {
+export function UiTMAddCourseButton({
+	className,
+	...props
+}: React.ComponentProps<typeof Button>) {
 	const { openUiTMImporter } = useImporterDialogs();
 	return (
 		<Button
 			className={clsx("bg-[#753895] text-white hover:bg-[#5a2c7a]", className)}
 			onClick={openUiTMImporter}
+			{...props}
 		>
 			<img className="w-6 h-6" src="/images/uitm-logo.png" />
 			Import from UiTM
