@@ -1,6 +1,6 @@
 // Set UITM_MOCK=true in your .env (or wrangler.jsonc vars) to use dummy data
 // when the UiTM server is offline.
-export const MOCK_MODE = process.env.UITM_MOCK === "true";
+export const MOCK_MODE = import.meta.env.VITE_UITM_MOCK === "true";
 
 // Simple seeded random to ensure consistent mock data for same inputs
 function seededRandom(seed: string) {

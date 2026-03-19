@@ -27,7 +27,7 @@ export default function CourseEditorDialogContent({
 			<ResponsiveDialogHeader>
 				<div className="flex items-center gap-2">
 					<ResponsiveDialogTitle>{title}</ResponsiveDialogTitle>
-					{process.env.NODE_ENV === "development" && isSupporter && (
+					{import.meta.env.DEV && isSupporter && (
 						<span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">
 							Supporter
 						</span>

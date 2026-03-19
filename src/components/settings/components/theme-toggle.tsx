@@ -18,7 +18,7 @@ export function ThemeToggle() {
 					size="icon"
 					variant="outline"
 					onContextMenu={(e) => {
-						if (process.env.NODE_ENV !== "development") {
+						if (!import.meta.env.DEV) {
 							return;
 						}
 

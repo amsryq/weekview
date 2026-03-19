@@ -33,8 +33,8 @@
 		},
 		"production": {
 			"vars": {
-				"UITM_MOCK": "true",
-				"WEEKVIEW_ENABLE_AUTH_PAYWALL": "false"
+				"VITE_UITM_MOCK": "true",
+				"VITE_ENABLE_PAYWALL": "false"
 			},
 			"routes": [
 				{
@@ -56,7 +56,7 @@
 		}
 	},
 	"vars": {
-		"UITM_MOCK": "true",
-		"WEEKVIEW_ENABLE_AUTH_PAYWALL": "false"
+		"VITE_UITM_MOCK": "true",
+		"VITE_ENABLE_PAYWALL": "false"
 	}
 }

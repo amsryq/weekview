@@ -4,12 +4,6 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
-const vars = {
-	COPYRIGHT_YEAR: new Date().getFullYear(),
-	WEEKVIEW_ENABLE_AUTH_PAYWALL:
-		process.env.WEEKVIEW_ENABLE_AUTH_PAYWALL === "true",
-};
-
 export default defineConfig({
 	server: {
 		port: 3000,
@@ -24,12 +18,11 @@ export default defineConfig({
 		}),
 		viteReact(),
 	],
-	define: Object.fromEntries(
-		Object.entries(vars).map(([key, value]) => [
-			"import.meta.env." + key,
-			JSON.stringify(value),
-		]),
-	),
+	define: {
+		"import.meta.env.VITE_COPYRIGHT_YEAR": JSON.stringify(
+			new Date().getFullYear(),
+		),
+	},
 	resolve: {
 		tsconfigPaths: true,
 	},
