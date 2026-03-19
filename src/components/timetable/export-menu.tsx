@@ -1,5 +1,4 @@
 import { DownloadIcon } from "lucide-react";
-import { domToPng, domToSvg } from "modern-screenshot";
 import { useCallback } from "react";
 import { Button } from "~/components/ui/button";
 import {
@@ -112,6 +111,7 @@ export function TimetableExportMenu({
 				};
 
 				if (format === "png") {
+					const { domToPng } = await import("modern-screenshot");
 					const dataUrl = await domToPng(node, {
 						scale,
 						style,
@@ -128,6 +128,7 @@ export function TimetableExportMenu({
 					return;
 				}
 
+				const { domToSvg } = await import("modern-screenshot");
 				const svgMarkup = await domToSvg(node, {
 					scale,
 					style,

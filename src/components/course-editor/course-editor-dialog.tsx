@@ -1,18 +1,18 @@
 import type { AnyFieldMeta } from "@tanstack/react-form";
-import { type JSX, useState } from "react";
+import { LoaderCircle } from "lucide-react";
+import { type JSX, lazy, Suspense, useState } from "react";
 import type { PartialDeep } from "type-fest";
 import { type CourseFormApi } from "~/lib/contexts/course-editor";
-import { useIsUserSupporter } from "~/lib/hooks/user";
 import { Course } from "~/lib/models/course";
 import {
 	ResponsiveDialog,
 	ResponsiveDialogContent,
-	ResponsiveDialogDescription,
-	ResponsiveDialogHeader,
-	ResponsiveDialogTitle,
 	ResponsiveDialogTrigger,
 } from "../ui/responsive-dialog";
-import { CourseEditorForm } from "./course-editor-form";
+
+const CourseEditorDialogContentLazy = lazy(
+	() => import("./course-editor-dialog-content"),
+);
 
 export function CourseEditorDialog({
 	children,
@@ -29,7 +29,6 @@ export function CourseEditorDialog({
 	open?: boolean;
 	onOpenChange?: (open: boolean) => void;
 }) {
-	const isSupporter = useIsUserSupporter();
 	const [internalOpen, setInternalOpen] = useState(false);
 	const [isDirty, setIsDirty] = useState(false);
 
@@ -90,26 +89,20 @@ export function CourseEditorDialog({
 					if (isDirty) e.preventDefault();
 				}}
 			>
-				<ResponsiveDialogHeader>
-					<div className="flex items-center gap-2">
-						<ResponsiveDialogTitle>{title}</ResponsiveDialogTitle>
-						{process.env.NODE_ENV === "development" && isSupporter && (
-							<span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">
-								Supporter
-							</span>
-						)}
-					</div>
-					<ResponsiveDialogDescription>
-						Configure your course details, appearance, and schedule.
-					</ResponsiveDialogDescription>
-				</ResponsiveDialogHeader>
-				<div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-					<CourseEditorForm
-						onSubmit={handleFormSubmit}
+				<Suspense
+					fallback={
+						<div className="flex-1 flex items-center justify-center min-h-0 py-12">
+							<LoaderCircle className="size-6 animate-spin text-muted-foreground" />
+						</div>
+					}
+				>
+					<CourseEditorDialogContentLazy
+						title={title}
 						defaultValues={defaultValues}
+						onSubmit={handleFormSubmit}
 						onDirtyChange={setIsDirty}
 					/>
-				</div>
+				</Suspense>
 			</ResponsiveDialogContent>
 		</ResponsiveDialog>
 	);
