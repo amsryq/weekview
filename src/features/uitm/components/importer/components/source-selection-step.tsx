@@ -1,10 +1,12 @@
 import {
 	BookOpen,
 	ClipboardPlus,
+	Database,
 	GraduationCap,
 	LucideIcon,
 } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import {
 	ResponsiveDialogClose,
@@ -161,6 +163,18 @@ export function SourceSelectionStep() {
 			</ResponsiveDialogHeader>
 
 			<div className="flex-1 space-y-4 overflow-y-auto px-6 py-2 min-h-0">
+				{import.meta.env.VITE_UITM_MOCK === "true" && (
+					<Alert className="relative rounded-xl border border-amber-500/20 bg-amber-500/5 shadow-none transition-colors dark:border-amber-500/30 dark:bg-amber-500/10">
+						<Database className="size-4 text-amber-500 dark:text-amber-400" />
+						<AlertTitle className="line-clamp-none text-sm font-bold text-amber-600 dark:text-amber-400">
+							Mock Data Active
+						</AlertTitle>
+						<AlertDescription className="text-xs leading-normal inline text-muted-foreground/90">
+							UiTM timetable data is currently being mocked. Real data will be
+							ignored.
+						</AlertDescription>
+					</Alert>
+				)}
 				<UnaffiliationNotice />
 
 				<div className="space-y-4">
