@@ -4,7 +4,6 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { createAuthMiddleware } from "better-auth/api";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
-import { cloudflare } from "better-auth-cloudflare";
 import { ENABLE_AUTH_PAYWALL_SERVER } from "./config/feature-flags";
 import { createDb } from "./db";
 import { handleCheckoutCompleted } from "./handlers/checkout";
@@ -12,7 +11,7 @@ import { createStripeClient } from "./stripe";
 
 const IS_LOGGED_IN = "is_logged_in";
 
-export function createAuth(cf?: IncomingRequestCfProperties) {
+export function createAuth() {
 	if (!ENABLE_AUTH_PAYWALL_SERVER) {
 		throw new Error("Auth and paywall are disabled");
 	}
@@ -28,6 +27,28 @@ export function createAuth(cf?: IncomingRequestCfProperties) {
 		DATABASE_URL: process.env.DATABASE_URL!,
 		DATABASE_AUTH_TOKEN: process.env.DATABASE_AUTH_TOKEN!,
 	});
+
+	const plugins = [
+		tanstackStartCookies(),
+		stripe({
+			stripeClient: createStripeClient(process.env.STRIPE_SECRET_KEY!),
+			stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
+			createCustomerOnSignUp: true,
+			onEvent: async (event) => {
+				const ctx = await auth.$context;
+				switch (event.type) {
+					case "checkout.session.completed": {
+						await handleCheckoutCompleted(
+							event.data.object,
+							// biome-ignore lint/suspicious/noExplicitAny: complex BetterAuth context type
+							ctx as unknown as any,
+						);
+						break;
+					}
+				}
+			},
+		}),
+	];
 
 	const auth = betterAuth({
 		appName: "Weekview",
@@ -93,34 +114,9 @@ export function createAuth(cf?: IncomingRequestCfProperties) {
 			provider: "sqlite",
 			usePlural: true,
 		}),
-		plugins: [
-			tanstackStartCookies(),
-			cloudflare({
-				cf,
-				autoDetectIpAddress: true,
-				geolocationTracking: true,
-			}),
-			stripe({
-				stripeClient: createStripeClient(process.env.STRIPE_SECRET_KEY!),
-				stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
-				createCustomerOnSignUp: true,
-				onEvent: async (event) => {
-					const ctx = await auth.$context;
-					switch (event.type) {
-						case "checkout.session.completed": {
-							await handleCheckoutCompleted(
-								event.data.object,
-								// biome-ignore lint/suspicious/noExplicitAny: complex BetterAuth context type
-								ctx as unknown as any,
-							);
-							break;
-						}
-					}
-				},
-			}),
-		],
+		plugins,
 		advanced: {
-			ipAddress: { ipAddressHeaders: ["cf-connecting-ip", "x-real-ip"] },
+			ipAddress: { ipAddressHeaders: ["x-real-ip", "x-forwarded-for"] },
 			cookiePrefix: "weekview-auth",
 			useSecureCookies: true,
 			cookies: {
