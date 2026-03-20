@@ -116,6 +116,7 @@ export function createAuth() {
 		}),
 		plugins,
 		advanced: {
+			trustedProxyHeaders: true,
 			ipAddress: { ipAddressHeaders: ["x-real-ip", "x-forwarded-for"] },
 			cookiePrefix: "weekview-auth",
 			useSecureCookies: true,
