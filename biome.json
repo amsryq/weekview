@@ -13,7 +13,8 @@
 			"!**/node_modules",
 			"!**/out",
 			"!**/dist",
-			"!src/routeTree.gen.ts"
+			"!**/.output",
+			"!**/routeTree.gen.ts"
 		]
 	},
 	"css": {
@@ -230,7 +231,7 @@
 			}
 		},
 		{
-			"includes": ["src/routeTree.gen.ts"],
+			"includes": ["**/routeTree.gen.ts"],
 			"linter": {
 				"enabled": false
 			}

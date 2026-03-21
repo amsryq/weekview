@@ -6,7 +6,9 @@ settings:
 
 importers:
 
-  .:
+  .: {}
+
+  apps/web:
     dependencies:
       '@better-auth/client':
         specifier: 0.0.2-alpha.3
