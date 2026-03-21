@@ -17,7 +17,7 @@ export class Group {
 	}
 
 	static async fetch(course: Course): Promise<Group[]> {
-		const data = await getGroups({ data: course.__path });
+		const data = await getGroups({ data: course.path });
 
 		return data.map(
 			(g) =>

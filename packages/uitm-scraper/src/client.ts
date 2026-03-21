@@ -130,7 +130,7 @@ export class UiTMScraper {
 				code,
 				campusCode: campus,
 				facultyCode: faculty || null,
-				__internal: { path },
+				path,
 			};
 		});
 

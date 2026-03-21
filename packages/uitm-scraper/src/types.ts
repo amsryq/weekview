@@ -40,9 +40,7 @@ export interface Course {
 	code: string;
 	campusCode: string;
 	facultyCode: string | null;
-	__internal: {
-		path: string;
-	};
+	path: string;
 }
 
 export interface Session {

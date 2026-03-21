@@ -6,11 +6,11 @@ export class Course {
 	code: string;
 	campus: Campus;
 	faculty?: Faculty;
-	__path: string;
+	path: string;
 
 	constructor(code: string, path: string, campus: Campus, faculty?: Faculty) {
 		this.code = code;
-		this.__path = path;
+		this.path = path;
 		this.campus = campus;
 		this.faculty = faculty;
 	}
@@ -27,8 +27,6 @@ export class Course {
 			data: { campus: campus.code, faculty: faculty?.code },
 		});
 
-		return data.map(
-			(c) => new Course(c.code, c.__internal.path, campus, faculty),
-		);
+		return data.map((c) => new Course(c.code, c.path, campus, faculty));
 	}
 }

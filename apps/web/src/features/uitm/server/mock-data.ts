@@ -92,7 +92,7 @@ export function getMockCourses(campus: string, faculty?: string | null) {
 			code,
 			campusCode: campus,
 			facultyCode: faculty || null,
-			__internal: { path: `mock/${code}` },
+			path: `mock/${code}`,
 		});
 	}
 
