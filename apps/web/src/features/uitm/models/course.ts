@@ -28,7 +28,8 @@ export class Course {
 		});
 
 		return data.map(
-			(c) => new Course(c.code, c.__internal.path, campus, faculty),
+			(c) =>
+				new Course(c.code, c.__internal.path, campus, faculty),
 		);
 	}
 }

@@ -1,8 +1,13 @@
-export interface Campus {
-	code: string;
-	name: string;
-	requireFaculty?: boolean;
-}
+import type {
+	Campus,
+	Course,
+	Group,
+	Session,
+	StudentGroup,
+} from "@weekview/uitm-scraper";
+
+export type { Campus, Course, Group, Session };
+export type MyStudentGroup = StudentGroup;
 
 export interface Faculty {
 	code: string;
@@ -10,43 +15,4 @@ export interface Faculty {
 	campusCode: string;
 }
 
-export interface Course {
-	code: string;
-	campusCode: string;
-	facultyCode: string | null;
-	__internal: {
-		path: string;
-	};
-}
-
-export interface Session {
-	groupCode: string;
-	room?: string;
-	day: number;
-	start: string;
-	end: string;
-	lecturer?: string;
-	mode?: string;
-	status?: string;
-}
-
-export interface Group {
-	code: string;
-	sessions: Session[];
-}
-
-export interface MyStudentSession {
-	groupCode: string;
-	room?: string;
-	day: number;
-	start: string;
-	end: string;
-	lecturer?: string;
-}
-
-export interface MyStudentGroup {
-	code: string;
-	courseName: string;
-	courseCode: string;
-	sessions: MyStudentSession[];
-}
+export type MyStudentSession = Session;

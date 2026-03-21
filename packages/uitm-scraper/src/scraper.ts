@@ -1,33 +1,10 @@
-import axios from "axios";
 import { parse } from "node-html-parser";
-import { CacheKeys, type CacheService } from "~/server/services/cache";
-import { type CookieJarService } from "~/server/services/cookie-jar";
-
-export interface Clock {
-	hour: number;
-	minute: number;
-}
-
-export interface RootScrapsSet {
-	tokens: Record<string, string>;
-	indexResultLocation: string | null;
-	campusSelectLocation: string | null;
-	facultySelectLocation: string | null;
-}
-
-export interface MyStudentAPIResponse {
-	[date: string]: null | {
-		hari: string;
-		jadual: Array<{
-			course_desc: string;
-			courseid: string;
-			groups: string;
-			masa: string;
-			bilik: string | null;
-			lecturer: string;
-		}>;
-	};
-}
+import { CookieJar, Cookie } from "tough-cookie";
+import type { 
+	Clock, 
+	RootScrapsSet, 
+	StorageAdapter
+} from "./types.js";
 
 export const DAY_MAP_ICRESS: Record<string, number> = {
 	MONDAY: 1,
@@ -57,63 +34,47 @@ export function formatClock(clock: Clock): string {
 
 export async function fetchIcress(
 	path: string,
-	cookieJarService: CookieJarService,
+	jar: CookieJar,
 	options: {
 		method?: string;
 		headers?: Record<string, string>;
-		data?: string;
+		body?: string;
 	} = {},
 ) {
-	const jar = await cookieJarService.getCookieJar();
 	const url = `https://simsweb4.uitm.edu.my/estudent/class_timetable/${path}`;
 
 	const cookies = await jar.getCookies(url);
 	const cookieHeader = cookies.map((c) => c.cookieString()).join("; ");
 
-	try {
-		const response = await axios.request({
-			url,
-			method: options.method || "GET",
-			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0",
-				Referer:
-					"https://simsweb4.uitm.edu.my/estudent/class_timetable/index.cfm",
-				...(cookieHeader ? { Cookie: cookieHeader } : {}),
-				...options.headers,
-			},
-			responseType: "text",
-			data: options.data,
-		});
+	const response = await fetch(url, {
+		method: options.method || "GET",
+		headers: {
+			"User-Agent":
+				"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0",
+			Referer:
+				"https://simsweb4.uitm.edu.my/estudent/class_timetable/index.cfm",
+			...(cookieHeader ? { Cookie: cookieHeader } : {}),
+			...options.headers,
+		},
+		body: options.body,
+	});
 
-		const setCookieHeaders = response.headers["set-cookie"];
-		if (setCookieHeaders) {
-			if (Array.isArray(setCookieHeaders)) {
-				for (const cookieStr of setCookieHeaders) {
-					try {
-						await jar.setCookie(cookieStr, url);
-					} catch (error) {
-						console.warn("Failed to set cookie:", cookieStr, error);
-					}
-				}
-			} else if (typeof setCookieHeaders === "string") {
-				try {
-					await jar.setCookie(setCookieHeaders, url);
-				} catch (error) {
-					console.warn("Failed to set cookie:", setCookieHeaders, error);
-				}
-			}
-			await cookieJarService.saveCookieJar(jar);
-		}
-
-		return response.data as string;
-	} catch (error) {
-		if (axios.isAxiosError(error) && error.response) {
-			console.error("Icress Error", error.response.status);
-			throw new Error(`Icress returned ${error.response.status}`);
-		}
-		throw error;
+	if (!response.ok) {
+		throw new Error(`Icress returned ${response.status}`);
 	}
+
+	const setCookieHeaders = response.headers.getSetCookie();
+	if (setCookieHeaders.length > 0) {
+		for (const cookieStr of setCookieHeaders) {
+			try {
+				await jar.setCookie(cookieStr, url);
+			} catch (error) {
+				console.warn("Failed to set cookie:", cookieStr, error);
+			}
+		}
+	}
+
+	return await response.text();
 }
 
 export function extractAjaxUrl(scriptContent: string): string | null {
@@ -123,22 +84,20 @@ export function extractAjaxUrl(scriptContent: string): string | null {
 }
 
 export async function fetchScrapsFromRootPage(
-	cacheService: CacheService,
-	cookieJarService: CookieJarService,
+	jar: CookieJar,
+	storage: StorageAdapter,
+	version: string = "v1"
 ): Promise<RootScrapsSet> {
-	const cacheKey = CacheKeys.uitm.tokens(`index.htm`);
+	const cacheKey = `uitm:tokens:${version}:index.htm`;
+	const cached = await storage.get(cacheKey);
+	if (cached) return JSON.parse(cached) as RootScrapsSet;
 
-	if (cacheService) {
-		const cachedTokens = await cacheService.get(cacheKey);
-		if (cachedTokens) return cachedTokens as RootScrapsSet;
-	}
-
-	const htm = await fetchIcress("index.cfm", cookieJarService);
+	const htm = await fetchIcress("index.cfm", jar);
 	const htmRoot = parse(htm);
 
 	const scripts = htmRoot
 		.querySelectorAll("script")
-		.map((el) => el.innerHTML)
+		.map((el: any) => el.innerHTML)
 		.filter(Boolean);
 	const tokens: Record<string, { id?: string; value: string }> = {};
 
@@ -199,10 +158,7 @@ export async function fetchScrapsFromRootPage(
 		facultySelectLocation,
 	};
 
-	if (cacheService) {
-		await cacheService.set(cacheKey, scraps, 600);
-	}
-
+	await storage.set(cacheKey, JSON.stringify(scraps), 600);
 	return scraps;
 }
 

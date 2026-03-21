@@ -1,0 +1,30 @@
+{
+	"name": "@weekview/uitm-scraper",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"require": "./dist/index.cjs"
+		}
+	},
+	"scripts": {
+		"build": "tsup src/index.ts --format cjs,esm --dts",
+		"dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"node-html-parser": "^7.1.0",
+		"tough-cookie": "^6.0.1"
+	},
+	"devDependencies": {
+		"@types/node": "^24.12.0",
+		"@types/tough-cookie": "^4.0.5",
+		"tsup": "^8.0.0",
+		"typescript": "~5.9.3"
+	}
+}

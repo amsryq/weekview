@@ -26,7 +26,8 @@ export class Group {
 					course,
 					Group.mergeOverlappingAndConsecutiveSessions(
 						g.sessions.map(
-							(s) => new Session(s.groupCode, s.room, s.day, s.start, s.end),
+							(s: import("@weekview/uitm-scraper").Session) =>
+								new Session(s.groupCode, s.room, s.day, s.start, s.end),
 						),
 					),
 				),
