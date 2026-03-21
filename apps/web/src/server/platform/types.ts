@@ -1,3 +1,5 @@
+import { StorageAdapter } from "@weekview/uitm-scraper";
+
 export interface Storage {
 	get(key: string): Promise<string | null>;
 	put(
@@ -15,6 +17,7 @@ export interface Storage {
 		list_complete: boolean;
 		cursor?: string;
 	}>;
+	asStorageAdapter(): StorageAdapter;
 }
 
 export interface PlatformContext {

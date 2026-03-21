@@ -1,4 +1,5 @@
 /// <reference types="@cloudflare/workers-types" />
+import type { StorageAdapter } from "@weekview/uitm-scraper";
 import type { Storage } from "./types";
 
 export class CloudflareStorage implements Storage {
@@ -38,5 +39,15 @@ export class CloudflareStorage implements Storage {
 	}> {
 		if (!this.kv) return { keys: [], list_complete: true };
 		return this.kv.list(options);
+	}
+
+	asStorageAdapter(): StorageAdapter {
+		return {
+			get: this.get.bind(this),
+			set: async (key, value, ttlSeconds) => {
+				await this.put(key, value, { expirationTtl: ttlSeconds });
+			},
+			delete: this.delete.bind(this),
+		};
 	}
 }

@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
-import type { StorageAdapter } from "@weekview/uitm-scraper";
 import { UiTMScraper } from "@weekview/uitm-scraper";
-import { getStorage } from "~/server/functions/utils";
+import { getInMemoryStorage } from "~/server/functions/utils";
 import {
 	getMockCourses,
 	getMockGroups,
@@ -12,7 +11,7 @@ import {
 } from "./mock-data";
 
 const scraper = new UiTMScraper({
-	storage: getStorage() as unknown as StorageAdapter,
+	storage: getInMemoryStorage().asStorageAdapter(),
 });
 
 export const getCampuses = createServerFn({ method: "GET" })

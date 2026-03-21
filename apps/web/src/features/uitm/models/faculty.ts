@@ -14,9 +14,6 @@ export class Faculty {
 
 	static async fetch(campus: Campus): Promise<Faculty[]> {
 		const data = await getCampuses({ data: "faculty" });
-		return data.map(
-			(f) =>
-				new Faculty(f.code, f.name, campus),
-		);
+		return data.map((f) => new Faculty(f.code, f.name, campus));
 	}
 }

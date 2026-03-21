@@ -1,5 +1,3 @@
-import type { CookieJar } from "tough-cookie";
-
 export interface Clock {
 	hour: number;
 	minute: number;
