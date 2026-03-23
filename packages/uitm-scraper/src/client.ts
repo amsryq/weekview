@@ -130,21 +130,23 @@ export class UiTMScraper {
 		);
 
 		const root = parse(data);
-		const trs = root.querySelectorAll("tr.gradeU");
+		const trs = root.querySelectorAll("tr");
 
-		const courses = trs.map((tr) => {
-			const code = tr.children[1].text.replace(
-				/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g,
-				"",
-			);
-			const path = tr.children[2].children[0].getAttribute("href")!;
-			return {
-				code,
-				campusCode: campus,
-				facultyCode: faculty || null,
-				path,
-			};
-		});
+		const courses = trs
+			.filter(
+				(tr) => tr.children.length >= 3 && tr.children[2].querySelector("a"),
+			)
+			.map((tr) => {
+				const rawCode = tr.children[1].text;
+				const code = rawCode.trim().replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, "");
+				const path = tr.children[2].querySelector("a")?.getAttribute("href")!;
+				return {
+					code,
+					campusCode: campus,
+					facultyCode: faculty || null,
+					path,
+				};
+			});
 
 		if (courses.length > 0) {
 			await this.storage.set(cacheKey, JSON.stringify(courses), 1800);

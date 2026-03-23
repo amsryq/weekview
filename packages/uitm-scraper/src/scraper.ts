@@ -74,9 +74,10 @@ export async function fetchIcress(
 }
 
 export function extractAjaxUrl(scriptContent: string): string | null {
-	const regex = /\$?.ajax:?\(?\s*{\s*url:\s*['"]([^'"]+)['"]/;
+	const regex =
+		/\$?.ajax:?\(?\s*{\s*url:\s*['"]([^'"]+)['"]|url:\s*['"]([^'"]+)['"]/;
 	const match = scriptContent.match(regex);
-	return match ? match[1] : null;
+	return match ? match[1] || match[2] : null;
 }
 
 export async function fetchScrapsFromRootPage(
@@ -103,6 +104,8 @@ export async function fetchScrapsFromRootPage(
 		const id = input.getAttribute("id");
 		if (name) {
 			tokens[name] = { id, value };
+		} else if (id) {
+			tokens[id] = { id, value };
 		}
 	}
 
@@ -123,15 +126,6 @@ export async function fetchScrapsFromRootPage(
 		if (script.includes("$('.find_cam_icress_student')")) {
 			const match = extractAjaxUrl(script);
 			if (match) campusSelectLocation = match;
-
-			for (const [key, { id }] of Object.entries(tokens))
-				if (id) {
-					const regex = new RegExp(
-						`document\\.getElementById\\(['"]${id}['"]\\)\\.value\\s*=\\s*['"]([^'"]+)['"]`,
-					);
-					const m = script.match(regex);
-					if (m) tokens[key] = { id, value: m[1] };
-				}
 		}
 
 		if (script.includes("$('.find_fac_icress_student')")) {
@@ -142,6 +136,26 @@ export async function fetchScrapsFromRootPage(
 		if (script.includes("function check_form_before_submit()")) {
 			const match = extractAjaxUrl(script);
 			if (match) indexResultLocation = match;
+
+			const tokenRegex =
+				/document\.getElementById\(['"]([^'"]+)['"]\)\.value\s*=\s*['"]([^'"]+)['"]/g;
+			let m;
+			while ((m = tokenRegex.exec(script)) !== null) {
+				const id = m[1];
+				const value = m[2];
+
+				// Find which token name matches this ID
+				for (const [name, token] of Object.entries(tokens)) {
+					if (token.id === id) {
+						tokens[name] = { id, value };
+						break;
+					}
+				}
+				// Also handle direct ID assignments if name wasn't found
+				if (!Object.values(tokens).some((t) => t.id === id)) {
+					tokens[id] = { id, value };
+				}
+			}
 		}
 	}
 
