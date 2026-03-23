@@ -38,7 +38,7 @@ const defaultState = {
 	showWatermark: true,
 
 	cellAppearance: {
-		textAlign: "center",
+		textAlign: "left",
 		material: "basic",
 		glassOptions: DEFAULT_GLASS_OPTIONS,
 		blurOptions: DEFAULT_BLUR_OPTIONS,
