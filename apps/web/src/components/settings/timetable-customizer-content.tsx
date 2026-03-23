@@ -9,12 +9,14 @@ import {
 import { useState } from "react";
 import type { PartialDeep } from "type-fest";
 import { useStore } from "zustand";
+import { SHOW_WATERMARK_OPTION } from "~/lib/config/feature-flags";
 import type { CellAppearance } from "~/lib/models/cell-appearance";
 import { DEFAULT_TIMETABLE_STYLE_ID } from "~/lib/models/style";
 import { CourseStore } from "~/lib/stores/course-store";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
 import { PaywallOverlay } from "../monetization/paywall-overlay";
 import { Button } from "../ui/button";
+import { Label } from "../ui/label";
 import { ResponsiveDialogClose } from "../ui/responsive-dialog";
 import {
 	ResponsiveTabs,
@@ -22,6 +24,7 @@ import {
 	ResponsiveTabsList,
 	ResponsiveTabsTrigger,
 } from "../ui/responsive-tabs";
+import { Switch } from "../ui/switch";
 import { BackgroundImageUpload } from "./components/background-image-upload";
 import { CellAppearanceLayoutSettings } from "./components/cell-appearance-layout-settings";
 import { StyleSelector } from "./components/style-selector";
@@ -90,6 +93,12 @@ export default function TimetableCustomizerContent({
 									layout={prefs.layout}
 									onLayoutChange={(layout) => prefs.setValue("layout", layout)}
 								/>
+								{SHOW_WATERMARK_OPTION && (
+									<WatermarkSettings
+										showWatermark={prefs.showWatermark}
+										onToggle={(value) => prefs.setValue("showWatermark", value)}
+									/>
+								)}
 							</ResponsiveTabsContent>
 
 							<ResponsiveTabsContent value="background" className="mt-0">
@@ -269,6 +278,38 @@ function BackgroundSettings({
 				options={backgroundImageOptions}
 				onOptionsChange={onBackgroundImageOptionsChange}
 			/>
+		</div>
+	);
+}
+
+interface WatermarkSettingsProps {
+	showWatermark: boolean;
+	onToggle: (value: boolean) => void;
+}
+
+function WatermarkSettings({
+	showWatermark,
+	onToggle,
+}: WatermarkSettingsProps) {
+	return (
+		<div className="space-y-4">
+			<div>
+				<h4 className="text-sm font-medium mb-2">Watermark</h4>
+				<p className="text-xs text-muted-foreground mb-4">
+					Show a small "created with weekview" badge in the bottom-right corner
+					of the exported timetable
+				</p>
+			</div>
+			<div className="flex items-center justify-between gap-4">
+				<Label htmlFor="watermark-toggle" className="text-sm cursor-pointer">
+					Show watermark
+				</Label>
+				<Switch
+					id="watermark-toggle"
+					checked={showWatermark}
+					onCheckedChange={onToggle}
+				/>
+			</div>
 		</div>
 	);
 }

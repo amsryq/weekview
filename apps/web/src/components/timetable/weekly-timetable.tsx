@@ -3,6 +3,7 @@ import { createContext, memo, useContext, useMemo } from "react";
 import { RequiredDeep } from "type-fest";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
+import { Logo } from "~/components/brand/logo";
 import { UiTMAddCourseButton } from "~/features/uitm/provider";
 import { useImporterDialogs } from "~/lib/contexts/importer-dialogs";
 import type { CellAppearance } from "~/lib/models/cell-appearance";
@@ -10,6 +11,7 @@ import type { Course } from "~/lib/models/course";
 import type { MeetingTime } from "~/lib/models/meeting-time";
 import { CustomStylesStore } from "~/lib/stores/custom-styles-store";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
+import { cn } from "~/lib/utils/styles";
 import { resolveTimetableStyleVariant } from "~/lib/utils/timetable-styles";
 import { Button } from "../ui/button";
 import {
@@ -47,6 +49,58 @@ function useTimetable() {
 	if (!ctx)
 		throw new Error("useTimetable must be used within TimetableProvider");
 	return ctx;
+}
+
+interface TimetableTitleProps {
+	labelColor: string;
+	className?: string;
+}
+
+function TimetableTitle({ labelColor, className }: TimetableTitleProps) {
+	const title = useStore(TimetablePreferencesStore, (s) => s.title);
+	const isEmpty = !title;
+
+	return (
+		<div
+			{...(isEmpty ? { "data-export-hidden": "true" } : {})}
+			className={cn("pb-3", className)}
+		>
+			<input
+				type="text"
+				value={title}
+				onChange={(e) =>
+					TimetablePreferencesStore.setState((s) => {
+						s.title = e.target.value;
+					})
+				}
+				placeholder="Add a title..."
+				className="bg-transparent border-none outline-none ring-0 shadow-none font-bold text-2xl text-center p-0 w-full min-w-0 cursor-text placeholder:text-muted-foreground/25"
+				style={{
+					color: isEmpty ? undefined : labelColor,
+					fontFamily: "inherit",
+				}}
+				aria-label="Timetable title"
+			/>
+		</div>
+	);
+}
+
+interface TimetableWatermarkProps {
+	labelColor: string;
+}
+
+function TimetableWatermark({ labelColor }: TimetableWatermarkProps) {
+	return (
+		<div
+			className="absolute bottom-6 right-6 flex items-center gap-1.5 opacity-40 pointer-events-none select-none z-10"
+			aria-hidden="true"
+		>
+			<span className="text-[12px] font-medium" style={{ color: labelColor }}>
+				created with
+			</span>
+			<Logo height={16} style={{ fill: labelColor }} aria-label="weekview" />
+		</div>
+	);
 }
 
 interface PositionedCourseBlockProps {
@@ -207,12 +261,16 @@ function RowLayout({
 		activeStyleId,
 		timetableColorMode,
 	);
+	const showWatermark = useStore(
+		TimetablePreferencesStore,
+		(s) => s.showWatermark,
+	);
 
 	return (
 		<div className="overflow-x-auto">
 			<div
 				id={containerId}
-				className="bg-card p-6 min-w-fit relative"
+				className="bg-card p-6 min-w-fit relative pb-16"
 				style={backgroundStyle}
 			>
 				{overlayStyle && (
@@ -222,6 +280,7 @@ function RowLayout({
 					/>
 				)}
 				<div className="relative z-10">
+					<TimetableTitle labelColor={activeStyle.chrome.labelColor} />
 					<div className="flex pb-2">
 						<div className="w-16 shrink-0" />
 						<div className="flex">
@@ -248,6 +307,9 @@ function RowLayout({
 						/>
 					))}
 				</div>
+				{showWatermark && (
+					<TimetableWatermark labelColor={activeStyle.chrome.labelColor} />
+				)}
 			</div>
 		</div>
 	);
@@ -272,11 +334,15 @@ function ColumnLayout({
 		activeStyleId,
 		timetableColorMode,
 	);
+	const showWatermark = useStore(
+		TimetablePreferencesStore,
+		(s) => s.showWatermark,
+	);
 	return (
 		<div className="overflow-y-auto">
 			<div
 				id={containerId}
-				className="bg-card grid relative p-6"
+				className="bg-card grid relative p-6 pb-20"
 				style={{
 					gridTemplateColumns: `auto repeat(${visibleDays.length}, 1fr)`,
 					...backgroundStyle,
@@ -288,6 +354,10 @@ function ColumnLayout({
 						style={overlayStyle}
 					/>
 				)}
+				<TimetableTitle
+					labelColor={activeStyle.chrome.labelColor}
+					className="col-span-full relative z-10"
+				/>
 				<div className="relative z-10 contents">
 					<div className="space-y-0">
 						<div className="h-8" />
@@ -313,6 +383,9 @@ function ColumnLayout({
 						/>
 					))}
 				</div>
+				{showWatermark && (
+					<TimetableWatermark labelColor={activeStyle.chrome.labelColor} />
+				)}
 			</div>
 		</div>
 	);

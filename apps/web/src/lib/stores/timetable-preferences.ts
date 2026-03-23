@@ -34,6 +34,8 @@ const defaultState = {
 	backgroundImageOptions: {
 		opacity: 0.3,
 	},
+	title: "",
+	showWatermark: true,
 
 	cellAppearance: {
 		textAlign: "center",
