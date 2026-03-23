@@ -31,5 +31,8 @@ export default defineConfig({
 			new Date().getFullYear(),
 		),
 		"import.meta.env.DEPLOY_PLATFORM": JSON.stringify(DEPLOY_PLATFORM),
+		"import.meta.env.VITE_SHOW_WATERMARK_OPTION": JSON.stringify(
+			process.env.VITE_SHOW_WATERMARK_OPTION ?? "",
+		),
 	},
 });

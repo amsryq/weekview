@@ -109,12 +109,22 @@ export function TimetableExportMenu({
 				const style = {
 					borderRadius: `${borderRadius}px`,
 				};
+				const filter = (node: Node) => {
+					if (
+						node instanceof Element &&
+						node.getAttribute("data-export-hidden") === "true"
+					) {
+						return false;
+					}
+					return true;
+				};
 
 				if (format === "png") {
 					const { domToPng } = await import("modern-screenshot");
 					const dataUrl = await domToPng(node, {
 						scale,
 						style,
+						filter,
 					});
 
 					if (action === "download") {
@@ -132,6 +142,7 @@ export function TimetableExportMenu({
 				const svgMarkup = await domToSvg(node, {
 					scale,
 					style,
+					filter,
 				});
 
 				const svgBlob = await (await fetch(svgMarkup)).blob();
