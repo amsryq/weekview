@@ -39,6 +39,3 @@ local.db-wal
 local.db-shm
 
 tsconfig.tsbuildinfo
-
-# TODO: Uncomment this
-README.md

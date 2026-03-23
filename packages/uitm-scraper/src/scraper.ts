@@ -1,10 +1,6 @@
 import { parse } from "node-html-parser";
-import { CookieJar, Cookie } from "tough-cookie";
-import type { 
-	Clock, 
-	RootScrapsSet, 
-	StorageAdapter
-} from "./types.js";
+import { CookieJar } from "tough-cookie";
+import type { Clock, RootScrapsSet, StorageAdapter } from "./types";
 
 export const DAY_MAP_ICRESS: Record<string, number> = {
 	MONDAY: 1,
@@ -86,7 +82,7 @@ export function extractAjaxUrl(scriptContent: string): string | null {
 export async function fetchScrapsFromRootPage(
 	jar: CookieJar,
 	storage: StorageAdapter,
-	version: string = "v1"
+	version: string = "v1",
 ): Promise<RootScrapsSet> {
 	const cacheKey = `uitm:tokens:${version}:index.htm`;
 	const cached = await storage.get(cacheKey);
@@ -97,7 +93,7 @@ export async function fetchScrapsFromRootPage(
 
 	const scripts = htmRoot
 		.querySelectorAll("script")
-		.map((el: any) => el.innerHTML)
+		.map((el) => el.innerHTML)
 		.filter(Boolean);
 	const tokens: Record<string, { id?: string; value: string }> = {};
 
@@ -148,6 +144,13 @@ export async function fetchScrapsFromRootPage(
 			if (match) indexResultLocation = match;
 		}
 	}
+
+	if (!indexResultLocation)
+		console.warn("Diagnostic: indexResultLocation not found in scripts.");
+	if (!campusSelectLocation)
+		console.warn("Diagnostic: campusSelectLocation not found in scripts.");
+	if (!facultySelectLocation)
+		console.warn("Diagnostic: facultySelectLocation not found in scripts.");
 
 	const scraps: RootScrapsSet = {
 		tokens: Object.fromEntries(

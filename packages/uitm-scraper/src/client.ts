@@ -1,24 +1,24 @@
 import { parse } from "node-html-parser";
 import { CookieJar } from "tough-cookie";
-import { 
-	fetchIcress, 
-	fetchScrapsFromRootPage, 
-	DAY_MAP_ICRESS, 
-	DAY_MAP_MYSTUDENT, 
-	parseTimeIcress, 
-	parseTimeMyStudent, 
-	formatClock 
-} from "./scraper.js";
-import type { 
-	Campus, 
-	Course, 
-	Group, 
-	Session, 
-	StudentGroup, 
-	StorageAdapter, 
+import {
+	DAY_MAP_ICRESS,
+	DAY_MAP_MYSTUDENT,
+	fetchIcress,
+	fetchScrapsFromRootPage,
+	formatClock,
+	parseTimeIcress,
+	parseTimeMyStudent,
+} from "./scraper";
+import type {
+	Campus,
+	Course,
+	Group,
+	MyStudentAPIResponse,
 	ScraperConfig,
-	MyStudentAPIResponse
-} from "./types.js";
+	Session,
+	StorageAdapter,
+	StudentGroup,
+} from "./types";
 
 export class UiTMScraper {
 	private storage: StorageAdapter;
@@ -38,9 +38,12 @@ export class UiTMScraper {
 		return new CookieJar();
 	}
 
-	private async saveJar(jar: CookieJar, identifier: string = "default"): Promise<void> {
+	private async saveJar(
+		jar: CookieJar,
+		identifier: string = "default",
+	): Promise<void> {
 		const cacheKey = `uitm:cookies:${this.version}:${identifier}`;
-		
+
 		// Simple TTL logic: 10 minutes or based on cookies
 		let ttlSeconds = 600;
 		const cookies = await jar.getCookies("https://simsweb4.uitm.edu.my");
@@ -65,10 +68,15 @@ export class UiTMScraper {
 
 	async getCampuses(mode: "campus" | "faculty" = "campus"): Promise<Campus[]> {
 		const jar = await this.getJar();
-		const { campusSelectLocation, facultySelectLocation } = await fetchScrapsFromRootPage(jar, this.storage, this.version);
-		
-		const location = mode === "campus" ? campusSelectLocation : facultySelectLocation;
-		const rawData = await fetchIcress(`${location}&key=All&page=1&page_limit=30`, jar);
+		const { campusSelectLocation, facultySelectLocation } =
+			await fetchScrapsFromRootPage(jar, this.storage, this.version);
+
+		const location =
+			mode === "campus" ? campusSelectLocation : facultySelectLocation;
+		const rawData = await fetchIcress(
+			`${location}&key=All&page=1&page_limit=30`,
+			jar,
+		);
 
 		if (!rawData || rawData.includes("Error")) {
 			throw new Error("Failed to fetch campuses");
@@ -96,7 +104,11 @@ export class UiTMScraper {
 		const cached = await this.storage.get(cacheKey);
 		if (cached) return JSON.parse(cached) as Course[];
 
-		const { tokens, indexResultLocation } = await fetchScrapsFromRootPage(jar, this.storage, this.version);
+		const { tokens, indexResultLocation } = await fetchScrapsFromRootPage(
+			jar,
+			this.storage,
+			this.version,
+		);
 
 		const body = new URLSearchParams({
 			search_campus: campus,
@@ -213,7 +225,9 @@ export class UiTMScraper {
 			}
 		> = {};
 
-		for (const [, dayData] of Object.entries(data) as Array<[string, MyStudentAPIResponse[string]]>) {
+		for (const [, dayData] of Object.entries(data) as Array<
+			[string, MyStudentAPIResponse[string]]
+		>) {
 			if (!dayData?.jadual) continue;
 			const day = DAY_MAP_MYSTUDENT[dayData.hari];
 			if (!day) continue;

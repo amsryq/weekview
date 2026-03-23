@@ -1,3 +1,2 @@
-export * from "./types.js";
-export * from "./scraper.js";
-export * from "./client.js";
+export * from "./client";
+export * from "./types";
