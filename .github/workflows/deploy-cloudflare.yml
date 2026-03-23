@@ -33,7 +33,7 @@ jobs:
         run: pnpm install
 
       - name: Build
-        run: pnpm run build
+        run: pnpm run build --filter web
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3

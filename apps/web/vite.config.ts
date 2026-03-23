@@ -23,13 +23,13 @@ export default defineConfig({
 		}),
 		viteReact(),
 	].filter(Boolean),
+	resolve: {
+		tsconfigPaths: true,
+	},
 	define: {
 		"import.meta.env.VITE_COPYRIGHT_YEAR": JSON.stringify(
 			new Date().getFullYear(),
 		),
 		"import.meta.env.DEPLOY_PLATFORM": JSON.stringify(DEPLOY_PLATFORM),
-	},
-	resolve: {
-		tsconfigPaths: true,
 	},
 });

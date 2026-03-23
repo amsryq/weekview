@@ -1,25 +1,19 @@
 {
+	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
-		"target": "esnext",
 		"useDefineForClassFields": true,
 		"lib": ["esnext", "DOM", "DOM.Iterable"],
-		"module": "esnext",
-		"esModuleInterop": true,
 		"erasableSyntaxOnly": true,
-		"skipLibCheck": true,
-		"moduleResolution": "bundler",
 		"allowImportingTsExtensions": true,
 		"resolveJsonModule": true,
-		"isolatedModules": true,
 		"noEmit": true,
 		"jsx": "preserve",
-		"strict": true,
 		"allowJs": true,
-		"forceConsistentCasingInFileNames": true,
 		"incremental": true,
 		"plugins": [],
 		"paths": {
-			"~/*": ["./src/*"]
+			"~/*": ["./src/*"],
+			"@weekview/uitm-scraper": ["../../packages/uitm-scraper/src/index.ts"]
 		}
 	},
 	"include": ["./src", ".tanstack"],
