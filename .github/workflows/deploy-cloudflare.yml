@@ -41,3 +41,4 @@ jobs:
           apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ env.CLOUDFLARE_ACCOUNT_ID }}
           packageManager: pnpm
+          workingDirectory: apps/web
