@@ -70,18 +70,12 @@ export function CourseEditorForm({
 					mobileClassName="flex-col gap-0"
 				>
 					<form.Subscribe
-						selector={(state) => [state.fieldMeta, state.errorMap]}
+						selector={(state) => [state.fieldMeta, state.errorMap] as const}
 					>
+						{/* @ts-expect-error - it should infer but it doesn't idk why */}
 						{([fieldMeta, errorMap]) => {
-							const meta = (fieldMeta ?? {}) as Record<
-								string,
-								{ errors?: unknown[] } | undefined
-							>;
 							const { basicsHasErrors, styleHasErrors, iconHasErrors } =
-								getTabErrors(
-									meta,
-									errorMap as Record<string, unknown> | undefined,
-								);
+								getTabErrors(fieldMeta, errorMap);
 
 							return (
 								<ResponsiveTabsList
@@ -214,12 +208,15 @@ export function CourseEditorForm({
 							</Button>
 						</DialogClose>
 						<form.Subscribe
-							selector={(state) => [state.canSubmit, state.isSubmitting]}
+							selector={(state) =>
+								[state.canSubmit, state.isSubmitting] as const
+							}
 						>
+							{/* @ts-expect-error - it should infer but it doesn't idk why */}
 							{([canSubmit, isSubmitting]) => (
 								<Button
 									type="submit"
-									disabled={!canSubmit || (isSubmitting as boolean)}
+									disabled={!canSubmit || isSubmitting}
 									size="sm"
 								>
 									Save Course

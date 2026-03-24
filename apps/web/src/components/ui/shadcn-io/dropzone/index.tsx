@@ -31,7 +31,19 @@ const DropzoneContext = createContext<DropzoneContextType | undefined>(
 	undefined,
 );
 
-export type DropzoneProps = Omit<DropzoneOptions, "onDrop"> & {
+type DropzoneOptionalKeys =
+	| "multiple"
+	| "onDragEnter"
+	| "onDragOver"
+	| "onDragLeave";
+
+type DropzoneBaseProps = Omit<
+	DropzoneOptions,
+	"onDrop" | DropzoneOptionalKeys
+> &
+	Partial<Pick<DropzoneOptions, DropzoneOptionalKeys>>;
+
+export type DropzoneProps = DropzoneBaseProps & {
 	src?: File[];
 	className?: string;
 	onDrop?: (
@@ -53,6 +65,10 @@ export const Dropzone = ({
 	src,
 	className,
 	children,
+	multiple = true,
+	onDragEnter,
+	onDragOver,
+	onDragLeave,
 	...props
 }: DropzoneProps) => {
 	const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -62,6 +78,10 @@ export const Dropzone = ({
 		minSize,
 		onError,
 		disabled,
+		multiple,
+		onDragEnter,
+		onDragOver,
+		onDragLeave,
 		onDrop: (acceptedFiles, fileRejections, event) => {
 			if (fileRejections.length > 0) {
 				const message = fileRejections.at(0)?.errors.at(0)?.message;

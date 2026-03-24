@@ -279,6 +279,7 @@ export const ComboboxItem = (props: ComboboxItemProps) => {
 
 	return (
 		<CommandItem
+			// @ts-expect-error - package 'cmdk' is badly typed as of writing for some reason
 			onSelect={(currentValue) => {
 				onValueChange(currentValue);
 				onOpenChange(false);

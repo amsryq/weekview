@@ -10,6 +10,7 @@ import {
 } from "~/components/ui/dialog";
 import { cn } from "~/lib/utils/styles";
 
+await import("cmdk").then((m) => m.Command);
 function Command({
 	className,
 	...props
