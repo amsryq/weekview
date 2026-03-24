@@ -73,7 +73,7 @@ export class UiTMScraper {
 
 		const location =
 			mode === "campus" ? campusSelectLocation : facultySelectLocation;
-		const rawData = await fetchIcress(
+		const { text: rawData } = await fetchIcress(
 			`${location}&key=All&page=1&page_limit=30`,
 			jar,
 		);
@@ -108,11 +108,8 @@ export class UiTMScraper {
 		const cached = await this.storage.get(cacheKey);
 		if (cached) return JSON.parse(cached) as Course[];
 
-		const { tokens, indexResultLocation } = await fetchScrapsFromRootPage(
-			jar,
-			this.storage,
-			this.version,
-		);
+		const { tokens, indexLocation, indexResultLocation } =
+			await fetchScrapsFromRootPage(jar, this.storage, this.version);
 
 		const body = new URLSearchParams({
 			search_campus: campus,
@@ -121,7 +118,7 @@ export class UiTMScraper {
 			...(faculty ? { search_faculty: faculty } : {}),
 		}).toString();
 
-		const data = await fetchIcress(
+		const { text: data } = await fetchIcress(
 			indexResultLocation ?? "index_result.cfm",
 			jar,
 			{
@@ -130,7 +127,7 @@ export class UiTMScraper {
 					"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
 				},
 				body,
-				referer: `https://simsweb4.uitm.edu.my/estudent/class_timetable/${indexResultLocation}`,
+				referer: indexLocation,
 			},
 		);
 
@@ -166,15 +163,14 @@ export class UiTMScraper {
 
 	async getGroups(path: string): Promise<Group[]> {
 		const jar = await this.getJar();
-		const { indexResultLocation } = await fetchScrapsFromRootPage(
+		const { indexLocation } = await fetchScrapsFromRootPage(
 			jar,
 			this.storage,
 			this.version,
 		);
-		const referer = indexResultLocation
-			? `https://simsweb4.uitm.edu.my/estudent/class_timetable/${indexResultLocation}`
-			: undefined;
-		const response = await fetchIcress(path, jar, { referer });
+		const { text: response } = await fetchIcress(path, jar, {
+			referer: indexLocation,
+		});
 		const root = parse(response);
 		const rows = root.querySelectorAll("#example tbody tr").map((row) => {
 			const cells = row

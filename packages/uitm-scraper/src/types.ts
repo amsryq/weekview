@@ -5,6 +5,7 @@ export interface Clock {
 
 export interface RootScrapsSet {
 	tokens: Record<string, string>;
+	indexLocation: string;
 	indexResultLocation: string | null;
 	campusSelectLocation: string | null;
 	facultySelectLocation: string | null;

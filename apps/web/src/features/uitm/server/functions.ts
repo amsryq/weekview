@@ -1,5 +1,7 @@
+import { env } from "cloudflare:workers";
 import { createServerFn } from "@tanstack/react-start";
 import { UiTMScraper } from "@weekview/uitm-scraper";
+import { CloudflareStorage } from "~/server/platform/cloudflare";
 import {
 	getMockCourses,
 	getMockGroups,
@@ -8,8 +10,6 @@ import {
 	MOCK_FACULTIES,
 	MOCK_MODE,
 } from "./mock-data";
-import { CloudflareStorage } from "~/server/platform/cloudflare";
-import { env } from "cloudflare:workers";
 
 declare global {
 	namespace Cloudflare {

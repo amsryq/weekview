@@ -72,7 +72,10 @@ export async function fetchIcress(
 		}
 	}
 
-	return await response.text();
+	return {
+		text: await response.text(),
+		url: response.url,
+	};
 }
 
 export function extractAjaxUrl(scriptContent: string): string | null {
@@ -104,7 +107,7 @@ export async function fetchScrapsFromRootPage(
 	const cached = await storage.get(cacheKey);
 	if (cached) return JSON.parse(cached) as RootScrapsSet;
 
-	const htm = await fetchIcress("index.cfm", jar);
+	const { text: htm, url: indexUrl } = await fetchIcress("index.cfm", jar);
 	const htmRoot = parse(htm);
 
 	const scripts = htmRoot
@@ -235,6 +238,7 @@ export async function fetchScrapsFromRootPage(
 		tokens: Object.fromEntries(
 			Object.entries(tokens).map(([k, v]) => [k, v.value]),
 		),
+		indexLocation: indexUrl,
 		indexResultLocation,
 		campusSelectLocation,
 		facultySelectLocation,
