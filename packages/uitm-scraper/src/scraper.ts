@@ -144,15 +144,16 @@ export async function fetchScrapsFromRootPage(
 				const id = m[1];
 				const value = m[2];
 
-				// Find which token name matches this ID
+				// Update tokens that match this ID
+				let found = false;
 				for (const [name, token] of Object.entries(tokens)) {
 					if (token.id === id) {
 						tokens[name] = { id, value };
-						break;
+						found = true;
 					}
 				}
-				// Also handle direct ID assignments if name wasn't found
-				if (!Object.values(tokens).some((t) => t.id === id)) {
+				// Also handle direct ID assignments if name wasn't found or as a fallback
+				if (!found || !Object.values(tokens).some((t) => t.id === id)) {
 					tokens[id] = { id, value };
 				}
 			}

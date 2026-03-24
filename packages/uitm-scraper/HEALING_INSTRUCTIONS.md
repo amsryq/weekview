@@ -13,29 +13,31 @@ Update the extraction logic in `src/scraper.ts` or related files so that the scr
 ## The Workflow
 
 1. **Establish Ground Truth (Metadata):**
-   - Use `browser-use-cli` to fetch the list of available **campuses** and **faculties** from the `<select>` dropdowns.
+   - Use `browser-use --headed open <URL>` to navigate the portal.
+   - Fetch the list of available **campuses** and **faculties** from the `<select>` or `select2` dropdowns.
    - Run `pnpm test:fetch --type campus` and `pnpm test:fetch --type faculty`.
-   - **Audit:** Compare the programmatic IDs and labels against what you saw in the browser. Common failures include ID mismatches or the server randomly returning "Error" for certain metadata combinations.
+   - **Audit:** Compare the programmatic IDs and labels against the browser. Check for "Error" responses in the terminal.
 
 2. **Establish Ground Truth (Schedules):**
-   - Use `browser-use-cli` to navigate the portal (e.g., `https://simsweb4.uitm.edu.my/estudent/class_timetable/index.cfm`).
-   - Select a random campus and faculty, click search, and note the resulting timetable (days, times, rooms).
-   - **Tip:** You can extract this as JSON or just keep it in your scratchpad for comparison in step 4.
+   - In the browser, select a campus (e.g., "J") and input an empty string for course field ("") to get all courses.
+   - Click Search and open the resulting timetable in a new tab if necessary (`browser-use switch 1`).
+   - Note the sessions, days, and times. Take a screenshot if needed: `browser-use screenshot ground_truth.png`.
 
 3. **Run Programmatic Fetch:**
-   - Run the fetch script: `pnpm test:fetch --campus <CAMPUS_CODE> --course <COURSE_CODE> [--faculty <FACULTY_CODE>]`.
-   - This script will use our library (`src/client.ts`) to fetch the *same* schedule and output it as JSON to the console.
+   - Run the fetch script: `pnpm test:fetch --campus <CAMPUS_CODE> --course <COURSE_CODE>`.
+   - Example: `pnpm test:fetch --campus J --course ACC036`.
 
-4. **Diagnose and Repair (Manual Agent Comparison):**
-   - **YOU (the AI Agent)** must manually compare the terminal JSON output from step 3 against your notes from step 2.
-   - Look for mismatches in session lengths, times, days, rooms, or entirely missing groups.
-   - If there are mismatches, the scraper is broken. Fetch the raw HTML of the portal's index page.
-   - Locate the `<script>` tag containing the AJAX logic and dynamic tokens.
-   - Update `src/scraper.ts` to dynamically extract these new values.
-   - **Leniency:** Apply common sense leniency for non-deterministic differences (e.g., whitespace, field order) that don't affect data integrity.
+4. **Diagnose and Repair:**
+   - Compare JSON output against the browser Ground Truth.
+   - If broken, inspect the page source for the `check_form_before_submit()` function using `browser-use eval`.
+   - Look for multiple token assignments: `document.getElementById('token1').value = '...'`.
+   - Update `src/scraper.ts` to capture all dynamic tokens, ensuring fields sharing the same ID are correctly mapped.
+   - Check if AJAX URLs in `.select2()` calls or `$.ajax` calls have changed and update `extractAjaxUrl` regex if needed.
 
 5. **Verify:**
-   - Repeat steps 1, 3, and 4 until the library's metadata and schedule outputs perfectly match the Ground Truth.
+   - Repeat steps 1, 3, and 4.
+   - Run `pnpm typecheck` to ensure code validity.
+   - `browser-use close` when finished.
 
 ## Diagnostic Guidance
 
@@ -51,5 +53,4 @@ The library includes defensive logging in `src/scraper.ts`. If the scraper fails
 
 ## Constraints
 - The final scraper code must run using standard Node.js `fetch`. 
-- `browser-use-cli` is strictly for establishing your Ground Truth during this healing process.
-
+- `browser-use` is strictly for establishing your Ground Truth during this healing process.
