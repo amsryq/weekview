@@ -120,7 +120,7 @@ export function MyStudentImportStep() {
 					/>
 				</div>
 
-				<div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/30 p-3">
+				<div className="hidden items-center justify-between rounded-xl border border-border/60 bg-muted/30 p-3">
 					<div className="flex flex-col">
 						<Label
 							htmlFor="include-course-name"
