@@ -24,15 +24,12 @@ export function UiTMImporterDialog({
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 }) {
-	const { setOpen, reset } = useImporterSelectionStore(
-		useShallow((state) => pick(state, ["setOpen", "reset"])),
-	);
+	const setOpen = useImporterSelectionStore((s) => s.setOpen);
 
 	const closeImporter = useCallback(() => {
 		setOpen(false);
-		reset();
 		onOpenChange(false);
-	}, [reset, setOpen, onOpenChange]);
+	}, [setOpen, onOpenChange]);
 
 	const handleOpenChange = useCallback(
 		(nextOpen: boolean) => {
