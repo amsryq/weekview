@@ -7,6 +7,7 @@ import { Course } from "../../../models/course";
 import { Faculty } from "../../../models/faculty";
 import { Group } from "../../../models/group";
 import { ScheduleInfo } from "../../../utils/parse-schedule";
+import { getFriendlyUiTMErrorMessage } from "../utils/error-feedback";
 import {
 	CourseImportProgress,
 	getProgressCounts,
@@ -217,7 +218,10 @@ export function useCourseImporter(options: {
 				prev === "cancelled" ? prev : "cancelled",
 			);
 			state.setCourseProgress((prev) =>
-				markUnfinishedProgressAsError(prev, reason),
+				markUnfinishedProgressAsError(
+					prev,
+					getFriendlyUiTMErrorMessage(reason),
+				),
 			);
 		},
 		[state.setImportPhase, state.setCourseProgress],
@@ -280,8 +284,14 @@ export function useCourseImporter(options: {
 			updateCourseStatus(entry.courseCode, entry.group, "running");
 
 			if (dedupeKeys.has(key)) {
-				updateCourseStatus(entry.courseCode, entry.group, "error", "Duplicate");
-				failures.push({ ...entry, reason: "Duplicate entry." });
+				const duplicateMessage = getFriendlyUiTMErrorMessage("Duplicate");
+				updateCourseStatus(
+					entry.courseCode,
+					entry.group,
+					"error",
+					duplicateMessage,
+				);
+				failures.push({ ...entry, reason: duplicateMessage });
 				continue;
 			}
 			dedupeKeys.add(key);
@@ -297,7 +307,7 @@ export function useCourseImporter(options: {
 				updateCourseStatus(entry.courseCode, entry.group, "success");
 				successes.push({ courseCode: entry.courseCode, group: entry.group });
 			} catch (e) {
-				const message = e instanceof Error ? e.message : "Failed";
+				const message = getFriendlyUiTMErrorMessage(e);
 				updateCourseStatus(entry.courseCode, entry.group, "error", message);
 				failures.push({ ...entry, reason: message });
 			}

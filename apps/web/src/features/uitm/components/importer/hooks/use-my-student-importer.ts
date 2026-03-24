@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { CourseStore } from "~/lib/stores/course-store";
 import { UiTMCourseSection } from "../../../course-section";
 import { fetchMyStudentTimetable } from "../../../models/mystudent";
+import { getFriendlyUiTMErrorMessage } from "../utils/error-feedback";
 import {
 	CourseImportProgress,
 	ImportFailure,
@@ -73,13 +74,17 @@ export function useMyStudentImporter(): UseMyStudentImporterResult {
 			const groups = await fetchMyStudentTimetable({
 				studentId: trimmedId,
 				includeCourseName: includeName,
+			}).catch((error) => {
+				throw new Error(getFriendlyUiTMErrorMessage(error));
 			});
 			ensureNotCancelled();
 
 			if (!groups.length) {
 				setImportPhase("complete");
 				throw new Error(
-					"No timetable entries were returned for that student ID.",
+					getFriendlyUiTMErrorMessage(
+						"No timetable entries were returned for that student ID.",
+					),
 				);
 			}
 
@@ -208,7 +213,12 @@ export function useMyStudentImporter(): UseMyStudentImporterResult {
 				id: studentId,
 				includeName: includeCourseName,
 			});
-		} catch {
+		} catch (error) {
+			if (error instanceof Error && error.message === CANCELLED_MESSAGE) {
+				return;
+			}
+
+			setImportPhase((prev) => (prev === "cancelled" ? prev : "complete"));
 			// errors handled via mutation state and progress tracking
 		}
 	};

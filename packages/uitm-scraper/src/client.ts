@@ -225,7 +225,7 @@ export class UiTMScraper {
 			},
 		);
 
-		if (!response.ok) throw new Error(`Failed to fetch student timetable`);
+		if (!response.ok) throw new Error(`MyStudent returned ${response.status}`);
 
 		const data = (await response.json()) as MyStudentAPIResponse;
 		const grouped: Record<

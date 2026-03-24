@@ -34,6 +34,7 @@ import { cn } from "~/lib/utils/styles";
 import { UiTMCourseSection } from "../../../course-section";
 import { useGroupFiltering } from "../hooks/use-group-filtering";
 import { useGroupQueries } from "../hooks/use-group-queries";
+import { getFriendlyUiTMErrorMessage } from "../utils/error-feedback";
 import { useImporterSelectionStore } from "../utils/shared";
 
 function pickSelectorState(
@@ -169,7 +170,7 @@ export function GroupSelectorStep() {
 					</Combobox>
 					{coursesError ? (
 						<p className="text-sm text-destructive px-1">
-							{(coursesError as Error).message}
+							{getFriendlyUiTMErrorMessage(coursesError)}
 						</p>
 					) : null}
 				</section>
@@ -272,7 +273,7 @@ export function GroupSelectorStep() {
 						<div className="divide-y divide-border/60 text-left">
 							{groupsError ? (
 								<div className="p-4 text-sm text-destructive">
-									{(groupsError as Error).message}
+									{getFriendlyUiTMErrorMessage(groupsError)}
 								</div>
 							) : groupsLoading ? (
 								Array.from({ length: 6 }).map((_, index) => (

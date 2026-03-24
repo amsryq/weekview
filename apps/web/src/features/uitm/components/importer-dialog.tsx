@@ -1,7 +1,5 @@
-import { pick } from "es-toolkit";
 import { LoaderCircle } from "lucide-react";
 import { lazy, Suspense, useCallback } from "react";
-import { useShallow } from "zustand/react/shallow";
 import { CourseEditorDialog } from "~/components/course-editor/course-editor-dialog";
 import {
 	ResponsiveDialog,
@@ -63,7 +61,6 @@ export function UiTMImporterDialog({
 	);
 }
 
-// Global renderer for UiTM importer dialog
 export function UiTMImporterDialogRenderer() {
 	const { uiTMImporterOpen, closeUiTMImporter } = useImporterDialogs();
 	return (
@@ -74,10 +71,9 @@ export function UiTMImporterDialogRenderer() {
 	);
 }
 
-// Global renderer for Manual importer dialog (CourseEditorDialog)
 export function ManualImporterDialogRenderer() {
 	const { manualImporterOpen, closeManualImporter } = useImporterDialogs();
-	// Add course logic
+
 	return (
 		<CourseEditorDialog
 			open={manualImporterOpen}

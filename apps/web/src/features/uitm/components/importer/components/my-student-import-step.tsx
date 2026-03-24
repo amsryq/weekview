@@ -22,6 +22,7 @@ import {
 	CANCELLED_MESSAGE,
 	useMyStudentImporter,
 } from "../hooks/use-my-student-importer";
+import { getFriendlyUiTMErrorMessage } from "../utils/error-feedback";
 import {
 	CourseImportProgress,
 	getProgressCounts,
@@ -61,9 +62,13 @@ export function MyStudentImportStep() {
 	const isComplete = importPhase === "complete";
 	const showImportError =
 		Boolean(importError) && importError?.message !== CANCELLED_MESSAGE;
+	const friendlyImportError = showImportError
+		? getFriendlyUiTMErrorMessage(importError)
+		: null;
 
-	const progressTitle =
-		importPhase === "fetching"
+	const progressTitle = showImportError
+		? "Import failed"
+		: importPhase === "fetching"
 			? "Fetching timetable..."
 			: importPhase === "importing"
 				? "Importing courses"
@@ -75,8 +80,9 @@ export function MyStudentImportStep() {
 							? "Import complete"
 							: "Preparing import";
 
-	const progressSubtitle =
-		importPhase === "fetching"
+	const progressSubtitle = showImportError
+		? "Please review the message below, then update your student ID or retry later."
+		: importPhase === "fetching"
 			? "Contacting UiTM MyStudent API..."
 			: importPhase === "importing"
 				? `Processing ${courseProgress.length} course${courseProgress.length === 1 ? "" : "s"}...`
@@ -179,7 +185,9 @@ export function MyStudentImportStep() {
 				>
 					<ResponsiveDialogHeader className="gap-1">
 						<ResponsiveDialogTitle className="flex items-center gap-2">
-							{isImporting ? (
+							{showImportError ? (
+								<AlertCircle className="size-4 text-destructive" />
+							) : isImporting ? (
 								<Loader2 className="size-4 animate-spin text-primary" />
 							) : errorCount > 0 ? (
 								<AlertCircle className="size-4 text-amber-500" />
@@ -194,7 +202,16 @@ export function MyStudentImportStep() {
 					</ResponsiveDialogHeader>
 
 					<div className="flex-1 py-2 px-6 overflow-y-auto min-h-0">
-						{courseProgress.length > 0 ? (
+						{showImportError ? (
+							<Alert variant="destructive" className="py-2.5">
+								<AlertTitle className="text-xs font-bold">
+									Import failed
+								</AlertTitle>
+								<AlertDescription className="text-xs opacity-90">
+									{friendlyImportError}
+								</AlertDescription>
+							</Alert>
+						) : courseProgress.length > 0 ? (
 							<div className="overflow-hidden rounded-xl border border-border/60 bg-card">
 								<div className="border-b border-border/60 bg-muted/40 px-3 py-2">
 									<h3 className="text-xs font-bold text-muted-foreground/80">
@@ -273,7 +290,7 @@ export function MyStudentImportStep() {
 							size="sm"
 							onClick={() => setProgressDialogOpen(false)}
 							className="w-full sm:w-auto"
-							disabled={isImporting && !cancelRequested}
+							disabled={isImporting && !cancelRequested && !showImportError}
 						>
 							Close
 						</Button>
