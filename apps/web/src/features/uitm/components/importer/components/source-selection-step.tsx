@@ -113,7 +113,7 @@ const SECTIONS: SectionData[] = [
 		description: "Choose groups manually or paste a slip.",
 		options: [
 			{
-				key: "campus-faculty",
+				key: "group-selector",
 				title: "Pick courses & groups",
 				description: "Browse available courses for your campus.",
 				icon: BookOpen,

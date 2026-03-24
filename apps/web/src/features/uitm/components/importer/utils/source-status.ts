@@ -3,7 +3,7 @@ import type { ImporterStep } from "./shared";
 
 export type SourceKey = Extract<
 	ImporterStep,
-	"my-student" | "campus-faculty" | "course-slip"
+	"my-student" | "group-selector" | "course-slip"
 >;
 
 export interface SourceStatus {
@@ -13,7 +13,7 @@ export interface SourceStatus {
 
 const STATIC_SOURCE_STATUS: Record<SourceKey, SourceStatus> = {
 	"my-student": { available: true },
-	"campus-faculty": { available: true },
+	"group-selector": { available: true },
 	"course-slip": { available: true },
 };
 

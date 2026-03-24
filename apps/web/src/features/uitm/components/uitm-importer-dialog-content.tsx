@@ -25,27 +25,29 @@ function AnimatedStepContainer({
 
 		const observer = new ResizeObserver((entries) => {
 			for (const entry of entries) {
-				const newHeight = entry.contentRect.height;
+				const { height, width } = entry.contentRect;
 				animate(
 					outer,
-					{ height: newHeight },
+					{ height, width },
 					{ type: "spring", bounce: 0, duration: 0.4 },
 				);
 			}
 		});
 
 		observer.observe(inner);
-		// Set initial height without animation
+
+		// Set initial size
 		outer.style.height = `${inner.scrollHeight}px`;
+		outer.style.width = `${inner.scrollWidth}px`;
 
 		return () => observer.disconnect();
 	}, []);
 
 	return (
-		// Outer shell: has an explicit pixel height that is driven by JS animation
-		<div ref={outerRef} className="overflow-hidden">
+		// Outer shell: has an explicit pixel height/width that is driven by JS animation
+		<div ref={outerRef} className="overflow-hidden w-fit max-w-full">
 			{/* Inner div: naturally sized by content, measured by ResizeObserver */}
-			<div ref={innerRef}>
+			<div ref={innerRef} className="w-fit md:min-w-[480px]">
 				<AnimatePresence mode="wait" initial={false}>
 					<motion.div
 						key={stepKey}

@@ -1,5 +1,6 @@
 import { LoaderCircle } from "lucide-react";
 import { lazy, Suspense, useCallback } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { CourseEditorDialog } from "~/components/course-editor/course-editor-dialog";
 import {
 	ResponsiveDialog,
@@ -9,6 +10,7 @@ import { useImporterDialogs } from "~/lib/contexts/importer-dialogs";
 import { Course } from "~/lib/models/course";
 import { ManualCourseProvider } from "~/lib/providers/manual-course-provider";
 import { CourseStore } from "~/lib/stores/course-store";
+import { cn } from "~/lib/utils/styles";
 import { useImporterSelectionStore } from "./importer/utils/shared";
 
 const UiTMImporterDialogContentLazy = lazy(
@@ -22,7 +24,15 @@ export function UiTMImporterDialog({
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 }) {
-	const setOpen = useImporterSelectionStore((s) => s.setOpen);
+	const { setOpen, currentStep, selectedCampus, selectedFaculty } =
+		useImporterSelectionStore(
+			useShallow((s) => ({
+				setOpen: s.setOpen,
+				currentStep: s.currentStep,
+				selectedCampus: s.selectedCampus,
+				selectedFaculty: s.selectedFaculty,
+			})),
+		);
 
 	const closeImporter = useCallback(() => {
 		setOpen(false);
@@ -41,10 +51,18 @@ export function UiTMImporterDialog({
 		[closeImporter, setOpen, onOpenChange],
 	);
 
+	const isLargeStep =
+		currentStep === "group-selector" &&
+		Boolean(selectedCampus) &&
+		(selectedCampus?.requireFaculty ? Boolean(selectedFaculty) : true);
+
 	return (
 		<ResponsiveDialog open={open} onOpenChange={handleOpenChange}>
 			<ResponsiveDialogContent
-				desktopClassName="sm:max-w-xl overflow-hidden"
+				desktopClassName={cn(
+					"overflow-hidden transition-[max-width,width] duration-300 ease-in-out w-fit max-w-full md:min-w-[480px]",
+					isLargeStep ? "sm:max-w-xl lg:max-w-7xl" : "sm:max-w-xl",
+				)}
 				mobileClassName="max-h-[92dvh]"
 			>
 				<Suspense
