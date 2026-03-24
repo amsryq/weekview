@@ -328,7 +328,7 @@ export function GroupSelectorStep() {
 	);
 
 	const mobileCoursePicker = (
-		<section className="space-y-2 md:hidden">
+		<section className="space-y-2 lg:hidden">
 			<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between px-1">
 				<h3 className="text-xs font-bold text-muted-foreground/80">Course</h3>
 			</div>
@@ -379,7 +379,7 @@ export function GroupSelectorStep() {
 	);
 
 	const desktopCoursePicker = (
-		<section className="hidden flex-1 min-h-0 overflow-hidden rounded-xl border border-border/60 bg-card md:flex md:flex-col">
+		<section className="hidden flex-1 min-h-0 overflow-hidden rounded-xl border border-border/60 bg-card lg:flex lg:flex-col">
 			<div className="border-b border-border/60 p-3">
 				<h3 className="px-1 text-xs font-bold text-muted-foreground/80">
 					Courses
@@ -452,16 +452,16 @@ export function GroupSelectorStep() {
 				</ResponsiveDialogDescription>
 			</ResponsiveDialogHeader>
 
-			<div className="min-h-0 flex-1 overflow-y-auto md:overflow-hidden px-6 py-4">
+			<div className="min-h-0 flex-1 overflow-y-auto lg:overflow-hidden px-6 py-4">
 				{canSelectCourse ? (
-					<div className="space-y-4 pt-2 md:flex md:items-start md:gap-4 md:space-y-0">
-						<div className="shrink-0 space-y-4 md:flex md:h-[480px] md:w-[240px] md:flex-col lg:w-[280px]">
+					<div className="space-y-4 pt-2 lg:flex lg:items-start lg:gap-4 lg:space-y-0">
+						<div className="shrink-0 space-y-4 lg:flex lg:h-[480px] lg:w-[280px] lg:flex-col">
 							{campusFacultySection}
 							{mobileCoursePicker}
 							{desktopCoursePicker}
 						</div>
 
-						<section className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/60 bg-card md:h-[480px] lg:w-[600px] xl:w-[800px]">
+						<section className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/60 bg-card lg:h-[480px] lg:w-[640px] xl:w-[800px]">
 							<div className="flex flex-col gap-3 border-b border-border/60 p-3 sm:flex-row sm:items-center sm:justify-between">
 								<div className="flex items-center gap-3">
 									<h3 className="px-1 text-xs font-bold text-muted-foreground/80">
@@ -558,7 +558,7 @@ export function GroupSelectorStep() {
 								</div>
 							</div>
 
-							<ScrollArea className="h-[280px] md:h-auto md:flex-1 bg-background/50">
+							<ScrollArea className="h-[280px] lg:h-auto lg:flex-1 bg-background/50">
 								<div className="divide-y divide-border/60 text-left">
 									{groupsError ? (
 										<div className="p-4 text-sm text-destructive">
