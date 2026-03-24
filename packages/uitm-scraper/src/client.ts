@@ -98,9 +98,13 @@ export class UiTMScraper {
 			}));
 	}
 
-	async getCourses(campus: string, faculty?: string | null): Promise<Course[]> {
+	async getCourses(
+		campus: string,
+		faculty?: string | null,
+		courseCode: string = "",
+	): Promise<Course[]> {
 		const jar = await this.getJar();
-		const cacheKey = `uitm:courses:${this.version}:${campus}${faculty ? `:${faculty}` : ""}`;
+		const cacheKey = `uitm:courses:${this.version}:${campus}${faculty ? `:${faculty}` : ""}:${courseCode}`;
 		const cached = await this.storage.get(cacheKey);
 		if (cached) return JSON.parse(cached) as Course[];
 
@@ -112,7 +116,7 @@ export class UiTMScraper {
 
 		const body = new URLSearchParams({
 			search_campus: campus,
-			search_course: "",
+			search_course: courseCode,
 			...tokens,
 			...(faculty ? { search_faculty: faculty } : {}),
 		}).toString();
@@ -126,6 +130,7 @@ export class UiTMScraper {
 					"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
 				},
 				body,
+				referer: `https://simsweb4.uitm.edu.my/estudent/class_timetable/${indexResultLocation}`,
 			},
 		);
 
@@ -138,7 +143,9 @@ export class UiTMScraper {
 			)
 			.map((tr) => {
 				const rawCode = tr.children[1].text;
-				const code = rawCode.trim().replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, "");
+				const code = rawCode
+					.trim()
+					.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, "");
 				const path = tr.children[2].querySelector("a")?.getAttribute("href")!;
 				return {
 					code,
@@ -159,7 +166,15 @@ export class UiTMScraper {
 
 	async getGroups(path: string): Promise<Group[]> {
 		const jar = await this.getJar();
-		const response = await fetchIcress(path, jar);
+		const { indexResultLocation } = await fetchScrapsFromRootPage(
+			jar,
+			this.storage,
+			this.version,
+		);
+		const referer = indexResultLocation
+			? `https://simsweb4.uitm.edu.my/estudent/class_timetable/${indexResultLocation}`
+			: undefined;
+		const response = await fetchIcress(path, jar, { referer });
 		const root = parse(response);
 		const rows = root.querySelectorAll("#example tbody tr").map((row) => {
 			const cells = row

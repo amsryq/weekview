@@ -60,7 +60,11 @@ async function main() {
 				`fetching schedules for ${targetCourseCode} at ${values.campus}...`,
 			);
 
-			const courses = await scraper.getCourses(values.campus, values.faculty);
+			const courses = await scraper.getCourses(
+				values.campus,
+				values.faculty,
+				targetCourseCode,
+			);
 			const targetCourse = courses.find(
 				(c) => c.code.toUpperCase() === targetCourseCode,
 			);
@@ -84,7 +88,9 @@ async function main() {
 			return;
 		}
 
-		console.error("Unknown type. Use --type campus, --type faculty, or --type schedule (default).");
+		console.error(
+			"Unknown type. Use --type campus, --type faculty, or --type schedule (default).",
+		);
 		process.exit(1);
 	} catch (error) {
 		console.error("Programmatic scraper failed:", error);

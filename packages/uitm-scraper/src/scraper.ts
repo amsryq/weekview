@@ -35,6 +35,7 @@ export async function fetchIcress(
 		method?: string;
 		headers?: Record<string, string>;
 		body?: string;
+		referer?: string;
 	} = {},
 ) {
 	const url = `https://simsweb4.uitm.edu.my/estudent/class_timetable/${path}`;
@@ -48,6 +49,7 @@ export async function fetchIcress(
 			"User-Agent":
 				"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0",
 			Referer:
+				options.referer ||
 				"https://simsweb4.uitm.edu.my/estudent/class_timetable/index.cfm",
 			...(cookieHeader ? { Cookie: cookieHeader } : {}),
 			...options.headers,
@@ -74,10 +76,23 @@ export async function fetchIcress(
 }
 
 export function extractAjaxUrl(scriptContent: string): string | null {
-	const regex =
-		/\$?.ajax:?\(?\s*{\s*url:\s*['"]([^'"]+)['"]|url:\s*['"]([^'"]+)['"]/;
-	const match = scriptContent.match(regex);
-	return match ? match[1] || match[2] : null;
+	// Multiple patterns to robustly extract AJAX/fetch endpoints from inlined scripts.
+	// The site has used $.ajax, $.post, $.get, select2 ajax.url and even fetch() in the past.
+	const patterns: RegExp[] = [
+		/url\s*:\s*['"]([^'")]+)['"]/m,
+		/\$\.ajax\(\s*['"]([^'")]+)['"]/m,
+		/\$\.post\(\s*['"]([^'")]+)['"]/m,
+		/\$\.get\(\s*['"]([^'")]+)['"]/m,
+		/\.select2\(\s*{[\s\S]*?ajax\s*:\s*{[\s\S]*?url\s*:\s*['"]([^'")]+)['"]/m,
+		/fetch\(\s*['"]([^'")]+)['"]/m,
+	];
+
+	for (const regex of patterns) {
+		const m = scriptContent.match(regex);
+		if (m && m[1]) return m[1];
+	}
+
+	return null;
 }
 
 export async function fetchScrapsFromRootPage(
@@ -137,24 +152,73 @@ export async function fetchScrapsFromRootPage(
 			const match = extractAjaxUrl(script);
 			if (match) indexResultLocation = match;
 
-			const tokenRegex =
-				/document\.getElementById\(['"]([^'"]+)['"]\)\.value\s*=\s*['"]([^'"]+)['"]/g;
-			let m;
-			while ((m = tokenRegex.exec(script)) !== null) {
-				const id = m[1];
-				const value = m[2];
+			// Collect token assignments from various patterns used on the page.
+			// Examples: document.getElementById('x').value = 'y'
+			// document.getElementsByName('name')[0].value = 'v'
+			// $("#id").val('v') or $("input[name='x']").val('v')
+			const tokenPatterns: Array<{
+				regex: RegExp;
+				type: "id" | "name" | "selector";
+			}> = [
+				{
+					regex:
+						/document\.getElementById\(['"]([^'")]+)['"]\)\.value\s*=\s*['"]([^'")]+)['"]/g,
+					type: "id",
+				},
+				{
+					regex:
+						/document\.getElementsByName\(['"]([^'")]+)['"]\)\s*\[\s*0\s*\]\.value\s*=\s*['"]([^'")]+)['"]/g,
+					type: "name",
+				},
+				{
+					regex:
+						/document\.querySelector\(\s*['"].*?name\s*=\s*['"]([^'")]+)['"].*?['"]\s*\)\.value\s*=\s*['"]([^'")]+)['"]/g,
+					type: "name",
+				},
+				{
+					regex:
+						/document\.querySelector\(\s*['"].*?#([^'")]+).*?['"]\s*\)\.value\s*=\s*['"]([^'")]+)['"]/g,
+					type: "id",
+				},
+				{
+					regex:
+						/\$\(\s*['"]#([^'")]+)['"]\s*\)\.val\(\s*['"]([^'")]+)['"]\s*\)/g,
+					type: "id",
+				},
+				{
+					regex:
+						/\$\(\s*['"][^'"]*name\s*=\s*['"]([^'")]+)['"][^'"]*['"]\s*\)\.val\(\s*['"]([^'")]+)['"]\s*\)/g,
+					type: "name",
+				},
+			];
 
-				// Update tokens that match this ID
-				let found = false;
-				for (const [name, token] of Object.entries(tokens)) {
-					if (token.id === id) {
-						tokens[name] = { id, value };
-						found = true;
+			for (const p of tokenPatterns) {
+				let m: RegExpExecArray | null;
+				while ((m = p.regex.exec(script)) !== null) {
+					if (!m[1]) continue;
+					const key = m[1];
+					const value = m[2] ?? "";
+
+					if (p.type === "id") {
+						let found = false;
+						for (const [name, token] of Object.entries(tokens)) {
+							if (token.id === key) {
+								tokens[name] = { id: key, value };
+								found = true;
+							}
+						}
+						if (!found || !Object.values(tokens).some((t) => t.id === key)) {
+							tokens[key] = { id: key, value };
+						}
+					} else if (p.type === "name") {
+						if (tokens[key]?.id) {
+							tokens[key] = { ...tokens[key], value };
+						} else {
+							tokens[key] = { value };
+						}
+					} else {
+						tokens[key] = { value };
 					}
-				}
-				// Also handle direct ID assignments if name wasn't found or as a fallback
-				if (!found || !Object.values(tokens).some((t) => t.id === id)) {
-					tokens[id] = { id, value };
 				}
 			}
 		}
