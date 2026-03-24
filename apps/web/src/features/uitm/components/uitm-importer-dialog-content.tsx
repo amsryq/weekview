@@ -2,7 +2,6 @@ import { pick } from "es-toolkit";
 import { AnimatePresence, animate, motion } from "framer-motion";
 import { useEffect, useRef } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { CourseAndFacultySelectorStep } from "./importer/components/course-and-faculty-selector-step";
 import { CourseSlipImportStep } from "./importer/components/course-slip-import-step";
 import { GroupSelectorStep } from "./importer/components/group-selector-step";
 import { MyStudentImportStep } from "./importer/components/my-student-import-step";
@@ -73,8 +72,6 @@ export default function UiTMImporterDialogContent() {
 		switch (currentStep) {
 			case "source":
 				return <SourceSelectionStep />;
-			case "campus-faculty":
-				return <CourseAndFacultySelectorStep />;
 			case "group-selector":
 				return <GroupSelectorStep />;
 			case "course-slip":
