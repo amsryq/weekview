@@ -1,4 +1,4 @@
-import { Settings, Settings2Icon } from "lucide-react";
+import { Brush, Settings } from "lucide-react";
 import { useEffect } from "react";
 import { TimetableCustomizer } from "~/components/settings/timetable-customizer";
 import { TimetableExportMenu } from "~/components/timetable/export-menu";
@@ -28,8 +28,8 @@ function App() {
 				</ManageCoursesTooltip>
 				<TimetableCustomizer>
 					<Button variant="outline">
-						<Settings2Icon className="w-4 h-4" />
-						Customize Timetable
+						<Brush className="w-4 h-4" />
+						Customize
 					</Button>
 				</TimetableCustomizer>
 				<TimetableExportMenu />
