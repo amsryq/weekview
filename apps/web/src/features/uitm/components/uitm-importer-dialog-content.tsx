@@ -25,10 +25,10 @@ function AnimatedStepContainer({
 
 		const observer = new ResizeObserver((entries) => {
 			for (const entry of entries) {
-				const { height, width } = entry.contentRect;
+				const { height } = entry.contentRect;
 				animate(
 					outer,
-					{ height, width },
+					{ height },
 					{ type: "spring", bounce: 0, duration: 0.4 },
 				);
 			}
@@ -36,9 +36,8 @@ function AnimatedStepContainer({
 
 		observer.observe(inner);
 
-		// Set initial size
+		// Set initial height
 		outer.style.height = `${inner.scrollHeight}px`;
-		outer.style.width = `${inner.scrollWidth}px`;
 
 		return () => observer.disconnect();
 	}, []);
