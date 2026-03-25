@@ -58,7 +58,11 @@ export async function fetchIcress(
 	});
 
 	if (!response.ok) {
-		throw new Error(`Icress returned ${response.status}`);
+		const error = new Error(`Icress returned ${response.status}`) as Error & {
+			status?: number;
+		};
+		error.status = response.status;
+		throw error;
 	}
 
 	const setCookieHeaders = response.headers.getSetCookie();

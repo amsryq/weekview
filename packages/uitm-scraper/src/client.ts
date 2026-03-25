@@ -14,6 +14,7 @@ import type {
 	Course,
 	Group,
 	MyStudentAPIResponse,
+	RootScrapsSet,
 	ScraperConfig,
 	Session,
 	StorageAdapter,
@@ -66,10 +67,24 @@ export class UiTMScraper {
 		await this.storage.set(cacheKey, JSON.stringify(jar.toJSON()), ttlSeconds);
 	}
 
+	private async getScraps(jar: CookieJar): Promise<RootScrapsSet> {
+		try {
+			return await fetchScrapsFromRootPage(jar, this.storage, this.version);
+		} catch (error) {
+			if (
+				error instanceof Error &&
+				(error as Error & { status?: number }).status === 503
+			) {
+				await this.storage.delete(`uitm:tokens:${this.version}:index.htm`);
+			}
+			throw error;
+		}
+	}
+
 	async getCampuses(mode: "campus" | "faculty" = "campus"): Promise<Campus[]> {
 		const jar = await this.getJar();
 		const { campusSelectLocation, facultySelectLocation } =
-			await fetchScrapsFromRootPage(jar, this.storage, this.version);
+			await this.getScraps(jar);
 
 		const location =
 			mode === "campus" ? campusSelectLocation : facultySelectLocation;
@@ -109,7 +124,7 @@ export class UiTMScraper {
 		if (cached) return JSON.parse(cached) as Course[];
 
 		const { tokens, indexLocation, indexResultLocation } =
-			await fetchScrapsFromRootPage(jar, this.storage, this.version);
+			await this.getScraps(jar);
 
 		const body = new URLSearchParams({
 			search_campus: campus,
@@ -163,11 +178,7 @@ export class UiTMScraper {
 
 	async getGroups(path: string): Promise<Group[]> {
 		const jar = await this.getJar();
-		const { indexLocation } = await fetchScrapsFromRootPage(
-			jar,
-			this.storage,
-			this.version,
-		);
+		const { indexLocation } = await this.getScraps(jar);
 		const { text: response } = await fetchIcress(path, jar, {
 			referer: indexLocation,
 		});
