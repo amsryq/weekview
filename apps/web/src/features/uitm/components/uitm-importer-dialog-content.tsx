@@ -23,12 +23,17 @@ function AnimatedStepContainer({
 		const inner = innerRef.current;
 		if (!outer || !inner) return;
 
+		const isDesktop = window.innerWidth >= 768;
+
 		const observer = new ResizeObserver((entries) => {
 			for (const entry of entries) {
 				const { height, width } = entry.contentRect;
 				animate(
 					outer,
-					{ height, width },
+					{
+						height,
+						width: isDesktop ? width : "auto",
+					},
 					{ type: "spring", bounce: 0, duration: 0.4 },
 				);
 			}
@@ -38,16 +43,19 @@ function AnimatedStepContainer({
 
 		// Set initial size
 		outer.style.height = `${inner.scrollHeight}px`;
-		outer.style.width = `${inner.scrollWidth}px`;
+		outer.style.width = isDesktop ? `${inner.scrollWidth}px` : "auto";
 
 		return () => observer.disconnect();
 	}, []);
 
 	return (
-		// Outer shell: has an explicit pixel height/width that is driven by JS animation
-		<div ref={outerRef} className="overflow-hidden w-fit max-w-full">
+		// Outer shell: animated sizing with scrolling enabled
+		<div
+			ref={outerRef}
+			className="w-full md:w-fit max-w-full overflow-y-auto md:overflow-hidden min-h-0 flex-1 md:flex-none"
+		>
 			{/* Inner div: naturally sized by content, measured by ResizeObserver */}
-			<div ref={innerRef} className="w-fit md:min-w-[480px]">
+			<div ref={innerRef} className="w-full md:w-fit md:min-w-120">
 				<AnimatePresence mode="wait" initial={false}>
 					<motion.div
 						key={stepKey}

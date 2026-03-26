@@ -61,7 +61,7 @@ export function UiTMImporterDialog({
 			<ResponsiveDialogContent
 				desktopClassName={cn(
 					"overflow-hidden transition-[max-width,width] duration-300 ease-in-out w-fit max-w-full md:min-w-[480px]",
-					isLargeStep ? "sm:max-w-xl lg:max-w-7xl" : "sm:max-w-xl",
+					isLargeStep ? "sm:max-w-xl lg:max-w-4xl" : "sm:max-w-xl",
 				)}
 				mobileClassName="max-h-[92dvh]"
 			>

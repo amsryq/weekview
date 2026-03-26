@@ -461,7 +461,7 @@ export function GroupSelectorStep() {
 							{desktopCoursePicker}
 						</div>
 
-						<section className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/60 bg-card lg:h-[480px] lg:w-[640px] xl:w-[800px]">
+						<section className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/60 bg-card lg:h-[480px] lg:w-[480px]">
 							<div className="flex flex-col gap-3 border-b border-border/60 p-3 sm:flex-row sm:items-center sm:justify-between">
 								<div className="flex items-center gap-3">
 									<h3 className="px-1 text-xs font-bold text-muted-foreground/80">
