@@ -493,7 +493,7 @@ export function GroupSelectorStep() {
 													View and manage the groups you&apos;ve added.
 												</SheetDescription>
 											</SheetHeader>
-											<ScrollArea className="my-4 h-[40dvh] rounded-lg border border-border/50 bg-background mx-6 sm:h-[260px]">
+											<div className="my-4 h-[40dvh] overflow-y-auto overscroll-contain touch-pan-y rounded-lg border border-border/50 bg-background mx-6 sm:h-[260px]">
 												<div className="divide-y divide-border/40 px-3">
 													{selectionCount ? (
 														selectedGroups.map(({ internal }) => (
@@ -531,7 +531,7 @@ export function GroupSelectorStep() {
 														</p>
 													)}
 												</div>
-											</ScrollArea>
+											</div>
 											<div className="mx-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
 												<SheetClose asChild>
 													<Button
@@ -558,7 +558,7 @@ export function GroupSelectorStep() {
 								</div>
 							</div>
 
-							<ScrollArea className="h-[280px] lg:h-auto lg:flex-1 bg-background/50">
+							<div className="h-[280px] overflow-y-auto overscroll-contain touch-pan-y lg:h-auto lg:flex-1 bg-background/50">
 								<div className="divide-y divide-border/60 text-left">
 									{groupsError ? (
 										<div className="p-4 text-sm text-destructive">
@@ -636,7 +636,7 @@ export function GroupSelectorStep() {
 										</div>
 									)}
 								</div>
-							</ScrollArea>
+							</div>
 						</section>
 					</div>
 				) : (
