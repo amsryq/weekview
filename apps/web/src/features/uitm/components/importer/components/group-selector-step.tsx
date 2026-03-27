@@ -178,11 +178,11 @@ export function GroupSelectorStep() {
 
 	const campusFacultySection = (
 		<section className="space-y-2">
-			<div className="flex items-center justify-between px-1">
-				<h3 className="text-xs font-bold text-muted-foreground/80">
-					Campus & Faculty
-				</h3>
-				{showCampusFacultyEditor ? null : (
+			{showCampusFacultyEditor ? null : (
+				<div className="flex items-center justify-between px-1">
+					<h3 className="text-xs font-bold text-muted-foreground/80">
+						Campus & Faculty
+					</h3>
 					<Button
 						variant="secondary"
 						size="sm"
@@ -192,10 +192,10 @@ export function GroupSelectorStep() {
 						<PencilLine className="size-3" />
 						Change
 					</Button>
-				)}
-			</div>
+				</div>
+			)}
 			{showCampusFacultyEditor ? (
-				<div className="space-y-3 rounded-xl border border-border/60 bg-muted/20 p-3">
+				<div className="space-y-3">
 					<div className="space-y-2">
 						<div className="flex items-center justify-between px-1">
 							<h4 className="text-[11px] font-bold text-muted-foreground/80">
@@ -640,13 +640,7 @@ export function GroupSelectorStep() {
 						</section>
 					</div>
 				) : (
-					<div className="space-y-4 pt-2">
-						{campusFacultySection}
-						<div className="rounded-xl border border-dashed border-border/70 bg-muted/20 px-4 py-5 text-sm text-muted-foreground">
-							Select your campus and faculty details to load available courses
-							and groups.
-						</div>
-					</div>
+					<div className="space-y-4 pt-2">{campusFacultySection}</div>
 				)}
 			</div>
 
