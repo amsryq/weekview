@@ -1,5 +1,6 @@
-import { DownloadIcon } from "lucide-react";
-import { useCallback } from "react";
+import { DownloadIcon, LoaderCircle } from "lucide-react";
+import { useCallback, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import {
 	DropdownMenu,
@@ -12,6 +13,14 @@ import {
 
 export type ExportFormat = "png" | "svg";
 export type ExportAction = "download" | "save-as";
+
+type ExportState =
+	| { status: "idle" }
+	| {
+			status: "running";
+			format: ExportFormat;
+			action: ExportAction;
+	  };
 
 export type TimetableExportMenuProps = {
 	targetSelector?: string;
@@ -95,12 +104,30 @@ export function TimetableExportMenu({
 	scale = DEFAULT_SCALE,
 	borderRadius = DEFAULT_BORDER_RADIUS,
 }: TimetableExportMenuProps) {
+	const [exportState, setExportState] = useState<ExportState>({
+		status: "idle",
+	});
+	const isExporting = exportState.status === "running";
+
 	const exportTimetable = useCallback(
 		async (format: ExportFormat, action: ExportAction) => {
+			if (isExporting) return;
+
+			setExportState({ status: "running", format, action });
+
+			const actionLabel = action === "download" ? "Downloading" : "Saving";
+			const statusToastId = toast.loading(
+				`${actionLabel} ${format.toUpperCase()} timetable...`,
+			);
 			const node = document.querySelector<HTMLElement>(targetSelector);
 
 			if (!node) {
 				console.error("Unable to locate timetable container for export.");
+				toast.error("Unable to export timetable", {
+					id: statusToastId,
+					description: "Timetable container was not found.",
+				});
+				setExportState({ status: "idle" });
 				return;
 			}
 
@@ -129,12 +156,20 @@ export function TimetableExportMenu({
 
 					if (action === "download") {
 						triggerDownload(dataUrl, filename);
+						toast.success("Timetable exported", {
+							id: statusToastId,
+							description: `${filename} download has started.`,
+						});
 						return;
 					}
 
 					const response = await fetch(dataUrl);
 					const blob = await response.blob();
 					await saveBlobWithPicker(blob, format, filename);
+					toast.success("Timetable exported", {
+						id: statusToastId,
+						description: `${filename} has been saved.`,
+					});
 					return;
 				}
 
@@ -151,15 +186,37 @@ export function TimetableExportMenu({
 					const objectUrl = URL.createObjectURL(svgBlob);
 					triggerDownload(objectUrl, filename);
 					URL.revokeObjectURL(objectUrl);
+					toast.success("Timetable exported", {
+						id: statusToastId,
+						description: `${filename} download has started.`,
+					});
 					return;
 				}
 
 				await saveBlobWithPicker(svgBlob, format, filename);
+				toast.success("Timetable exported", {
+					id: statusToastId,
+					description: `${filename} has been saved.`,
+				});
 			} catch (error) {
+				if (error instanceof DOMException && error.name === "AbortError") {
+					toast("Export cancelled", {
+						id: statusToastId,
+						description: "No file was written.",
+					});
+					return;
+				}
+
 				console.error("Failed to export timetable", error);
+				toast.error("Failed to export timetable", {
+					id: statusToastId,
+					description: "Please try again.",
+				});
+			} finally {
+				setExportState({ status: "idle" });
 			}
 		},
-		[borderRadius, filenameBase, scale, targetSelector],
+		[borderRadius, filenameBase, isExporting, scale, targetSelector],
 	);
 
 	const handleSelect = useCallback(
@@ -172,26 +229,44 @@ export function TimetableExportMenu({
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button>
-					<DownloadIcon className="w-4 h-4" />
-					Export
+				<Button disabled={isExporting}>
+					{isExporting ? (
+						<LoaderCircle className="h-4 w-4 animate-spin" />
+					) : (
+						<DownloadIcon className="w-4 h-4" />
+					)}
+					{isExporting
+						? `${exportState.action === "download" ? "Downloading" : "Saving"} ${exportState.format.toUpperCase()}...`
+						: "Export"}
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end">
 				<DropdownMenuGroup>
-					<DropdownMenuItem onSelect={handleSelect("png", "download")}>
+					<DropdownMenuItem
+						disabled={isExporting}
+						onSelect={handleSelect("png", "download")}
+					>
 						Download PNG
 					</DropdownMenuItem>
-					<DropdownMenuItem onSelect={handleSelect("svg", "download")}>
+					<DropdownMenuItem
+						disabled={isExporting}
+						onSelect={handleSelect("svg", "download")}
+					>
 						Download SVG
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
-					<DropdownMenuItem onSelect={handleSelect("png", "save-as")}>
+					<DropdownMenuItem
+						disabled={isExporting}
+						onSelect={handleSelect("png", "save-as")}
+					>
 						Save as PNG
 					</DropdownMenuItem>
-					<DropdownMenuItem onSelect={handleSelect("svg", "save-as")}>
+					<DropdownMenuItem
+						disabled={isExporting}
+						onSelect={handleSelect("svg", "save-as")}
+					>
 						Save as SVG
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
