@@ -1,4 +1,4 @@
-import { Clock, MapPin } from "lucide-react";
+import { Clock, MapPin, Pencil, Trash2 } from "lucide-react";
 import type React from "react";
 import { RequiredDeep } from "type-fest";
 import { useCourseEditor } from "~/lib/contexts/course-editor";
@@ -14,6 +14,18 @@ import type { Course } from "~/lib/models/course";
 import type { MeetingTime } from "~/lib/models/meeting-time";
 import { CourseStore } from "~/lib/stores/course-store";
 import { cn } from "~/lib/utils/styles";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "../ui/alert-dialog";
+import { Button } from "../ui/button";
 import { CustomIcon } from "../ui/custom-icon";
 import { FitText } from "../ui/fit-text";
 import GlassSurface from "../ui/glass-surface";
@@ -406,6 +418,10 @@ export function CourseBlock({
 		});
 	};
 
+	const handleDelete = () => {
+		CourseStore.getState().removeCourse(course.id);
+	};
+
 	return (
 		<HoverCard>
 			<HoverCardTrigger>
@@ -434,20 +450,48 @@ export function CourseBlock({
 					)}
 				</Container>
 			</HoverCardTrigger>
-			<HoverCardContent>
-				<div className="space-y-2">
-					<h4 className="text-sm font-semibold">{course.code}</h4>
-					<p className="text-sm text-muted-foreground">{course.name}</p>
-					<div className="flex items-center gap-2 text-sm">
-						<Clock className="w-4 h-4" />
-						{meetingTime.time.toString()}
-					</div>
-					{meetingTime.location && (
-						<div className="flex items-center gap-2 text-sm">
-							<MapPin className="w-4 h-4" />
-							{meetingTime.location}
-						</div>
-					)}
+			<HoverCardContent className="w-auto p-2">
+				<div className="flex items-center gap-1">
+					<Button
+						variant="ghost"
+						size="icon-sm"
+						onClick={handleClick}
+						aria-label={`Edit ${course.code}`}
+						title="Edit"
+					>
+						<Pencil />
+					</Button>
+					<AlertDialog>
+						<AlertDialogTrigger asChild>
+							<Button
+								variant="ghost"
+								size="icon-sm"
+								className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+								aria-label={`Delete ${course.code}`}
+								title="Delete"
+								onClick={(e) => e.stopPropagation()}
+							>
+								<Trash2 />
+							</Button>
+						</AlertDialogTrigger>
+						<AlertDialogContent>
+							<AlertDialogHeader>
+								<AlertDialogTitle>Delete {course.code}?</AlertDialogTitle>
+								<AlertDialogDescription>
+									This will permanently remove the course from the timetable.
+								</AlertDialogDescription>
+							</AlertDialogHeader>
+							<AlertDialogFooter>
+								<AlertDialogCancel>Cancel</AlertDialogCancel>
+								<AlertDialogAction
+									className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+									onClick={handleDelete}
+								>
+									Delete
+								</AlertDialogAction>
+							</AlertDialogFooter>
+						</AlertDialogContent>
+					</AlertDialog>
 				</div>
 			</HoverCardContent>
 		</HoverCard>
