@@ -95,6 +95,8 @@ function CourseCard({ course }: { course: Course }) {
 			<div className="flex shrink-0 items-center gap-0.5 pt-0.5 opacity-100 transition-opacity focus-within:opacity-100 sm:opacity-0 sm:group-hover:opacity-100">
 				<CourseEditorDialog
 					defaultValues={course.toSchema()}
+					courseId={course.id}
+					onDelete={() => CourseStore.getState().removeCourse(course.id)}
 					onSubmit={(data, form) => {
 						const conflicts = CourseStore.getState()
 							.getConflictingCourses(

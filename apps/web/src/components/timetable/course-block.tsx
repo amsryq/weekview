@@ -397,6 +397,9 @@ export function CourseBlock({
 		e.stopPropagation();
 		openCourseEditor({
 			course,
+			onDelete: () => {
+				CourseStore.getState().removeCourse(course.id);
+			},
 			onSubmit: (data) => {
 				CourseStore.getState().updateCourse(course.id, data);
 			},

@@ -1,4 +1,4 @@
-import { BookOpen, Eye, Info, Palette, Smile } from "lucide-react";
+import { BookOpen, Eye, Info, Palette, Smile, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import type { PartialDeep } from "type-fest";
 import {
@@ -8,15 +8,26 @@ import {
 import { Course } from "~/lib/models/course";
 import { TimetableCustomizer } from "../settings/timetable-customizer";
 import { Alert, AlertDescription } from "../ui/alert";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "../ui/alert-dialog";
 import { Button } from "../ui/button";
 import {
 	Dialog,
-	DialogClose,
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
 } from "../ui/dialog";
+import { ResponsiveDialogClose } from "../ui/responsive-dialog";
 import {
 	ResponsiveTabs,
 	ResponsiveTabsContent,
@@ -38,12 +49,14 @@ interface CourseEditorFormProps {
 	onSubmit: (data: Course.Schema, form: CourseFormApi) => void;
 	defaultValues?: PartialDeep<Course.Schema>;
 	onDirtyChange?: (isDirty: boolean) => void;
+	onDelete?: () => void;
 }
 
 export function CourseEditorForm({
 	onSubmit,
 	defaultValues,
 	onDirtyChange,
+	onDelete,
 }: CourseEditorFormProps) {
 	const [activeTab, setActiveTab] = useState<TabValue>("basics");
 
@@ -168,32 +181,69 @@ export function CourseEditorForm({
 				</ResponsiveTabs>
 
 				{/* Footer Actions */}
-				<footer className="flex items-center justify-between gap-3 px-4 sm:px-6 pt-4 pb-4 border-t shrink-0">
-					<div className="xl:hidden">
-						<Dialog>
-							<DialogTrigger asChild>
-								<Button
-									type="button"
-									variant="outline"
-									size="sm"
-									className="gap-2"
-								>
-									<Eye className="size-4" />
-									Preview
-								</Button>
-							</DialogTrigger>
-							<DialogContent className="max-w-md">
-								<DialogHeader>
-									<DialogTitle>Course Preview</DialogTitle>
-								</DialogHeader>
-								<div className="py-4">
-									<CoursePreview />
-								</div>
-							</DialogContent>
-						</Dialog>
+				<footer className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t px-4 py-4 sm:px-6">
+					<div className="flex min-w-0 items-center gap-2">
+						<div className="xl:hidden">
+							<Dialog>
+								<DialogTrigger asChild>
+									<Button
+										type="button"
+										variant="outline"
+										size="sm"
+										className="gap-2"
+									>
+										<Eye className="size-4" />
+										Preview
+									</Button>
+								</DialogTrigger>
+								<DialogContent className="max-w-md">
+									<DialogHeader>
+										<DialogTitle>Course Preview</DialogTitle>
+									</DialogHeader>
+									<div className="py-4">
+										<CoursePreview />
+									</div>
+								</DialogContent>
+							</Dialog>
+						</div>
+						{onDelete && (
+							<AlertDialog>
+								<AlertDialogTrigger asChild>
+									<Button
+										type="button"
+										variant="outline"
+										size="sm"
+										className="text-destructive border-destructive/30 hover:bg-destructive hover:text-destructive-foreground"
+									>
+										<Trash2Icon className="size-4" />
+										Delete
+									</Button>
+								</AlertDialogTrigger>
+								<AlertDialogContent>
+									<AlertDialogHeader>
+										<AlertDialogTitle>
+											Remove {defaultValues?.code ?? "this course"}?
+										</AlertDialogTitle>
+										<AlertDialogDescription>
+											This action will remove the course and its meetings from
+											your timetable.
+										</AlertDialogDescription>
+									</AlertDialogHeader>
+									<AlertDialogFooter>
+										<AlertDialogCancel>Cancel</AlertDialogCancel>
+										<AlertDialogAction
+											onClick={onDelete}
+											className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+										>
+											Delete
+										</AlertDialogAction>
+									</AlertDialogFooter>
+								</AlertDialogContent>
+							</AlertDialog>
+						)}
 					</div>
 
-					<div className="flex gap-2 ml-auto">
+					<div className="ml-auto flex flex-wrap items-center justify-end gap-2">
 						<Button
 							type="button"
 							variant="ghost"
@@ -202,11 +252,11 @@ export function CourseEditorForm({
 						>
 							Reset
 						</Button>
-						<DialogClose asChild>
+						<ResponsiveDialogClose asChild>
 							<Button type="button" variant="outline" size="sm">
 								Cancel
 							</Button>
-						</DialogClose>
+						</ResponsiveDialogClose>
 						<form.Subscribe
 							selector={(state) =>
 								[state.canSubmit, state.isSubmitting] as const

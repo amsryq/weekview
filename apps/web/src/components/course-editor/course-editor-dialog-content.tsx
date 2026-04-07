@@ -14,11 +14,13 @@ export default function CourseEditorDialogContent({
 	defaultValues,
 	onSubmit,
 	onDirtyChange,
+	onDelete,
 }: {
 	title?: string;
 	defaultValues?: PartialDeep<Course.Schema>;
 	onSubmit: (data: Course.Schema, form: CourseFormApi) => void;
 	onDirtyChange: (isDirty: boolean) => void;
+	onDelete?: () => void;
 }) {
 	const isSupporter = useIsUserSupporter();
 
@@ -42,6 +44,7 @@ export default function CourseEditorDialogContent({
 					onSubmit={onSubmit}
 					defaultValues={defaultValues}
 					onDirtyChange={onDirtyChange}
+					onDelete={onDelete}
 				/>
 			</div>
 		</>

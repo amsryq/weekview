@@ -10,7 +10,9 @@ export type CourseFormApi = ReturnType<typeof useCourseForm>["form"];
 type EditorProps = {
 	title?: string;
 	defaultValues?: PartialDeep<Course.Schema>;
+	courseId?: string;
 	onSubmit: (data: Course.Schema, form: CourseFormApi) => void;
+	onDelete?: (courseId: string) => void;
 };
 
 export const CourseEditorFormContext = createContext<CourseFormApi | null>(
@@ -31,8 +33,10 @@ interface CourseEditorContextType {
 	openCourseEditor: (options: {
 		course?: Course;
 		defaultValues?: PartialDeep<Course.Schema>;
+		courseId?: string;
 		title?: string;
 		onSubmit: (data: Course.Schema, form: CourseFormApi) => void;
+		onDelete?: (courseId: string) => void;
 	}) => void;
 	closeCourseEditor: () => void;
 	/** Internal — consumed by CourseEditorDialogRenderer. Do not use in application code. */
@@ -52,18 +56,24 @@ export function CourseEditorProvider({ children }: { children: ReactNode }) {
 	const openCourseEditor = ({
 		course,
 		defaultValues,
+		courseId,
 		title = course ? "Edit Course" : "Add Course",
 		onSubmit,
+		onDelete,
 	}: {
 		course?: Course;
 		defaultValues?: PartialDeep<Course.Schema>;
+		courseId?: string;
 		title?: string;
 		onSubmit: (data: Course.Schema, form: CourseFormApi) => void;
+		onDelete?: (courseId: string) => void;
 	}) => {
 		setEditorProps({
 			title,
 			defaultValues: defaultValues ?? course?.toSchema(),
+			courseId: courseId ?? course?.id,
 			onSubmit,
+			onDelete,
 		});
 		setIsOpen(true);
 	};
@@ -112,6 +122,8 @@ export function CourseEditorDialogRenderer() {
 		<CourseEditorDialog
 			title={editorProps.title}
 			defaultValues={editorProps.defaultValues}
+			courseId={editorProps.courseId}
+			onDelete={editorProps.onDelete}
 			onSubmit={(data, form) => {
 				editorProps.onSubmit(data, form);
 

@@ -18,14 +18,18 @@ export function CourseEditorDialog({
 	children,
 	title = "Edit Course",
 	defaultValues = undefined,
+	courseId,
 	onSubmit,
+	onDelete,
 	open: controlledOpen,
 	onOpenChange: controlledOnOpenChange,
 }: {
 	children?: JSX.Element;
 	title?: string;
 	defaultValues?: PartialDeep<Course.Schema>;
+	courseId?: string;
 	onSubmit: (data: Course.Schema, form: CourseFormApi) => void;
+	onDelete?: (courseId: string) => void;
 	open?: boolean;
 	onOpenChange?: (open: boolean) => void;
 }) {
@@ -73,6 +77,19 @@ export function CourseEditorDialog({
 		}
 	};
 
+	const handleDelete = () => {
+		if (!courseId || !onDelete) return;
+
+		onDelete(courseId);
+		setIsDirty(false);
+
+		if (controlledOnOpenChange !== undefined) {
+			controlledOnOpenChange(false);
+		} else {
+			setInternalOpen(false);
+		}
+	};
+
 	return (
 		<ResponsiveDialog open={open} onOpenChange={setOpen}>
 			{children && (
@@ -101,6 +118,7 @@ export function CourseEditorDialog({
 						defaultValues={defaultValues}
 						onSubmit={handleFormSubmit}
 						onDirtyChange={setIsDirty}
+						onDelete={courseId ? handleDelete : undefined}
 					/>
 				</Suspense>
 			</ResponsiveDialogContent>
