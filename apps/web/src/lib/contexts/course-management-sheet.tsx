@@ -1,4 +1,4 @@
-import { createContext, type ReactNode, useContext, useState } from "react";
+import { createContext, type ReactNode, use, useState } from "react";
 
 interface CourseManagementSheetContextType {
 	openSheet: () => void;
@@ -34,7 +34,7 @@ export function CourseManagementSheetProvider({
 }
 
 export function useCourseManagementSheet() {
-	const ctx = useContext(CourseManagementSheetContext);
+	const ctx = use(CourseManagementSheetContext);
 	if (!ctx)
 		throw new Error(
 			"useCourseManagementSheet must be used within CourseManagementSheetProvider",

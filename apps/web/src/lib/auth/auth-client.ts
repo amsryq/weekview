@@ -47,7 +47,7 @@ export function useSession(options?: {
 		useCookie("__Secure-weekview-auth.is_logged_in") === "1";
 	const isLoggedIn = ENABLE_AUTH_PAYWALL && isLoggedInCookie;
 
-	const sessionQuery = useQuery({
+	const { data: queryData, isFetching, error, refetch: queryRefetch } = useQuery({
 		queryKey: ["session", isLoggedIn],
 		queryFn: async () => {
 			const s = await authClient.getSession();
@@ -66,13 +66,13 @@ export function useSession(options?: {
 	}, [isLoggedIn, queryClient]);
 
 	const refetch = async () => {
-		return sessionQuery.refetch();
+		return queryRefetch();
 	};
 
 	return {
-		data: ENABLE_AUTH_PAYWALL ? (sessionQuery.data?.data ?? null) : null,
-		isPending: sessionQuery.isFetching,
-		error: sessionQuery.error ?? null,
+		data: ENABLE_AUTH_PAYWALL ? (queryData?.data ?? null) : null,
+		isPending: isFetching,
+		error: error ?? null,
 		refetch,
 	};
 }

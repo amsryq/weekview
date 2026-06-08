@@ -1,5 +1,5 @@
 import { PlusIcon } from "lucide-react";
-import { createContext, memo, useContext, useMemo } from "react";
+import { createContext, memo, use, useMemo } from "react";
 import { RequiredDeep } from "type-fest";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
@@ -45,7 +45,7 @@ interface TimetableContextProps {
 const TimetableContext = createContext<TimetableContextProps | null>(null);
 
 function useTimetable() {
-	const ctx = useContext(TimetableContext);
+	const ctx = use(TimetableContext);
 	if (!ctx)
 		throw new Error("useTimetable must be used within TimetableProvider");
 	return ctx;

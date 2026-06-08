@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, use, useState } from "react";
 
 interface ImporterDialogsContextType {
 	openUiTMImporter: () => void;
@@ -34,7 +34,7 @@ export function ImporterDialogsProvider({ children }: { children: ReactNode }) {
 }
 
 export function useImporterDialogs() {
-	const ctx = useContext(ImporterDialogsContext);
+	const ctx = use(ImporterDialogsContext);
 	if (!ctx)
 		throw new Error(
 			"useImporterDialogs must be used within ImporterDialogsProvider",

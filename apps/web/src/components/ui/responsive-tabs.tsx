@@ -1,5 +1,6 @@
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import * as React from "react";
+import { use } from "react";
 import { cn } from "~/lib/utils/styles";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
 import {
@@ -22,7 +23,7 @@ const ResponsiveTabsContext = React.createContext<ResponsiveTabsContextValue>({
 });
 
 export function useResponsiveTabs() {
-	return React.useContext(ResponsiveTabsContext);
+	return use(ResponsiveTabsContext);
 }
 
 // ---------------------------------------------------------------------------

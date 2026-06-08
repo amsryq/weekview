@@ -1,5 +1,5 @@
 import { toMerged } from "es-toolkit";
-import { createContext, useContext, useRef, useState } from "react";
+import { createContext, use, useRef, useState } from "react";
 
 type SupportDialogConfig = {
 	title: string;
@@ -57,7 +57,7 @@ export function SupportDialogProvider({
 }
 
 export function useSupportDialog() {
-	const context = useContext(SupportDialogContext);
+	const context = use(SupportDialogContext);
 	if (!context) {
 		throw new Error(
 			"useSupportDialog must be used within a SupportDialogProvider",

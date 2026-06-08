@@ -7,7 +7,7 @@ import {
 	type HTMLAttributes,
 	memo,
 	useCallback,
-	useContext,
+	use,
 	useEffect,
 	useMemo,
 	useRef,
@@ -42,7 +42,7 @@ const ColorPickerContext = createContext<ColorPickerContextValue | undefined>(
 );
 
 export const useColorPicker = () => {
-	const context = useContext(ColorPickerContext);
+	const context = use(ColorPickerContext);
 
 	if (!context) {
 		throw new Error("useColorPicker must be used within a ColorPickerProvider");

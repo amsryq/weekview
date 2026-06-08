@@ -1,6 +1,6 @@
 import { UploadIcon } from "lucide-react";
 import type { ReactNode } from "react";
-import { createContext, useContext } from "react";
+import { createContext, use } from "react";
 import type { DropEvent, DropzoneOptions, FileRejection } from "react-dropzone";
 import { useDropzone } from "react-dropzone";
 import { Button } from "~/components/ui/button";
@@ -120,7 +120,7 @@ export const Dropzone = ({
 };
 
 const useDropzoneContext = () => {
-	const context = useContext(DropzoneContext);
+	const context = use(DropzoneContext);
 
 	if (!context) {
 		throw new Error("useDropzoneContext must be used within a Dropzone");

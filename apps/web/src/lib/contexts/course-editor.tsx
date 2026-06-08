@@ -1,5 +1,5 @@
 import { type AnyFieldMeta } from "@tanstack/react-form";
-import { createContext, type ReactNode, useContext, useState } from "react";
+import { createContext, type ReactNode, use, useState } from "react";
 import type { PartialDeep } from "type-fest";
 import { CourseEditorDialog } from "~/components/course-editor/course-editor-dialog";
 import { useCourseForm } from "~/components/course-editor/hooks/use-course-form";
@@ -20,7 +20,7 @@ export const CourseEditorFormContext = createContext<CourseFormApi | null>(
 );
 
 export function useCourseEditorForm() {
-	const context = useContext(CourseEditorFormContext);
+	const context = use(CourseEditorFormContext);
 	if (!context) {
 		throw new Error(
 			"useCourseEditorForm must be used within a CourseEditorFormContext",
@@ -97,7 +97,7 @@ export function CourseEditorProvider({ children }: { children: ReactNode }) {
 }
 
 export function useCourseEditor() {
-	const context = useContext(CourseEditorContext);
+	const context = use(CourseEditorContext);
 	if (!context) {
 		throw new Error(
 			"useCourseEditor must be used within a CourseEditorProvider",

@@ -1,4 +1,5 @@
 import * as React from "react";
+import { use } from "react";
 import { cn } from "~/lib/utils/styles";
 import {
 	Dialog,
@@ -31,7 +32,7 @@ const ResponsiveDialogContext =
 	React.createContext<ResponsiveDialogContextValue>({ isDesktop: true });
 
 function useResponsiveDialog() {
-	return React.useContext(ResponsiveDialogContext);
+	return use(ResponsiveDialogContext);
 }
 
 // ---------------------------------------------------------------------------

@@ -34,7 +34,7 @@ export function UiTMAddCourseButton({
 			onClick={openUiTMImporter}
 			{...props}
 		>
-			<img className="w-6 h-6" src="/images/uitm-logo.png" />
+			<img className="w-6 h-6" src="/images/uitm-logo.png" alt="UiTM logo" />
 			Import from UiTM
 		</Button>
 	);

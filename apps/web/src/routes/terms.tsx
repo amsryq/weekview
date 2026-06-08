@@ -3,6 +3,11 @@ import { ENABLE_AUTH_PAYWALL } from "~/lib/config/feature-flags";
 import { seo } from "~/lib/utils/seo";
 
 export const Route = createFileRoute("/terms")({
+	beforeLoad: () => {
+		if (!ENABLE_AUTH_PAYWALL) {
+			throw redirect({ to: "/app" });
+		}
+	},
 	head: () => ({
 		meta: seo({
 			title: "Terms of Service | Weekview",
@@ -10,11 +15,6 @@ export const Route = createFileRoute("/terms")({
 				"The legal terms governing use of Weekview, including accounts, subscriptions, refunds, and limitations of liability.",
 		}),
 	}),
-	beforeLoad: () => {
-		if (!ENABLE_AUTH_PAYWALL) {
-			throw redirect({ to: "/app" });
-		}
-	},
 	component: TermsPage,
 });
 

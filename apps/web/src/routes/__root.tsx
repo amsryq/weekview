@@ -12,6 +12,7 @@ import { useStore } from "zustand";
 import { SupportDialog } from "~/components/app/support-dialog";
 import { CourseManagementSheetRenderer } from "~/components/course-management/course-management-sheet";
 import { Toaster } from "~/components/ui/sonner";
+import { MotionConfig } from "framer-motion";
 import {
 	ManualImporterDialogRenderer,
 	UiTMImporterDialogRenderer,
@@ -139,26 +140,28 @@ function RootComponent() {
 
 	return (
 		<ThemeProvider defaultTheme="system" storageKey="weekview-ui-theme">
-			<QueryClientProvider client={queryClient}>
-				<SupportDialogProvider>
-					<CourseManagementSheetProvider>
-						<ImporterDialogsProvider>
-							<CourseEditorProvider>
-								<div className="root">
-									<Outlet />
-								</div>
-								<GlobalNavigationBlocker />
-								<SupportDialog />
-								<CourseEditorDialogRenderer />
-								<CourseManagementSheetRenderer />
-								<UiTMImporterDialogRenderer />
-								<ManualImporterDialogRenderer />
-							</CourseEditorProvider>
-						</ImporterDialogsProvider>
-					</CourseManagementSheetProvider>
-				</SupportDialogProvider>
-			</QueryClientProvider>
-			<Toaster />
+			<MotionConfig reducedMotion="user">
+				<QueryClientProvider client={queryClient}>
+					<SupportDialogProvider>
+						<CourseManagementSheetProvider>
+							<ImporterDialogsProvider>
+								<CourseEditorProvider>
+									<div className="root">
+										<Outlet />
+									</div>
+									<GlobalNavigationBlocker />
+									<SupportDialog />
+									<CourseEditorDialogRenderer />
+									<CourseManagementSheetRenderer />
+									<UiTMImporterDialogRenderer />
+									<ManualImporterDialogRenderer />
+								</CourseEditorProvider>
+							</ImporterDialogsProvider>
+						</CourseManagementSheetProvider>
+					</SupportDialogProvider>
+				</QueryClientProvider>
+				<Toaster />
+			</MotionConfig>
 		</ThemeProvider>
 	);
 }

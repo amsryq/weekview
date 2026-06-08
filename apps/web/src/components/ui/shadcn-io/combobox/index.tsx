@@ -4,7 +4,7 @@ import {
 	type ComponentProps,
 	createContext,
 	type ReactNode,
-	useContext,
+	use,
 	useEffect,
 	useRef,
 	useState,
@@ -128,7 +128,7 @@ export const ComboboxTrigger = ({
 	...props
 }: ComboboxTriggerProps) => {
 	const { value, data, type, setWidth, loading, loadingText } =
-		useContext(ComboboxContext);
+		use(ComboboxContext);
 	const ref = useRef<HTMLButtonElement>(null);
 
 	useEffect(() => {
@@ -193,7 +193,7 @@ export const ComboboxContent = ({
 	popoverOptions,
 	...props
 }: ComboboxContentProps) => {
-	const { width } = useContext(ComboboxContext);
+	const { width } = use(ComboboxContext);
 
 	return (
 		<PopoverContent
@@ -218,7 +218,7 @@ export const ComboboxInput = ({
 	onValueChange: controlledOnValueChange,
 	...props
 }: ComboboxInputProps) => {
-	const { type, inputValue, setInputValue } = useContext(ComboboxContext);
+	const { type, inputValue, setInputValue } = use(ComboboxContext);
 
 	const [value, onValueChange] = useControllableState({
 		defaultProp: defaultValue ?? inputValue,
@@ -244,13 +244,13 @@ export const ComboboxInput = ({
 export type ComboboxListProps = ComponentProps<typeof CommandList>;
 
 export const ComboboxList = (props: ComboboxListProps) => (
-	<CommandList aria-busy={useContext(ComboboxContext).loading} {...props} />
+	<CommandList aria-busy={use(ComboboxContext).loading} {...props} />
 );
 
 export type ComboboxEmptyProps = ComponentProps<typeof CommandEmpty>;
 
 export const ComboboxEmpty = ({ children, ...props }: ComboboxEmptyProps) => {
-	const { type, loading, loadingText } = useContext(ComboboxContext);
+	const { type, loading, loadingText } = use(ComboboxContext);
 
 	return (
 		<CommandEmpty {...props}>
@@ -275,7 +275,7 @@ export const ComboboxGroup = (props: ComboboxGroupProps) => (
 export type ComboboxItemProps = ComponentProps<typeof CommandItem>;
 
 export const ComboboxItem = (props: ComboboxItemProps) => {
-	const { onValueChange, onOpenChange } = useContext(ComboboxContext);
+	const { onValueChange, onOpenChange } = use(ComboboxContext);
 
 	return (
 		<CommandItem
@@ -307,7 +307,7 @@ export const ComboboxCreateNew = ({
 	className,
 }: ComboboxCreateNewProps) => {
 	const { inputValue, type, onValueChange, onOpenChange, loading } =
-		useContext(ComboboxContext);
+		use(ComboboxContext);
 
 	if (loading || !inputValue.trim()) {
 		return null;

@@ -57,16 +57,18 @@ function useImportState(importerOpen: boolean): ImportState {
 	const [cancelRequested, setCancelRequested] = useState(false);
 	const cancelRequestedRef = useRef(false);
 
-	useEffect(() => {
+	const [prevOpen, setPrevOpen] = useState(importerOpen);
+	if (importerOpen !== prevOpen) {
+		setPrevOpen(importerOpen);
 		if (!importerOpen) {
-			setProgressDialogOpen(false);
 			setImportPhase("idle");
 			setCampusInfo({});
 			setCourseProgress([]);
-			cancelRequestedRef.current = false;
+			setProgressDialogOpen(false);
 			setCancelRequested(false);
+			cancelRequestedRef.current = false;
 		}
-	}, [importerOpen]);
+	}
 
 	return {
 		importPhase,
