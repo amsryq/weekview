@@ -8,11 +8,11 @@ import {
 	Scripts,
 	useBlocker,
 } from "@tanstack/react-router";
+import { MotionConfig } from "framer-motion";
 import { useStore } from "zustand";
 import { SupportDialog } from "~/components/app/support-dialog";
 import { CourseManagementSheetRenderer } from "~/components/course-management/course-management-sheet";
 import { Toaster } from "~/components/ui/sonner";
-import { MotionConfig } from "framer-motion";
 import {
 	ManualImporterDialogRenderer,
 	UiTMImporterDialogRenderer,

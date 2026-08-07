@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { CourseStore } from "~/lib/stores/course-store";
 import { UiTMCourseSection } from "../../../course-section";
 import { Campus } from "../../../models/campus";

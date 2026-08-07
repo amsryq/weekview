@@ -24,7 +24,7 @@ const scraper = new UiTMScraper({
 });
 
 export const getCampuses = createServerFn({ method: "GET" })
-	.inputValidator((mode: "campus" | "faculty") => mode)
+	.validator((mode: "campus" | "faculty") => mode)
 	.handler(async ({ data: mode }) => {
 		if (MOCK_MODE) {
 			return mode === "campus" ? MOCK_CAMPUSES : MOCK_FACULTIES;
@@ -33,7 +33,7 @@ export const getCampuses = createServerFn({ method: "GET" })
 	});
 
 export const getCourses = createServerFn({ method: "GET" })
-	.inputValidator((d: { campus: string; faculty?: string | null }) => d)
+	.validator((d: { campus: string; faculty?: string | null }) => d)
 	.handler(async ({ data: { campus, faculty } }) => {
 		if (MOCK_MODE) {
 			return getMockCourses(campus, faculty);
@@ -42,7 +42,7 @@ export const getCourses = createServerFn({ method: "GET" })
 	});
 
 export const getGroups = createServerFn({ method: "GET" })
-	.inputValidator((path: string) => path)
+	.validator((path: string) => path)
 	.handler(async ({ data: path }) => {
 		if (MOCK_MODE) {
 			const courseCode = path.split("/").pop() || "UNKNOWN";
@@ -52,7 +52,7 @@ export const getGroups = createServerFn({ method: "GET" })
 	});
 
 export const getStudentTimetable = createServerFn({ method: "GET" })
-	.inputValidator((studentId: string) => studentId)
+	.validator((studentId: string) => studentId)
 	.handler(async ({ data: studentId }) => {
 		if (MOCK_MODE) {
 			return getMockStudentTimetable(studentId);

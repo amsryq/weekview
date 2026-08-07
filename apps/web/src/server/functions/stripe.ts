@@ -5,7 +5,7 @@ import { ENABLE_AUTH_PAYWALL_SERVER } from "../config/feature-flags";
 import { createStripeClient } from "../stripe";
 
 export const getStripeSession = createServerFn({ method: "GET" })
-	.inputValidator((sessionId: string) => sessionId)
+	.validator((sessionId: string) => sessionId)
 	.handler(async ({ data: sessionId }) => {
 		if (!ENABLE_AUTH_PAYWALL_SERVER) {
 			throw new Error("Payments are disabled");

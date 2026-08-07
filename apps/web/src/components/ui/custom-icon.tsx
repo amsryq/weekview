@@ -27,7 +27,10 @@ export function CustomIcon({ icon, style, className }: CustomIconProps) {
 	if (hasSvg) {
 		return (
 			<div style={style} className={`custom-icon ${className || ""}`}>
-				<img src={`data:image/svg+xml;utf8,${encodeURIComponent(icon.svg!)}`} alt="" />
+				<img
+					src={`data:image/svg+xml;utf8,${encodeURIComponent(icon.svg!)}`}
+					alt=""
+				/>
 			</div>
 		);
 	}

@@ -9,7 +9,7 @@
 	<p align="center">A modern web application for generating and customizing weekly schedules for students.</p>
 
 [![Code Size](https://img.shields.io/github/languages/code-size/amsryq/weekview?color=blue)](https://github.com/amsryq/weekview)
-[![License](https://img.shields.io/github/license/amsryq/weekview?color=007ec6)](https://github.com/amsryq/weekview/blob/main/LICENSE)
+[![License](https://img.shields.io/github/license/amsryq/weekview?color=007ec6)](https://github.com/amsryq/weekview/blob/master/LICENSE)
 
 </div>
 
