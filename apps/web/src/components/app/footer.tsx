@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { GithubIcon } from "lucide-react";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
@@ -43,6 +44,16 @@ export function Footer() {
 					</HoverCardContent>
 				</HoverCard>
 			</p>
+			<span className="hidden md:inline">|</span>
+			<a
+				href="https://github.com/amsryq/weekview"
+				target="_blank"
+				rel="noreferrer"
+				className="underline inline-flex items-center gap-1.5"
+			>
+				<GithubIcon className="size-4" />
+				Source Code
+			</a>
 			{ENABLE_AUTH_PAYWALL && (
 				<>
 					<span className="hidden md:inline">|</span>

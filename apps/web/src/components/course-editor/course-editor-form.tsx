@@ -85,7 +85,6 @@ export function CourseEditorForm({
 					<form.Subscribe
 						selector={(state) => [state.fieldMeta, state.errorMap] as const}
 					>
-						{/* @ts-expect-error - it should infer but it doesn't idk why */}
 						{([fieldMeta, errorMap]) => {
 							const { basicsHasErrors, styleHasErrors, iconHasErrors } =
 								getTabErrors(fieldMeta, errorMap);
@@ -262,7 +261,6 @@ export function CourseEditorForm({
 								[state.canSubmit, state.isSubmitting] as const
 							}
 						>
-							{/* @ts-expect-error - it should infer but it doesn't idk why */}
 							{([canSubmit, isSubmitting]) => (
 								<Button
 									type="submit"

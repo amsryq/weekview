@@ -260,7 +260,6 @@ export function CourseDetailsTab() {
 								))}
 							</div>
 							<form.Subscribe selector={(state) => state.errorMap?.onChange}>
-								{/* @ts-expect-error - it should infer but it doesn't idk why */}
 								{(error) =>
 									error ? (
 										<FieldError
