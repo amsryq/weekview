@@ -18,6 +18,10 @@ export const Route = createFileRoute("/payment-cancel")({
 	component: PaymentCancelPage,
 });
 
+function closeWindow() {
+	window.close();
+}
+
 function PaymentCancelPage() {
 	if (!ENABLE_AUTH_PAYWALL) {
 		return (
@@ -49,10 +53,6 @@ function PaymentCancelPage() {
 			</div>
 		);
 	}
-
-	const closeWindow = () => {
-		window.close();
-	};
 
 	return (
 		<div className="min-h-screen flex items-center justify-center bg-background p-4">

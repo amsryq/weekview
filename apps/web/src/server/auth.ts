@@ -38,11 +38,7 @@ export function createAuth() {
 				const ctx = await auth.$context;
 				switch (event.type) {
 					case "checkout.session.completed": {
-						await handleCheckoutCompleted(
-							event.data.object,
-							// biome-ignore lint/suspicious/noExplicitAny: complex BetterAuth context type
-							ctx as unknown as any,
-						);
+						await handleCheckoutCompleted(event.data.object, ctx);
 						break;
 					}
 				}
@@ -144,6 +140,4 @@ export function createAuth() {
  * For CLI usage (schema generation) only. Do not use in runtime code.
  * Get instance from CF variables instead.
  */
-export const auth = ENABLE_AUTH_PAYWALL_SERVER
-	? (createAuth() as unknown)
-	: null;
+export const auth = ENABLE_AUTH_PAYWALL_SERVER ? createAuth() : null;

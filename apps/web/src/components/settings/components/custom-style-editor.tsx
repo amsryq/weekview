@@ -1,7 +1,6 @@
 import { Moon, Sun, Trash2 } from "lucide-react";
 import { memo, useCallback } from "react";
 import { useStore } from "zustand";
-import type { ColorEntry } from "~/lib/models/color-entry";
 import { isBuiltInStyle, type TimetableColorMode } from "~/lib/models/style";
 import { CustomStylesStore } from "~/lib/stores/custom-styles-store";
 import { PREDEFINED_FONTS } from "~/lib/utils/fonts";
@@ -268,11 +267,7 @@ const BackgroundColorField = memo(function BackgroundColorField({
 					Sets the canvas color behind your timetable grid.
 				</p>
 			</div>
-			<ColorField
-				label="Canvas color"
-				value={value as string}
-				onChange={onChange as (value: string) => void}
-			/>
+			<ColorField label="Canvas color" value={value} onChange={onChange} />
 		</div>
 	);
 });
@@ -297,13 +292,7 @@ const ChromeColorField = memo(function ChromeColorField({
 		fieldType: "chrome",
 	});
 
-	return (
-		<ColorField
-			label={label}
-			value={value as string}
-			onChange={onChange as (value: string) => void}
-		/>
-	);
+	return <ColorField label={label} value={value} onChange={onChange} />;
 });
 
 interface PaletteColorCardProps {
@@ -336,10 +325,7 @@ const PaletteColorCard = memo(function PaletteColorCard({
 					Used when assigning colors automatically.
 				</p>
 			</div>
-			<ColorEntryConfigurer
-				value={value as ColorEntry.Schema}
-				onChange={onChange as (value: ColorEntry.Schema) => void}
-			/>
+			<ColorEntryConfigurer value={value} onChange={onChange} />
 		</div>
 	);
 });

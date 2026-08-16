@@ -54,9 +54,10 @@ export function AppearanceTab() {
 									value={field.state.value}
 									onChange={(value) => {
 										field.handleChange(value);
+										// SAFETY: null unsets themeColorIndex when custom color is chosen
 										form.setFieldValue(
 											"themeColorIndex",
-											null as unknown as number,
+											null as number | null,
 										);
 									}}
 								/>
@@ -79,6 +80,10 @@ export function AppearanceTab() {
 			</Section>
 		</div>
 	);
+}
+
+function isIconType(cause: unknown): cause is "emoji" | "svg" {
+	return cause === "emoji" || cause === "svg";
 }
 
 export function IconSection() {
@@ -111,7 +116,9 @@ export function IconSection() {
 					{(field) => (
 						<Field label="Icon Type">
 							<Select
-								onValueChange={(v) => field.handleChange(v as "emoji" | "svg")}
+								onValueChange={(v) => {
+									if (isIconType(v)) field.handleChange(v);
+								}}
 								value={field.state.value}
 							>
 								<SelectTrigger className="h-8 text-xs w-40">

@@ -6,8 +6,13 @@
 	"scripts": {
 		"dev": "pnpm -F web dev",
 		"build": "pnpm -F web build",
-		"lint:write": "pnpm -F web lint:write",
+		"lint": "oxlint",
+		"lint:write": "oxlint --fix",
 		"typecheck": "pnpm -r typecheck",
 		"db:up": "pnpm -F web db:up"
+	},
+	"devDependencies": {
+		"@oxlint/plugins": "1.78.0",
+		"oxlint": "1.78.0"
 	}
 }

@@ -42,9 +42,9 @@ export function ImportProgressDialog({
 	return (
 		<ResponsiveDialog
 			open={open}
-			onOpenChange={(open) => {
+			onOpenChange={(nextOpen) => {
 				if (!isImporting) {
-					onOpenChange(open);
+					onOpenChange(nextOpen);
 				}
 			}}
 		>

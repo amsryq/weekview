@@ -39,6 +39,10 @@ function setThemeAttr(theme: Theme) {
 	root.classList.add(theme);
 }
 
+function isTheme(cause: unknown): cause is Theme {
+	return cause === "dark" || cause === "light" || cause === "system";
+}
+
 export function ThemeProvider({
 	children,
 	defaultTheme = "system",
@@ -46,9 +50,9 @@ export function ThemeProvider({
 	...props
 }: ThemeProviderProps) {
 	const [theme, setTheme] = useState<Theme>(() => {
-		if (typeof window !== "undefined") {
-			const storedTheme = localStorage.getItem(storageKey) as Theme;
-			if (storedTheme) return storedTheme;
+		if ("window" in globalThis && "localStorage" in globalThis) {
+			const storedTheme = localStorage.getItem(storageKey);
+			if (isTheme(storedTheme)) return storedTheme;
 		}
 		return defaultTheme;
 	});
@@ -68,15 +72,15 @@ export function ThemeProvider({
 
 	const value = {
 		theme,
-		setTheme: (theme: Theme) => {
-			if (typeof window !== "undefined") {
-				localStorage.setItem(storageKey, theme);
+		setTheme: (nextTheme: Theme) => {
+			if ("window" in globalThis && "localStorage" in globalThis) {
+				localStorage.setItem(storageKey, nextTheme);
 			}
-			setTheme(theme);
+			setTheme(nextTheme);
 		},
 		get applyingTheme() {
 			if (theme === "system") {
-				return typeof window !== "undefined" &&
+				return "window" in globalThis &&
 					window.matchMedia("(prefers-color-scheme: dark)").matches
 					? "dark"
 					: "light";

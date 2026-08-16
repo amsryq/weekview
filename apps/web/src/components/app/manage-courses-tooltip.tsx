@@ -18,7 +18,7 @@ export function ManageCoursesTooltip({ children }: PropsWithChildren) {
 	} = useCourseManagementSheet();
 	const [isOpen, setIsOpen] = useState(false);
 	const [hasDismissed, setHasDismissed] = useState(() => {
-		if (typeof localStorage !== "undefined") {
+		if ("localStorage" in globalThis) {
 			return localStorage.getItem("dismissedManageCoursesTooltip") === "true";
 		}
 		return false;
@@ -47,7 +47,7 @@ export function ManageCoursesTooltip({ children }: PropsWithChildren) {
 	const handleDismiss = () => {
 		setIsOpen(false);
 		setHasDismissed(true);
-		if (typeof localStorage !== "undefined") {
+		if ("localStorage" in globalThis) {
 			localStorage.setItem("dismissedManageCoursesTooltip", "true");
 		}
 	};

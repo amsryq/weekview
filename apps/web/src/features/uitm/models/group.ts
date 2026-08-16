@@ -40,7 +40,7 @@ export class Group {
 		if (sessions.length <= 1) return sessions;
 
 		// Sort sessions by day and start time
-		const sorted = [...sessions].sort((a, b) => {
+		const sorted = sessions.toSorted((a, b) => {
 			if (a.day !== b.day) return (a.day ?? 0) - (b.day ?? 0);
 			return (a.start ?? "").localeCompare(b.start ?? "");
 		});

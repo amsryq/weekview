@@ -16,6 +16,7 @@ import { Separator } from "~/components/ui/separator";
 import { Twemoji } from "~/components/ui/twemoji";
 import { ENABLE_AUTH_PAYWALL } from "~/lib/config/feature-flags";
 import { useUser } from "~/lib/hooks/user";
+import { isString } from "~/lib/utils/predicates";
 import { generateCheckout } from "~/server/functions/stripe";
 
 export default function SupportDialogContent({
@@ -85,7 +86,7 @@ function SupporterCheckoutCard() {
 			}
 
 			const { url } = await generateCheckout();
-			if (typeof url === "string" && url) {
+			if (isString(url) && url) {
 				window.open(url, "_blank", "noopener,noreferrer");
 			} else {
 				throw new Error("No checkout URL returned");
@@ -256,7 +257,7 @@ function SponsorLink() {
 
 function ShareButton() {
 	const [copied, setCopied] = useState(false);
-	const url = typeof window !== "undefined" ? window.location.origin : "";
+	const url = "window" in globalThis ? globalThis.window.location.origin : "";
 
 	const share = async () => {
 		if (navigator.share) {

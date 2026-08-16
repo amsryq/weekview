@@ -193,8 +193,8 @@ function Container({
 				<div
 					className="absolute inset-0 z-0 pointer-events-none rounded-[inherit]"
 					style={{
-						background: background as string,
-						backgroundColor: backgroundColor as string,
+						background,
+						backgroundColor,
 						opacity,
 					}}
 				/>

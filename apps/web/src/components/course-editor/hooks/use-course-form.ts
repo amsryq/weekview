@@ -42,6 +42,7 @@ export function useCourseForm({
 			onChange: ({ value }) => validateMeetingTimeConflicts(value),
 			onSubmit: Course.schema,
 		},
+		// SAFETY: toMerged deep merges complete Course.Schema defaults with optional partial overrides
 		defaultValues: toMerged(
 			{
 				code: "",

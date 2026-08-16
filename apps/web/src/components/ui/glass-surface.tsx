@@ -1,6 +1,7 @@
 import { omit } from "es-toolkit";
 import React, { useCallback, useEffect, useId, useRef } from "react";
 import { useTheme } from "~/lib/contexts/themes";
+import { isNumber, isString } from "~/lib/utils/predicates";
 
 export interface GlassSurfaceProps {
 	children?: React.ReactNode;
@@ -43,31 +44,37 @@ export interface GlassSurfaceProps {
 	style?: React.CSSProperties;
 }
 
+export interface BackgroundLayers {
+	containerBackground: string;
+	overlayBackground?: string;
+	overlayOpacity?: number;
+}
+
+const isGradient = (s?: string) => !!s && /gradient\s*\(/i.test(s);
+const clamp = (v: number) => Math.max(0, Math.min(1, v ?? 0));
+
+function supportsBackdropFilter(): boolean {
+	if (!("window" in globalThis)) return false;
+	return CSS.supports("backdrop-filter", "blur(10px)");
+}
+
 // Determine layered backgrounds. If a gradient is provided via style.background,
 // render it as an overlay with uniform opacity so children are not affected.
 const getBackgroundLayers = (
 	style: React.CSSProperties | undefined,
 	isDarkMode: boolean,
 	backgroundOpacity: number,
-): {
-	containerBackground: string;
-	overlayBackground?: string;
-	overlayOpacity?: number;
-} => {
+): BackgroundLayers => {
 	const bg =
-		typeof style?.background === "string" && style.background.trim() !== ""
+		isString(style?.background) && style.background.trim() !== ""
 			? style.background.trim()
 			: undefined;
 	const bgColor =
-		typeof style?.backgroundColor === "string" &&
-		style.backgroundColor.trim() !== ""
+		isString(style?.backgroundColor) && style.backgroundColor.trim() !== ""
 			? style.backgroundColor.trim()
 			: undefined;
 
-	const isGradient = (s?: string) => !!s && /gradient\s*\(/i.test(s);
 	const fallbackBase = isDarkMode ? "hsl(0 0% 0%)" : "hsl(0 0% 100%)";
-
-	const clamp = (v: number) => Math.max(0, Math.min(1, v ?? 0));
 	const overlay = isGradient(bg) ? bg : (bgColor ?? bg ?? fallbackBase);
 
 	// Always use an overlay for consistency (solids and gradients).
@@ -199,7 +206,7 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
 	}, [updateDisplacementMap]);
 
 	const supportsSVGFilters = () => {
-		if (typeof window === "undefined" || typeof document === "undefined") {
+		if (!("window" in globalThis) || !("document" in globalThis)) {
 			return false;
 		}
 		const isWebkit =
@@ -215,16 +222,12 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
 		return div.style.backdropFilter !== "";
 	};
 
-	const supportsBackdropFilter = () => {
-		if (typeof window === "undefined") return false;
-		return CSS.supports("backdrop-filter", "blur(10px)");
-	};
-
 	const getContainerStyles = (): React.CSSProperties => {
+		// SAFETY: CSS properties object includes custom properties and base style overrides
 		const baseStyles: React.CSSProperties = {
 			...omit(style, ["background", "backgroundColor"]),
-			width: typeof width === "number" ? `${width}px` : width,
-			height: typeof height === "number" ? `${height}px` : height,
+			width: isNumber(width) ? `${width}px` : width,
+			height: isNumber(height) ? `${height}px` : height,
 			borderRadius: `${borderRadius}px`,
 			"--glass-frost": backgroundOpacity,
 			"--glass-saturation": saturation,

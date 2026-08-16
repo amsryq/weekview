@@ -2,7 +2,7 @@ import { parse } from "node-html-parser";
 import { CookieJar } from "tough-cookie";
 import type { Clock, RootScrapsSet, StorageAdapter } from "./types";
 
-export const DAY_MAP_ICRESS: Record<string, number> = {
+export const DAY_MAP_ICRESS = {
 	MONDAY: 1,
 	TUESDAY: 2,
 	WEDNESDAY: 3,
@@ -10,9 +10,9 @@ export const DAY_MAP_ICRESS: Record<string, number> = {
 	FRIDAY: 5,
 	SATURDAY: 6,
 	SUNDAY: 7,
-};
+} satisfies Record<string, number>;
 
-export const DAY_MAP_MYSTUDENT: Record<string, number> = {
+export const DAY_MAP_MYSTUDENT = {
 	Monday: 1,
 	Tuesday: 2,
 	Wednesday: 3,
@@ -20,7 +20,7 @@ export const DAY_MAP_MYSTUDENT: Record<string, number> = {
 	Friday: 5,
 	Saturday: 6,
 	Sunday: 7,
-};
+} satisfies Record<string, number>;
 
 export function formatClock(clock: Clock): string {
 	return `${clock.hour.toString().padStart(2, "0")}:${clock.minute
@@ -43,21 +43,30 @@ export async function fetchIcress(
 	const cookies = await jar.getCookies(url);
 	const cookieHeader = cookies.map((c) => c.cookieString()).join("; ");
 
+	const headers = new Headers({
+		"User-Agent":
+			"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0",
+		Referer:
+			options.referer ||
+			"https://simsweb4.uitm.edu.my/estudent/class_timetable/index.cfm",
+	});
+	if (options.headers) {
+		for (const [k, v] of Object.entries(options.headers)) {
+			headers.set(k, v);
+		}
+	}
+	if (cookieHeader) {
+		headers.set("Cookie", cookieHeader);
+	}
+
 	const response = await fetch(url, {
 		method: options.method || "GET",
-		headers: {
-			"User-Agent":
-				"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0",
-			Referer:
-				options.referer ||
-				"https://simsweb4.uitm.edu.my/estudent/class_timetable/index.cfm",
-			...(cookieHeader ? { Cookie: cookieHeader } : {}),
-			...options.headers,
-		},
+		headers,
 		body: options.body,
 	});
 
 	if (!response.ok) {
+		// SAFETY: Custom HTTP status attachment on standard Error instance
 		const error = new Error(`Icress returned ${response.status}`) as Error & {
 			status?: number;
 		};
@@ -109,7 +118,10 @@ export async function fetchScrapsFromRootPage(
 ): Promise<RootScrapsSet> {
 	const cacheKey = `uitm:tokens:${version}:index.htm`;
 	const cached = await storage.get(cacheKey);
-	if (cached) return JSON.parse(cached) as RootScrapsSet;
+	if (cached) {
+		// SAFETY: Cached scraps payload matches RootScrapsSet structure
+		return JSON.parse(cached) as RootScrapsSet;
+	}
 
 	const { text: htm, url: indexUrl } = await fetchIcress("index.cfm", jar);
 	const htmRoot = parse(htm);
@@ -252,6 +264,11 @@ export async function fetchScrapsFromRootPage(
 	return scraps;
 }
 
+function parseClock(t: string): Clock {
+	const [h, m] = t.split(":").map(Number);
+	return { hour: h, minute: m };
+}
+
 export function parseTimeIcress(
 	timeString: string,
 	dayMap: Record<string, number>,
@@ -265,12 +282,16 @@ export function parseTimeIcress(
 
 	if (!(day && day in dayMap)) throw new Error(`Invalid day: ${day}`);
 
-	const parseClock = (t: string): Clock => {
-		const [h, m] = t.split(":").map(Number);
-		return { hour: h, minute: m };
-	};
-
 	return [dayMap[day], parseClock(startTime), parseClock(endTime)];
+}
+
+function convertMyStudentTime(t: string, p: string): string {
+	const [h, m] = t.split(":").map(Number);
+	let h24 = h;
+	if (h >= 13) h24 = h;
+	else if (p === "PM" && h !== 12) h24 = h + 12;
+	else if (p === "AM" && h === 12) h24 = 0;
+	return `${h24.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
 }
 
 export function parseTimeMyStudent(timeString: string): [string, string] {
@@ -281,14 +302,8 @@ export function parseTimeMyStudent(timeString: string): [string, string] {
 
 	const [, startTime, startPeriod, endTime, endPeriod] = match;
 
-	const convert = (t: string, p: string) => {
-		const [h, m] = t.split(":").map(Number);
-		let h24 = h;
-		if (h >= 13) h24 = h;
-		else if (p === "PM" && h !== 12) h24 = h + 12;
-		else if (p === "AM" && h === 12) h24 = 0;
-		return `${h24.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
-	};
-
-	return [convert(startTime, startPeriod), convert(endTime, endPeriod)];
+	return [
+		convertMyStudentTime(startTime, startPeriod),
+		convertMyStudentTime(endTime, endPeriod),
+	];
 }

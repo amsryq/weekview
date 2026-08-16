@@ -21,6 +21,28 @@ import type {
 	StudentGroup,
 } from "./types";
 
+function isCallable(cause: unknown): cause is () => number {
+	return (
+		Object.prototype.toString.call(cause) === "[object Function]" ||
+		Object.prototype.toString.call(cause) === "[object AsyncFunction]"
+	);
+}
+
+function isFiniteNumber(cause: unknown): cause is number {
+	return (
+		Object.prototype.toString.call(cause) === "[object Number]" &&
+		Number.isFinite(cause)
+	);
+}
+
+function getDayNumber(hari: string): number | undefined {
+	if (hari in DAY_MAP_MYSTUDENT) {
+		// SAFETY: Key membership verified with 'in' operator
+		return DAY_MAP_MYSTUDENT[hari as keyof typeof DAY_MAP_MYSTUDENT];
+	}
+	return undefined;
+}
+
 export class UiTMScraper {
 	private storage: StorageAdapter;
 	private version: string;
@@ -51,9 +73,12 @@ export class UiTMScraper {
 		if (cookies.length > 0) {
 			const now = Date.now();
 			for (const cookie of cookies) {
-				if (cookie.expiryTime && typeof cookie.expiryTime === "function") {
+				if (cookie.expiryTime && isCallable(cookie.expiryTime)) {
 					const expiryTime = cookie.expiryTime();
-					if (expiryTime && expiryTime !== Number.POSITIVE_INFINITY) {
+					if (
+						isFiniteNumber(expiryTime) &&
+						expiryTime !== Number.POSITIVE_INFINITY
+					) {
 						const ttl = Math.floor((expiryTime - now) / 1000);
 						if (ttl > 0 && ttl < ttlSeconds) {
 							ttlSeconds = ttl;
@@ -73,7 +98,8 @@ export class UiTMScraper {
 		} catch (error) {
 			if (
 				error instanceof Error &&
-				(error as Error & { status?: number }).status === 503
+				"status" in error &&
+				error.status === 503
 			) {
 				await this.storage.delete(`uitm:tokens:${this.version}:index.htm`);
 			}
@@ -97,6 +123,7 @@ export class UiTMScraper {
 			throw new Error("Failed to fetch campuses");
 		}
 
+		// SAFETY: UiTM campus select endpoint returns paginated results list
 		const json = JSON.parse(rawData) as {
 			results: Array<{ id: string; text: string }>;
 			total: number;
@@ -121,17 +148,23 @@ export class UiTMScraper {
 		const jar = await this.getJar();
 		const cacheKey = `uitm:courses:${this.version}:${campus}${faculty ? `:${faculty}` : ""}:${courseCode}`;
 		const cached = await this.storage.get(cacheKey);
-		if (cached) return JSON.parse(cached) as Course[];
+		if (cached) {
+			// SAFETY: Cached course payload is serialized Course[]
+			return JSON.parse(cached) as Course[];
+		}
 
 		const { tokens, indexLocation, indexResultLocation } =
 			await this.getScraps(jar);
 
-		const body = new URLSearchParams({
+		const searchParams = new URLSearchParams({
 			search_campus: campus,
 			search_course: courseCode,
 			...tokens,
-			...(faculty ? { search_faculty: faculty } : {}),
-		}).toString();
+		});
+		if (faculty) {
+			searchParams.set("search_faculty", faculty);
+		}
+		const body = searchParams.toString();
 
 		const { text: data } = await fetchIcress(
 			indexResultLocation ?? "index_result.cfm",
@@ -158,7 +191,8 @@ export class UiTMScraper {
 				const code = rawCode
 					.trim()
 					.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, "");
-				const path = tr.children[2].querySelector("a")?.getAttribute("href")!;
+				const path =
+					tr.children[2].querySelector("a")?.getAttribute("href") ?? "";
 				return {
 					code,
 					campusCode: campus,
@@ -238,6 +272,7 @@ export class UiTMScraper {
 
 		if (!response.ok) throw new Error(`MyStudent returned ${response.status}`);
 
+		// SAFETY: UiTM MyStudent API returns MyStudentAPIResponse JSON
 		const data = (await response.json()) as MyStudentAPIResponse;
 		const grouped: Record<
 			string,
@@ -249,11 +284,9 @@ export class UiTMScraper {
 			}
 		> = {};
 
-		for (const [, dayData] of Object.entries(data) as Array<
-			[string, MyStudentAPIResponse[string]]
-		>) {
+		for (const dayData of Object.values(data)) {
 			if (!dayData?.jadual) continue;
-			const day = DAY_MAP_MYSTUDENT[dayData.hari];
+			const day = getDayNumber(dayData.hari);
 			if (!day) continue;
 
 			for (const session of dayData.jadual) {
@@ -282,8 +315,8 @@ export class UiTMScraper {
 						(s) => s.day === newSession.day && s.start === newSession.start,
 					);
 					if (!exists) grouped[key].sessions.push(newSession);
-				} catch (_e) {
-					console.warn("Failed to parse", session);
+				} catch (error) {
+					console.warn("Failed to parse", session, error);
 				}
 			}
 		}

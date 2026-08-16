@@ -18,6 +18,7 @@ export class StorageCacheService implements CacheService {
 		try {
 			const val = await this.storage.get(key);
 			if (!val) return null;
+			// SAFETY: Cached JSON payload was serialized from type T in set()
 			return JSON.parse(val) as T;
 		} catch (error) {
 			console.error(`Cache get error for key "${key}":`, error);

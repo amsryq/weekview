@@ -1,6 +1,7 @@
 import { Trash2Icon, UploadIcon } from "lucide-react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
+import { isString } from "../../../lib/utils/predicates";
 import { Button } from "../../ui/button";
 import { Label } from "../../ui/label";
 import {
@@ -49,18 +50,20 @@ export function BackgroundImageUpload({
 			setIsLoading(true);
 			const reader = new FileReader();
 
-			reader.onload = (e) => {
-				const result = e.target?.result as string;
-				onChange(result);
+			reader.addEventListener("load", () => {
+				const result = reader.result;
+				if (isString(result)) {
+					onChange(result);
+				}
 				setIsLoading(false);
-			};
+			});
 
-			reader.onerror = () => {
+			reader.addEventListener("error", () => {
 				toast.error("Failed to read file", {
 					description: "Please try again with a different image.",
 				});
 				setIsLoading(false);
-			};
+			});
 
 			reader.readAsDataURL(file);
 		},

@@ -138,20 +138,18 @@ export function SourceSelectionStep() {
 		setCurrentStep(step);
 	};
 
-	const sortedSections = [...SECTIONS]
-		.map((section) => {
-			const sortedOptions = [...section.options].sort((a, b) => {
-				const aAvail = sources[a.key]?.available ?? true;
-				const bAvail = sources[b.key]?.available ?? true;
-				return aAvail === bAvail ? 0 : aAvail ? -1 : 1;
-			});
-			return { ...section, options: sortedOptions };
-		})
-		.sort((a, b) => {
-			const aAvail = a.options.some((o) => sources[o.key]?.available ?? true);
-			const bAvail = b.options.some((o) => sources[o.key]?.available ?? true);
+	const sortedSections = SECTIONS.map((section) => {
+		const sortedOptions = section.options.toSorted((a, b) => {
+			const aAvail = sources[a.key]?.available ?? true;
+			const bAvail = sources[b.key]?.available ?? true;
 			return aAvail === bAvail ? 0 : aAvail ? -1 : 1;
 		});
+		return { ...section, options: sortedOptions };
+	}).toSorted((a, b) => {
+		const aAvail = a.options.some((o) => sources[o.key]?.available ?? true);
+		const bAvail = b.options.some((o) => sources[o.key]?.available ?? true);
+		return aAvail === bAvail ? 0 : aAvail ? -1 : 1;
+	});
 
 	return (
 		<>

@@ -105,7 +105,7 @@ export function ColorPicker({
 	}, [onChange]);
 
 	const supportsEyeDropper =
-		typeof window !== "undefined" && "EyeDropper" in window;
+		"window" in globalThis && "EyeDropper" in globalThis.window;
 
 	const isSmall = size === "sm";
 	const swatchBtnRef = useRef<HTMLButtonElement>(null);

@@ -4,6 +4,7 @@ import { createStore, useStore } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { ColorEntry } from "../models/color-entry";
+import { isRecord, isString } from "../utils/predicates";
 
 interface State {
 	colors: ColorEntry[];
@@ -166,8 +167,8 @@ const ColorStore = createStore<State & Actions>()(
 					return false;
 				}
 
-				set((state) => {
-					state.colors = state.colors.filter((c) => c.id !== colorId);
+				set((draft) => {
+					draft.colors = draft.colors.filter((c) => c.id !== colorId);
 				});
 
 				return true;
@@ -182,16 +183,16 @@ const ColorStore = createStore<State & Actions>()(
 					return false;
 				}
 
-				set((state) => {
-					const colorIndex = state.colors.findIndex((c) => c.id === colorId);
+				set((draft) => {
+					const colorIndex = draft.colors.findIndex((c) => c.id === colorId);
 					if (colorIndex !== -1) {
 						if (color.type === "solid") {
-							state.colors[colorIndex].def = {
+							draft.colors[colorIndex].def = {
 								type: "solid",
 								color: normalizeHexColor(color.color),
 							};
 						} else {
-							state.colors[colorIndex].def = {
+							draft.colors[colorIndex].def = {
 								type: "gradient",
 								gradientColors: [...color.gradientColors!],
 								gradientDirection: color.gradientDirection!,
@@ -292,21 +293,24 @@ const ColorStore = createStore<State & Actions>()(
 
 				// Ensure all colors are instances of ColorEntry
 				for (let i = 0; i < state.colors.length; i++) {
-					const color = state.colors[i];
-					if (!(color instanceof ColorEntry)) {
+					const rawColor: unknown = state.colors[i];
+					if (!(rawColor instanceof ColorEntry)) {
+						const rawId =
+							isRecord(rawColor) && isString(rawColor.id)
+								? rawColor.id
+								: undefined;
 						if (
-							(color as ColorEntry)?.id?.startsWith("__predefined-") &&
-							!(color as ColorEntry)?.id?.includes(
-								`-${PREDEFINED_COLORS_VERSION}-`,
-							)
+							rawId?.startsWith("__predefined-") &&
+							!rawId?.includes(`-${PREDEFINED_COLORS_VERSION}-`)
 						) {
 							// @ts-expect-error
 							state.colors[i] = undefined;
 							continue;
 						}
 
+						// SAFETY: Rehydrated JSON payload conforms to ColorEntry constructor argument
 						// @ts-expect-error
-						state.colors[i] = new ColorEntry({ ...color });
+						state.colors[i] = new ColorEntry({ ...(rawColor as object) });
 					}
 				}
 

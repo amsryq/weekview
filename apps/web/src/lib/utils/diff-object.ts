@@ -12,21 +12,32 @@
  * governing permissions and limitations under the License.
  */
 
-import { UnknownRecord } from "type-fest";
+import { isBoolean, isNumber, isString } from "./predicates";
 
-function isObject(value: unknown): value is UnknownRecord {
-	return (
-		Boolean(value) && typeof value === "object" && value!.constructor === Object
-	);
+export type DiffValue =
+	| string
+	| number
+	| boolean
+	| null
+	| undefined
+	| bigint
+	| symbol
+	| DiffValue[]
+	| { [key: string]: DiffValue };
+
+export type DiffObject = Record<string, DiffValue>;
+
+function isPlainObject(cause: unknown): cause is DiffObject {
+	return Object.prototype.toString.call(cause) === "[object Object]";
 }
 
 /**
  * Represents the structure of a detailed diff result
  */
-export interface DetailedDiffResult<T = Record<string, unknown>> {
-	added: Partial<T>;
-	deleted: Partial<T>;
-	updated: Partial<T>;
+export interface DetailedDiffResult<T = DiffValue> {
+	added: Partial<T> | DiffValue;
+	deleted: Partial<T> | DiffValue;
+	updated: Partial<T> | DiffValue;
 }
 
 /**
@@ -44,20 +55,20 @@ export interface DetailedDiffResult<T = Record<string, unknown>> {
  * @param updated - The updated object
  * @returns Diff result with { added, deleted, updated } structure
  */
-export function detailedDiff<T extends UnknownRecord>(
+export function detailedDiff<T extends DiffObject>(
 	original: T,
 	updated: T,
 ): DetailedDiffResult<T> {
 	const result: DetailedDiffResult<T> = {
-		added: {} as Partial<T>,
-		deleted: {} as Partial<T>,
-		updated: {} as Partial<T>,
+		added: {},
+		deleted: {},
+		updated: {},
 	};
 
 	// Handle edge cases
-	if (!isObject(original) || !isObject(updated)) {
+	if (!isPlainObject(original) || !isPlainObject(updated)) {
 		if (original !== updated) {
-			result.updated = updated as Partial<T>;
+			result.updated = updated;
 		}
 		return result;
 	}
@@ -70,29 +81,46 @@ export function detailedDiff<T extends UnknownRecord>(
 	for (const key of allKeys) {
 		if (!originalKeys.has(key)) {
 			// Completely new key - goes to added
-			(result.added as UnknownRecord)[key] = (updated as UnknownRecord)[key];
+			// SAFETY: Dynamic key indexing for diff record
+			(result.added as DiffObject)[key] = updated[key];
 		} else if (!updatedKeys.has(key)) {
 			// Deleted key - goes to deleted
-			(result.deleted as UnknownRecord)[key] = undefined;
+			// SAFETY: Dynamic key indexing for diff record
+			(result.deleted as DiffObject)[key] = undefined;
 		} else {
 			// Key exists in both - check for differences
-			const originalValue = (original as UnknownRecord)[key];
-			const updatedValue = (updated as UnknownRecord)[key];
+			const originalValue = original[key];
+			const updatedValue = updated[key];
 
 			if (originalValue !== updatedValue) {
 				// Values are different - need to analyze the difference
 				const diffResult = analyzeValueDifference(originalValue, updatedValue);
 
-				if (diffResult.added && Object.keys(diffResult.added).length > 0) {
-					(result.added as UnknownRecord)[key] = diffResult.added;
+				if (
+					diffResult.added &&
+					isPlainObject(diffResult.added) &&
+					Object.keys(diffResult.added).length > 0
+				) {
+					// SAFETY: Dynamic key indexing for diff record
+					(result.added as DiffObject)[key] = diffResult.added;
 				}
 
-				if (diffResult.updated && Object.keys(diffResult.updated).length > 0) {
-					(result.updated as UnknownRecord)[key] = diffResult.updated;
+				if (
+					diffResult.updated &&
+					isPlainObject(diffResult.updated) &&
+					Object.keys(diffResult.updated).length > 0
+				) {
+					// SAFETY: Dynamic key indexing for diff record
+					(result.updated as DiffObject)[key] = diffResult.updated;
 				}
 
-				if (diffResult.deleted && Object.keys(diffResult.deleted).length > 0) {
-					(result.deleted as UnknownRecord)[key] = diffResult.deleted;
+				if (
+					diffResult.deleted &&
+					isPlainObject(diffResult.deleted) &&
+					Object.keys(diffResult.deleted).length > 0
+				) {
+					// SAFETY: Dynamic key indexing for diff record
+					(result.deleted as DiffObject)[key] = diffResult.deleted;
 				}
 			}
 		}
@@ -108,49 +136,40 @@ export function detailedDiff<T extends UnknownRecord>(
  * @returns Object with added, updated, deleted categorizations
  */
 function analyzeValueDifference(
-	original: unknown,
-	updated: unknown,
-): DetailedDiffResult<UnknownRecord> {
-	const result: DetailedDiffResult<UnknownRecord> = {
+	original: DiffValue,
+	updated: DiffValue,
+): DetailedDiffResult<DiffValue> {
+	const result: DetailedDiffResult<DiffValue> = {
 		added: {},
 		updated: {},
 		deleted: {},
 	};
 
-	// If types are different, it's an update
-	if (typeof original !== typeof updated) {
-		return { added: {}, updated: updated as UnknownRecord, deleted: {} };
-	}
-
 	// Handle primitive values first (strings, numbers, booleans)
 	if (
-		typeof original === "string" ||
-		typeof original === "number" ||
-		typeof original === "boolean"
+		(isString(original) && isString(updated)) ||
+		(isNumber(original) && isNumber(updated)) ||
+		(isBoolean(original) && isBoolean(updated))
 	) {
 		if (original !== updated) {
-			return { added: {}, updated: updated as UnknownRecord, deleted: {} };
+			return {
+				added: {},
+				updated,
+				deleted: {},
+			};
 		}
 		return result; // No difference
 	}
 
 	// Handle arrays (but not strings, which are array-like)
 	if (Array.isArray(original) && Array.isArray(updated)) {
-		const arrayDiff = analyzeArrayDifference(original, updated);
-		return arrayDiff;
+		return analyzeArrayDifference(original, updated);
 	}
 
 	// Handle objects (but not arrays or strings)
-	if (
-		isObject(original) &&
-		isObject(updated) &&
-		!Array.isArray(original) &&
-		!Array.isArray(updated) &&
-		typeof original !== "string" &&
-		typeof updated !== "string"
-	) {
-		const originalObj = original as UnknownRecord;
-		const updatedObj = updated as UnknownRecord;
+	if (isPlainObject(original) && isPlainObject(updated)) {
+		const originalObj = original;
+		const updatedObj = updated;
 		const originalKeys = new Set(Object.keys(originalObj));
 		const updatedKeys = new Set(Object.keys(updatedObj));
 		const allKeys = new Set([...originalKeys, ...updatedKeys]);
@@ -158,10 +177,12 @@ function analyzeValueDifference(
 		for (const key of allKeys) {
 			if (!originalKeys.has(key)) {
 				// New property - goes to added
-				result.added[key] = updatedObj[key];
+				// SAFETY: Dynamic property assignment
+				(result.added as DiffObject)[key] = updatedObj[key];
 			} else if (!updatedKeys.has(key)) {
 				// Deleted property
-				result.deleted[key] = undefined;
+				// SAFETY: Dynamic property assignment
+				(result.deleted as DiffObject)[key] = undefined;
 			} else {
 				// Property exists in both
 				const originalProp = originalObj[key];
@@ -170,50 +191,53 @@ function analyzeValueDifference(
 				if (originalProp !== updatedProp) {
 					const propDiff = analyzeValueDifference(originalProp, updatedProp);
 
-					if (propDiff.added && Object.keys(propDiff.added).length > 0) {
-						if (!result.added[key]) result.added[key] = {};
-						Object.assign(result.added[key] as UnknownRecord, propDiff.added);
+					if (
+						propDiff.added &&
+						isPlainObject(propDiff.added) &&
+						Object.keys(propDiff.added).length > 0
+					) {
+						if (!isPlainObject(result.added)) result.added = {};
+						Object.assign(result.added, propDiff.added);
 					}
 
 					if (
 						propDiff.updated &&
-						(typeof propDiff.updated === "object"
+						(isPlainObject(propDiff.updated)
 							? Object.keys(propDiff.updated).length > 0
 							: propDiff.updated !== undefined)
 					) {
-						if (
-							typeof propDiff.updated === "object" &&
-							propDiff.updated !== null
-						) {
-							if (!result.updated[key]) result.updated[key] = {};
-							Object.assign(
-								result.updated[key] as UnknownRecord,
-								propDiff.updated,
-							);
+						if (isPlainObject(propDiff.updated)) {
+							if (!isPlainObject(result.updated)) result.updated = {};
+							Object.assign(result.updated, propDiff.updated);
 						} else {
-							// Handle primitive values directly
-							result.updated[key] = propDiff.updated;
+							// SAFETY: Property indexing
+							(result.updated as DiffObject)[key] = propDiff.updated;
 						}
 					}
 
-					if (propDiff.deleted && Object.keys(propDiff.deleted).length > 0) {
-						if (!result.deleted[key]) result.deleted[key] = {};
-						Object.assign(
-							result.deleted[key] as UnknownRecord,
-							propDiff.deleted,
-						);
+					if (
+						propDiff.deleted &&
+						isPlainObject(propDiff.deleted) &&
+						Object.keys(propDiff.deleted).length > 0
+					) {
+						if (!isPlainObject(result.deleted)) result.deleted = {};
+						Object.assign(result.deleted, propDiff.deleted);
 					}
 
-					// If it's a simple value change (or all diff categories are empty), put it in updated
-					// BUT only if there are actual differences (not just reference differences)
 					if (
-						(!propDiff.added || Object.keys(propDiff.added).length === 0) &&
-						(!propDiff.deleted || Object.keys(propDiff.deleted).length === 0) &&
-						(!propDiff.updated || Object.keys(propDiff.updated).length === 0)
+						(!propDiff.added ||
+							(isPlainObject(propDiff.added) &&
+								Object.keys(propDiff.added).length === 0)) &&
+						(!propDiff.deleted ||
+							(isPlainObject(propDiff.deleted) &&
+								Object.keys(propDiff.deleted).length === 0)) &&
+						(!propDiff.updated ||
+							(isPlainObject(propDiff.updated) &&
+								Object.keys(propDiff.updated).length === 0))
 					) {
-						// Only add to updated if the values are actually different (deep comparison)
 						if (JSON.stringify(originalProp) !== JSON.stringify(updatedProp)) {
-							result.updated[key] = updatedProp;
+							// SAFETY: Property indexing
+							(result.updated as DiffObject)[key] = updatedProp;
 						}
 					}
 				}
@@ -223,8 +247,12 @@ function analyzeValueDifference(
 		return result;
 	}
 
-	// For primitive values (including strings) that are different
-	return { added: {}, updated: updated as UnknownRecord, deleted: {} };
+	// For different types or other values that are different
+	return {
+		added: {},
+		updated,
+		deleted: {},
+	};
 }
 
 /**
@@ -234,10 +262,10 @@ function analyzeValueDifference(
  * @returns Categorized differences
  */
 function analyzeArrayDifference(
-	original: unknown[],
-	updated: unknown[],
-): DetailedDiffResult<UnknownRecord> {
-	const result: DetailedDiffResult<UnknownRecord> = {
+	original: DiffValue[],
+	updated: DiffValue[],
+): DetailedDiffResult<DiffValue> {
+	const result: DetailedDiffResult<DiffValue> = {
 		added: {},
 		updated: {},
 		deleted: {},
@@ -246,46 +274,62 @@ function analyzeArrayDifference(
 	const maxLength = Math.max(original.length, updated.length);
 
 	for (let i = 0; i < maxLength; i++) {
+		const key = String(i);
 		if (i >= original.length) {
 			// New element
-			result.added[i] = updated[i];
+			// SAFETY: Dynamic key assignment
+			(result.added as DiffObject)[key] = updated[i];
 		} else if (i >= updated.length) {
 			// Deleted element
-			result.deleted[i] = undefined;
+			// SAFETY: Dynamic key assignment
+			(result.deleted as DiffObject)[key] = undefined;
 		} else if (original[i] !== updated[i]) {
 			// Changed element
-			if (
-				isObject(original[i]) &&
-				isObject(updated[i]) &&
-				!Array.isArray(original[i]) &&
-				!Array.isArray(updated[i]) &&
-				typeof original[i] !== "string" &&
-				typeof updated[i] !== "string"
-			) {
-				const elemDiff = analyzeValueDifference(original[i], updated[i]);
+			const origElem = original[i];
+			const updElem = updated[i];
+			if (isPlainObject(origElem) && isPlainObject(updElem)) {
+				const elemDiff = analyzeValueDifference(origElem, updElem);
 
-				if (elemDiff.added && Object.keys(elemDiff.added).length > 0) {
-					result.added[i] = elemDiff.added;
+				if (
+					elemDiff.added &&
+					isPlainObject(elemDiff.added) &&
+					Object.keys(elemDiff.added).length > 0
+				) {
+					// SAFETY: Dynamic key assignment
+					(result.added as DiffObject)[key] = elemDiff.added;
 				}
 
-				if (elemDiff.updated && Object.keys(elemDiff.updated).length > 0) {
-					result.updated[i] = elemDiff.updated;
+				if (
+					elemDiff.updated &&
+					isPlainObject(elemDiff.updated) &&
+					Object.keys(elemDiff.updated).length > 0
+				) {
+					// SAFETY: Dynamic key assignment
+					(result.updated as DiffObject)[key] = elemDiff.updated;
 				}
 
-				if (elemDiff.deleted && Object.keys(elemDiff.deleted).length > 0) {
-					result.deleted[i] = elemDiff.deleted;
+				if (
+					elemDiff.deleted &&
+					isPlainObject(elemDiff.deleted) &&
+					Object.keys(elemDiff.deleted).length > 0
+				) {
+					// SAFETY: Dynamic key assignment
+					(result.deleted as DiffObject)[key] = elemDiff.deleted;
 				}
 			} else {
-				// Simple value change in array (including strings, numbers, etc.)
-				result.updated[i] = updated[i];
+				// Simple value change in array
+				// SAFETY: Dynamic key assignment
+				(result.updated as DiffObject)[key] = updElem;
 			}
 		}
 	}
 
-	// If only additions/updates, return as added (to match deep-object-diff behavior)
 	if (
+		isPlainObject(result.updated) &&
 		Object.keys(result.updated).length === 0 &&
-		Object.keys(result.deleted).length === 0
+		isPlainObject(result.deleted) &&
+		Object.keys(result.deleted).length === 0 &&
+		isPlainObject(result.added)
 	) {
 		return { added: { ...result.added }, updated: {}, deleted: {} };
 	}
@@ -298,36 +342,33 @@ function analyzeArrayDifference(
  * These maintain compatibility with deep-object-diff API
  */
 
-export function diff<T extends UnknownRecord>(
+export function diff<T extends DiffObject>(
 	original: T,
 	updated: T,
 ): Partial<T> {
 	const detailed = detailedDiff(original, updated);
 
-	// Deep merge all changes into a single object
 	const result: Partial<T> = {};
 
-	// Helper function to deep merge objects
-	function deepMerge<U extends UnknownRecord>(
+	function deepMerge<U extends DiffObject>(
 		target: Partial<U>,
-		source: Partial<U>,
+		source: Partial<U> | DiffValue,
 	): Partial<U> {
+		if (!isPlainObject(source)) return target;
 		for (const [key, value] of Object.entries(source)) {
-			if (isObject(value) && isObject((target as UnknownRecord)[key])) {
-				// Both are objects, merge recursively
-				(target as UnknownRecord)[key] = deepMerge(
-					(target as UnknownRecord)[key] as UnknownRecord,
-					value as UnknownRecord,
-				);
+			// SAFETY: Index access for dynamic target
+			const targetVal = (target as DiffObject)[key];
+			if (isPlainObject(value) && isPlainObject(targetVal)) {
+				// SAFETY: Nested merge of plain objects
+				(target as DiffObject)[key] = deepMerge(targetVal, value);
 			} else {
-				// Either not both objects, or target doesn't have this key
-				(target as UnknownRecord)[key] = value;
+				// SAFETY: Dynamic property assignment
+				(target as DiffObject)[key] = value;
 			}
 		}
 		return target;
 	}
 
-	// Deep merge added, updated, and deleted properties
 	deepMerge(result, detailed.added);
 	deepMerge(result, detailed.updated);
 	deepMerge(result, detailed.deleted);
@@ -335,26 +376,29 @@ export function diff<T extends UnknownRecord>(
 	return result;
 }
 
-export function addedDiff<T extends UnknownRecord>(
+export function addedDiff<T extends DiffObject>(
 	original: T,
 	updated: T,
 ): Partial<T> {
 	const detailed = detailedDiff(original, updated);
-	return detailed.added;
+	// SAFETY: DiffResult added mapping matches Partial<T>
+	return detailed.added as Partial<T>;
 }
 
-export function deletedDiff<T extends UnknownRecord>(
+export function deletedDiff<T extends DiffObject>(
 	original: T,
 	updated: T,
 ): Partial<T> {
 	const detailed = detailedDiff(original, updated);
-	return detailed.deleted;
+	// SAFETY: DiffResult deleted mapping matches Partial<T>
+	return detailed.deleted as Partial<T>;
 }
 
-export function updatedDiff<T extends UnknownRecord>(
+export function updatedDiff<T extends DiffObject>(
 	original: T,
 	updated: T,
 ): Partial<T> {
 	const detailed = detailedDiff(original, updated);
-	return detailed.updated;
+	// SAFETY: DiffResult updated mapping matches Partial<T>
+	return detailed.updated as Partial<T>;
 }

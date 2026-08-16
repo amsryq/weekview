@@ -41,7 +41,7 @@ import { Slider } from "../../ui/slider";
 import { Switch } from "../../ui/switch";
 
 const IS_FIREFOX =
-	typeof window !== "undefined" && /Firefox/.test(navigator.userAgent);
+	"window" in globalThis && /Firefox/.test(navigator.userAgent);
 
 interface Props {
 	value?: CellAppearance;
@@ -60,12 +60,12 @@ const CELL_ELEMENTS: readonly ElementKey[] = [
 	"location",
 ];
 
-const ELEMENT_LABELS: Record<ElementKey, string> = {
+const ELEMENT_LABELS = {
 	code: "Code",
 	name: "Name",
 	time: "Time",
 	location: "Location",
-};
+} satisfies Record<ElementKey, string>;
 
 // Helper to get material-specific options
 function _getMaterialOptions<T extends keyof typeof DEFAULT_BLUR_OPTIONS>(
@@ -404,13 +404,16 @@ function SmartField<T>({
 	if (form) {
 		return (
 			<form.Field
-				// biome-ignore lint/suspicious/noExplicitAny: TanStack Form path types are extremely complex to map dynamically
+				// SAFETY: Dynamic path name for TanStack Form field binding
+				// oxlint-disable-next-line typescript/no-explicit-any
 				name={name as any}
 			>
 				{(field) =>
 					children(
+						// SAFETY: Form field value falls back to baseValue and typed fallback
 						(field.state.value ?? baseValue ?? fallback) as T,
-						// biome-ignore lint/suspicious/noExplicitAny: Internal bridge for generic form updates
+						// SAFETY: Internal bridge for generic form updates
+						// oxlint-disable-next-line typescript/no-explicit-any
 						(v: T) => field.handleChange(v as any),
 					)
 				}
@@ -419,6 +422,7 @@ function SmartField<T>({
 	}
 
 	return children(
+		// SAFETY: Value falls back to baseValue and typed fallback of type T
 		(value ?? baseValue ?? fallback) as T,
 		onChange ??
 			(() => {

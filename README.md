@@ -54,7 +54,8 @@ It streamlines timetable creation with direct schedule importing from UiTM porta
 
 - `pnpm dev` starts the web development server.
 - `pnpm build` builds the application for production.
-- `pnpm lint:write` checks and formats code using Biome.
+- `pnpm lint` runs Oxlint and anti-slop linter checks.
+- `pnpm lint:write` automatically fixes fixable lint issues using Oxlint.
 - `pnpm typecheck` performs TypeScript type checking across all workspace packages.
 - `pnpm db:up` starts the local Turso / SQLite database.
 

@@ -5,13 +5,11 @@
  * Note: `crypto.randomUUID` is available only on secure contexts in most browsers: https://developer.mozilla.org/en-US/docs/Web/API/Crypto/randomUUID
  */
 
+import { isFunction } from "./predicates";
+
 export function randomUUID(): string {
-	if (
-		typeof window !== "undefined" &&
-		typeof crypto !== "undefined" &&
-		typeof crypto.randomUUID === "function"
-	) {
-		return crypto.randomUUID();
+	if ("crypto" in globalThis && isFunction(globalThis.crypto?.randomUUID)) {
+		return globalThis.crypto.randomUUID();
 	}
 	// Fallback: generate RFC4122 v4 UUID
 	// https://stackoverflow.com/a/2117523/2715716

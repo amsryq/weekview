@@ -420,7 +420,7 @@ function TimetableSkeleton() {
 									className="relative h-[96px]"
 									style={{ width: `${11 * ROW_BLOCK_WIDTH_PX}px` }}
 								>
-									{Array.from({ length: 11 }).map((_, j) => (
+									{Array.from({ length: 11 }).map((__unused, j) => (
 										<div
 											key={j}
 											className="absolute top-0 bottom-0 border-l border-muted"

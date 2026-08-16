@@ -23,6 +23,10 @@ interface ColorSelectorGridProps {
 
 type ColorType = "solid" | "gradient";
 
+function isColorType(cause: unknown): cause is ColorType {
+	return cause === "solid" || cause === "gradient";
+}
+
 export function ColorSelectorGrid({ value, onChange }: ColorSelectorGridProps) {
 	const [colorType, setColorType] = useState<ColorType>(value?.type || "solid");
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -120,7 +124,9 @@ export function ColorSelectorGrid({ value, onChange }: ColorSelectorGridProps) {
 			{/* Type Toggle */}
 			<Tabs
 				value={colorType}
-				onValueChange={(v) => handleTypeChange(v as ColorType)}
+				onValueChange={(v) => {
+					if (isColorType(v)) handleTypeChange(v);
+				}}
 				className="gap-0"
 			>
 				<TabsList>

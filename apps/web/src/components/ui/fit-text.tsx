@@ -39,7 +39,7 @@ export function FitText({
 	const textElementRef = useRef<HTMLDivElement>(null);
 	const [currentFontSize, setCurrentFontSize] = useState(fontSize);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: children is included deliberately
+	// oxlint-disable-next-line react/exhaustive-deps
 	useLayoutEffect(() => {
 		const adjustFontSize = () => {
 			if (!textElementRef.current) return;

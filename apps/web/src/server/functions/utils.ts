@@ -1,11 +1,12 @@
 import { StorageAdapter } from "@weekview/uitm-scraper";
 import { Storage } from "../platform/types";
 
+function isExpired(expires?: number): boolean {
+	return expires !== undefined && Date.now() > expires;
+}
+
 export function getInMemoryStorage(): Storage {
 	const storage = new Map<string, { value: string; expires?: number }>();
-
-	const isExpired = (expires?: number) =>
-		expires !== undefined && Date.now() > expires;
 
 	const get: Storage["get"] = async (key: string) => {
 		const entry = storage.get(key);
@@ -54,7 +55,7 @@ export function getInMemoryStorage(): Storage {
 				return key.startsWith(prefix);
 			})
 			.map(([key]) => key)
-			.sort();
+			.toSorted();
 
 		const paginatedKeys = allKeys.slice(cursor, cursor + limit);
 		const nextCursor =

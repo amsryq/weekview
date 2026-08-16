@@ -1,14 +1,23 @@
-import { AuthContext } from "better-auth";
 import Stripe from "stripe";
+import { isString } from "../../lib/utils/predicates";
+
+export interface CheckoutAuthContext {
+	adapter: {
+		update: (options: {
+			model: string;
+			where: Array<{ field: string; value: string }>;
+			update: { supporterUntil: Date };
+		}) => Promise<void | null | object>;
+	};
+}
 
 export async function handleCheckoutCompleted(
 	session: Stripe.Checkout.Session,
-	ctx: AuthContext,
+	ctx: CheckoutAuthContext,
 ) {
-	const stripeCustomerId =
-		typeof session.customer === "string"
-			? session.customer
-			: session.customer?.id;
+	const stripeCustomerId = isString(session.customer)
+		? session.customer
+		: session.customer?.id;
 
 	if (!stripeCustomerId) {
 		throw new Error("No stripe customer ID on session");

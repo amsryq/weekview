@@ -19,7 +19,9 @@ export function validateMeetingTimeConflicts(
 	return undefined;
 }
 
-function hasErrorMapErrors(errorMap: Record<string, unknown> | undefined) {
+function hasErrorMapErrors(
+	errorMap: CourseFormApi["state"]["errorMap"] | undefined,
+) {
 	return Object.values(errorMap ?? {}).some((error) => {
 		if (Array.isArray(error)) return error.length > 0;
 		return error !== undefined && error !== null && error !== "";
@@ -27,7 +29,7 @@ function hasErrorMapErrors(errorMap: Record<string, unknown> | undefined) {
 }
 
 function hasFieldErrors(
-	fieldMeta: Record<string, { errors?: unknown[] } | undefined>,
+	fieldMeta: CourseFormApi["state"]["fieldMeta"] | undefined,
 	predicate?: (name: string) => boolean,
 ) {
 	return Object.entries(fieldMeta ?? {}).some(
@@ -38,8 +40,8 @@ function hasFieldErrors(
 
 export function useCourseValidation(form: CourseFormApi) {
 	const getTabErrors = (
-		fieldMeta: Record<string, { errors?: unknown[] } | undefined>,
-		errorMap: Record<string, unknown> | undefined,
+		fieldMeta: CourseFormApi["state"]["fieldMeta"],
+		errorMap: CourseFormApi["state"]["errorMap"],
 	) => {
 		const basicsHasErrors =
 			hasErrorMapErrors(errorMap) ||

@@ -7,6 +7,13 @@ export interface CookieJarService {
 	clear(): Promise<void>;
 }
 
+function isCallable(cause: unknown): cause is () => number {
+	return (
+		Object.prototype.toString.call(cause) === "[object Function]" ||
+		Object.prototype.toString.call(cause) === "[object AsyncFunction]"
+	);
+}
+
 export class CachedCookieJarService implements CookieJarService {
 	private memoryJar: CookieJar | null = null;
 	private cache: CacheService;
@@ -59,7 +66,7 @@ export class CachedCookieJarService implements CookieJarService {
 			if (cookies.length > 0) {
 				const now = Date.now();
 				for (const cookie of cookies) {
-					if (cookie.expiryTime && typeof cookie.expiryTime === "function") {
+					if (isCallable(cookie.expiryTime)) {
 						const expiryTime = cookie.expiryTime();
 						if (expiryTime && expiryTime !== Number.POSITIVE_INFINITY) {
 							const ttl = Math.floor((expiryTime - now) / 1000);

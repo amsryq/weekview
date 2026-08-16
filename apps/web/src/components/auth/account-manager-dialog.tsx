@@ -1,6 +1,7 @@
 import { LoaderCircleIcon, RefreshCw } from "lucide-react";
 import { ReactNode } from "react";
 import { signOut, useSession } from "~/lib/auth/auth-client";
+import { isString } from "~/lib/utils/predicates";
 import { generateCheckout, removeSupporter } from "~/server/functions/stripe";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
@@ -100,7 +101,7 @@ function AccountManagerPanel() {
 					onClick={async () => {
 						try {
 							const { url } = await generateCheckout();
-							if (typeof url === "string" && url) {
+							if (isString(url) && url) {
 								window.open(url, "_blank", "noopener,noreferrer");
 							} else {
 								throw new Error("No checkout URL returned");

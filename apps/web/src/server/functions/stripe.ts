@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
+import { isString } from "../../lib/utils/predicates";
 import { createAuth } from "../auth";
 import { ENABLE_AUTH_PAYWALL_SERVER } from "../config/feature-flags";
 import { createStripeClient } from "../stripe";
@@ -17,15 +18,15 @@ export const getStripeSession = createServerFn({ method: "GET" })
 		const session = await stripe.checkout.sessions.retrieve(sessionId);
 
 		// Logic from backend/src/index.ts
-		const stripeCustomerId =
-			typeof session.customer === "string"
-				? session.customer
-				: session.customer?.id;
+		const stripeCustomerId = isString(session.customer)
+			? session.customer
+			: session.customer?.id;
 
 		let supporterExpiresAt: Date | null = null;
 
 		if (session.metadata?.type === "supporter_payment" && stripeCustomerId) {
 			const ctx = await auth.$context;
+			// SAFETY: Better-auth user adapter returns the user record schema matching session user
 			const user = (await ctx.adapter.findOne({
 				model: "user",
 				where: [{ field: "stripeCustomerId", value: stripeCustomerId }],

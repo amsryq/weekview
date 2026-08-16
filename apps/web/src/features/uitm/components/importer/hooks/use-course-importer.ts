@@ -105,12 +105,12 @@ async function fetchInitialMetadata(
 
 	let campus = selectedCampus;
 	if (!campus) {
-		const campuses = await queryClient.fetchQuery({
+		const campuses = await queryClient.fetchQuery<Campus[]>({
 			queryKey: ["uitm", "campuses"],
 			queryFn: Campus.fetch,
 			staleTime: 5 * 60 * 1000,
 		});
-		campus = (campuses as Campus[]).find(
+		campus = campuses.find(
 			(c) =>
 				normalizeString(c.code) ===
 					normalizeString(schedule.campus?.code ?? "") ||
@@ -124,12 +124,12 @@ async function fetchInitialMetadata(
 
 	let faculty = selectedFaculty;
 	if (campus.requireFaculty && !faculty) {
-		const faculties = await queryClient.fetchQuery({
+		const faculties = await queryClient.fetchQuery<Faculty[]>({
 			queryKey: ["uitm", "faculties", campus.code],
 			queryFn: () => Faculty.fetch(campus!),
 			staleTime: 5 * 60 * 1000,
 		});
-		faculty = (faculties as Faculty[]).find(
+		faculty = faculties.find(
 			(f) =>
 				normalizeString(f.code) ===
 					normalizeString(schedule.faculty?.code ?? "") ||
@@ -148,12 +148,6 @@ async function processImportEntry(
 	courseLookup: Map<string, Course>,
 	groupsByCourse: Map<string, UiTMCourseSection[] | null>,
 	queryClient: ReturnType<typeof useQueryClient>,
-	updateCourseStatus: (
-		c: string,
-		g: string,
-		s: ProgressStatus,
-		r?: string,
-	) => void,
 ) {
 	const course = courseLookup.get(normalizeString(entry.courseCode));
 	if (!course) throw new Error("Course not found");
@@ -163,12 +157,12 @@ async function processImportEntry(
 
 	if (uitmGroups === undefined) {
 		try {
-			const result = await queryClient.fetchQuery({
+			const result = await queryClient.fetchQuery<Group[]>({
 				queryKey: ["uitm", "groups", course.code],
 				queryFn: () => Group.fetch(course),
 				staleTime: 5 * 60 * 1000,
 			});
-			uitmGroups = (result as Group[]).map((g) => g.toUiTMCourse());
+			uitmGroups = result.map((g) => g.toUiTMCourse());
 			groupsByCourse.set(course.code, uitmGroups);
 		} catch (e) {
 			groupsByCourse.set(course.code, null);
@@ -213,44 +207,52 @@ export function useCourseImporter(options: {
 }) {
 	const queryClient = useQueryClient();
 	const state = useImportState(options.importerOpen);
+	const {
+		setImportPhase,
+		setCourseProgress,
+		setCancelRequested,
+		cancelRequestedRef,
+	} = state;
 
 	const applyCancellation = useCallback(
 		(reason = CANCELLED_MESSAGE) => {
-			state.setImportPhase((prev) =>
+			setImportPhase((prev) =>
 				prev === "cancelled" ? prev : "cancelled",
 			);
-			state.setCourseProgress((prev) =>
+			setCourseProgress((prev) =>
 				markUnfinishedProgressAsError(
 					prev,
 					getFriendlyUiTMErrorMessage(reason),
 				),
 			);
 		},
-		[state.setImportPhase, state.setCourseProgress],
+		[setImportPhase, setCourseProgress],
 	);
 
 	const requestCancel = useCallback(() => {
-		if (state.cancelRequestedRef.current) return;
-		state.cancelRequestedRef.current = true;
-		state.setCancelRequested(true);
+		if (cancelRequestedRef.current) return;
+		cancelRequestedRef.current = true;
+		setCancelRequested(true);
 		applyCancellation();
-	}, [applyCancellation, state.cancelRequestedRef, state.setCancelRequested]);
+	}, [applyCancellation, cancelRequestedRef, setCancelRequested]);
 
 	const updateCourseStatus = useCallback(
 		(c: string, g: string, s: ProgressStatus, r?: string) => {
-			state.setCourseProgress((prev) => updateProgressStatus(prev, c, g, s, r));
+			setCourseProgress((prev) => updateProgressStatus(prev, c, g, s, r));
 		},
-		[state.setCourseProgress],
+		[setCourseProgress],
 	);
 
 	const runImport = async (schedule: ScheduleInfo) => {
 		state.setImportPhase("setup");
-		const initialProgress = schedule.courses.map((e) => ({
-			courseCode: e.courseCode,
-			courseName: e.name,
-			group: e.group,
-			status: "pending" as ProgressStatus,
-		}));
+		const initialProgress: CourseImportProgress[] = schedule.courses.map(
+			(e) => ({
+				courseCode: e.courseCode,
+				courseName: e.name,
+				group: e.group,
+				status: "pending",
+			}),
+		);
 		state.setCourseProgress(initialProgress);
 
 		if (!schedule.courses.length) throw new Error("No courses detected.");
@@ -264,14 +266,14 @@ export function useCourseImporter(options: {
 			options.selectedFaculty,
 		);
 
-		const courses = await queryClient.fetchQuery({
+		const courses = await queryClient.fetchQuery<Course[]>({
 			queryKey: ["uitm", "courses", campus.code, faculty?.code],
 			queryFn: () => Course.fetch(faculty ?? campus!),
 			staleTime: 5 * 60 * 1000,
 		});
 
 		const courseLookup = new Map<string, Course>(
-			(courses as Course[]).map((c) => [normalizeString(c.code), c]),
+			courses.map((c) => [normalizeString(c.code), c]),
 		);
 
 		state.setImportPhase("importing");
@@ -304,7 +306,6 @@ export function useCourseImporter(options: {
 					courseLookup,
 					groupsByCourse,
 					queryClient,
-					updateCourseStatus,
 				);
 				updateCourseStatus(entry.courseCode, entry.group, "success");
 				successes.push({ courseCode: entry.courseCode, group: entry.group });

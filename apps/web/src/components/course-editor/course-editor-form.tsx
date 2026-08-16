@@ -45,6 +45,10 @@ import { LayoutTab } from "./layout-tab";
 
 type TabValue = "basics" | "style" | "icon";
 
+function isTabValue(cause: unknown): cause is TabValue {
+	return cause === "basics" || cause === "style" || cause === "icon";
+}
+
 interface CourseEditorFormProps {
 	onSubmit: (data: Course.Schema, form: CourseFormApi) => void;
 	defaultValues?: PartialDeep<Course.Schema>;
@@ -78,7 +82,9 @@ export function CourseEditorForm({
 			<form onSubmit={validateForm} className="flex flex-col h-full min-h-0">
 				<ResponsiveTabs
 					value={activeTab}
-					onValueChange={(v) => setActiveTab(v as TabValue)}
+					onValueChange={(v) => {
+						if (isTabValue(v)) setActiveTab(v);
+					}}
 					className="flex-1 flex min-h-0"
 					mobileClassName="flex-col gap-0"
 				>

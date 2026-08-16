@@ -1,10 +1,16 @@
-function toRawMessage(error: unknown): string {
-	if (error instanceof Error) {
-		return error.message;
+import { isRecord, isString } from "~/lib/utils/predicates";
+
+function toRawMessage(cause: unknown): string {
+	if (cause instanceof Error) {
+		return cause.message;
 	}
 
-	if (typeof error === "string") {
-		return error;
+	if (isString(cause)) {
+		return cause;
+	}
+
+	if (isRecord(cause) && isString(cause.message)) {
+		return cause.message;
 	}
 
 	return "An unexpected error occurred.";
@@ -31,8 +37,8 @@ function parseServiceStatus(message: string): {
 	return { service, status };
 }
 
-export function getFriendlyUiTMErrorMessage(error: unknown): string {
-	const message = toRawMessage(error).trim();
+export function getFriendlyUiTMErrorMessage(cause: unknown): string {
+	const message = toRawMessage(cause).trim();
 	if (!message)
 		return "Something went wrong while importing. Please try again.";
 

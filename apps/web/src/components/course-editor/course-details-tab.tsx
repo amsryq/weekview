@@ -1,5 +1,6 @@
 import { Clock, MapPin, Plus, Timer, Trash2 } from "lucide-react";
 import { useCourseEditorForm } from "~/lib/contexts/course-editor";
+import { isRecord, isString } from "~/lib/utils/predicates";
 import { Button } from "../ui/button";
 import { FieldError } from "../ui/field";
 import { Input } from "../ui/input";
@@ -25,17 +26,17 @@ const DAYS_OF_WEEK = [
 const getDayLabel = (dayValue?: number) =>
 	DAYS_OF_WEEK.find((day) => day.value === dayValue)?.label ?? "Select day";
 
-const getFieldErrorMessage = (error: unknown) => {
-	if (typeof error === "string") {
-		return error;
+const getFieldErrorMessage = (cause: unknown) => {
+	if (isString(cause)) {
+		return cause;
 	}
 
-	if (typeof error === "object" && error !== null && "message" in error) {
-		const message = (error as { message?: unknown }).message;
-		return typeof message === "string" ? message : String(message ?? error);
+	if (isRecord(cause) && "message" in cause) {
+		const message = cause.message;
+		return isString(message) ? message : String(message ?? cause);
 	}
 
-	return String(error);
+	return String(cause);
 };
 
 export function CourseDetailsTab() {
@@ -154,7 +155,7 @@ export function CourseDetailsTab() {
 												<form.Field name={`meetingTimes[${index}].day`}>
 													{(dayField) => (
 														<span className="text-sm font-semibold">
-															{getDayLabel(dayField.state.value as number)}
+															{getDayLabel(dayField.state.value)}
 														</span>
 													)}
 												</form.Field>

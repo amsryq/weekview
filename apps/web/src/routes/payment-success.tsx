@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { CheckCircle, Clock, XCircle } from "lucide-react";
 import { Suspense } from "react";
+import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import {
 	Card,
@@ -147,14 +148,12 @@ function PaymentDetails({ sessionData }: PaymentDetailsProps) {
 	);
 }
 
-type PaymentSuccessSearch = {
-	session_id?: string;
-};
+const paymentSuccessSearchSchema = z.object({
+	session_id: z.string().optional(),
+});
 
 export const Route = createFileRoute("/payment-success")({
-	validateSearch: (search: Record<string, unknown>): PaymentSuccessSearch => ({
-		session_id: search.session_id as string | undefined,
-	}),
+	validateSearch: (search) => paymentSuccessSearchSchema.parse(search),
 	head: () => ({
 		meta: seo({ title: "Payment Success | Weekview" }),
 	}),

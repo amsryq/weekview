@@ -11,11 +11,11 @@ export interface SourceStatus {
 	unavailableReason?: string;
 }
 
-const STATIC_SOURCE_STATUS: Record<SourceKey, SourceStatus> = {
+const STATIC_SOURCE_STATUS = {
 	"my-student": { available: true },
 	"group-selector": { available: true },
 	"course-slip": { available: true },
-};
+} satisfies Record<SourceKey, SourceStatus>;
 
 type SourceStatusProvider = () =>
 	| Record<SourceKey, SourceStatus>

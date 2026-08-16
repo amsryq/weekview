@@ -30,6 +30,26 @@ import { CellAppearanceLayoutSettings } from "./components/cell-appearance-layou
 import { StyleSelector } from "./components/style-selector";
 import type { TabValue } from "./timetable-customizer";
 
+function isTabValue(cause: unknown): cause is TabValue {
+	return (
+		cause === "styles" ||
+		cause === "layout" ||
+		cause === "background" ||
+		cause === "cells"
+	);
+}
+
+function handleCellAppearanceChange(changes: PartialDeep<CellAppearance>) {
+	TimetablePreferencesStore.setState((writable) => {
+		merge(writable.cellAppearance, changes);
+	});
+}
+
+function handleReset() {
+	TimetablePreferencesStore.getState().reset();
+	CourseStore.getState().resetAllToStyle(DEFAULT_TIMETABLE_STYLE_ID);
+}
+
 export default function TimetableCustomizerContent({
 	initialTab,
 }: {
@@ -38,23 +58,14 @@ export default function TimetableCustomizerContent({
 	const prefs = useStore(TimetablePreferencesStore);
 	const [activeTab, setActiveTab] = useState<TabValue>(initialTab ?? "styles");
 
-	const handleCellAppearanceChange = (changes: PartialDeep<CellAppearance>) => {
-		TimetablePreferencesStore.setState((writable) => {
-			merge(writable.cellAppearance, changes);
-		});
-	};
-
-	const handleReset = () => {
-		TimetablePreferencesStore.getState().reset();
-		CourseStore.getState().resetAllToStyle(DEFAULT_TIMETABLE_STYLE_ID);
-	};
-
 	return (
 		<>
 			<div className="flex-1 flex flex-col min-h-0 sm:flex-row sm:overflow-hidden">
 				<ResponsiveTabs
 					value={activeTab}
-					onValueChange={(v) => setActiveTab(v as TabValue)}
+					onValueChange={(v) => {
+						if (isTabValue(v)) setActiveTab(v);
+					}}
 					className="flex-1 flex min-h-0"
 					mobileClassName="flex-col"
 				>

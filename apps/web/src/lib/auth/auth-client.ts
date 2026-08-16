@@ -8,8 +8,8 @@ import { useCookie } from "../hooks/cookies";
 
 export const authClient = createAuthClient({
 	baseURL:
-		typeof window !== "undefined"
-			? new URL(window.location.origin).toString()
+		"window" in globalThis
+			? new URL(globalThis.window.location.origin).toString()
 			: "http://localhost:3000",
 	plugins: [
 		stripeClient({

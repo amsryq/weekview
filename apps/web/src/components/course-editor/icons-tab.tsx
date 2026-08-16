@@ -1,5 +1,6 @@
 import { useStore as useFormStore } from "@tanstack/react-form";
 import { useCourseEditorForm } from "~/lib/contexts/course-editor";
+import { isRecord, isString } from "~/lib/utils/predicates";
 import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
 import {
@@ -14,17 +15,21 @@ import { Tabs, TabsContent } from "../ui/tabs";
 import { Textarea } from "../ui/textarea";
 import { Twemoji } from "../ui/twemoji";
 
-const getFieldErrorMessage = (error: unknown) => {
-	if (typeof error === "string") {
-		return error;
+function isIconType(cause: unknown): cause is "emoji" | "svg" {
+	return cause === "emoji" || cause === "svg";
+}
+
+const getFieldErrorMessage = (cause: unknown) => {
+	if (isString(cause)) {
+		return cause;
 	}
 
-	if (typeof error === "object" && error !== null && "message" in error) {
-		const message = (error as { message?: unknown }).message;
-		return typeof message === "string" ? message : String(message ?? error);
+	if (isRecord(cause) && "message" in cause) {
+		const message = cause.message;
+		return isString(message) ? message : String(message ?? cause);
 	}
 
-	return String(error);
+	return String(cause);
 };
 
 export function IconsTab() {
@@ -48,7 +53,9 @@ export function IconsTab() {
 					<Field>
 						<FieldLabel>Icon Type</FieldLabel>
 						<Select
-							onValueChange={(v) => field.handleChange(v as "emoji" | "svg")}
+							onValueChange={(v) => {
+								if (isIconType(v)) field.handleChange(v);
+							}}
 							value={field.state.value}
 						>
 							<SelectTrigger>
@@ -73,12 +80,11 @@ export function IconsTab() {
 
 			<Tabs
 				value={iconType || "emoji"}
-				onValueChange={(value) =>
-					form.setFieldValue(
-						"cellAppearance.icon.type",
-						value as "emoji" | "svg",
-					)
-				}
+				onValueChange={(value) => {
+					if (isIconType(value)) {
+						form.setFieldValue("cellAppearance.icon.type", value);
+					}
+				}}
 				className="w-full"
 			>
 				{/* <TabsList className="grid w-full grid-cols-2">

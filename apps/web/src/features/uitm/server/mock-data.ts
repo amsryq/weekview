@@ -66,8 +66,8 @@ const COURSE_PREFIXES = [
 	"CHM",
 	"ELC",
 	"CTU",
-];
-const COURSE_NAMES: Record<string, string> = {
+] as const;
+const COURSE_NAMES = {
 	CSC: "Computer Programming",
 	MAT: "Calculus",
 	ICT: "Information Systems",
@@ -76,7 +76,7 @@ const COURSE_NAMES: Record<string, string> = {
 	CHM: "Chemistry",
 	ELC: "English for Communication",
 	CTU: "Islamic Studies",
-};
+} satisfies Record<string, string>;
 
 export function getMockCourses(campus: string, faculty?: string | null) {
 	const rand = seededRandom(`${campus}-${faculty || "none"}`);
@@ -96,7 +96,7 @@ export function getMockCourses(campus: string, faculty?: string | null) {
 		});
 	}
 
-	return courses.sort((a, b) => a.code.localeCompare(b.code));
+	return courses.toSorted((a, b) => a.code.localeCompare(b.code));
 }
 
 const ROOMS = ["BK-01", "BK-02", "BK-03", "DK-1", "DK-2", "LAB-A", "LAB-B"];
@@ -164,14 +164,16 @@ export function getMockStudentTimetable(studentId: string) {
 		const sessionCount = 1 + Math.floor(rand() * 2);
 
 		for (let s = 0; s < sessionCount; s++) {
-			let day: number, startHour: number, endHour: number;
+			let day: number;
+			let startHour: number;
+			let endHour: number;
 
 			if (shouldConflict && i === 1 && s === 0 && selectedSlots.length > 0) {
 				// Intentionally conflict with the first slot of the first course
 				day = selectedSlots[0].day;
 				startHour = selectedSlots[0].start;
 				endHour = selectedSlots[0].end;
-			} else {
+			} else if (!shouldConflict) {
 				// Try to find a free slot or just generate one
 				let attempts = 0;
 				do {
@@ -179,9 +181,7 @@ export function getMockStudentTimetable(studentId: string) {
 					startHour = 8 + Math.floor(rand() * 9);
 					endHour = startHour + 2;
 					attempts++;
-					// If not trying to conflict, try to find a non-overlapping slot
 				} while (
-					!shouldConflict &&
 					attempts < 10 &&
 					selectedSlots.some(
 						(slot) =>
@@ -190,6 +190,10 @@ export function getMockStudentTimetable(studentId: string) {
 								(endHour > slot.start && endHour <= slot.end)),
 					)
 				);
+			} else {
+				day = 1 + Math.floor(rand() * 5);
+				startHour = 8 + Math.floor(rand() * 9);
+				endHour = startHour + 2;
 			}
 
 			selectedSlots.push({ day, start: startHour, end: endHour });

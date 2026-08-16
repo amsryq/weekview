@@ -135,9 +135,11 @@ export const ComboboxTrigger = ({
 		// Create a ResizeObserver to detect width changes
 		const resizeObserver = new ResizeObserver((entries) => {
 			for (const entry of entries) {
-				const newWidth = (entry.target as HTMLElement).offsetWidth;
-				if (newWidth) {
-					setWidth?.(newWidth);
+				if (entry.target instanceof HTMLElement) {
+					const newWidth = entry.target.offsetWidth;
+					if (newWidth) {
+						setWidth?.(newWidth);
+					}
 				}
 			}
 		});

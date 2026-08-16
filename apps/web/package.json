@@ -9,8 +9,8 @@
 		"build:node": "DEPLOY_PLATFORM=node pnpm run build",
 		"deploy": "DEPLOY_PLATFORM=cloudflare pnpm run build && wrangler deploy",
 		"preview": "vite preview",
-		"start": "node .output/server/index.mjs",
-		"lint:write": "biome check --write --unsafe",
+		"lint": "oxlint",
+		"lint:write": "oxlint --fix",
 		"auth:generate": "pnpx --yes @better-auth/cli@latest generate --config src/server/auth.ts --output src/server/db/auth.schema.ts -y",
 		"db:up": "turso dev --port=5555 --db-file=local.db",
 		"db:generate": "drizzle-kit generate",
@@ -75,7 +75,6 @@
 		"zustand": "^5.0.12"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.7",
 		"@cloudflare/vite-plugin": "^1.51.0",
 		"@cloudflare/workers-types": "^4.20260316.1",
 		"@tanstack/react-router-devtools": "^1.167.1",

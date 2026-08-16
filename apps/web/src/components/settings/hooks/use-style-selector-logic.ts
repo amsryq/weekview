@@ -51,13 +51,13 @@ export function useStyleSelectorData() {
 	};
 }
 
+function applyStyle(styleId: string) {
+	TimetablePreferencesStore.getState().applyStyle(styleId);
+	CourseStore.getState().resetAllToStyle(styleId);
+}
+
 export function useStyleSelectorActions() {
 	const { applyingTheme } = useTheme();
-
-	const applyStyle = (styleId: string) => {
-		TimetablePreferencesStore.getState().applyStyle(styleId);
-		CourseStore.getState().resetAllToStyle(styleId);
-	};
 
 	const setThemePreference = (preference: TimetableThemePreference) => {
 		const store = TimetablePreferencesStore.getState();

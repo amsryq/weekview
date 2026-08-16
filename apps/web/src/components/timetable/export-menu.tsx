@@ -49,7 +49,7 @@ const DEFAULT_FILENAME_BASE = "timetable";
 const DEFAULT_SCALE = 3;
 const DEFAULT_BORDER_RADIUS = 8;
 
-const FILE_PICKER_TYPES: Record<ExportFormat, FilePickerType> = {
+const FILE_PICKER_TYPES = {
 	png: {
 		description: "PNG image",
 		accept: {
@@ -62,7 +62,7 @@ const FILE_PICKER_TYPES: Record<ExportFormat, FilePickerType> = {
 			"image/svg+xml": [".svg"],
 		},
 	},
-};
+} satisfies Record<ExportFormat, FilePickerType>;
 
 const triggerDownload = (href: string, filename: string) => {
 	const link = document.createElement("a");
@@ -87,8 +87,10 @@ const saveBlobWithPicker = async (
 		return;
 	}
 
-	const showSaveFilePickerFn =
-		window.showSaveFilePicker as unknown as ShowSaveFilePicker;
+	// SAFETY: showSaveFilePicker is checked for existence on window above
+	const showSaveFilePickerFn = (
+		window as Window & { showSaveFilePicker: ShowSaveFilePicker }
+	).showSaveFilePicker;
 	const handle = await showSaveFilePickerFn({
 		suggestedName: filename,
 		types: [FILE_PICKER_TYPES[format]],
@@ -97,6 +99,16 @@ const saveBlobWithPicker = async (
 	await writable.write(blob);
 	await writable.close();
 };
+
+function filterExportNode(targetNode: Node): boolean {
+	if (
+		targetNode instanceof Element &&
+		targetNode.getAttribute("data-export-hidden") === "true"
+	) {
+		return false;
+	}
+	return true;
+}
 
 export function TimetableExportMenu({
 	targetSelector = DEFAULT_SELECTOR,
@@ -136,22 +148,12 @@ export function TimetableExportMenu({
 				const style = {
 					borderRadius: `${borderRadius}px`,
 				};
-				const filter = (node: Node) => {
-					if (
-						node instanceof Element &&
-						node.getAttribute("data-export-hidden") === "true"
-					) {
-						return false;
-					}
-					return true;
-				};
-
 				if (format === "png") {
 					const { domToPng } = await import("modern-screenshot");
 					const dataUrl = await domToPng(node, {
 						scale,
 						style,
-						filter,
+						filter: filterExportNode,
 					});
 
 					if (action === "download") {
@@ -177,7 +179,7 @@ export function TimetableExportMenu({
 				const svgMarkup = await domToSvg(node, {
 					scale,
 					style,
-					filter,
+					filter: filterExportNode,
 				});
 
 				const svgBlob = await (await fetch(svgMarkup)).blob();

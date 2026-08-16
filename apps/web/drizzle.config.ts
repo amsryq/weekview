@@ -1,9 +1,8 @@
-/// <reference types="@types/node" />
+import dotenv from "dotenv";
 import { defineConfig } from "drizzle-kit";
 
 if (process.env.NODE_ENV === "production") {
-	// biome-ignore lint/style/noCommonJs: This file is not to be tree-shaken and is on top-level
-	require("dotenv").config({
+	dotenv.config({
 		path: ".dev.vars.production",
 	});
 }

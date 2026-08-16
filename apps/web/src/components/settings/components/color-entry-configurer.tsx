@@ -30,6 +30,23 @@ const GRADIENT_DIRECTIONS: { value: GradientDirection; label: string }[] = [
 	{ value: "to-bl", label: "↙ Bottom Left" },
 ];
 
+function isColorType(cause: unknown): cause is "solid" | "gradient" {
+	return cause === "solid" || cause === "gradient";
+}
+
+function isGradientDirection(cause: unknown): cause is GradientDirection {
+	return (
+		cause === "to-r" ||
+		cause === "to-l" ||
+		cause === "to-t" ||
+		cause === "to-b" ||
+		cause === "to-tr" ||
+		cause === "to-tl" ||
+		cause === "to-br" ||
+		cause === "to-bl"
+	);
+}
+
 export function ColorEntryConfigurer({
 	value,
 	onChange,
@@ -46,9 +63,7 @@ export function ColorEntryConfigurer({
 						value.type === "gradient"
 							? value.gradientColors[0] || "#000000"
 							: "#000000",
-					...(value.predefined !== undefined
-						? { predefined: value.predefined }
-						: {}),
+					predefined: value.predefined,
 				});
 			} else {
 				onChange({
@@ -58,9 +73,7 @@ export function ColorEntryConfigurer({
 							? [value.color, "#ffffff"]
 							: ["#000000", "#ffffff"],
 					gradientDirection: "to-r",
-					...(value.predefined !== undefined
-						? { predefined: value.predefined }
-						: {}),
+					predefined: value.predefined,
 				});
 			}
 		},
@@ -70,22 +83,23 @@ export function ColorEntryConfigurer({
 	const handleSolidColorChange = useCallback(
 		(color: string) => {
 			onChange({
-				...value,
 				type: "solid",
 				color,
-			} as ColorEntry.Schema);
+				predefined: value.predefined,
+			});
 		},
-		[value, onChange],
+		[value.predefined, onChange],
 	);
 
 	const handleGradientDirectionChange = useCallback(
 		(dir: GradientDirection) => {
 			if (value.type !== "gradient") return;
 			onChange({
-				...value,
 				type: "gradient",
+				gradientColors: value.gradientColors,
 				gradientDirection: dir,
-			} as ColorEntry.Schema);
+				predefined: value.predefined,
+			});
 		},
 		[value, onChange],
 	);
@@ -96,10 +110,11 @@ export function ColorEntryConfigurer({
 			const newColors = [...value.gradientColors];
 			newColors[index] = color;
 			onChange({
-				...value,
 				type: "gradient",
 				gradientColors: newColors,
-			} as ColorEntry.Schema);
+				gradientDirection: value.gradientDirection,
+				predefined: value.predefined,
+			});
 		},
 		[value, onChange],
 	);
@@ -107,20 +122,22 @@ export function ColorEntryConfigurer({
 	const handleAddGradientColor = useCallback(() => {
 		if (value.type !== "gradient") return;
 		onChange({
-			...value,
 			type: "gradient",
 			gradientColors: [...value.gradientColors, "#888888"],
-		} as ColorEntry.Schema);
+			gradientDirection: value.gradientDirection,
+			predefined: value.predefined,
+		});
 	}, [value, onChange]);
 
 	const handleRemoveGradientColor = useCallback(
 		(index: number) => {
 			if (value.type !== "gradient") return;
 			onChange({
-				...value,
 				type: "gradient",
 				gradientColors: value.gradientColors.filter((_, i) => i !== index),
-			} as ColorEntry.Schema);
+				gradientDirection: value.gradientDirection,
+				predefined: value.predefined,
+			});
 		},
 		[value, onChange],
 	);
@@ -137,7 +154,9 @@ export function ColorEntryConfigurer({
 		<div className="space-y-4">
 			<Tabs
 				value={value.type}
-				onValueChange={(v) => handleTypeChange(v as "solid" | "gradient")}
+				onValueChange={(v) => {
+					if (isColorType(v)) handleTypeChange(v);
+				}}
 			>
 				{showTabs && (
 					<TabsList className="w-full grid grid-cols-2">
@@ -166,16 +185,16 @@ export function ColorEntryConfigurer({
 						<Label>Direction</Label>
 						<Select
 							value={gradientDirection}
-							onValueChange={(v) =>
-								handleGradientDirectionChange(v as GradientDirection)
-							}
+							onValueChange={(v) => {
+								if (isGradientDirection(v)) handleGradientDirectionChange(v);
+							}}
 						>
 							<SelectTrigger>
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>
-								{GRADIENT_DIRECTIONS.map(({ value, label }) => (
-									<SelectItem key={value} value={value}>
+								{GRADIENT_DIRECTIONS.map(({ value: dirValue, label }) => (
+									<SelectItem key={dirValue} value={dirValue}>
 										{label}
 									</SelectItem>
 								))}

@@ -2,7 +2,7 @@ import { immerable } from "immer";
 import { z } from "zod";
 import { randomUUID } from "../utils/random";
 
-const GradientDirectionMap: Record<GradientDirection, string> = {
+const GradientDirectionMap = {
 	"to-r": "to right",
 	"to-l": "to left",
 	"to-t": "to top",
@@ -11,7 +11,7 @@ const GradientDirectionMap: Record<GradientDirection, string> = {
 	"to-tl": "to top left",
 	"to-br": "to bottom right",
 	"to-bl": "to bottom left",
-};
+} satisfies Record<GradientDirection, string>;
 
 export const BackgroundTypeSchema = z.enum(["solid", "gradient"]);
 export type BackgroundType = z.infer<typeof BackgroundTypeSchema>;

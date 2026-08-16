@@ -1,5 +1,5 @@
 import { toMerged } from "es-toolkit";
-import { RequiredDeep, UnknownRecord } from "type-fest";
+import type { RequiredDeep } from "type-fest";
 import { createStore } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
@@ -18,6 +18,7 @@ import {
 	type TimetableColorMode,
 	type TimetableThemePreference,
 } from "../models/style";
+import { isBoolean, isNumber, isString } from "../utils/predicates";
 import {
 	resolveTimetableStyle,
 	resolveTimetableStyleColorByIndex,
@@ -25,12 +26,26 @@ import {
 
 export type TimetableLayout = "rows" | "columns";
 
-const defaultState = {
-	layout: "rows" as TimetableLayout,
+export interface TimetablePreferencesState {
+	layout: TimetableLayout;
+	activeStyleId: string;
+	timetableThemePreference: TimetableThemePreference;
+	timetableColorMode: TimetableColorMode;
+	backgroundImage: string | null;
+	backgroundImageOptions: {
+		opacity: number;
+	};
+	title: string;
+	showWatermark: boolean;
+	cellAppearance: RequiredDeep<CellAppearance>;
+}
+
+const defaultState: TimetablePreferencesState = {
+	layout: "rows",
 	activeStyleId: DEFAULT_TIMETABLE_STYLE_ID,
-	timetableThemePreference: "follow-app" as TimetableThemePreference,
-	timetableColorMode: "light" as TimetableColorMode,
-	backgroundImage: null as string | null,
+	timetableThemePreference: "follow-app",
+	timetableColorMode: "light",
+	backgroundImage: null,
 	backgroundImageOptions: {
 		opacity: 0.3,
 	},
@@ -87,10 +102,10 @@ const defaultState = {
 
 		fgColor: "#00FF00",
 		fontFamily: resolveTimetableStyle(DEFAULT_TIMETABLE_STYLE_ID).fontFamily,
-	} satisfies RequiredDeep<CellAppearance> as RequiredDeep<CellAppearance>,
+	},
 };
 
-export type State = typeof defaultState;
+export type State = TimetablePreferencesState;
 
 interface Actions {
 	getCellAppearance: (
@@ -161,20 +176,26 @@ export const TimetablePreferencesStore = createStore<State & Actions>()(
 
 			setValue: (key, value) =>
 				set((s) => {
-					(s[key] as unknown) = value;
+					// SAFETY: Type-safe key-value assignment constrained by generic parameters
+					(s[key] as State[typeof key]) = value;
 				}),
 
 			setCellElementAppearanceValue: (key, subKey, value) =>
 				set((s) => {
-					const target = (s.cellAppearance as UnknownRecord)[
-						key
-					] as UnknownRecord;
-					target[subKey] = value as unknown;
+					if (key === "visibility" && isBoolean(value)) {
+						s.cellAppearance.visibility[subKey] = value;
+					} else if (key === "fontSize" && isNumber(value)) {
+						s.cellAppearance.fontSize[subKey] = value;
+					} else if (key === "weight" && isString(value)) {
+						// SAFETY: Value is validated FontWeight string
+						s.cellAppearance.weight[subKey] = value as FontWeight;
+					}
 				}),
 
 			setCellAppearanceValue: (key, value) =>
 				set((s) => {
-					(s.cellAppearance as UnknownRecord)[key] = value as unknown;
+					// SAFETY: Type-safe key-value assignment for CellAppearance schema
+					(s.cellAppearance[key] as CellAppearance[typeof key]) = value;
 				}),
 
 			setBackgroundAppearance: (background) =>
