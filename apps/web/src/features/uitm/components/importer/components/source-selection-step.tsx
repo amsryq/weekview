@@ -17,6 +17,7 @@ import {
 import { cn } from "~/lib/utils/styles";
 import { ImporterStep, useImporterSelectionStore } from "../utils/shared";
 import { type SourceKey, useSourceStatuses } from "../utils/source-status";
+import { SemesterEndNotice } from "./semester-end-notice";
 import { UnaffiliationNotice } from "./unaffiliation-notice";
 
 interface SourceOptionProps {
@@ -173,6 +174,7 @@ export function SourceSelectionStep() {
 						</AlertDescription>
 					</Alert>
 				)}
+				<SemesterEndNotice />
 				<UnaffiliationNotice />
 
 				<div className="space-y-4">
