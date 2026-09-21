@@ -11,10 +11,11 @@
 	"observability": {
 		"enabled": true
 	},
-	"kv_namespaces": [
+	"d1_databases": [
 		{
-			"binding": "KV",
-			"id": "c225e0c92abd4cbbbed691333fa663d4"
+			"binding": "D1",
+			"database_name": "weekview",
+			"database_id": "e0dc43ff-6f9f-4366-91dd-190d8d5ac78e"
 		}
 	],
 	"env": {
@@ -24,10 +25,11 @@
 				"enabled": true,
 				"head_sampling_rate": 1
 			},
-			"kv_namespaces": [
+			"d1_databases": [
 				{
-					"binding": "KV",
-					"id": "c225e0c92abd4cbbbed691333fa663d4"
+					"binding": "D1",
+					"database_name": "weekview",
+					"database_id": "e0dc43ff-6f9f-4366-91dd-190d8d5ac78e"
 				}
 			]
 		},
@@ -47,10 +49,11 @@
 				}
 			],
 			"workers_dev": false,
-			"kv_namespaces": [
+			"d1_databases": [
 				{
-					"binding": "KV",
-					"id": "c225e0c92abd4cbbbed691333fa663d4"
+					"binding": "D1",
+					"database_name": "weekview",
+					"database_id": "e0dc43ff-6f9f-4366-91dd-190d8d5ac78e"
 				}
 			]
 		}

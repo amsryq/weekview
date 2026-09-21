@@ -1,7 +1,7 @@
 import { env } from "cloudflare:workers";
 import { createServerFn } from "@tanstack/react-start";
 import { UiTMScraper } from "@weekview/uitm-scraper";
-import { CloudflareStorage } from "~/server/platform/cloudflare";
+import { CloudflareD1Storage } from "~/server/platform/cloudflare";
 import {
 	getMockCourses,
 	getMockGroups,
@@ -14,13 +14,13 @@ import {
 declare global {
 	namespace Cloudflare {
 		interface Env {
-			KV: KVNamespace;
+			D1: D1Database;
 		}
 	}
 }
 
 const scraper = new UiTMScraper({
-	storage: new CloudflareStorage(env.KV).asStorageAdapter(),
+	storage: new CloudflareD1Storage(env.D1),
 });
 
 export const getCampuses = createServerFn({ method: "GET" })

@@ -27,7 +27,7 @@ export interface PlatformContext {
 }
 
 export interface CloudflareEnv {
-	KV?: KVNamespace;
+	D1: D1Database;
 	WEEKVIEW_ENABLE_AUTH_PAYWALL?: string;
 	APP_URL: string;
 	CACHE_CLEAR_TOKEN: string;

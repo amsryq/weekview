@@ -1,53 +1,67 @@
 /// <reference types="@cloudflare/workers-types" />
 import type { StorageAdapter } from "@weekview/uitm-scraper";
-import type { Storage } from "./types";
 
-export class CloudflareStorage implements Storage {
-	private kv: KVNamespace | undefined;
+const D1_STORAGE_TABLE = "uitm_storage";
 
-	constructor(kv: KVNamespace | undefined) {
-		this.kv = kv;
+export class CloudflareD1Storage implements StorageAdapter {
+	private readonly database: D1Database;
+	private readonly ready: Promise<void>;
+
+	constructor(database: D1Database) {
+		this.database = database;
+		this.ready = database
+			.prepare(
+				`CREATE TABLE IF NOT EXISTS ${D1_STORAGE_TABLE} (
+					key TEXT PRIMARY KEY NOT NULL,
+					value TEXT NOT NULL,
+					expires_at INTEGER
+				)`,
+			)
+			.run()
+			.then(() => undefined);
 	}
 
 	async get(key: string): Promise<string | null> {
-		if (!this.kv) return null;
-		return this.kv.get(key);
+		await this.ready;
+		const entry = await this.database
+			.prepare(
+				`SELECT value, expires_at
+				 FROM ${D1_STORAGE_TABLE}
+				 WHERE key = ?1`,
+			)
+			.bind(key)
+			.first<{ value: string; expires_at: number | null }>();
+
+		if (!entry) return null;
+		if (entry.expires_at !== null && entry.expires_at <= Date.now()) {
+			await this.delete(key);
+			return null;
+		}
+		return entry.value;
 	}
 
-	async put(
-		key: string,
-		value: string,
-		options?: { expiration?: number; expirationTtl?: number },
-	): Promise<void> {
-		if (!this.kv) return;
-		return this.kv.put(key, value, options);
+	async set(key: string, value: string, ttlSeconds?: number): Promise<void> {
+		await this.ready;
+		const expiresAt =
+			ttlSeconds === undefined ? null : Date.now() + ttlSeconds * 1000;
+
+		await this.database
+			.prepare(
+				`INSERT INTO ${D1_STORAGE_TABLE} (key, value, expires_at)
+				 VALUES (?1, ?2, ?3)
+				 ON CONFLICT(key) DO UPDATE SET
+					value = excluded.value,
+					expires_at = excluded.expires_at`,
+			)
+			.bind(key, value, expiresAt)
+			.run();
 	}
 
 	async delete(key: string): Promise<void> {
-		if (!this.kv) return;
-		return this.kv.delete(key);
-	}
-
-	async list(options?: {
-		prefix?: string;
-		limit?: number;
-		cursor?: string;
-	}): Promise<{
-		keys: { name: string }[];
-		list_complete: boolean;
-		cursor?: string;
-	}> {
-		if (!this.kv) return { keys: [], list_complete: true };
-		return this.kv.list(options);
-	}
-
-	asStorageAdapter(): StorageAdapter {
-		return {
-			get: this.get.bind(this),
-			set: async (key, value, ttlSeconds) => {
-				await this.put(key, value, { expirationTtl: ttlSeconds });
-			},
-			delete: this.delete.bind(this),
-		};
+		await this.ready;
+		await this.database
+			.prepare(`DELETE FROM ${D1_STORAGE_TABLE} WHERE key = ?1`)
+			.bind(key)
+			.run();
 	}
 }
