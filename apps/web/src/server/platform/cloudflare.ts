@@ -5,11 +5,14 @@ const D1_STORAGE_TABLE = "uitm_storage";
 
 export class CloudflareD1Storage implements StorageAdapter {
 	private readonly database: D1Database;
-	private readonly ready: Promise<void>;
+	private ready: Promise<void> | undefined;
 
 	constructor(database: D1Database) {
 		this.database = database;
-		this.ready = database
+	}
+
+	private async ensureReady(): Promise<void> {
+		this.ready ??= this.database
 			.prepare(
 				`CREATE TABLE IF NOT EXISTS ${D1_STORAGE_TABLE} (
 					key TEXT PRIMARY KEY NOT NULL,
@@ -19,10 +22,12 @@ export class CloudflareD1Storage implements StorageAdapter {
 			)
 			.run()
 			.then(() => undefined);
+
+		await this.ready;
 	}
 
 	async get(key: string): Promise<string | null> {
-		await this.ready;
+		await this.ensureReady();
 		const entry = await this.database
 			.prepare(
 				`SELECT value, expires_at
@@ -41,7 +46,7 @@ export class CloudflareD1Storage implements StorageAdapter {
 	}
 
 	async set(key: string, value: string, ttlSeconds?: number): Promise<void> {
-		await this.ready;
+		await this.ensureReady();
 		const expiresAt =
 			ttlSeconds === undefined ? null : Date.now() + ttlSeconds * 1000;
 
@@ -58,7 +63,7 @@ export class CloudflareD1Storage implements StorageAdapter {
 	}
 
 	async delete(key: string): Promise<void> {
-		await this.ready;
+		await this.ensureReady();
 		await this.database
 			.prepare(`DELETE FROM ${D1_STORAGE_TABLE} WHERE key = ?1`)
 			.bind(key)
