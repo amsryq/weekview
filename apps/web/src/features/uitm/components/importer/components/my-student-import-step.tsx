@@ -28,6 +28,7 @@ import {
 	getProgressCounts,
 	useImporterSelectionStore,
 } from "../utils/shared";
+import { SemesterEndNotice } from "./semester-end-notice";
 
 export function MyStudentImportStep() {
 	const [studentId, setStudentId] = useState("");
@@ -100,6 +101,7 @@ export function MyStudentImportStep() {
 					Enter your student ID to fetch from the portal.
 				</ResponsiveDialogDescription>
 			</ResponsiveDialogHeader>
+			<SemesterEndNotice />
 
 			<div className="flex-1 flex flex-col gap-4 px-6 py-2 overflow-y-auto min-h-0">
 				<div className="space-y-1.5 px-1">
