@@ -13,7 +13,9 @@ import { SHOW_WATERMARK_OPTION } from "~/lib/config/feature-flags";
 import type { CellAppearance } from "~/lib/models/cell-appearance";
 import { DEFAULT_TIMETABLE_STYLE_ID } from "~/lib/models/style";
 import { CourseStore } from "~/lib/stores/course-store";
+import type { TimetableFirstDay } from "~/lib/stores/timetable-preferences";
 import { TimetablePreferencesStore } from "~/lib/stores/timetable-preferences";
+import { cn } from "~/lib/utils/styles";
 import { PaywallOverlay } from "../monetization/paywall-overlay";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
@@ -103,6 +105,10 @@ export default function TimetableCustomizerContent({
 								<LayoutSettings
 									layout={prefs.layout}
 									onLayoutChange={(layout) => prefs.setValue("layout", layout)}
+									firstDay={prefs.firstDay}
+									onFirstDayChange={(firstDay) =>
+										prefs.setValue("firstDay", firstDay)
+									}
 								/>
 								{SHOW_WATERMARK_OPTION && (
 									<WatermarkSettings
@@ -156,9 +162,16 @@ export default function TimetableCustomizerContent({
 interface LayoutSettingsProps {
 	layout: "rows" | "columns";
 	onLayoutChange: (layout: "rows" | "columns") => void;
+	firstDay: TimetableFirstDay;
+	onFirstDayChange: (firstDay: TimetableFirstDay) => void;
 }
 
-function LayoutSettings({ layout, onLayoutChange }: LayoutSettingsProps) {
+function LayoutSettings({
+	layout,
+	onLayoutChange,
+	firstDay,
+	onFirstDayChange,
+}: LayoutSettingsProps) {
 	return (
 		<div className="space-y-4">
 			<div>
@@ -183,6 +196,31 @@ function LayoutSettings({ layout, onLayoutChange }: LayoutSettingsProps) {
 					onClick={() => onLayoutChange("columns")}
 					icon={<VerticalLayoutIcon />}
 				/>
+			</div>
+
+			<div className="flex items-center justify-between gap-4 pt-2">
+				<h4 className="text-sm font-medium">Week starts on</h4>
+				<div className="inline-flex shrink-0 rounded-md border p-0.5 gap-0.5">
+					{([
+						["auto", "Auto"],
+						["monday", "Monday"],
+						["sunday", "Sunday"],
+					] as const).map(([value, label]) => (
+						<button
+							key={value}
+							type="button"
+							onClick={() => onFirstDayChange(value)}
+							className={cn(
+								"px-2.5 py-1 rounded transition-colors text-xs font-medium",
+								firstDay === value
+									? "bg-primary text-primary-foreground shadow-sm"
+									: "text-muted-foreground hover:text-foreground hover:bg-muted",
+							)}
+						>
+							{label}
+						</button>
+					))}
+				</div>
 			</div>
 		</div>
 	);
@@ -209,10 +247,9 @@ function LayoutOption({
 			onClick={onClick}
 			className={`
 				flex flex-col items-center gap-3 p-4 rounded-lg border-2 transition-all
-				${
-					isSelected
-						? "border-primary bg-primary/5"
-						: "border-muted hover:border-muted-foreground/30"
+				${isSelected
+					? "border-primary bg-primary/5"
+					: "border-muted hover:border-muted-foreground/30"
 				}
 			`}
 		>

@@ -1,21 +1,21 @@
 import { useMemo } from "react";
 import type { Course } from "~/lib/models/course";
-import { COLUMN_BLOCK_HEIGHT_PX, DAYS, ROW_BLOCK_WIDTH_PX } from "../constants";
+import type { TimetableFirstDay } from "~/lib/stores/timetable-preferences";
+import {
+	COLUMN_BLOCK_HEIGHT_PX,
+	ROW_BLOCK_WIDTH_PX,
+} from "../constants";
+import { useOccupiedDays } from "./use-occupied-days";
 
 export function useTimetableLayout(
 	courses: Course[],
 	layoutProp: "rows" | "columns" | undefined,
 	prefsLayout: "rows" | "columns",
+	firstDay: TimetableFirstDay,
 ) {
 	const effectiveLayout = layoutProp ?? prefsLayout;
 
-	const visibleDays = useMemo(() => {
-		const maxDay = Math.max(
-			5,
-			...courses.flatMap((c) => c.meetingTimes.map((mt) => mt.day)),
-		);
-		return DAYS.slice(0, maxDay);
-	}, [courses]);
+	const visibleDays = useOccupiedDays(courses, firstDay);
 
 	const { timeSlots, columnHeight, rowWidth } = useMemo(() => {
 		if (courses.length === 0) {

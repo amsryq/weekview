@@ -454,6 +454,7 @@ export function WeeklyTimetable({
 	const { mounted, courses } = useTimetableData(coursesProp);
 	const {
 		prefsLayout,
+		firstDay,
 		backgroundImage,
 		activeStyleId,
 		timetableColorMode,
@@ -461,7 +462,7 @@ export function WeeklyTimetable({
 		backgroundImageOptions,
 	} = useTimetablePreferences();
 	const { effectiveLayout, visibleDays, timeSlots, columnHeight, rowWidth } =
-		useTimetableLayout(courses, layout, prefsLayout);
+		useTimetableLayout(courses, layout, prefsLayout, firstDay);
 	const { backgroundStyle, overlayStyle } = useTimetableAppearance(
 		activeStyleId,
 		timetableColorMode,

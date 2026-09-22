@@ -25,9 +25,11 @@ import {
 } from "../utils/timetable-styles";
 
 export type TimetableLayout = "rows" | "columns";
+export type TimetableFirstDay = "monday" | "sunday" | "auto";
 
 export interface TimetablePreferencesState {
 	layout: TimetableLayout;
+	firstDay: TimetableFirstDay;
 	activeStyleId: string;
 	timetableThemePreference: TimetableThemePreference;
 	timetableColorMode: TimetableColorMode;
@@ -42,6 +44,7 @@ export interface TimetablePreferencesState {
 
 const defaultState: TimetablePreferencesState = {
 	layout: "rows",
+	firstDay: "auto",
 	activeStyleId: DEFAULT_TIMETABLE_STYLE_ID,
 	timetableThemePreference: "follow-app",
 	timetableColorMode: "light",

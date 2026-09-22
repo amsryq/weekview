@@ -7,6 +7,7 @@ export function useTimetablePreferences() {
 		TimetablePreferencesStore,
 		useShallow((s) => ({
 			prefsLayout: s.layout,
+			firstDay: s.firstDay,
 			backgroundImage: s.backgroundImage,
 			activeStyleId: s.activeStyleId,
 			timetableColorMode: s.timetableColorMode,

@@ -151,6 +151,7 @@ export function getMockStudentTimetable(studentId: string) {
 	// To create conflicts, we'll intentionally pick overlapping slots for some courses
 	// if the studentId ends in a certain way
 	const shouldConflict = studentId.endsWith("9");
+	const startsOnSunday = studentId.endsWith("7");
 
 	const selectedSlots: Array<{ day: number; start: number; end: number }> = [];
 
@@ -177,7 +178,9 @@ export function getMockStudentTimetable(studentId: string) {
 				// Try to find a free slot or just generate one
 				let attempts = 0;
 				do {
-					day = 1 + Math.floor(rand() * 5);
+					day = startsOnSunday
+						? [7, 1, 2, 3, 4][(i + s) % 5]
+						: 1 + Math.floor(rand() * 5);
 					startHour = 8 + Math.floor(rand() * 9);
 					endHour = startHour + 2;
 					attempts++;
