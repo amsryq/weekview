@@ -11,6 +11,22 @@ import {
 import type { Campus } from "../../../../models/campus";
 import type { Faculty } from "../../../../models/faculty";
 import { getFriendlyUiTMErrorMessage } from "../../utils/error-feedback";
+import { useEffect, useRef, useState } from "react";
+
+// TODO: Move this to common utility
+function useTimeout(callback: (...args: unknown[]) => unknown, delay: number | null) {
+	const callbackRef = useRef(callback);
+
+	useEffect(() => {
+		callbackRef.current = callback;
+	}, [callback]);
+
+	useEffect(() => {
+		if (delay === null) return;
+		const timer = setTimeout(() => callbackRef.current(), delay);
+		return () => clearTimeout(timer);
+	}, [delay]);
+}
 
 interface CampusFacultyEditorProps {
 	campuses: Campus[] | undefined;
@@ -37,6 +53,13 @@ export function CampusFacultyEditor({
 	onCampusChange,
 	onFacultyChange,
 }: CampusFacultyEditorProps) {
+	const [timeoutTriggered, setTimeoutTriggered] = useState(false);
+	useTimeout(() => {
+		if (campusesLoading) {
+			setTimeoutTriggered(true);
+		}
+	}, 5_000);
+
 	return (
 		<div className="space-y-3">
 			<div className="space-y-2">
@@ -153,6 +176,12 @@ export function CampusFacultyEditor({
 						</p>
 					) : null}
 				</div>
+			) : null}
+
+			{timeoutTriggered && campusesLoading && !campusesError ? (
+				<p className="px-1 text-sm text-destructive">
+					Loading campuses is taking longer than expected. UiTM portal may be experiencing issues, or check your connection. Please try again later.
+				</p>
 			) : null}
 		</div>
 	);
