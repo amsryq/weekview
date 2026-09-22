@@ -101,6 +101,7 @@ export function extractAjaxUrl(scriptContent: string): string | null {
 		/\$\.get\(\s*['"]([^'")]+)['"]/m,
 		/\.select2\(\s*{[\s\S]*?ajax\s*:\s*{[\s\S]*?url\s*:\s*['"]([^'")]+)['"]/m,
 		/fetch\(\s*['"]([^'")]+)['"]/m,
+		/\.open\(\s*['"][^'"]+['"]\s*,\s*['"]([^'"]+)['"]/m,
 	];
 
 	for (const regex of patterns) {
@@ -109,6 +110,16 @@ export function extractAjaxUrl(scriptContent: string): string | null {
 	}
 
 	return null;
+}
+
+function extractNamedAjaxUrl(scriptContent: string, name: string): string | null {
+	const match = scriptContent.match(
+		new RegExp(
+			`\\.open\\(\\s*['"][^'"]+['"]\\s*,\\s*['"]([^'"]*${name}[^'"]*)['"]`,
+			"i",
+		),
+	);
+	return match?.[1] ?? null;
 }
 
 export async function fetchScrapsFromRootPage(
@@ -157,15 +168,15 @@ export async function fetchScrapsFromRootPage(
 	let facultySelectLocation = "";
 
 	for (const script of scripts) {
-		if (script.includes("$('.find_cam_icress_student')")) {
-			const match = extractAjaxUrl(script);
-			if (match) campusSelectLocation = match;
-		}
+		const campusMatch = script.includes("$('.find_cam_icress_student')")
+			? extractAjaxUrl(script)
+			: extractNamedAjaxUrl(script, "campus");
+		if (campusMatch) campusSelectLocation = campusMatch;
 
-		if (script.includes("$('.find_fac_icress_student')")) {
-			const match = extractAjaxUrl(script);
-			if (match) facultySelectLocation = match;
-		}
+		const facultyMatch = script.includes("$('.find_fac_icress_student')")
+			? extractAjaxUrl(script)
+			: extractNamedAjaxUrl(script, "faculty");
+		if (facultyMatch) facultySelectLocation = facultyMatch;
 
 		if (script.includes("function check_form_before_submit()")) {
 			const match = extractAjaxUrl(script);

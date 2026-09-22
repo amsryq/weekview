@@ -123,15 +123,26 @@ export class UiTMScraper {
 			throw new Error("Failed to fetch campuses");
 		}
 
-		// SAFETY: UiTM campus select endpoint returns paginated results list
-		const json = JSON.parse(rawData) as {
-			results: Array<{ id: string; text: string }>;
-			total: number;
-		};
+		let entries: Array<{ id: string; text: string }>;
+		try {
+			// SAFETY: Legacy endpoint returns a paginated JSON result list.
+			const json = JSON.parse(rawData) as {
+				results: Array<{ id: string; text: string }>;
+			};
+			entries = json.results;
+		} catch {
+			// The current endpoint returns one `CODE - LABEL` entry per line.
+			entries = rawData
+				.split(/<br\s*\/?>/i)
+				.map((line) => line.trim())
+				.map((line) => line.match(/^([A-Z0-9]+)\s*-\s*(.+)$/i))
+				.filter((match): match is RegExpMatchArray => match !== null)
+				.map(([, id, text]) => ({ id, text }));
+		}
 
 		await this.saveJar(jar);
 
-		return json.results
+		return entries
 			.filter((c) => c.id !== "X")
 			.map((campus) => ({
 				code: campus.id,
