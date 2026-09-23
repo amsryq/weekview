@@ -43,11 +43,11 @@
 			},
 			"routes": [
 				{
-					"pattern": "weekview.my",
+					"pattern": "weekview.amsryq.dev",
 					"custom_domain": true
 				},
 				{
-					"pattern": "www.weekview.my",
+					"pattern": "www.weekview.amsryq.dev",
 					"custom_domain": true
 				}
 			],

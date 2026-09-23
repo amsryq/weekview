@@ -68,7 +68,7 @@ export const Route = createRootRoute({
 				href: "/images/apple-touch-icon.png",
 			},
 			{ rel: "manifest", href: "/images/site.webmanifest" },
-			{ rel: "canonical", href: "https://weekview.my" },
+			{ rel: "canonical", href: "https://weekview.amsryq.dev" },
 		],
 		scripts: [
 			{
@@ -78,7 +78,7 @@ export const Route = createRootRoute({
 					"@type": "WebApplication",
 					name: "Weekview",
 					description: DEFAULT_SEO.description,
-					url: "https://weekview.my",
+					url: "https://weekview.amsryq.dev",
 					applicationCategory: "ProductivityApplication",
 					operatingSystem: "Web Browser",
 					author: {

@@ -4,7 +4,7 @@ export const DEFAULT_SEO = {
 		"Build, customize, and export your university class schedules intuitively. Weekview is the top free timetable generator for students, featuring smart conflict detection and beautiful PNG exports.",
 	keywords:
 		"university timetable generator, college class schedule maker, weekly planner, student planner, course scheduler, timetable generator, UiTM, uitm timetable generator",
-	image: "https://weekview.my/images/web-app-manifest-512x512.png",
+	image: "https://weekview.amsryq.dev/images/web-app-manifest-512x512.png",
 };
 
 export const seo = ({
@@ -21,7 +21,7 @@ export const seo = ({
 		{ name: "robots", content: "index, follow" },
 		{ property: "og:title", content: title },
 		{ property: "og:description", content: description },
-		{ property: "og:url", content: "https://weekview.my" },
+		{ property: "og:url", content: "https://weekview.amsryq.dev" },
 		{ property: "og:site_name", content: "Weekview" },
 		{ property: "og:locale", content: "en_US" },
 		{ property: "og:type", content: "website" },
