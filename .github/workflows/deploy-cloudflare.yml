@@ -21,7 +21,6 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets['CLOUDFLARE_API_TOKEN'] }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets['CLOUDFLARE_ACCOUNT_ID'] }}
       CLOUDFLARE_PAGES_PROJECT: ${{ secrets['CLOUDFLARE_PAGES_PROJECT'] }}
-      VITE_SHOW_WATERMARK_OPTION: true
 
     steps:
       - name: Checkout repository
@@ -32,6 +31,12 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
+      
+      - name: Export repository variables
+        env:
+          REPO_VARS: ${{ toJSON(vars) }}
+        run: |
+          echo "$REPO_VARS" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> "$GITHUB_ENV"
 
       - name: Build
         run: pnpm run build --filter web
