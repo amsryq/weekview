@@ -3,7 +3,6 @@ import { createContext, memo, use, useMemo } from "react";
 import { RequiredDeep } from "type-fest";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
-import { Logo } from "~/components/brand/logo";
 import { UiTMAddCourseButton } from "~/features/uitm/provider";
 import { useImporterDialogs } from "~/lib/contexts/importer-dialogs";
 import type { CellAppearance } from "~/lib/models/cell-appearance";
@@ -27,6 +26,7 @@ import {
 	ROW_BLOCK_WIDTH_PX,
 } from "./constants";
 import { CourseBlock } from "./course-block";
+import { TimetableWatermark } from "./timetable-watermark";
 import { useTimetableAppearance } from "./hooks/use-timetable-appearance";
 import { useTimetableData } from "./hooks/use-timetable-data";
 import { useTimetableLayout } from "./hooks/use-timetable-layout";
@@ -81,24 +81,6 @@ function TimetableTitle({ labelColor, className }: TimetableTitleProps) {
 				}}
 				aria-label="Timetable title"
 			/>
-		</div>
-	);
-}
-
-interface TimetableWatermarkProps {
-	labelColor: string;
-}
-
-function TimetableWatermark({ labelColor }: TimetableWatermarkProps) {
-	return (
-		<div
-			className="absolute bottom-6 right-6 flex items-center gap-1.5 opacity-40 pointer-events-none select-none z-10"
-			aria-hidden="true"
-		>
-			<span className="text-[12px] font-medium" style={{ color: labelColor }}>
-				created with
-			</span>
-			<Logo height={16} style={{ fill: labelColor }} aria-label="weekview" />
 		</div>
 	);
 }

@@ -6,7 +6,9 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "weekview",
 	"compatibility_date": "2026-02-17",
-	"compatibility_flags": ["nodejs_compat"],
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
 	"main": "@tanstack/react-start/server-entry",
 	"observability": {
 		"enabled": true
@@ -36,7 +38,8 @@
 		"production": {
 			"vars": {
 				"VITE_UITM_MOCK": "true",
-				"VITE_ENABLE_PAYWALL": "false"
+				"VITE_ENABLE_PAYWALL": "false",
+				"VITE_SHOW_WATERMARK_OPTION": "true"
 			},
 			"routes": [
 				{
@@ -60,6 +63,7 @@
 	},
 	"vars": {
 		"VITE_UITM_MOCK": "true",
-		"VITE_ENABLE_PAYWALL": "false"
+		"VITE_ENABLE_PAYWALL": "false",
+		"VITE_SHOW_WATERMARK_OPTION": "true"
 	}
 }

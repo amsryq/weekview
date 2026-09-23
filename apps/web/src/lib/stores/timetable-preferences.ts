@@ -1,4 +1,4 @@
-import { toMerged } from "es-toolkit";
+import { omit, toMerged } from "es-toolkit";
 import type { RequiredDeep } from "type-fest";
 import { createStore } from "zustand";
 import { persist } from "zustand/middleware";
@@ -18,7 +18,7 @@ import {
 	type TimetableColorMode,
 	type TimetableThemePreference,
 } from "../models/style";
-import { isBoolean, isNumber, isString } from "../utils/predicates";
+import { isBoolean, isNumber, isRecord, isString } from "../utils/predicates";
 import {
 	resolveTimetableStyle,
 	resolveTimetableStyleColorByIndex,
@@ -252,6 +252,15 @@ export const TimetablePreferencesStore = createStore<State & Actions>()(
 		})),
 		{
 			name: "taiki-timetable-preferences",
+			partialize: (state) => omit(state, ["showWatermark"]),
+			merge: (persistedState, currentState) => {
+				const merged = { ...currentState };
+				if (isRecord(persistedState)) {
+					Object.assign(merged, persistedState);
+				}
+				merged.showWatermark = true;
+				return merged;
+			},
 		},
 	),
 );

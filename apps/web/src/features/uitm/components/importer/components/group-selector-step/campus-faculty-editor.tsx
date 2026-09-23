@@ -14,7 +14,7 @@ import { getFriendlyUiTMErrorMessage } from "../../utils/error-feedback";
 import { useEffect, useRef, useState } from "react";
 
 // TODO: Move this to common utility
-function useTimeout(callback: (...args: unknown[]) => unknown, delay: number | null) {
+function useTimeout(callback: () => void, delay: number | null) {
 	const callbackRef = useRef(callback);
 
 	useEffect(() => {
