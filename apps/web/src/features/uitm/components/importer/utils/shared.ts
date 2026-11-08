@@ -96,6 +96,21 @@ export const useImporterSelectionStore = create<{
 export const normalizeString = (value: string): string =>
 	value.replace(/\s+/g, "").trim().toLowerCase();
 
+export const CANCELLED_MESSAGE = "Import cancelled";
+
+/**
+ * Aborts the current import when the user has requested cancellation.
+ * Shared by every importer so cancellation behaves identically everywhere.
+ */
+export function ensureNotCancelled(
+	isCancelled: boolean,
+	applyCancellation: () => void,
+): void {
+	if (!isCancelled) return;
+	applyCancellation();
+	throw new Error(CANCELLED_MESSAGE);
+}
+
 export function markUnfinishedProgressAsError(
 	progress: CourseImportProgress[],
 	reason: string,

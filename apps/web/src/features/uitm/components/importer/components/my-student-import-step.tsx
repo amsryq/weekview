@@ -18,12 +18,10 @@ import {
 	ResponsiveDialogTitle,
 } from "~/components/ui/responsive-dialog";
 import { Switch } from "~/components/ui/switch";
-import {
-	CANCELLED_MESSAGE,
-	useMyStudentImporter,
-} from "../hooks/use-my-student-importer";
+import { useMyStudentImporter } from "../hooks/use-my-student-importer";
 import { getFriendlyUiTMErrorMessage } from "../utils/error-feedback";
 import {
+	CANCELLED_MESSAGE,
 	CourseImportProgress,
 	getProgressCounts,
 	useImporterSelectionStore,

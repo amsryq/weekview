@@ -10,8 +10,17 @@ export function useUser() {
 	return session.data?.user ?? null;
 }
 
-export function useIsUserSupporter() {
-	const supporterUntil = useUser()?.supporterUntil;
+/**
+ * Supporter status is inherently time-dependent, so it is evaluated against
+ * the current time wherever it is rendered.
+ */
+export function isSupporterActive(
+	supporterUntil: Date | null | undefined,
+): boolean {
 	if (!supporterUntil) return false;
-	return supporterUntil > new Date();
+	return supporterUntil.getTime() > Date.now();
+}
+
+export function useIsUserSupporter() {
+	return isSupporterActive(useUser()?.supporterUntil);
 }

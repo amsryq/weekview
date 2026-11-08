@@ -9,7 +9,9 @@ import { Group } from "../../../models/group";
 import { ScheduleInfo } from "../../../utils/parse-schedule";
 import { getFriendlyUiTMErrorMessage } from "../utils/error-feedback";
 import {
+	CANCELLED_MESSAGE,
 	CourseImportProgress,
+	ensureNotCancelled,
 	getProgressCounts,
 	ImportFailure,
 	ImportResult,
@@ -19,8 +21,6 @@ import {
 	ProgressStatus,
 	updateProgressStatus,
 } from "../utils/shared";
-
-const CANCELLED_MESSAGE = "Import cancelled";
 
 // --- Types & Internal State Hook ---
 
@@ -42,6 +42,7 @@ interface ImportState {
 	cancelRequested: boolean;
 	setCancelRequested: React.Dispatch<React.SetStateAction<boolean>>;
 	cancelRequestedRef: React.MutableRefObject<boolean>;
+	resetCancelRequested: () => void;
 }
 
 function useImportState(importerOpen: boolean): ImportState {
@@ -57,6 +58,11 @@ function useImportState(importerOpen: boolean): ImportState {
 	const [cancelRequested, setCancelRequested] = useState(false);
 	const cancelRequestedRef = useRef(false);
 
+	const resetCancelRequested = useCallback(() => {
+		cancelRequestedRef.current = false;
+		setCancelRequested(false);
+	}, []);
+
 	const [prevOpen, setPrevOpen] = useState(importerOpen);
 	if (importerOpen !== prevOpen) {
 		setPrevOpen(importerOpen);
@@ -66,7 +72,6 @@ function useImportState(importerOpen: boolean): ImportState {
 			setCourseProgress([]);
 			setProgressDialogOpen(false);
 			setCancelRequested(false);
-			cancelRequestedRef.current = false;
 		}
 	}
 
@@ -82,16 +87,11 @@ function useImportState(importerOpen: boolean): ImportState {
 		cancelRequested,
 		setCancelRequested,
 		cancelRequestedRef,
+		resetCancelRequested,
 	};
 }
 
 // --- Import Orchestration Logic ---
-
-function ensureNotCancelled(state: ImportState, applyCancellation: () => void) {
-	if (!state.cancelRequestedRef.current) return;
-	applyCancellation();
-	throw new Error(CANCELLED_MESSAGE);
-}
 
 async function fetchInitialMetadata(
 	state: ImportState,
@@ -101,7 +101,7 @@ async function fetchInitialMetadata(
 	selectedCampus?: Campus,
 	selectedFaculty?: Faculty,
 ) {
-	ensureNotCancelled(state, applyCancellation);
+	ensureNotCancelled(state.cancelRequestedRef.current, applyCancellation);
 
 	let campus = selectedCampus;
 	if (!campus) {
@@ -120,7 +120,7 @@ async function fetchInitialMetadata(
 	}
 
 	if (!campus) throw new Error("Unable to determine campus.");
-	ensureNotCancelled(state, applyCancellation);
+	ensureNotCancelled(state.cancelRequestedRef.current, applyCancellation);
 
 	let faculty = selectedFaculty;
 	if (campus.requireFaculty && !faculty) {
@@ -137,7 +137,7 @@ async function fetchInitialMetadata(
 					normalizeString(f.name) === normalizeString(schedule.faculty.name)),
 		);
 	}
-	ensureNotCancelled(state, applyCancellation);
+	ensureNotCancelled(state.cancelRequestedRef.current, applyCancellation);
 
 	state.setCampusInfo({ campus, faculty });
 	return { campus, faculty };
@@ -283,7 +283,9 @@ export function useCourseImporter(options: {
 		const failures: ImportFailure[] = [];
 
 		for (const entry of schedule.courses) {
-			ensureNotCancelled(state, () => applyCancellation());
+			ensureNotCancelled(state.cancelRequestedRef.current, () =>
+				applyCancellation(),
+			);
 			const key = `${normalizeString(entry.courseCode)}__${normalizeString(entry.group)}`;
 			updateCourseStatus(entry.courseCode, entry.group, "running");
 
@@ -331,8 +333,7 @@ export function useCourseImporter(options: {
 			state.setCourseProgress([]);
 			state.setCampusInfo({});
 			state.setImportPhase("idle");
-			state.cancelRequestedRef.current = false;
-			state.setCancelRequested(false);
+			state.resetCancelRequested();
 			state.setProgressDialogOpen(true);
 			try {
 				await importMutation.mutateAsync(schedule);

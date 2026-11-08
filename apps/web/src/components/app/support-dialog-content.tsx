@@ -1,6 +1,5 @@
 import {
 	ExternalLinkIcon,
-	GithubIcon,
 	HeartIcon,
 	LoaderCircle,
 	Share2Icon,
@@ -12,10 +11,11 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "~/components/ui/dialog";
+import { GithubIcon } from "~/components/ui/github-icon";
 import { Separator } from "~/components/ui/separator";
 import { Twemoji } from "~/components/ui/twemoji";
 import { ENABLE_AUTH_PAYWALL } from "~/lib/config/feature-flags";
-import { useUser } from "~/lib/hooks/user";
+import { isSupporterActive, useUser } from "~/lib/hooks/user";
 import { isString } from "~/lib/utils/predicates";
 import { generateCheckout } from "~/server/functions/stripe";
 
@@ -71,7 +71,7 @@ function PaywallContent({
 function SupporterCheckoutCard() {
 	const [loading, setLoading] = useState(false);
 	const user = useUser();
-	const isSupporter = user?.supporterUntil && user.supporterUntil > new Date();
+	const isSupporter = isSupporterActive(user?.supporterUntil);
 
 	const onSupport = async () => {
 		try {

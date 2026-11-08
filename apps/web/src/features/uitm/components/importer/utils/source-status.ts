@@ -33,19 +33,14 @@ export function useSourceStatuses() {
 
 	useEffect(() => {
 		let isMounted = true;
-		const result = provider();
 
-		if (result instanceof Promise) {
-			result
-				.then((resolved) => {
-					if (isMounted) setStatuses(resolved);
-				})
-				.catch((error) => {
-					console.error("Failed to fetch source statuses", error);
-				});
-		} else {
-			setStatuses(result);
-		}
+		Promise.resolve(provider())
+			.then((resolved) => {
+				if (isMounted) setStatuses(resolved);
+			})
+			.catch((error) => {
+				console.error("Failed to fetch source statuses", error);
+			});
 
 		return () => {
 			isMounted = false;

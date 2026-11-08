@@ -6,6 +6,6 @@ export const useStyleValidation = () => {
 		(color: string) => HEX_COLOR_REGEX.test(color.trim()),
 		[],
 	);
-	const normalize = useCallback(normalizeHexColor, []);
+	const normalize = useCallback((color: string) => normalizeHexColor(color), []);
 	return { isValidHex, normalize };
 };

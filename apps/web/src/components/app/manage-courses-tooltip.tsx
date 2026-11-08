@@ -34,15 +34,14 @@ export function ManageCoursesTooltip({ children }: PropsWithChildren) {
 		prevCoursesCountRef.current = coursesCount;
 	}, [coursesCount]);
 
+	const shouldShow = hasAddedCourse && !hasDismissed && !isSheetOpen;
+
 	useEffect(() => {
-		if (hasAddedCourse && !hasDismissed && !isSheetOpen) {
-			// Small delay to let the sheet close animation finish smoothly
-			const timer = setTimeout(() => setIsOpen(true), 300);
-			return () => clearTimeout(timer);
-		} else {
-			setIsOpen(false);
-		}
-	}, [hasAddedCourse, hasDismissed, isSheetOpen]);
+		if (!shouldShow) return;
+		// Small delay to let the sheet close animation finish smoothly
+		const timer = setTimeout(() => setIsOpen(true), 300);
+		return () => clearTimeout(timer);
+	}, [shouldShow]);
 
 	const handleDismiss = () => {
 		setIsOpen(false);
@@ -54,7 +53,7 @@ export function ManageCoursesTooltip({ children }: PropsWithChildren) {
 
 	return (
 		<Popover
-			open={isOpen}
+			open={isOpen && shouldShow}
 			onOpenChange={(open) => {
 				if (!open) handleDismiss();
 			}}

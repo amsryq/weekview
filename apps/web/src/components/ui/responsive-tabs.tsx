@@ -1,6 +1,7 @@
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import * as React from "react";
 import { use } from "react";
+import { useMediaQuery } from "~/lib/hooks/use-media-query";
 import { cn } from "~/lib/utils/styles";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
 import {
@@ -24,24 +25,6 @@ const ResponsiveTabsContext = React.createContext<ResponsiveTabsContextValue>({
 
 export function useResponsiveTabs() {
 	return use(ResponsiveTabsContext);
-}
-
-// ---------------------------------------------------------------------------
-// useMediaQuery (SSR-safe)
-// ---------------------------------------------------------------------------
-
-function useMediaQuery(query: string): boolean {
-	const [matches, setMatches] = React.useState(false);
-
-	React.useEffect(() => {
-		const media = window.matchMedia(query);
-		if (media.matches !== matches) setMatches(media.matches);
-		const listener = () => setMatches(media.matches);
-		media.addEventListener("change", listener);
-		return () => media.removeEventListener("change", listener);
-	}, [matches, query]);
-
-	return matches;
 }
 
 // ---------------------------------------------------------------------------

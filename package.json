@@ -12,7 +12,7 @@
 		"db:up": "pnpm -F web db:up"
 	},
 	"devDependencies": {
-		"@oxlint/plugins": "1.78.0",
-		"oxlint": "1.78.0"
+		"@oxlint/plugins": "1.92.0",
+		"oxlint": "1.92.0"
 	}
 }

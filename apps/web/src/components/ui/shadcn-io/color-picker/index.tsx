@@ -64,8 +64,8 @@ export const ColorPicker = ({
 	className,
 	...props
 }: ColorPickerProps) => {
-	const selectedColor = Color(value);
-	const defaultColor = Color(defaultValue);
+	const selectedColor = new Color(value);
+	const defaultColor = new Color(defaultValue);
 
 	const [hue, setHue] = useState(
 		selectedColor.hue() || defaultColor.hue() || 0,
@@ -87,10 +87,12 @@ export const ColorPicker = ({
 		onChangeRef.current = onChange;
 	});
 
-	// Update color when controlled value changes
-	useEffect(() => {
+	// Sync internal HSL state when the controlled value changes
+	const [prevValue, setPrevValue] = useState(value);
+	if (value !== prevValue) {
+		setPrevValue(value);
 		if (value) {
-			const color = Color(value);
+			const color = new Color(value);
 			const [h, s, l] = color.hsl().array();
 
 			setHue(h);
@@ -98,7 +100,7 @@ export const ColorPicker = ({
 			setLightness(l);
 			setAlpha(color.alpha() * 100);
 		}
-	}, [value]);
+	}
 
 	// Memoize the current color to avoid recalculating on every render
 	const currentColor = useMemo(
@@ -291,7 +293,7 @@ export const ColorPickerEyeDropper = ({
 			// @ts-expect-error - EyeDropper API is experimental
 			const eyeDropper = new EyeDropper();
 			const result = await eyeDropper.open();
-			const color = Color(result.sRGBHex);
+			const color = new Color(result.sRGBHex);
 			const [h, s, l] = color.hsl().array();
 
 			setHue(h);

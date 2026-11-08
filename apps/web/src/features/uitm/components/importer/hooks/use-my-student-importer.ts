@@ -5,7 +5,9 @@ import { UiTMCourseSection } from "../../../course-section";
 import { fetchMyStudentTimetable } from "../../../models/mystudent";
 import { getFriendlyUiTMErrorMessage } from "../utils/error-feedback";
 import {
+	CANCELLED_MESSAGE,
 	CourseImportProgress,
+	ensureNotCancelled,
 	ImportFailure,
 	ImportSuccess,
 	markUnfinishedProgressAsError,
@@ -15,8 +17,6 @@ import {
 } from "../utils/shared";
 
 type ImportPhase = "idle" | "fetching" | "importing" | "cancelled" | "complete";
-
-export const CANCELLED_MESSAGE = "Import cancelled";
 
 interface UseMyStudentImporterResult {
 	courseProgress: CourseImportProgress[];
@@ -63,13 +63,7 @@ export function useMyStudentImporter(): UseMyStudentImporterResult {
 			}
 
 			setImportPhase("fetching");
-			const ensureNotCancelled = () => {
-				if (!cancelRequestedRef.current) return;
-				applyCancellation();
-				throw new Error(CANCELLED_MESSAGE);
-			};
-
-			ensureNotCancelled();
+			ensureNotCancelled(cancelRequestedRef.current, applyCancellation);
 
 			const groups = await fetchMyStudentTimetable({
 				studentId: trimmedId,
@@ -77,7 +71,7 @@ export function useMyStudentImporter(): UseMyStudentImporterResult {
 			}).catch((error) => {
 				throw new Error(getFriendlyUiTMErrorMessage(error));
 			});
-			ensureNotCancelled();
+			ensureNotCancelled(cancelRequestedRef.current, applyCancellation);
 
 			if (!groups.length) {
 				setImportPhase("complete");
@@ -95,7 +89,7 @@ export function useMyStudentImporter(): UseMyStudentImporterResult {
 				status: "pending",
 			}));
 			setCourseProgress(initialProgress);
-			ensureNotCancelled();
+			ensureNotCancelled(cancelRequestedRef.current, applyCancellation);
 
 			setImportPhase("importing");
 			const dedupeKeys = new Set<string>();
@@ -114,7 +108,7 @@ export function useMyStudentImporter(): UseMyStudentImporterResult {
 			};
 
 			for (const group of groups) {
-				ensureNotCancelled();
+				ensureNotCancelled(cancelRequestedRef.current, applyCancellation);
 				const courseCode = group.internal.code;
 				const groupCode = group.internal.group;
 
@@ -186,7 +180,7 @@ export function useMyStudentImporter(): UseMyStudentImporterResult {
 				}
 			}
 
-			ensureNotCancelled();
+			ensureNotCancelled(cancelRequestedRef.current, applyCancellation);
 			setImportPhase("complete");
 			return { successes, failures };
 		},

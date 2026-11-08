@@ -38,33 +38,33 @@ function hasFieldErrors(
 	);
 }
 
-export function useCourseValidation(form: CourseFormApi) {
-	const getTabErrors = (
-		fieldMeta: CourseFormApi["state"]["fieldMeta"],
-		errorMap: CourseFormApi["state"]["errorMap"],
-	) => {
-		const basicsHasErrors =
-			hasErrorMapErrors(errorMap) ||
-			hasFieldErrors(
-				fieldMeta,
-				(name) =>
-					name.startsWith("code") ||
-					name.startsWith("name") ||
-					name.startsWith("meetingTimes"),
-			);
-		const styleHasErrors = hasFieldErrors(
+function getTabErrors(
+	fieldMeta: CourseFormApi["state"]["fieldMeta"],
+	errorMap: CourseFormApi["state"]["errorMap"],
+) {
+	const basicsHasErrors =
+		hasErrorMapErrors(errorMap) ||
+		hasFieldErrors(
 			fieldMeta,
 			(name) =>
-				name.startsWith("cellAppearance") &&
-				!name.startsWith("cellAppearance.icon"),
+				name.startsWith("code") ||
+				name.startsWith("name") ||
+				name.startsWith("meetingTimes"),
 		);
-		const iconHasErrors = hasFieldErrors(fieldMeta, (name) =>
-			name.startsWith("cellAppearance.icon"),
-		);
+	const styleHasErrors = hasFieldErrors(
+		fieldMeta,
+		(name) =>
+			name.startsWith("cellAppearance") &&
+			!name.startsWith("cellAppearance.icon"),
+	);
+	const iconHasErrors = hasFieldErrors(fieldMeta, (name) =>
+		name.startsWith("cellAppearance.icon"),
+	);
 
-		return { basicsHasErrors, styleHasErrors, iconHasErrors };
-	};
+	return { basicsHasErrors, styleHasErrors, iconHasErrors };
+}
 
+export function useCourseValidation(form: CourseFormApi) {
 	const validateForm = async (e: React.FormEvent) => {
 		e.preventDefault();
 		e.stopPropagation();

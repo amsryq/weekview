@@ -1,6 +1,7 @@
 import { LoaderCircleIcon, RefreshCw } from "lucide-react";
 import { ReactNode } from "react";
 import { signOut, useSession } from "~/lib/auth/auth-client";
+import { isSupporterActive } from "~/lib/hooks/user";
 import { isString } from "~/lib/utils/predicates";
 import { generateCheckout, removeSupporter } from "~/server/functions/stripe";
 import { Button } from "../ui/button";
@@ -79,9 +80,7 @@ function AccountManagerPanel() {
 	}
 
 	const supporterUntil = session.data.user.supporterUntil;
-	const isSupporter = supporterUntil
-		? supporterUntil.getTime() > Date.now()
-		: false;
+	const isSupporter = isSupporterActive(supporterUntil);
 
 	return (
 		<div className="flex flex-col justify-center items-center text-center gap-4 py-4">

@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { GithubIcon } from "lucide-react";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { GithubIcon } from "~/components/ui/github-icon";
 import {
 	HoverCard,
 	HoverCardContent,
